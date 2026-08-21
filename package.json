@@ -1,0 +1,24 @@
+{
+  "name": "debug-arena",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Debug Arena — a LeetCode-style platform for root-cause bug diagnosis instead of algorithm writing",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:generate": "pnpm --filter @debug-arena/db generate",
+    "db:migrate": "pnpm --filter @debug-arena/db migrate",
+    "db:studio": "pnpm --filter @debug-arena/db studio"
+  },
+  "devDependencies": {
+    "turbo": "^2.1.0",
+    "typescript": "^5.6.0"
+  },
+  "packageManager": "pnpm@9.9.0",
+  "engines": {
+    "node": ">=20"
+  }
+}
