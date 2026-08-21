@@ -1,8 +1,53 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "'JetBrains Mono'", ui-monospace, "'Cascadia Code'", monospace;
+  --radius-lg: var(--radius-lg);
+  --radius-md: var(--radius-sm);
+  --radius-sm: calc(var(--radius-sm) - 2px);
+
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-inset: var(--inset);
+  --color-foreground: var(--foreground);
+  --color-heading: var(--heading);
+  --color-body: var(--body);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted-secondary: var(--muted-foreground-2);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
+  --color-border-faint: var(--border-faint);
+  --color-header: var(--header-bg);
+  --color-success: var(--success);
+  --color-success-strong: var(--success-strong);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-warning-strong: var(--warning-strong);
+
+  --color-cat-react: var(--cat-react);
+  --color-cat-react-dim: var(--cat-react-dim);
+  --color-cat-concurrency: var(--cat-concurrency);
+  --color-cat-concurrency-dim: var(--cat-concurrency-dim);
+  --color-cat-distributed: var(--cat-distributed);
+  --color-cat-distributed-dim: var(--cat-distributed-dim);
+  --color-cat-memory: var(--cat-memory);
+  --color-cat-memory-dim: var(--cat-memory-dim);
+
+  --color-diff-easy: var(--diff-easy);
+  --color-diff-medium: var(--diff-medium);
+  --color-diff-hard: var(--diff-hard);
+  --color-diff-expert: var(--diff-expert);
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   /* Surfaces (per brief) */
