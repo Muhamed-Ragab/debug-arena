@@ -1,20 +1,20 @@
 import { Routes, Route } from "react-router-dom";
 import AppShell from "./components/layout/AppShell";
-import ChallengeBrowser from "./ChallengeBrowser";
-import Challenge from "./Challenge";
-import Results from "./Results";
-import Profile from "./Profile";
-import Leaderboard from "./Leaderboard";
+import ChallengeBrowserPage from "./features/browser/ChallengeBrowserPage";
+import ChallengePage from "./features/challenge/ChallengePage";
+import ResultsPage from "./features/results/ResultsPage";
+import ProfilePage from "./features/profile/ProfilePage";
+import LeaderboardPage from "./features/leaderboard/LeaderboardPage";
 
 export default function App() {
   return (
     <Routes>
       <Route element={<AppShell />}>
-        <Route path="/" element={<ChallengeBrowser />} />
-        <Route path="/challenges/:id" element={<Challenge />} />
-        <Route path="/submissions/:id/results" element={<Results />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/" element={<ChallengeBrowserPage />} />
+        <Route path="/challenges/:id" element={<ChallengePage />} />
+        <Route path="/submissions/:id/results" element={<ResultsPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
       </Route>
     </Routes>
   );
