@@ -1,5 +1,5 @@
 import type { Category } from "../../lib/types";
-import { CATEGORY_CONFIG } from "../../data/categories";
+import { CATEGORY_CONFIG } from "../../lib/categories";
 
 export function CategoryTag({ category }: { category: Category }) {
   const cfg = CATEGORY_CONFIG[category];

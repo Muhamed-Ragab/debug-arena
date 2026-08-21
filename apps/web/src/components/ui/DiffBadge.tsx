@@ -1,5 +1,5 @@
 import type { Difficulty } from "../../lib/types";
-import { DIFFICULTY_CONFIG } from "../../data/categories";
+import { DIFFICULTY_CONFIG } from "../../lib/categories";
 
 export function DiffBadge({ difficulty }: { difficulty: Difficulty }) {
   const c = DIFFICULTY_CONFIG[difficulty];
