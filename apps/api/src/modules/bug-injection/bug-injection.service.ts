@@ -8,7 +8,7 @@ export class BugInjectionService {
    * verifies it reproduces via the sandbox runner, then persists a new
    * draft challenge for admin review.
    */
-  async injectBug(input: {
+  async injectBug(_input: {
     sourceRepoUrl: string;
     categoryId: string;
     difficulty: "easy" | "medium" | "hard";

@@ -12,7 +12,7 @@ export class GradingService {
    * 2. Full LLM judge reasoning call for borderline/low-confidence cases,
    *    via the Vercel AI SDK.
    */
-  async gradeExplanation(input: {
+  async gradeExplanation(_input: {
     challengeId: string;
     explanation: string;
   }): Promise<{ score: number; feedback: string }> {

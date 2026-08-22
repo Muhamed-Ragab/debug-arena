@@ -6,20 +6,31 @@
   "scripts": {
     "dev": "vite",
     "build": "tsgo && vite build",
-    "lint": "eslint \"src/**/*.{ts,tsx}\"",
-    "typecheck": "tsgo --noEmit"
+    "lint": "oxlint",
+    "typecheck": "tsgo --noEmit",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "i18n:extract": "lingui extract",
+    "i18n:compile": "lingui compile"
   },
   "dependencies": {
     "@debug-arena/contracts": "workspace:*",
+    "@lingui/core": "^6.6.0",
+    "@lingui/react": "^6.6.0",
+    "@tanstack/react-query": "^5.101.4",
+    "@ts-rest/react-query": "^3.52.1",
+    "lucide-react": "^1.33.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2",
-    "@ts-rest/react-query": "^3.52.1",
-    "@tanstack/react-query": "^5.101.4",
-    "lucide-react": "^1.33.0",
     "recharts": "^3.10.1"
   },
   "devDependencies": {
+    "@lingui/babel-plugin-lingui-macro": "^6.6.0",
+    "@lingui/cli": "^6.6.0",
+    "@lingui/format-po": "^6.6.0",
+    "@lingui/vite-plugin": "^6.6.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
@@ -28,7 +39,7 @@
     "autoprefixer": "^10.5.4",
     "postcss": "^8.5.26",
     "tailwindcss": "^4.3.3",
-    "typescript": "^7.0.2",
+    "typescript": "7.0.2",
     "vite": "^8.2.2"
   }
 }

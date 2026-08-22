@@ -1,11 +1,8 @@
 import { NavLink } from "react-router-dom";
-import { LayoutGrid, Trophy, User, Bug } from "lucide-react";
-
-const NAV = [
-  { to: "/", label: "Challenges", icon: LayoutGrid, end: true },
-  { to: "/leaderboard", label: "Leaderboard", icon: Trophy, end: false },
-  { to: "/profile", label: "Profile", icon: User, end: false },
-];
+import { LayoutGrid, Trophy, User, Bug, Settings, X } from "lucide-react";
+import { useLingui } from "@lingui/react";
+import { ThemeToggle } from "../ThemeToggle";
+import { LanguageSwitcher } from "../LanguageSwitcher";
 
 export function Logo({ compact = false }: { compact?: boolean }) {
   return (
@@ -22,18 +19,33 @@ export function Logo({ compact = false }: { compact?: boolean }) {
   );
 }
 
-export default function Sidebar() {
+export default function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => void }) {
+  const { i18n } = useLingui();
+  
+  const NAV = [
+    { to: "/challenges", label: i18n._("Challenges"), icon: LayoutGrid, end: false },
+    { to: "/leaderboard", label: i18n._("Leaderboard"), icon: Trophy, end: false },
+    { to: "/profile", label: i18n._("Profile"), icon: User, end: false },
+    { to: "/settings", label: i18n._("Settings"), icon: Settings, end: false },
+  ];
   return (
     <aside
-      className="flex h-full w-[260px] shrink-0 flex-col border-r border-border bg-surface"
+      className={`flex h-full w-[260px] shrink-0 flex-col border-e border-border bg-surface absolute inset-y-0 z-50 transition-transform duration-300 lg:static lg:translate-x-0 ${
+        open ? "translate-x-0" : "max-lg:-translate-x-full max-lg:rtl:translate-x-full"
+      }`}
     >
-      <div className="flex h-16 items-center px-5">
+      <div className="flex h-16 items-center justify-between px-5">
         <Logo />
+        {onClose && (
+          <button onClick={onClose} className="lg:hidden">
+            <X size={20} className="text-muted-foreground" />
+          </button>
+        )}
       </div>
 
       <div className="px-3 pt-2">
         <p className="px-3 pb-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-          Navigation
+          {i18n._("Navigation")}
         </p>
         <nav className="flex flex-col gap-1">
           {NAV.map(({ to, label, icon: Icon, end }) => (
@@ -52,7 +64,7 @@ export default function Sidebar() {
               {({ isActive }) => (
                 <>
                   {isActive && (
-                    <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r bg-primary" />
+                    <span className="absolute start-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-e bg-primary" />
                   )}
                   <Icon size={18} className={isActive ? "text-primary" : ""} />
                   <span>{label}</span>
@@ -63,15 +75,16 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      <div className="mt-auto p-3">
-        <div className="rounded-lg border border-border bg-inset p-4">
-          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-            Your Rank
-          </p>
-          <p className="mt-1 text-2xl font-semibold text-heading">#128</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            4,820 pts · 12-day streak
-          </p>
+      <div className="mt-auto border-t border-border p-4">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-muted-foreground">{i18n._("Theme")}</span>
+            <ThemeToggle />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-muted-foreground">{i18n._("Language")}</span>
+            <LanguageSwitcher />
+          </div>
         </div>
       </div>
     </aside>

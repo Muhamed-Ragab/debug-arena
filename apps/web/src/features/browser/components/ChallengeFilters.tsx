@@ -24,18 +24,18 @@ export default function ChallengeFilters({
       <div className="relative">
         <Search
           size={16}
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
         />
         <input
           value={search}
           onChange={(e) => onSearch(e.target.value)}
           placeholder="Search challenges..."
-          className="w-full rounded-lg border border-border bg-card py-2.5 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+          className="w-full rounded-lg border border-border bg-card py-2.5 ps-10 pe-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
         />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <span className="me-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Category
         </span>
         <Pill
@@ -58,7 +58,7 @@ export default function ChallengeFilters({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <span className="me-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Difficulty
         </span>
         <Pill

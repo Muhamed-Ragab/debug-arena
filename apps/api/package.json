@@ -6,8 +6,11 @@
     "dev": "nest start --watch",
     "build": "nest build",
     "start": "node dist/main.js",
-    "lint": "eslint \"src/**/*.ts\"",
-    "typecheck": "tsc --noEmit"
+    "lint": "oxlint",
+    "typecheck": "tsgo --noEmit",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
   },
   "dependencies": {
     "@debug-arena/db": "workspace:*",
@@ -29,6 +32,6 @@
     "@nestjs/cli": "^10.4.0",
     "@types/node": "^22.5.0",
     "@types/passport-jwt": "^4.0.1",
-    "typescript": "^5.6.0"
+    "typescript": "7.0.2"
   }
 }

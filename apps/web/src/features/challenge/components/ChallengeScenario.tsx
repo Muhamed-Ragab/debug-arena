@@ -18,7 +18,7 @@ export default function ChallengeScenario({ challenge, cfg, treeOpen, setTreeOpe
 
   return (
     <div
-      className="w-[272px] shrink-0 flex flex-col border-r overflow-hidden"
+      className="w-full shrink-0 flex flex-col border-b border-e overflow-hidden max-h-[45vh] lg:max-h-none lg:w-[272px] lg:border-b-0"
       style={{ borderColor: "rgba(255,255,255,0.06)" }}
     >
       <div className="px-5 pt-5 pb-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>

@@ -1,9 +1,12 @@
 import { useMemo, useState } from "react";
-import { Bell, ChevronLeft, ChevronRight } from "lucide-react";
+import { useOutletContext } from "react-router-dom";
+import { ChevronLeft, ChevronRight, Menu } from "lucide-react";
 import type { Category, Difficulty } from "../../../lib/types";
 import { CHALLENGES } from "../../../features/challenge/data/challenges";
 import ChallengeFilters from "./ChallengeFilters";
 import ChallengeCard from "./ChallengeCard";
+import NotificationBell from "../../../components/ui/NotificationBell";
+import type { AppShellContext } from "../../../components/layout/AppShell";
 
 const PAGE_SIZE = 6;
 
@@ -14,6 +17,7 @@ const STATS = [
 ];
 
 export default function ChallengeBrowser() {
+  const { onMenuClick } = useOutletContext<AppShellContext>();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<Category | "all">("all");
   const [difficulty, setDifficulty] = useState<Difficulty | "all">("all");
@@ -36,25 +40,29 @@ export default function ChallengeBrowser() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-surface px-8">
-        <nav className="flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground">Arena</span>
-          <span className="text-muted-foreground">/</span>
-          <span className="font-medium text-heading">Challenges</span>
-        </nav>
-        <div className="flex items-center gap-4">
+      <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-border bg-surface px-4 sm:px-8">
+        <div className="flex min-w-0 items-center gap-2 text-sm">
           <button
-            className="relative flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:text-foreground"
-            aria-label="Notifications"
+            type="button"
+            onClick={onMenuClick}
+            aria-label="Open navigation"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition-colors hover:text-foreground lg:hidden"
           >
-            <Bell size={18} />
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-danger ring-2 ring-surface" />
+            <Menu size={18} />
           </button>
+          <nav className="flex min-w-0 items-center gap-2 text-sm">
+            <span className="hidden text-muted-foreground sm:inline">Arena</span>
+            <span className="hidden text-muted-foreground sm:inline">/</span>
+            <span className="truncate font-medium text-heading md:opacity-100">Challenges</span>
+          </nav>
+        </div>
+        <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+          <NotificationBell />
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20 text-sm font-semibold text-primary">
               MR
             </div>
-            <div className="leading-tight">
+            <div className="hidden leading-tight sm:block">
               <p className="text-sm font-medium text-heading">Marcus Reyes</p>
               <p className="text-xs text-muted-foreground">Senior Engineer</p>
             </div>
@@ -62,7 +70,7 @@ export default function ChallengeBrowser() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-8 py-6">
+      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
         <div className="mb-6">
           <h1 className="text-2xl font-semibold tracking-tight text-heading">Challenges</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -70,7 +78,7 @@ export default function ChallengeBrowser() {
           </p>
         </div>
 
-        <div className="mb-6 grid grid-cols-3 gap-4">
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {STATS.map((s) => (
             <div key={s.label} className="rounded-xl border border-border bg-card p-4">
               <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">

@@ -8,7 +8,7 @@ export class SandboxService {
    * CPU/memory/time limits. See architecture.md §2.6 — this is the
    * highest-risk component and needs the most scrutiny before launch.
    */
-  async runFixAgainstHiddenTests(input: {
+  async runFixAgainstHiddenTests(_input: {
     challengeId: string;
     proposedFix: unknown;
   }): Promise<{ passed: boolean; output: string }> {

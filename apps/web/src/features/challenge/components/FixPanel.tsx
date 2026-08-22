@@ -28,7 +28,7 @@ export default function FixPanel() {
             }}
           >
             <span
-              className="w-6 shrink-0 pl-3 py-[3px] select-none"
+              className="w-6 shrink-0 ps-3 py-[3px] select-none"
               style={{
                 color:
                   line.type === "add" ? "#22C55E" : line.type === "del" ? "#EF4444" : "transparent",

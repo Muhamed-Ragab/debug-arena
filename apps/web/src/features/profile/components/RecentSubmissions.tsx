@@ -17,7 +17,7 @@ export default function RecentSubmissions({ items }: { items: RecentSubmission[]
             >
               <CategoryTag category={r.category} />
               <p className="flex-1 text-[13px] text-zinc-300 truncate">{r.title}</p>
-              <div className="text-right flex-shrink-0">
+              <div className="text-end flex-shrink-0">
                 <span className="font-mono text-[13px] font-medium" style={{ color }}>
                   {r.score}
                 </span>

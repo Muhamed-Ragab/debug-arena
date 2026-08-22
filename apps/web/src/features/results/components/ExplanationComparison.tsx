@@ -8,7 +8,7 @@ export default function ExplanationComparison({ userExplanation, canonical, aiFe
   return (
     <div>
       <p className="text-[11px] text-zinc-600 uppercase tracking-widest mb-3 font-mono">Explanation comparison</p>
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 gap-4 mb-4 md:grid-cols-2">
         <div
           className="rounded-lg p-4"
           style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.06)" }}

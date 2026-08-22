@@ -4,7 +4,7 @@ export default function ScoreBreakdown({ parts }: { parts: ScorePart[] }) {
   return (
     <div>
       <p className="text-[11px] text-zinc-600 uppercase tracking-widest mb-3 font-mono">Score breakdown</p>
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {parts.map((part) => {
           const pct = (part.score / part.max) * 100;
           const color = pct >= 80 ? "#22C55E" : pct >= 60 ? "#F59E0B" : "#EF4444";

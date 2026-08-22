@@ -31,6 +31,52 @@
 - Split into "This week" and "All-time" — weekly resets keep it approachable for newer users rather than always showing the same top 10.
 - Per-category leaderboards in addition to overall, since a user might be a rendering-bug specialist and never top the concurrency board.
 
+### Landing Page
+Marketing surface for the "LeetCode for debugging" positioning. Same dark dev-tool aesthetic as the app — no consumer-marketing pastels, no stock-photo hero. The page should feel like it belongs to the same product the user logs into.
+
+- **Hero**
+  - Full-bleed dark canvas with a subtle terminal/scanline texture (low-opacity monospace grid or faint `>` prompt motif) — reinforces "this is a tool, not a course."
+  - Headline: short, declarative, e.g. *"Debug like it's 2am on call."* or *"Stop guessing. Start diagnosing."* — never "Welcome to our platform."
+  - Sub-headline states the value prop in one line: **"LeetCode for debugging — practice root-cause diagnosis on real-world bugs, not toy algorithms."**
+  - A small, live-looking code/stack-trace snippet in the hero (syntax-highlighted, monospace) to signal the actual product surface immediately. Keep it static or lightly animated (typing caret), not a heavy demo.
+
+- **Value prop ("LeetCode for debugging")**
+  - Three or four compact feature blocks contrasting with algorithm practice:
+    1. *Real bug classes* — React rendering, backend concurrency, singletons, race conditions.
+    2. *Explain the root cause* — the graded deliverable is the diagnosis, not a passing test.
+    3. *Hidden tests + grading agent* — your fix runs against hidden tests, then an agent grades the explanation.
+    4. *Weak-spot analytics* — per-category radar shows where you keep getting paged.
+  - Use the same category color-coding as the app (one color per category) so the marketing page and product feel continuous.
+
+- **CTAs**
+  - Primary: "Start a challenge" (links to challenge browser) — high-contrast accent button, same component as in-app primary actions.
+  - Secondary: "See how grading works" (links to a results-screen explainer / sample challenge) — ghost/outline button.
+  - One CTA above the fold and one repeated after the value-prop block; avoid CTA spam — two max per viewport.
+
+- **Social proof**
+  - Understated, engineering-credible, not testimonial-carousel kitsch: a row of "trusted by engineers at" wordmarks (text, monospace, muted) OR a compact stat strip ("12k bugs diagnosed", "4 bug classes", "hidden-test grading").
+  - Optional: a single pull-quote from a recognizable eng handle, set in the same type as in-app copy, no quotation-mark decoration.
+  - Keep social proof muted (low contrast, small) so it reads as credibility, not a sales push — consistent with the "engineering tool" tone.
+
+### Profile Settings
+Advanced account management surface (distinct from the read-only stats/profile page). Dark dev-tool aesthetic consistent with the rest of the app; forms use the same input/button primitives as in-app settings.
+
+- **Managing multiple sessions**
+  - "Active sessions" list showing device/browser, approximate location (IP-derived, coarse), and last-active time for each logged-in session.
+  - Per-session "Revoke" action; a "Revoke all other sessions" bulk action at the top.
+  - New-login events surface here (and optionally notify) so users can spot unexpected sessions — security-first, no gamification.
+
+- **Linking OAuth accounts**
+  - "Connected accounts" section listing providers (GitHub, Google, etc.) with connected/disconnected state.
+  - Allow linking multiple providers to one account; show which provider is the current sign-in method and which is primary for avatar/name.
+  - Unlinking a provider must require a password/secondary factor fallback if it's the only credential — never let an unlink orphan the account (block with inline guidance).
+
+- **Editing profile info**
+  - Editable fields: display name, username/handle (with availability check), avatar (upload or pick from a small set), and a short bio/tagline.
+  - Category-interest selection (which bug classes to surface in the browser) reuses the same category color tokens.
+  - Save state shows inline validation (handle taken, name too long) using the app's existing form-error styling — no separate "marketing" form look.
+  - Danger zone (separate, muted-red section): delete account with explicit confirmation step.
+
 ## 4. Visual Direction
 - Dark, developer-tool-adjacent theme by default (matches the audience's existing tools — VS Code, terminal), with a light mode toggle.
 - Category color-coding used consistently across browser, challenge screen tags, and stats charts — one color per category, never reused for anything else.

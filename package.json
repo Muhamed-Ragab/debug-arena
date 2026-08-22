@@ -11,11 +11,15 @@
     "test": "turbo run test",
     "db:generate": "pnpm --filter @debug-arena/db generate",
     "db:migrate": "pnpm --filter @debug-arena/db migrate",
-    "db:studio": "pnpm --filter @debug-arena/db studio"
+    "db:studio": "pnpm --filter @debug-arena/db studio",
+    "fmt": "turbo run fmt",
+    "fmt:check": "turbo run fmt:check"
   },
   "devDependencies": {
+    "oxfmt": "^0.64.0",
+    "oxlint": "^1.79.0",
     "turbo": "^2.1.0",
-    "typescript": "^7.0.2"
+    "typescript": "7.0.2"
   },
   "packageManager": "pnpm@9.9.0",
   "engines": {

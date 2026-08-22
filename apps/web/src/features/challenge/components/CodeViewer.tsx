@@ -11,7 +11,7 @@ interface Props {
 
 export default function CodeViewer({ cfg, selectedLine, onToggleLine }: Props) {
   return (
-    <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: "#0b0b10" }}>
+    <div className="flex-1 flex min-h-[50vh] flex-col overflow-hidden lg:min-h-0" style={{ backgroundColor: "#0b0b10" }}>
       <div
         className="flex items-center border-b"
         style={{ backgroundColor: "#0f0f15", borderColor: "rgba(255,255,255,0.06)" }}
@@ -22,7 +22,7 @@ export default function CodeViewer({ cfg, selectedLine, onToggleLine }: Props) {
         >
           <FileCode size={12} /> Dashboard.tsx
         </div>
-        <div className="ml-auto px-4 py-2.5 text-[11px] text-zinc-700 font-mono">
+        <div className="ms-auto px-4 py-2.5 text-[11px] text-zinc-700 font-mono">
           {selectedLine ? `Line ${selectedLine} marked` : "Click a line to mark bug location"}
         </div>
       </div>
@@ -45,19 +45,19 @@ export default function CodeViewer({ cfg, selectedLine, onToggleLine }: Props) {
                   style={{ backgroundColor: selected ? `${cfg.color}13` : undefined }}
                 >
                   <td
-                    className="select-none text-right pr-4 pl-3 py-[2.5px] w-10 text-[12px] transition-colors"
+                    className="select-none text-end pe-4 ps-3 py-[2.5px] w-10 text-[12px] transition-colors"
                     style={{ color: selected ? cfg.color : "#3a3a52" }}
                   >
                     {n}
                   </td>
-                  <td className="pl-2 pr-6 py-[2.5px] text-[12.5px] group-hover:bg-white/[0.018] transition-colors">
+                  <td className="ps-2 pe-6 py-[2.5px] text-[12.5px] group-hover:bg-white/[0.018] transition-colors">
                     {tokens.map((t, j) => (
                       <span key={j} style={{ color: selected ? cfg.color : t.color }}>
                         {t.text}
                       </span>
                     ))}
                   </td>
-                  <td className="w-5 pr-2 text-[10px]" style={{ color: cfg.color }}>
+                  <td className="w-5 pe-2 text-[10px]" style={{ color: cfg.color }}>
                     {selected ? "●" : ""}
                   </td>
                 </tr>
