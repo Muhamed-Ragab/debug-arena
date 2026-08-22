@@ -1,5 +1,6 @@
-import { Bell } from "lucide-react";
+import { useLingui } from "@lingui/react";
 import { Logo } from "./Sidebar";
+import NotificationBell from "../ui/NotificationBell";
 
 export interface Crumb {
   label: string;
@@ -12,6 +13,8 @@ interface TopBarProps {
 }
 
 export default function TopBar({ crumbs, right }: TopBarProps) {
+  const { i18n } = useLingui();
+  
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-surface px-6">
       <div className="flex items-center gap-4">
@@ -35,20 +38,14 @@ export default function TopBar({ crumbs, right }: TopBarProps) {
       </div>
       <div className="flex items-center gap-4">
         {right}
-        <button
-          className="relative flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
-          aria-label="Notifications"
-        >
-          <Bell size={18} />
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-danger ring-2 ring-surface" />
-        </button>
+        <NotificationBell />
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20 text-sm font-semibold text-primary">
             MR
           </div>
           <div className="leading-tight">
             <p className="text-sm font-medium text-heading">Marcus Reyes</p>
-            <p className="text-xs text-muted-foreground">Senior Engineer</p>
+            <p className="text-xs text-muted-foreground">{i18n._("Senior Engineer")}</p>
           </div>
         </div>
       </div>
