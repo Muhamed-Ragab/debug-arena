@@ -9,6 +9,7 @@ import {
 import ScoreBreakdown from "./ScoreBreakdown";
 import ExplanationComparison from "./ExplanationComparison";
 import Prevention from "./Prevention";
+import TopBar from "../../../components/layout/TopBar";
 
 interface Props {
   onNext: () => void;
@@ -19,16 +20,20 @@ export default function ResultsScreen({ onNext }: Props) {
   const maxTotal = SCORE_PARTS.reduce((s, p) => s + p.max, 0);
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto">
+    <div className="flex h-full w-full flex-col">
+      <TopBar
+        crumbs={[{ label: "Challenges", to: "/challenges" }, { label: "Results" }]}
+      />
+      <div className="flex-1 overflow-y-auto flex flex-col">
       <div
-        className="px-8 pt-7 pb-5 border-b flex items-center justify-between sticky top-0 z-10 backdrop-blur-sm"
+        className="px-4 pt-7 pb-5 border-b flex flex-wrap items-center justify-between gap-y-2 sticky top-0 z-10 backdrop-blur-sm sm:px-8"
         style={{ borderColor: "rgba(255,255,255,0.06)", backgroundColor: "rgba(13,13,18,0.92)" }}
       >
-        <div>
+        <div className="min-w-0">
           <p className="text-[11px] text-zinc-600 uppercase tracking-widest mb-0.5 font-mono">Results</p>
           <h1 className="text-[15px] font-semibold text-zinc-100">Dashboard freezes after third click</h1>
         </div>
-        <div className="text-right">
+        <div className="text-end">
           <p className="text-[11px] text-zinc-600 font-mono mb-0.5">Total score</p>
           <p className="text-2xl font-semibold text-white tabular-nums font-mono">
             {total}
@@ -37,7 +42,7 @@ export default function ResultsScreen({ onNext }: Props) {
         </div>
       </div>
 
-      <div className="px-8 py-6 space-y-8 max-w-[1100px]">
+      <div className="px-4 py-6 space-y-8 max-w-[1100px] mx-auto sm:px-8">
         <ScoreBreakdown parts={SCORE_PARTS} />
         <ExplanationComparison
           userExplanation={USER_EXPLANATION}
@@ -46,7 +51,7 @@ export default function ResultsScreen({ onNext }: Props) {
         />
         <Prevention items={PREVENTION} />
 
-        <div className="flex items-center justify-between pb-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-8">
           <p className="text-[12px] text-zinc-700">Challenge complete · +{total} pts added to your profile</p>
           <button
             onClick={onNext}
@@ -58,6 +63,7 @@ export default function ResultsScreen({ onNext }: Props) {
             Back to challenges <ChevronRight size={14} />
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

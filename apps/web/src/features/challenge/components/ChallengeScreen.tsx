@@ -5,6 +5,7 @@ import ChallengeScenario from "./ChallengeScenario";
 import CodeViewer from "./CodeViewer";
 import ChallengeTabs from "./ChallengeTabs";
 import SubmitBar from "./SubmitBar";
+import TopBar from "../../../components/layout/TopBar";
 
 interface Props {
   challenge: Challenge;
@@ -16,7 +17,14 @@ export default function ChallengeScreen({ challenge, onSubmit }: Props) {
   const ws = useChallengeWorkspace(onSubmit);
 
   return (
-    <div className="flex h-full overflow-hidden">
+    <div className="flex h-full w-full flex-col">
+      <TopBar
+        crumbs={[
+          { label: "Challenges", to: "/challenges" },
+          { label: challenge.title },
+        ]}
+      />
+      <div className="flex flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
       <ChallengeScenario
         challenge={challenge}
         cfg={cfg}
@@ -25,7 +33,7 @@ export default function ChallengeScreen({ challenge, onSubmit }: Props) {
       />
       <CodeViewer cfg={cfg} selectedLine={ws.selectedLine} onToggleLine={ws.toggleLine} />
       <div
-        className="w-[308px] shrink-0 flex flex-col border-l"
+        className="w-full shrink-0 flex flex-col border-t border-s lg:w-[308px] lg:border-t-0"
         style={{ borderColor: "rgba(255,255,255,0.06)" }}
       >
         <ChallengeTabs
@@ -42,6 +50,7 @@ export default function ChallengeScreen({ challenge, onSubmit }: Props) {
           onSubmit={ws.submit}
         />
       </div>
+    </div>
     </div>
   );
 }
