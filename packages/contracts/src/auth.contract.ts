@@ -1,5 +1,10 @@
 import { initContract } from "@ts-rest/core";
-import { z } from "zod";
+import {
+  RegisterBodySchema,
+  LoginBodySchema,
+  AuthTokenResponseSchema,
+  AuthErrorResponseSchema,
+} from "./auth.schema";
 
 const c = initContract();
 
@@ -7,26 +12,19 @@ export const authContract = c.router({
   register: {
     method: "POST",
     path: "/auth/register",
-    body: z.object({
-      email: z.string().email(),
-      username: z.string().min(3),
-      password: z.string().min(8),
-    }),
+    body: RegisterBodySchema,
     responses: {
-      201: z.object({ token: z.string() }),
-      409: z.object({ message: z.string() }),
+      201: AuthTokenResponseSchema,
+      409: AuthErrorResponseSchema,
     },
   },
   login: {
     method: "POST",
     path: "/auth/login",
-    body: z.object({
-      email: z.string().email(),
-      password: z.string(),
-    }),
+    body: LoginBodySchema,
     responses: {
-      200: z.object({ token: z.string() }),
-      401: z.object({ message: z.string() }),
+      200: AuthTokenResponseSchema,
+      401: AuthErrorResponseSchema,
     },
   },
 });
