@@ -51,29 +51,31 @@ Headers included in all responses:
 ## 1. Authentication
 **Path:** /auth
 
+Auth is provided by **better-auth**. Sessions are opaque httpOnly cookies (`Set-Cookie`); the SPA uses `better-auth/client`. The per-request identity is bridged into Postgres RLS via `request.jwt.claim.sub` (see implementation_guide.md §6).
+
 ### POST /auth/register
 Creates a new user account.
 - **Rate Limit:** 5 requests per 15 minutes (Strict to prevent bot account creation).
 - **Body**: { email: string, username: string, password: string }
-- **Response 201**: { "success": true, "data": { "token": "..." }, "error": null }
+- **Response 201**: Sets a session cookie; body `{ "success": true, "data": { "user": {...}, "session": {...} }, "error": null }` (exact shape per better-auth).
 
 ### POST /auth/login
 Authenticates an existing user.
 - **Rate Limit:** 10 requests per 15 minutes (Prevents brute force).
 - **Body**: { email: string, password: string }
-- **Response 200**: { "success": true, "data": { "token": "..." }, "error": null }
+- **Response 200**: Sets a session cookie; body `{ "success": true, "data": { "user": {...}, "session": {...} }, "error": null }` (exact shape per better-auth).
 
 ### GET /auth/oauth/:provider
 Initiates an OAuth login flow with a supported provider (google, github).
 - **Rate Limit:** 10 requests per 15 minutes.
 - **Query Params**: redirect (optional) — where to return after the provider redirects back.
-- **Response 302**: Redirects to the provider's authorization page. On callback, issues a session token and redirects to the app.
+- **Response 302**: Redirects to the provider's authorization page. On callback, issues a session cookie and redirects to the app.
 
 ### POST /auth/oauth/:provider/callback
 Handles the provider's redirect and exchanges the authorization code for a session.
 - **Rate Limit:** 10 requests per 15 minutes.
 - **Body**: { code: string, state: string }
-- **Response 200**: { "success": true, "data": { "token": "..." }, "error": null }
+- **Response 200**: Sets a session cookie; body `{ "success": true, "data": { "user": {...}, "session": {...} }, "error": null }` (exact shape per better-auth).
 
 ### GET /auth/sessions
 Lists the user's active sessions across devices (multi-session support).

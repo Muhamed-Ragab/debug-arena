@@ -18,27 +18,40 @@
 | streak_count | int | Current daily active streak |
 | last_activity_date | date | To compute streak continuity |
 | created_at | timestamptz | |
+| name | text nullable | display name (better-auth) |
+| image | text nullable | avatar URL (better-auth) |
 
-### oauth_accounts
+*Extended for better-auth: `email_verified_at` maps to better-auth's `emailVerified`; `passwordHash` maps to better-auth's password field; `name`/`image` added. `id` stays uuid.*
+
+### accounts
 | Field | Type | Notes |
 |---|---|---|
-| id | uuid PK | |
-| user_id | uuid FK -> users.id | |
-| provider | text | e.g. "google", "github" |
-| provider_account_id | text | provider's user/account id |
-| access_token | text nullable | OAuth access token |
-| refresh_token | text nullable | OAuth refresh token |
+| id | text PK | |
+| userId | uuid FK -> users.id | cascade |
+| providerId | text | e.g. "google","github" |
+| accountId | text | provider's user id |
+| accessToken | text nullable | |
+| refreshToken | text nullable | |
+| idToken | text nullable | |
+| expiresAt | timestamptz nullable | |
+| scope | text nullable | |
+| password | text nullable | |
+
+*Supersedes legacy oauth_accounts. Managed by better-auth.*
 
 ### sessions
 | Field | Type | Notes |
 |---|---|---|
-| id | uuid PK | |
-| user_id | uuid FK -> users.id | |
-| refresh_token_hash | text | hashed refresh token for rotation |
-| user_agent | text nullable | client user agent |
-| ip_address | inet nullable | client IP |
-| status | enum(active, revoked) | |
-| expires_at | timestamptz | |
+| id | text PK | |
+| userId | uuid FK -> users.id | cascade |
+| token | text unique | |
+| expiresAt | timestamptz | |
+| ipAddress | text nullable | |
+| userAgent | text nullable | |
+| createdAt | timestamptz | |
+| updatedAt | timestamptz | |
+
+*Supersedes legacy sessions. Opaque token; revocation = row deletion. Managed by better-auth.*
 
 ### login_attempts
 | Field | Type | Notes |
@@ -49,21 +62,15 @@
 | attempt_count | int | failed attempts in window |
 | locked_until | timestamptz nullable | lockout expiry |
 
-### email_verifications
+### verifications
 | Field | Type | Notes |
 |---|---|---|
-| id | uuid PK | |
-| user_id | uuid FK -> users.id | |
-| token_hash | text | hashed verification token |
-| expires_at | timestamptz | |
+| id | text PK | |
+| identifier | text | |
+| value | text | |
+| expiresAt | timestamptz | |
 
-### password_resets
-| Field | Type | Notes |
-|---|---|---|
-| id | uuid PK | |
-| user_id | uuid FK -> users.id | |
-| token_hash | text | hashed reset token |
-| expires_at | timestamptz | |
+*Supersedes email_verifications + password_resets. Managed by better-auth.*
 
 ### profile_links
 | Field | Type | Notes |
@@ -228,10 +235,10 @@
 - `achievements` 1—N `user_achievements`
 - `bug_injection_jobs` 1—1 `challenges`
 - `submissions.root_cause_embedding` vs `challenges.root_cause_embedding` via pgvector for semantic-similarity pass.
-- `users` 1—N `oauth_accounts`
-- `users` 1—N `sessions`
-- `users` 1—N `email_verifications`
-- `users` 1—N `password_resets`
+- `users` 1—N `accounts` (better-auth)
+- `users` 1—N `sessions` (better-auth)
+- `users` 1—N `verifications` (better-auth)
 - `users` 1—N `profile_links`
 - `challenges` 1—N `challenge_embeddings` (RAG search via pgvector)
 - `login_attempts` keyed by `email`/`ip_address` for rate limiting (no FK to users, supports pre-account attempts).
+- *RLS policies remain keyed on `request.jwt.claim.sub`; the value is populated per-request from the better-auth session via a `SET LOCAL` bridge (see implementation_guide.md §6).*

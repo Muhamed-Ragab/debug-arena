@@ -40,7 +40,7 @@
 - Real-time Notifications: Notification bell for achievements, grading completion, and social activities
 
 ### 2.2 API layer (NestJS + ts-rest + Drizzle)
-- Auth (Passport-JWT)
+- Auth (better-auth + Drizzle adapter; session identity bridged into Postgres RLS per request)
 - Challenge CRUD (admin-only for manual authoring)
 - Submission endpoint: orchestrates validation → sandboxed test run → grading agent call → score computation
 - Stats & Leaderboard endpoints (supports category filters and streak calculations)
@@ -81,4 +81,5 @@
 ## 4. Non-Functional Considerations
 - **Cost control**: LLM calls are the main variable cost — use embedding similarity as a cheap first-pass filter.
 - **Security**: sandbox isolation for any code execution is non-negotiable.
+- **Auth**: handled by better-auth; the per-request user identity is bridged into Postgres RLS via `SET LOCAL "request.jwt.claims"` (see implementation_guide.md §6).
 - **Scalability**: MVP scale relies on flat scan for pgvector and simple DB indexing. Real-time updates (SSE) handle async UI state cleanly without aggressive polling.
