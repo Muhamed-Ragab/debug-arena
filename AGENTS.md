@@ -112,3 +112,9 @@ Scaffold phase — all module/service files contain `TODO` stubs. No tests exist
 - **Async grading flow**: Submission → sandbox test run (sync) → BullMQ grading job (async) → SSE push on completion — full trace in `implementation_guide.md §5`, architecture context in `architecture.md §2.4`
 - **Auth guards**: `BetterAuthSessionGuard` (requires auth), `OptionalBetterAuthSessionGuard` (passes anonymous), `RolesGuard` (admin-only) — detailed in `implementation_guide.md §6`
 - **Rate limits**: Per-endpoint limits defined in `API.md`, implementation approach in `implementation_guide.md §1`
+
+## TypeScript Strictness
+- **NEVER use 'any' type.**
+- Always set strict types for all variables, parameters, and function return values.
+- Use explicit interfaces or Zod schema inference for payloads.
+- No implicit 'any'; if a type is unknown, use 'unknown' and narrow it down.
