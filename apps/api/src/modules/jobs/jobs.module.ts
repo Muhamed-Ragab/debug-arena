@@ -13,7 +13,7 @@ import { BullModule } from "@nestjs/bullmq";
     BullModule.registerQueue(
       { name: "grading" },
       { name: "sandbox-run" },
-      { name: "bug-injection" }
+      { name: "bug-injection" },
     ),
   ],
   exports: [BullModule],
