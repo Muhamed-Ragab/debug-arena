@@ -7,7 +7,8 @@ Scoped to Phase 0 + Phase 1 (manual MVP). Later-phase tasks live in plan.md unti
 - [ ] Provision Postgres, enable `pgvector` extension
 - [ ] Set up Drizzle schema + migrations for: `users`, `categories`, `challenges`, `hints`, `submissions`
 - [ ] Set up ts-rest contract package shared between API and frontend
-- [ ] Auth: Passport-JWT login/register endpoints + frontend auth flow
+- [ ] Auth: integrate better-auth (drizzle adapter, /api/auth/* proxy controller, google+github OAuth, session guards, RLS bridge via SET LOCAL request.jwt.claims) + frontend auth flow with better-auth/client
+- [ ] Migrate auth schema: extend users (uuid id, add emailVerified/name/image, map passwordHash), let better-auth own sessions/accounts/verifications; drop legacy oauth_accounts/email_verifications/password_resets; keep login_attempts (schema.ts + migrate.ts)
 - [ ] CI: lint + typecheck + migration check on PR
 
 ## Phase 1 — Manual MVP

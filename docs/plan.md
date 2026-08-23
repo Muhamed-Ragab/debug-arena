@@ -2,7 +2,7 @@
 
 ## Phase 0 — Foundation (setup)
 - Repo scaffolding: NestJS + Drizzle + Postgres (with pgvector), React + Vite + shadcn/ui, ts-rest contracts
-- Auth (Passport-JWT)
+- Auth (better-auth + Drizzle adapter; RLS bridged per request)
 - Base schema migration (users, categories, challenges, submissions, hints, stats, leaderboards, notifications, social graph, gamification)
 
 ## Phase 1 — Manual MVP (Validate the Core Loop)
