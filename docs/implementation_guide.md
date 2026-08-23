@@ -140,49 +140,70 @@ Triggered via event `eventEmitter.emit('submission.created', { userId })`
 
 ---
 
-## 6. OAuth & Session Auth
-**Feasibility:** 100% (NestJS Passport + `@nestjs/jwt` + Postgres-backed sessions)
+## 6. Authentication (better-auth)
+**Feasibility:** 100% (`better-auth` + `@better-auth/drizzle-adapter` + Postgres/pg + NestJS `toNodeHandler`)
 
-The platform supports both local credentials and third-party identity providers. The `users` table already allows `password_hash` to be `null`, which is exactly what an OAuth-only account needs. We layer provider linking, rotating refresh tokens, and a session guard on top of that nullable column.
+We adopt **better-auth** instead of hand-rolling Passport/JWT/session logic. It provides battle-tested credential + OAuth login, DB-backed sessions with revocation and device listing, email verification, and password reset out of the box. We preserve our Postgres **RLS** security model by bridging the session identity into the `request.jwt.claim.sub` GUC per request (see RLS Bridge).
 
-### Schema Additions
-- `oauth_accounts`: Links a provider identity to a local user.
-  | Field | Type | Notes |
-  |---|---|---|
-  | id | uuid PK | |
-  | user_id | uuid FK -> users.id | The local account the provider is attached to |
-  | provider | text | e.g. `google`, `github` |
-  | provider_account_id | text | The stable ID the provider returns |
-  | access_token | text nullable | Encrypted at rest |
-  | refresh_token | text nullable | Encrypted at rest, used for silent re-auth |
-  | PK | (user_id, provider) | A user can link the same provider only once |
+### Mounting in NestJS
+better-auth is framework-agnostic. Mount its Node handler on a catch-all auth route and let it own `/api/auth/*` (sign-up, sign-in, OAuth callback, session list/revoke, email verification, password reset). No manual controller methods are required beyond the proxy:
+```ts
+// apps/api/src/modules/auth/auth.controller.ts
+import { All, Controller, Req, Res } from "@nestjs/common";
+import type { Request, Response } from "express";
+import { toNodeHandler } from "better-auth/node";
+import { auth } from "./auth";
 
-- `sessions`: Server-side session records so we can revoke tokens and enforce device limits.
-  | Field | Type | Notes |
-  |---|---|---|
-  | id | uuid PK | Session id, stored in the JWT `sid` claim |
-  | user_id | uuid FK -> users.id | |
-  | refresh_token_hash | text | Bcrypt hash of the rotating refresh token |
-  | user_agent | text nullable | For the "active devices" view |
-  | ip_address | inet nullable | |
-  | expires_at | timestamptz | Absolute session lifetime |
-  | revoked_at | timestamptz nullable | Set on logout or forced revocation |
-  | created_at | timestamptz | |
+@Controller("api/auth")
+export class AuthController {
+  @All("*")
+  async handle(@Req() req: Request, @Res() res: Response) {
+    return toNodeHandler(auth)(req, res);
+  }
+}
+```
 
-### Provider Linking
-1. **New OAuth user:** The callback receives `provider`, `provider_account_id`, and profile claims. We look for an existing `oauth_accounts` row. If none exists, we create a `users` row (with `password_hash = null`) and insert the `oauth_accounts` link in a single Drizzle transaction.
-2. **Linking to an existing account:** A logged-in user visits `/settings/linked-accounts` and completes the provider flow. We require a fresh local password or a re-auth before attaching, so an attacker who controls a victim's email provider can't hijack the account.
-3. **Conflict handling:** If the provider identity already maps to a different local user, we surface a clear error instead of silently merging accounts.
+### Drizzle adapter + schema
+```ts
+// apps/api/src/modules/auth/auth.ts
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import { db } from "@debug-arena/db";
 
-### Refresh Tokens
-- Access tokens are short-lived (15 minutes). Refresh tokens live longer (30 days) and rotate on every use.
-- On refresh, `AuthService.rotateRefreshToken` issues a new token, writes `refresh_token_hash` to the `sessions` row, and invalidates the old hash. If a reused (stolen) token shows up, we revoke the whole `sessions` row and force re-login on all devices.
-- `sessions.expires_at` gives us an absolute ceiling independent of the JWT `exp` claim, so we can kill a session server-side before the token naturally expires.
+export const auth = betterAuth({
+  database: drizzleAdapter(db, { provider: "pg" }),
+  socialProviders: {
+    google: { clientId: process.env.GOOGLE_CLIENT_ID!, clientSecret: process.env.GOOGLE_CLIENT_SECRET! },
+    github: { clientId: process.env.GITHUB_CLIENT_ID!, clientSecret: process.env.GITHUB_CLIENT_SECRET! },
+  },
+  session: { expiresIn: 60 * 60 * 24 * 30, updateAge: 60 * 60 * 24 }, // 30d session, sliding 1d refresh
+  advanced: { generateId: () => crypto.randomUUID() }, // keep users.id as uuid
+});
+```
+We keep our `users` table (uuid PK) extended with better-auth's expected columns and let better-auth own `sessions`, `accounts`, and `verifications` via the adapter. Our legacy `oauth_accounts`, `email_verifications`, and `password_resets` tables are superseded by better-auth's `accounts`/`verifications`; `login_attempts` stays as a custom audit/rate-limit table (better-auth has no built-in equivalent). See `erd.md` for the mapped schema.
+
+> **Schema change required:** `packages/db/src/schema.ts` and `migrate.ts` must be updated to the better-auth tables (tracked in `tasks.md` Phase 0). This document change does not modify code.
+
+### RLS Bridge (CRITICAL)
+Our RLS policies key on `request.jwt.claim.sub`. better-auth issues **opaque session tokens**, not Postgres JWTs, so that GUC is empty unless we populate it. Bridge it in a NestJS guard/interceptor that runs before any DB access:
+```ts
+const session = await auth.api.getSession({ headers: req.headers });
+if (session) {
+  await db.execute(sql`SET LOCAL "request.jwt.claims" = ${JSON.stringify({ sub: session.user.id, role: session.user.role })}::json`);
+}
+```
+This keeps every existing RLS policy (users, submissions, sessions, accounts, verifications, analytics) working unchanged. Scope the `SET LOCAL` to the request transaction and reset it afterward (per-request Drizzle transaction or middleware that clears the GUC). Anonymous requests set no claim, so policies that allow public reads still apply.
 
 ### Session Guards
-- `JwtSessionGuard` extends the Passport JWT strategy. Beyond verifying the signature, it loads the `sid` claim, checks that the `sessions` row exists, is not `revoked_at`, and has not passed `expires_at`. A missing or dead session rejects the request with `401`.
-- `OptionalJwtSessionGuard` runs the same checks but passes through unauthenticated requests, used by the challenge browser so anonymous users can still read public challenges.
-- Admin routes use `RolesGuard` on top of `JwtSessionGuard`, reading `users.role` to gate challenge authoring and bug-injection review.
+- `BetterAuthSessionGuard` calls `auth.api.getSession({ headers })`; on success it sets the RLS claim and attaches `req.user`. A missing/dead session (better-auth deletes revoked rows) → `401`.
+- `OptionalBetterAuthSessionGuard` runs the same check but passes through when unauthenticated (challenge browser for anonymous reads).
+- `RolesGuard` reads `session.user.role` for admin routes (challenge authoring, bug-injection review).
+
+### What we no longer hand-write
+- Password hashing (argon2/bcrypt handled by better-auth)
+- Refresh-token rotation (replaced by better-auth sliding sessions + `updateAge`)
+- OAuth callback / state / PKCE (handled by `socialProviders`)
+- Email verification + password-reset token machinery (handled by the `verifications` table)
 
 ---
 
