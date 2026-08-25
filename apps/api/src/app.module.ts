@@ -2,7 +2,6 @@ import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { AuthModule } from "@thallesp/nestjs-better-auth";
 import { auth } from "./common/auth/auth";
 import { LoggerMiddleware } from "./common/middleware/logger.middleware";
-import { AuthModule as AppAuthModule } from "./modules/auth/auth.module";
 import { ChallengesModule } from "./modules/challenges/challenges.module";
 import { SubmissionsModule } from "./modules/submissions/submissions.module";
 import { GradingModule } from "./modules/grading/grading.module";
@@ -19,7 +18,6 @@ import { SandboxModule } from "./modules/sandbox/sandbox.module";
         rawBody: true,
       },
     }),
-    AppAuthModule,
     ChallengesModule,
     SubmissionsModule,
     GradingModule,
