@@ -20,6 +20,7 @@
     "@lingui/react": "^6.6.0",
     "@tanstack/react-query": "^5.102.3",
     "@ts-rest/react-query": "^3.52.1",
+    "better-auth": "^1.7.1",
     "lucide-react": "^1.34.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
