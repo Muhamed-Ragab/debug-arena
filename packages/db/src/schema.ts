@@ -207,7 +207,8 @@ export const leaderboardEntries = analyticsSchema.table("leaderboard_entries", {
 export const sessions = pgTable(
   "sessions",
   {
-    id: text("id").primaryKey(),
+    // Client-side default: better-auth delegates id generation to the ORM.
+    id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -227,11 +228,12 @@ export const sessions = pgTable(
 export const accounts = pgTable(
   "accounts",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     providerId: text("provider_id").notNull(),
+    issuer: text("issuer").notNull(),
     accountId: text("account_id").notNull(),
     accessToken: text("access_token"),
     refreshToken: text("refresh_token"),
@@ -253,7 +255,7 @@ export const accounts = pgTable(
 
 // --- verifications (better-auth owned tokens) ---
 export const verifications = pgTable("verifications", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),

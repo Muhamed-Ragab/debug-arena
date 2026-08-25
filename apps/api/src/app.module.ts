@@ -7,6 +7,7 @@ import { SubmissionsModule } from "./modules/submissions/submissions.module";
 import { GradingModule } from "./modules/grading/grading.module";
 import { BugInjectionModule } from "./modules/bug-injection/bug-injection.module";
 import { SandboxModule } from "./modules/sandbox/sandbox.module";
+import { UsersModule } from "./modules/users/users.module";
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { SandboxModule } from "./modules/sandbox/sandbox.module";
     GradingModule,
     BugInjectionModule,
     SandboxModule,
+    UsersModule,
   ],
 })
 export class AppModule implements NestModule {

@@ -30,6 +30,11 @@ export const auth = betterAuth({
   // /api/auth/* through the Vite proxy, which strips /api -> /auth reaches Nest.
   basePath: "/auth",
   secret: process.env.BETTER_AUTH_SECRET,
+  // SPA calls come from :5173 through the Vite proxy; override in prod via
+  // BETTER_AUTH_URL.
+  trustedOrigins: process.env.BETTER_AUTH_URL
+    ? [process.env.BETTER_AUTH_URL]
+    : ["http://localhost:5173"],
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
@@ -61,10 +66,11 @@ export const auth = betterAuth({
     storeSessionInDatabase: false,
   },
   advanced: {
-    // Generate UUID ids so inserts satisfy the uuid PK columns in our schema
-    // (keeps FK-compatible ids). 1.7.1 exposes this under database.generateId.
+    // Client-side UUID ids: our PKs are text columns (better-auth canonical)
+    // with drizzle $defaultFn fallbacks; the "uuid" preset would instead ask
+    // Postgres to generate, which requires gen_random_uuid() defaults.
     database: {
-      generateId: "uuid",
+      generateId: () => crypto.randomUUID(),
     },
   },
   user: {
