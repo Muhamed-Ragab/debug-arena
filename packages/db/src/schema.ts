@@ -13,9 +13,9 @@ import {
   pgPolicy,
   pgSchema,
   check,
-  uniqueIndex
+  uniqueIndex,
+  vector
 } from "drizzle-orm/pg-core";
-import { vector } from "pgvector/drizzle-orm";
 import { relations, sql } from "drizzle-orm";
 
 // --- Roles ---
@@ -58,16 +58,16 @@ export const users = pgTable("users", {
   streakCount: integer("streak_count").notNull().default(0),
   lastActivityDate: timestamp("last_activity_date", { mode: 'date' }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  uniqueIndex('email_idx').on(t.email),
-  pgPolicy('admin_all_users', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  pgPolicy('user_own_profile', {
+}, (t) => ({
+  emailIdx: uniqueIndex('email_idx').on(t.email),
+  adminAllUsers: pgPolicy('admin_all_users', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
+  userOwnProfile: pgPolicy('user_own_profile', {
     for: 'all',
     to: userRole,
     using: sql`${t.id} = (select current_setting('request.jwt.claim.sub')::uuid)`,
     withCheck: sql`${t.id} = (select current_setting('request.jwt.claim.sub')::uuid)`
   })
-]);
+}));
 
 // --- categories ---
 export const categories = pgTable("categories", {
@@ -75,10 +75,10 @@ export const categories = pgTable("categories", {
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
   description: text("description"),
-}, (t) => [
-  pgPolicy('admin_all_categories', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  pgPolicy('user_read_categories', { for: 'select', to: userRole, using: sql`true` })
-]);
+}, (t) => ({
+  adminAllCategories: pgPolicy('admin_all_categories', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
+  userReadCategories: pgPolicy('user_read_categories', { for: 'select', to: userRole, using: sql`true` })
+}));
 
 // --- challenges ---
 export const challenges = pgTable("challenges", {
@@ -96,18 +96,18 @@ export const challenges = pgTable("challenges", {
   source: challengeSourceEnum("source").notNull().default("manual"),
   status: challengeStatusEnum("status").notNull().default("draft"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
+}, (t) => ({
   // HNSW Index for fast vector similarity searches! (Requires pgvector)
-  index('root_cause_embedding_idx').using('hnsw', t.rootCauseEmbedding.op('vector_cosine_ops')),
-  
+  rootCauseEmbeddingIdx: index('root_cause_embedding_idx').using('hnsw', t.rootCauseEmbedding.op('vector_cosine_ops')),
+
   // RLS Policies
-  pgPolicy('admin_all_challenges', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  pgPolicy('user_read_published', { 
-    for: 'select', 
-    to: userRole, 
-    using: sql`${t.status} = 'published'` 
+  adminAllChallenges: pgPolicy('admin_all_challenges', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
+  userReadPublished: pgPolicy('user_read_published', {
+    for: 'select',
+    to: userRole,
+    using: sql`${t.status} = 'published'`
   })
-]);
+}));
 
 // --- hints ---
 export const hints = pgTable("hints", {
@@ -116,10 +116,10 @@ export const hints = pgTable("hints", {
   order: integer("order").notNull(),
   socraticPrompt: text("socratic_prompt").notNull(),
   penaltyPoints: integer("penalty_points").notNull().default(10),
-}, (t) => [
-  pgPolicy('admin_all_hints', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  pgPolicy('user_read_hints', { for: 'select', to: userRole, using: sql`true` })
-]);
+}, (t) => ({
+  adminAllHints: pgPolicy('admin_all_hints', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
+  userReadHints: pgPolicy('user_read_hints', { for: 'select', to: userRole, using: sql`true` })
+}));
 
 // --- submissions ---
 export const submissions = pgTable("submissions", {
@@ -139,17 +139,17 @@ export const submissions = pgTable("submissions", {
   totalScore: integer("total_score"),
   timeSpentSeconds: integer("time_spent_seconds"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  check('score_check', sql`${t.totalScore} >= 0 AND ${t.totalScore} <= 100`),
-  
-  pgPolicy('admin_all_submissions', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  pgPolicy('user_own_submissions', {
+}, (t) => ({
+  scoreCheck: check('score_check', sql`${t.totalScore} >= 0 AND ${t.totalScore} <= 100`),
+
+  adminAllSubmissions: pgPolicy('admin_all_submissions', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
+  userOwnSubmissions: pgPolicy('user_own_submissions', {
     for: 'all',
     to: userRole,
     using: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`,
     withCheck: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`
   })
-]);
+}));
 
 // --- bug_injection_jobs ---
 export const bugInjectionJobs = pgTable("bug_injection_jobs", {
@@ -161,10 +161,10 @@ export const bugInjectionJobs = pgTable("bug_injection_jobs", {
   generatedChallengeId: uuid("generated_challenge_id").references(() => challenges.id),
   errorMessage: text("error_message"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
+}, (t) => ({
   // Only admins can trigger and read injection jobs
-  pgPolicy('admin_all_jobs', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` })
-]);
+  adminAllJobs: pgPolicy('admin_all_jobs', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` })
+}));
 
 // ==========================================
 // ANALYTICS SCHEMA (Namespaced)
@@ -178,15 +178,15 @@ export const userCategoryStats = analyticsSchema.table("user_category_stats", {
   avgTimeSeconds: integer("avg_time_seconds").notNull().default(0),
   rootCauseAccuracyPercent: integer("root_cause_accuracy_percent").notNull().default(0),
   weakSpotRank: integer("weak_spot_rank"),
-}, (t) => [
-  primaryKey({ columns: [t.userId, t.categoryId] }),
-  pgPolicy('admin_all_stats', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  pgPolicy('user_read_own_stats', {
+}, (t) => ({
+  compositePk: primaryKey({ columns: [t.userId, t.categoryId] }),
+  adminAllStats: pgPolicy('admin_all_stats', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
+  userReadOwnStats: pgPolicy('user_read_own_stats', {
     for: 'select',
     to: userRole,
     using: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`
   })
-]);
+}));
 
 export const leaderboardEntries = analyticsSchema.table("leaderboard_entries", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -195,11 +195,11 @@ export const leaderboardEntries = analyticsSchema.table("leaderboard_entries", {
   period: leaderboardPeriodEnum("period").notNull(),
   rank: integer("rank").notNull(),
   totalScore: integer("total_score").notNull(),
-}, (t) => [
-  index('leaderboard_period_idx').on(t.period, t.categoryId),
-  pgPolicy('admin_all_leaderboards', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  pgPolicy('user_read_leaderboards', { for: 'select', to: userRole, using: sql`true` })
-]);
+}, (t) => ({
+  leaderboardPeriodIdx: index('leaderboard_period_idx').on(t.period, t.categoryId),
+  adminAllLeaderboards: pgPolicy('admin_all_leaderboards', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
+  userReadLeaderboards: pgPolicy('user_read_leaderboards', { for: 'select', to: userRole, using: sql`true` })
+}));
 
 // --- sessions (multi-session auth) ---
 export const sessions = pgTable("sessions", {
@@ -212,16 +212,16 @@ export const sessions = pgTable("sessions", {
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   lastActiveAt: timestamp("last_active_at", { withTimezone: true }).notNull().defaultNow(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  index('session_user_idx').on(t.userId),
-  pgPolicy('admin_all_sessions', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  pgPolicy('user_own_sessions', {
+}, (t) => ({
+  sessionUserIdx: index('session_user_idx').on(t.userId),
+  adminAllSessions: pgPolicy('admin_all_sessions', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
+  userOwnSessions: pgPolicy('user_own_sessions', {
     for: 'all',
     to: userRole,
     using: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`,
     withCheck: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`
   })
-]);
+}));
 
 // --- oauth_accounts (OAuth identity linking) ---
 export const oauthAccounts = pgTable("oauth_accounts", {
@@ -233,16 +233,16 @@ export const oauthAccounts = pgTable("oauth_accounts", {
   refreshToken: text("refresh_token"),
   expiresAt: timestamp("expires_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  uniqueIndex('oauth_provider_account_idx').on(t.provider, t.providerAccountId),
-  pgPolicy('admin_all_oauth', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  pgPolicy('user_own_oauth', {
+}, (t) => ({
+  oauthProviderAccountIdx: uniqueIndex('oauth_provider_account_idx').on(t.provider, t.providerAccountId),
+  adminAllOauth: pgPolicy('admin_all_oauth', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
+  userOwnOauth: pgPolicy('user_own_oauth', {
     for: 'all',
     to: userRole,
     using: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`,
     withCheck: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`
   })
-]);
+}));
 
 // --- login_attempts (rate limiting) ---
 export const loginAttempts = pgTable("login_attempts", {
@@ -253,11 +253,11 @@ export const loginAttempts = pgTable("login_attempts", {
   success: boolean("success").notNull().default(false),
   reason: text("reason"),
   attemptedAt: timestamp("attempted_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  index('login_attempt_ip_idx').on(t.ipAddress, t.attemptedAt),
-  index('login_attempt_email_idx').on(t.email, t.attemptedAt),
-  pgPolicy('admin_all_login_attempts', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` })
-]);
+}, (t) => ({
+  loginAttemptIpIdx: index('login_attempt_ip_idx').on(t.ipAddress, t.attemptedAt),
+  loginAttemptEmailIdx: index('login_attempt_email_idx').on(t.email, t.attemptedAt),
+  adminAllLoginAttempts: pgPolicy('admin_all_login_attempts', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` })
+}));
 
 // --- email_verifications ---
 export const emailVerifications = pgTable("email_verifications", {
@@ -267,15 +267,15 @@ export const emailVerifications = pgTable("email_verifications", {
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   verifiedAt: timestamp("verified_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  pgPolicy('admin_all_email_verifications', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  pgPolicy('user_own_email_verifications', {
+}, (t) => ({
+  adminAllEmailVerifications: pgPolicy('admin_all_email_verifications', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
+  userOwnEmailVerifications: pgPolicy('user_own_email_verifications', {
     for: 'all',
     to: userRole,
     using: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`,
     withCheck: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`
   })
-]);
+}));
 
 // --- password_resets ---
 export const passwordResets = pgTable("password_resets", {
@@ -285,15 +285,15 @@ export const passwordResets = pgTable("password_resets", {
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   usedAt: timestamp("used_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  pgPolicy('admin_all_password_resets', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  pgPolicy('user_own_password_resets', {
+}, (t) => ({
+  adminAllPasswordResets: pgPolicy('admin_all_password_resets', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
+  userOwnPasswordResets: pgPolicy('user_own_password_resets', {
     for: 'all',
     to: userRole,
     using: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`,
     withCheck: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`
   })
-]);
+}));
 
 // --- profile_links ---
 export const profileLinks = pgTable("profile_links", {
@@ -302,15 +302,15 @@ export const profileLinks = pgTable("profile_links", {
   platform: profileLinkPlatformEnum("platform").notNull(),
   url: text("url").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  pgPolicy('admin_all_profile_links', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  pgPolicy('user_own_profile_links', {
+}, (t) => ({
+  adminAllProfileLinks: pgPolicy('admin_all_profile_links', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
+  userOwnProfileLinks: pgPolicy('user_own_profile_links', {
     for: 'all',
     to: userRole,
     using: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`,
     withCheck: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`
   })
-]);
+}));
 
 // --- email_templates ---
 export const emailTemplates = pgTable("email_templates", {
@@ -321,11 +321,11 @@ export const emailTemplates = pgTable("email_templates", {
   bodyText: text("body_text"),
   variables: jsonb("variables"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  uniqueIndex('email_template_slug_idx').on(t.slug),
-  pgPolicy('admin_all_email_templates', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  pgPolicy('user_read_email_templates', { for: 'select', to: userRole, using: sql`true` })
-]);
+}, (t) => ({
+  emailTemplateSlugIdx: uniqueIndex('email_template_slug_idx').on(t.slug),
+  adminAllEmailTemplates: pgPolicy('admin_all_email_templates', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
+  userReadEmailTemplates: pgPolicy('user_read_email_templates', { for: 'select', to: userRole, using: sql`true` })
+}));
 
 // --- challenge_embeddings (RAG search) ---
 export const challengeEmbeddings = pgTable("challenge_embeddings", {
@@ -334,13 +334,13 @@ export const challengeEmbeddings = pgTable("challenge_embeddings", {
   content: text("content").notNull(),
   embedding: vector("embedding", { dimensions: EMBEDDING_DIM }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
+}, (t) => ({
   // HNSW Index for fast vector similarity search over challenge embeddings (requires pgvector)
-  index('challenge_embedding_idx').using('hnsw', t.embedding.op('vector_cosine_ops')),
-  index('challenge_embedding_challenge_idx').on(t.challengeId),
-  pgPolicy('admin_all_challenge_embeddings', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  pgPolicy('user_read_challenge_embeddings', { for: 'select', to: userRole, using: sql`true` })
-]);
+  challengeEmbeddingIdx: index('challenge_embedding_idx').using('hnsw', t.embedding.op('vector_cosine_ops')),
+  challengeEmbeddingChallengeIdx: index('challenge_embedding_challenge_idx').on(t.challengeId),
+  adminAllChallengeEmbeddings: pgPolicy('admin_all_challenge_embeddings', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
+  userReadChallengeEmbeddings: pgPolicy('user_read_challenge_embeddings', { for: 'select', to: userRole, using: sql`true` })
+}));
 
 // --- Relations ---
 export const usersRelations = relations(users, ({ many }) => ({

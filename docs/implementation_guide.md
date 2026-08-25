@@ -184,6 +184,8 @@ We keep our `users` table (uuid PK) extended with better-auth's expected columns
 
 > **Schema change required:** `packages/db/src/schema.ts` and `migrate.ts` must be updated to the better-auth tables (tracked in `tasks.md` Phase 0). This document change does not modify code.
 
+> **Known Issue — RESOLVED (2026-08-25):** The better-auth ↔ drizzle peer conflict is closed: workspace upgraded to `drizzle-orm@0.45.2` (matches `@better-auth/drizzle-adapter@^1.7.1` peer range) with paired `drizzle-kit@0.31`. Path taken after the reverted packages-removal attempt: fixed all latent type errors first (array→object extraConfig returns, phantom `better-auth`/`@types/express` declarations, dropped nonexistent `pgvector/drizzle-orm` import — Drizzle ships native `vector`; npm pgvector pkg removed), then bumped 0.33→0.36.4 (first RLS-capable line) and finally to 0.45.2. Lint/typecheck/build green post-upgrade. Note: `apps/api` builds via plain `tsc` (Nest CLI's programmatic compiler API is unavailable on TypeScript 7.0; expected back in 7.1) — `nest start --watch` still used for dev.
+
 ### RLS Bridge (CRITICAL)
 Our RLS policies key on `request.jwt.claim.sub`. better-auth issues **opaque session tokens**, not Postgres JWTs, so that GUC is empty unless we populate it. Bridge it in a NestJS guard/interceptor that runs before any DB access:
 ```ts

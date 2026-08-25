@@ -41,3 +41,4 @@
 ## Open Questions
 - ELO-style dynamic difficulty scaling vs fixed challenge difficulties.
 - B2B Bootcamps vs B2C developer subscriptions model influencing content style.
+- Resolved (2026-08-25): keep the pnpm/Turborepo modular monorepo with `@ts-rest/*` shared contracts; the packages-removal attempt was reverted. `@ts-rest/nest` is NOT wired into controllers yet (see `apps/api/src/modules/auth/auth.controller.ts` TODO). The better-auth ↔ drizzle-orm peer conflict is fully resolved (workspace on drizzle-orm 0.45.2 = adapter peer match; lint/typecheck/build green; see `implementation_guide.md` §6).
