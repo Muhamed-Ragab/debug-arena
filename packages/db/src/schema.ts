@@ -35,21 +35,24 @@ export const challengeSourceEnum = pgEnum("challenge_source", ["manual", "ai_gen
 export const challengeStatusEnum = pgEnum("challenge_status", ["draft", "published", "archived"]);
 export const jobStatusEnum = pgEnum("job_status", ["queued", "running", "succeeded", "failed"]);
 export const leaderboardPeriodEnum = pgEnum("leaderboard_period", ["weekly", "all_time"]);
-
-// --- Auth / profile / RAG enums ---
-export const oauthProviderEnum = pgEnum("oauth_provider", ["google", "github", "gitlab", "discord", "apple"]);
-export const sessionStatusEnum = pgEnum("session_status", ["active", "expired", "revoked"]);
 export const profileLinkPlatformEnum = pgEnum("profile_link_platform", ["github", "gitlab", "twitter", "linkedin", "website", "stackoverflow"]);
 
 const EMBEDDING_DIM = 1536;
 
 // --- users ---
 export const users = pgTable("users", {
+  // better-auth canonical fields first; domain extras exposed via
+  // user.additionalFields in apps/api/src/common/auth/auth.ts.
   id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name"),
   email: text("email").notNull().unique(),
-  username: text("username").notNull().unique(),
-  passwordHash: text("password_hash"),
-  emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
+  emailVerified: boolean("email_verified").notNull().default(false),
+  image: text("image"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  // --- domain extras ---
+  // Nullable: better-auth inserts omit it; registration flows backfill later.
+  username: text("username").unique(),
   displayName: text("display_name"),
   bio: text("bio"),
   avatarUrl: text("avatar_url"),
@@ -57,7 +60,6 @@ export const users = pgTable("users", {
   currentRating: integer("current_rating").notNull().default(1000),
   streakCount: integer("streak_count").notNull().default(0),
   lastActivityDate: timestamp("last_activity_date", { mode: 'date' }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
   emailIdx: uniqueIndex('email_idx').on(t.email),
   adminAllUsers: pgPolicy('admin_all_users', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
@@ -201,48 +203,62 @@ export const leaderboardEntries = analyticsSchema.table("leaderboard_entries", {
   userReadLeaderboards: pgPolicy('user_read_leaderboards', { for: 'select', to: userRole, using: sql`true` })
 }));
 
-// --- sessions (multi-session auth) ---
-export const sessions = pgTable("sessions", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  tokenHash: text("token_hash").notNull(),
-  status: sessionStatusEnum("status").notNull().default("active"),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  lastActiveAt: timestamp("last_active_at", { withTimezone: true }).notNull().defaultNow(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => ({
-  sessionUserIdx: index('session_user_idx').on(t.userId),
-  adminAllSessions: pgPolicy('admin_all_sessions', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  userOwnSessions: pgPolicy('user_own_sessions', {
-    for: 'all',
-    to: userRole,
-    using: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`,
-    withCheck: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`
-  })
-}));
+// --- sessions (better-auth owned) ---
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: text("id").primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    token: text("token").notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    sessionUserIdx: index("session_user_idx").on(t.userId),
+  }),
+);
 
-// --- oauth_accounts (OAuth identity linking) ---
-export const oauthAccounts = pgTable("oauth_accounts", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  provider: oauthProviderEnum("provider").notNull(),
-  providerAccountId: text("provider_account_id").notNull(),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  expiresAt: timestamp("expires_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => ({
-  oauthProviderAccountIdx: uniqueIndex('oauth_provider_account_idx').on(t.provider, t.providerAccountId),
-  adminAllOauth: pgPolicy('admin_all_oauth', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  userOwnOauth: pgPolicy('user_own_oauth', {
-    for: 'all',
-    to: userRole,
-    using: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`,
-    withCheck: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`
-  })
-}));
+// --- accounts (better-auth owned: OAuth identities + credential hashes) ---
+export const accounts = pgTable(
+  "accounts",
+  {
+    id: text("id").primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    providerId: text("provider_id").notNull(),
+    accountId: text("account_id").notNull(),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
+    accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true }),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true }),
+    scope: text("scope"),
+    password: text("password"), // credential hash lives here, not on users
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    accountsProviderAccountIdx: uniqueIndex("accounts_provider_account_idx").on(
+      t.providerId,
+      t.accountId,
+    ),
+  }),
+);
+
+// --- verifications (better-auth owned tokens) ---
+export const verifications = pgTable("verifications", {
+  id: text("id").primaryKey(),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 // --- login_attempts (rate limiting) ---
 export const loginAttempts = pgTable("login_attempts", {
@@ -257,42 +273,6 @@ export const loginAttempts = pgTable("login_attempts", {
   loginAttemptIpIdx: index('login_attempt_ip_idx').on(t.ipAddress, t.attemptedAt),
   loginAttemptEmailIdx: index('login_attempt_email_idx').on(t.email, t.attemptedAt),
   adminAllLoginAttempts: pgPolicy('admin_all_login_attempts', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` })
-}));
-
-// --- email_verifications ---
-export const emailVerifications = pgTable("email_verifications", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  tokenHash: text("token_hash").notNull(),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  verifiedAt: timestamp("verified_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => ({
-  adminAllEmailVerifications: pgPolicy('admin_all_email_verifications', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  userOwnEmailVerifications: pgPolicy('user_own_email_verifications', {
-    for: 'all',
-    to: userRole,
-    using: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`,
-    withCheck: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`
-  })
-}));
-
-// --- password_resets ---
-export const passwordResets = pgTable("password_resets", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  tokenHash: text("token_hash").notNull(),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  usedAt: timestamp("used_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => ({
-  adminAllPasswordResets: pgPolicy('admin_all_password_resets', { for: 'all', to: adminRole, using: sql`true`, withCheck: sql`true` }),
-  userOwnPasswordResets: pgPolicy('user_own_password_resets', {
-    for: 'all',
-    to: userRole,
-    using: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`,
-    withCheck: sql`${t.userId} = (select current_setting('request.jwt.claim.sub')::uuid)`
-  })
 }));
 
 // --- profile_links ---
@@ -345,10 +325,8 @@ export const challengeEmbeddings = pgTable("challenge_embeddings", {
 // --- Relations ---
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
-  oauthAccounts: many(oauthAccounts),
+  accounts: many(accounts),
   loginAttempts: many(loginAttempts),
-  emailVerifications: many(emailVerifications),
-  passwordResets: many(passwordResets),
   profileLinks: many(profileLinks),
 }));
 
@@ -374,20 +352,12 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, { fields: [sessions.userId], references: [users.id] }),
 }));
 
-export const oauthAccountsRelations = relations(oauthAccounts, ({ one }) => ({
-  user: one(users, { fields: [oauthAccounts.userId], references: [users.id] }),
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, { fields: [accounts.userId], references: [users.id] }),
 }));
 
 export const loginAttemptsRelations = relations(loginAttempts, ({ one }) => ({
   user: one(users, { fields: [loginAttempts.userId], references: [users.id] }),
-}));
-
-export const emailVerificationsRelations = relations(emailVerifications, ({ one }) => ({
-  user: one(users, { fields: [emailVerifications.userId], references: [users.id] }),
-}));
-
-export const passwordResetsRelations = relations(passwordResets, ({ one }) => ({
-  user: one(users, { fields: [passwordResets.userId], references: [users.id] }),
 }));
 
 export const profileLinksRelations = relations(profileLinks, ({ one }) => ({

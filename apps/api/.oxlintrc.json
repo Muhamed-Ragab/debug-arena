@@ -22,7 +22,7 @@
     "import/no-unassigned-import": [
       "error",
       {
-        "allow": ["reflect-metadata", "**/*.css"]
+        "allow": ["reflect-metadata", "**/*.css", "**/env"]
       }
     ],
     "unicorn/filename-case": "off",
