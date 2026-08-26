@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import type { DeviceType, SessionData } from "../data/settings";
 import { SESSIONS } from "../data/settings";
+import SignOutButton from "../../auth/components/SignOutButton";
 
 const DEVICE_ICON: Record<DeviceType, typeof Laptop> = {
   desktop: Laptop,
@@ -34,7 +35,9 @@ export default function SessionManager() {
     <section className="rounded-lg border border-border bg-card p-5 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-[15px] font-semibold text-heading">Active sessions</h2>
+          <h2 className="text-[15px] font-semibold text-heading">
+            Active sessions <SignOutButton />
+          </h2>
           <p className="mt-1 text-[13px] text-muted-foreground">
             Devices signed in to your account. Revoke anything you don&apos;t recognize.
           </p>
