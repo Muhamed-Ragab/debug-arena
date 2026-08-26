@@ -1,0 +1,57 @@
+import { relations } from "drizzle-orm";
+import { accounts, loginAttempts, users } from "@/features/auth/schema";
+import {
+  categories,
+  challengeEmbeddings,
+  challenges,
+  hints,
+  submissions,
+} from "@/features/challenge/schema";
+import { profileLinks } from "@/features/profile/schema";
+
+// --- Relations ---
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+  loginAttempts: many(loginAttempts),
+  profileLinks: many(profileLinks),
+}));
+
+export const challengesRelations = relations(challenges, ({ one, many }) => ({
+  category: one(categories, {
+    fields: [challenges.categoryId],
+    references: [categories.id],
+  }),
+  embeddings: many(challengeEmbeddings),
+  hints: many(hints),
+  submissions: many(submissions),
+}));
+
+export const submissionsRelations = relations(submissions, ({ one }) => ({
+  challenge: one(challenges, {
+    fields: [submissions.challengeId],
+    references: [challenges.id],
+  }),
+  user: one(users, { fields: [submissions.userId], references: [users.id] }),
+}));
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, { fields: [accounts.userId], references: [users.id] }),
+}));
+
+export const loginAttemptsRelations = relations(loginAttempts, ({ one }) => ({
+  user: one(users, { fields: [loginAttempts.userId], references: [users.id] }),
+}));
+
+export const profileLinksRelations = relations(profileLinks, ({ one }) => ({
+  user: one(users, { fields: [profileLinks.userId], references: [users.id] }),
+}));
+
+export const challengeEmbeddingsRelations = relations(
+  challengeEmbeddings,
+  ({ one }) => ({
+    challenge: one(challenges, {
+      fields: [challengeEmbeddings.challengeId],
+      references: [challenges.id],
+    }),
+  })
+);

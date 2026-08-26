@@ -10,7 +10,7 @@ pnpm db:generate && pnpm db:migrate  # Drizzle codegen + run migrations
 pnpm dev                    # Next.js dev (Turborepo removed)
 ```
 
-Verification order: `pnpm lint` -> `pnpm typecheck` -> `pnpm test` -> `pnpm build`
+Verification order: `pnpm lint` -> `pnpm format:check` -> `pnpm typecheck` -> `pnpm test` -> `pnpm build`
 
 ## Layout
 
@@ -19,24 +19,31 @@ Verification order: `pnpm lint` -> `pnpm typecheck` -> `pnpm test` -> `pnpm buil
 | `src/app/` | App Router routes (public pages + `(app)` protected group) |
 | `src/components/ui/` | shadcn-style primitives |
 | `src/features/{name}/` | one directory per page/feature |
-| `src/lib/auth.ts` | better-auth SERVER instance |
-| `src/lib/auth-client.ts` | better-auth React client |
-| `src/db/` | Drizzle schema + client (folded from packages/db) |
+| `src/lib/auth/` | better-auth SERVER & React client instances |
+| `src/lib/env/` | `@t3-oss/env-nextjs` type-safe environment configuration |
+| `src/lib/safe-action/` | `next-safe-action` base & authenticated action clients |
+| `src/lib/redis/` | Redis client singleton |
+| `src/lib/domain/` | Categories, difficulties, and domain types |
+| `src/db/schema/` | Drizzle schema split by domain with array syntax `(t) => [...]` |
+| `src/db/client.ts` | Drizzle pool client |
 | `drizzle/` | migrations |
 | `src/locales/{en,ar}/` | Lingui catalogs (.po source + compiled .ts) |
 
 ## Toolchain
 
 - Next.js 16 App Router, src dir, Turbopack default (dev+build), React Compiler ON (`reactCompiler: true`)
-- Formatter `oxfmt`, linter `oxlint` (root `.oxlintrc.json`) — Next runs NO linter during build (`next lint` removed in 16)
-- TypeScript: standard `tsc --noEmit` (tsgo dropped for Next compatibility); strict mode on
+- Linter & Formatter: **Biome** (`biome.json`) — `pnpm lint` (`biome check src`) and `pnpm format` (`biome format --write src`)
+- Server Actions: **next-safe-action** (`src/lib/safe-action/`)
+- Environment Validation: **@t3-oss/env-nextjs** (`src/lib/env/`)
+- TypeScript: standard `tsc --noEmit`; strict mode on
 - Package manager pnpm 9.9.0; Node >= 20.9
 
 ## Conventions
 
 - Client Components: add `"use client"` when a file uses hooks/context/window/localStorage/recharts/better-auth hooks. Pure presentational files stay Server Components.
-- Routing: react-router is GONE. `Link` from `next/link` (`href=`), `useRouter/usePathname/useParams/useSearchParams` from `next/navigation`.
-- Auth guards: `proxy.ts` (cookie presence via `getSessionCookie`) + client `ProtectedRoute` (full session check) in `src/app/(app)/layout.tsx` chain.
+- Routing: `Link` from `next/link` (`href=`), `useRouter/usePathname/useParams/useSearchParams` from `next/navigation`.
+- Auth guards: `src/proxy.ts` (cookie presence via `getSessionCookie`) + client `ProtectedRoute` (full session check) in `src/app/(app)/layout.tsx` chain.
+- Server Actions: use `actionClient` or `authActionClient` from `@/lib/safe-action` with Zod input schemas.
 - Response envelope `{ success, data, error }` applies to OUR route handlers under `src/app/api/**` (better-auth endpoints return their native shape).
 - i18n: Lingui runtime pattern — `useLingui().i18n._("key")`, catalogs `src/locales/{locale}/*.json` loaded by `dynamicActivate`. No macros.
 - AI instructions: read bundled version-matched docs at `node_modules/next/dist/docs/` before Next.js API work.
