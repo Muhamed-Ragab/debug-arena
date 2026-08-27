@@ -4,6 +4,7 @@ import { GripVertical } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
+import type { HintItem } from "@/features/challenge/types";
 import { CATEGORY_CONFIG } from "@/lib/domain/categories";
 import type { Challenge } from "@/lib/domain/types";
 import { useChallengeWorkspace } from "../hooks/useChallengeWorkspace";
@@ -11,7 +12,6 @@ import type { DiffLine } from "../types";
 import { ChallengeScenario } from "./ChallengeScenario";
 import { ChallengeTabs } from "./ChallengeTabs";
 import { CodeViewer } from "./CodeViewer";
-import type { HintItem } from "./HintsPanel";
 import { SubmitBar } from "./SubmitBar";
 
 interface Props {

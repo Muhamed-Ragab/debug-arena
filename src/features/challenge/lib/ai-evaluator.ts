@@ -1,22 +1,6 @@
+import type { AIEvaluationResult } from "@/features/challenge/types";
 import { env } from "@/lib/env/env";
 import { cosineSimilarity, generateDeterministicEmbedding } from "./embedding";
-
-export interface AIEvaluationResult {
-  alignmentPercent: number;
-  confidence?: "high" | "medium" | "low";
-  constructiveFeedback: string;
-  enhancementSuggestions?: string[];
-  fixScore?: number; // 0-25
-  isAiGraded: boolean;
-  isCorrect: boolean;
-  keyConceptsIdentified: string[];
-  missedMechanisms: string[];
-  modelUsed?: string;
-  needsEnhancement: boolean;
-  preventionAnalysis: string;
-  preventionScore?: number; // 0-25
-  rootCauseScore: number; // 0-25
-}
 
 export interface EvaluateExplanationParams {
   buggyCodeSnippet?: string;

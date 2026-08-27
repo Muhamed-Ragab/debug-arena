@@ -1,4 +1,5 @@
-import type { AIEvaluationResult } from "./ai-evaluator";
+import type { AIEvaluationResult } from "@/features/challenge/types";
+import type { ScorePart } from "@/features/results/types";
 import { cosineSimilarity, generateDeterministicEmbedding } from "./embedding";
 import type { SandboxExecutionResult } from "./sandbox";
 
@@ -14,13 +15,6 @@ export interface GradingInput {
   rootCauseExplanation: string;
   sandboxResult: SandboxExecutionResult;
   solutionExplanation?: string;
-}
-
-export interface ScorePart {
-  desc: string;
-  label: string;
-  max: number;
-  score: number;
 }
 
 export interface GradingResult {

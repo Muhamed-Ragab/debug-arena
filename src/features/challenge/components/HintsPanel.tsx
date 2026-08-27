@@ -1,12 +1,7 @@
 import { ChevronDown, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-
-export interface HintItem {
-  order: number;
-  penaltyPoints: number;
-  socraticPrompt: string;
-}
+import type { HintItem } from "@/features/challenge/types";
 
 interface Props {
   hints: HintItem[];

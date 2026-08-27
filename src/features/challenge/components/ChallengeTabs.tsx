@@ -1,8 +1,9 @@
+import type { HintItem } from "@/features/challenge/types";
 import { cn } from "@/lib/utils";
 import type { DiffLine, RightTab } from "../types";
 import { ExplainPanel } from "./ExplainPanel";
 import { FixPanel } from "./FixPanel";
-import { type HintItem, HintsPanel } from "./HintsPanel";
+import { HintsPanel } from "./HintsPanel";
 
 interface Props {
   diffLines: DiffLine[];

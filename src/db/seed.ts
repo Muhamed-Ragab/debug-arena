@@ -1,9 +1,7 @@
 import { eq } from "drizzle-orm";
 import "@/lib/env";
-import {
-  SEED_CATEGORIES,
-  SEED_CHALLENGES,
-} from "@/features/challenge/data/challenges.seed";
+import { SEED_CATEGORIES } from "@/features/challenge/constants";
+import { SEED_CHALLENGES } from "@/features/challenge/data/challenges.seed";
 import { generateDeterministicEmbedding } from "@/features/challenge/lib/embedding";
 import { db } from "./client";
 import * as schema from "./schema";

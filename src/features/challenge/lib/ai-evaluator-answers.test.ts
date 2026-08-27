@@ -1,8 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  type AIEvaluationResult,
-  evaluateExplanationWithGroq,
-} from "./ai-evaluator";
+import type { AIEvaluationResult } from "@/features/challenge/types";
+import { evaluateExplanationWithGroq } from "./ai-evaluator";
 import { gradeSubmission } from "./grading";
 
 describe("AI Evaluator - Answer Quality & Grading Automation", () => {
