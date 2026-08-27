@@ -8,7 +8,9 @@ import {
   useState,
 } from "react";
 
-export type Theme = "dark" | "light" | "system";
+import type { Theme } from "./types";
+
+export type { Theme } from "./types";
 
 interface ThemeProviderProps {
   children: ReactNode;
