@@ -18,12 +18,17 @@ describe("Groq AI Evaluator", () => {
               alignmentPercent: 92,
               constructiveFeedback:
                 "Spot on diagnosis! You accurately identified the stale closure inside setInterval.",
+              enhancementSuggestions: [
+                "Consider also mentioning memory cleanup with clearInterval.",
+              ],
+              isCorrect: true,
               keyConceptsIdentified: [
                 "Stale closure",
                 "Empty dependency array",
                 "Functional state update needed",
               ],
               missedMechanisms: [],
+              needsEnhancement: false,
               preventionAnalysis:
                 "Use the functional state updater syntax setCount(c => c + 1) or ESLint react-hooks/exhaustive-deps.",
               rootCauseScore: 24,
@@ -52,6 +57,9 @@ describe("Groq AI Evaluator", () => {
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     expect(result.isAiGraded).toBe(true);
+    expect(result.isCorrect).toBe(true);
+    expect(result.needsEnhancement).toBe(false);
+    expect(result.enhancementSuggestions).toHaveLength(1);
     expect(result.rootCauseScore).toBe(24);
     expect(result.alignmentPercent).toBe(92);
     expect(result.constructiveFeedback).toContain("Spot on diagnosis");

@@ -11,7 +11,7 @@ import {
   SCORE_PARTS,
   USER_EXPLANATION,
 } from "@/features/results/data/results";
-import type { ScorePart } from "@/features/results/types";
+import type { EvaluationDetails, ScorePart } from "@/features/results/types";
 import { ExplanationComparison } from "./ExplanationComparison";
 import { Prevention } from "./Prevention";
 import { ScoreBreakdown } from "./ScoreBreakdown";
@@ -20,6 +20,7 @@ interface Props {
   aiFeedback?: string;
   canonicalExplanation?: string;
   challengeTitle?: string;
+  evaluationDetails?: EvaluationDetails | null;
   maxScore?: number;
   onNext?: () => void;
   preventionNotes?: string[];
@@ -39,6 +40,7 @@ export function ResultsScreen({
   userSolution,
   canonicalExplanation = CANONICAL,
   aiFeedback = AI_FEEDBACK,
+  evaluationDetails,
   preventionNotes = PREVENTION,
 }: Props) {
   const router = useRouter();
@@ -91,6 +93,7 @@ export function ResultsScreen({
           <ExplanationComparison
             aiFeedback={aiFeedback}
             canonical={canonicalExplanation}
+            evaluationDetails={evaluationDetails}
             userExplanation={userExplanation}
             userSolution={userSolution}
           />

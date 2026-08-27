@@ -29,14 +29,27 @@ function getFixQualityDesc(score: number): string {
   return "Fix failed test assertions or details omitted";
 }
 
-function getAiFeedback(total: number): string {
-  if (total >= 85) {
-    return "Excellent diagnosis! You identified the exact failure mechanism and provided a complete, resilient fix.";
+function getDynamicAiFeedback(
+  submissionAiFeedback: string | null | undefined,
+  userExplanation: string | null | undefined,
+  canonicalRootCause: string | null | undefined,
+  totalScore: number
+): string {
+  if (submissionAiFeedback && submissionAiFeedback.trim().length > 0) {
+    return submissionAiFeedback;
   }
-  if (total >= 65) {
-    return "Solid debugging work. You addressed the core issue. Compare your explanation with the canonical root cause to see the specific mechanism details.";
+
+  if (!userExplanation || userExplanation.trim().length < 5) {
+    return "No substantial diagnosis was submitted. Review the canonical root cause to understand the underlying bug mechanism.";
   }
-  return "Good effort. Review the canonical root-cause breakdown and prevention notes to master this bug pattern.";
+
+  if (totalScore >= 85) {
+    return `Excellent diagnosis! Your explanation aligns directly with the canonical mechanism: "${canonicalRootCause?.slice(0, 120)}..."`;
+  }
+  if (totalScore >= 60) {
+    return "Solid debugging effort. Your diagnosis touched on the failure mechanism, but review the canonical root cause for key execution lifecycle details.";
+  }
+  return "Your explanation missed critical failure mechanisms. Compare your diagnosis with the canonical root cause to master this debugging pattern.";
 }
 
 type SubmissionData = NonNullable<
@@ -169,11 +182,27 @@ export default async function SubmissionResultsPage({
         "Implement architectural guardrails and type-safe constraints.",
       ];
 
+  const dynamicAiFeedback = getDynamicAiFeedback(
+    submission.aiFeedback,
+    submission.rootCauseExplanation,
+    submission.canonicalRootCause,
+    total
+  );
+
+  const evaluationDetails = submission.evaluationDetails ?? {
+    alignmentPercent: Math.round(((submission.rootCauseScore ?? 0) / 25) * 100),
+    isAiGraded: Boolean(submission.aiFeedback),
+    isCorrect:
+      (submission.rootCauseScore ?? 0) >= 17 && Boolean(submission.fixCorrect),
+    needsEnhancement: total < 85,
+  };
+
   return (
     <ResultsScreen
-      aiFeedback={getAiFeedback(total)}
+      aiFeedback={dynamicAiFeedback}
       canonicalExplanation={submission.canonicalRootCause}
       challengeTitle={submission.challengeTitle}
+      evaluationDetails={evaluationDetails}
       maxScore={100}
       preventionNotes={preventionNotes}
       scoreParts={scoreParts}

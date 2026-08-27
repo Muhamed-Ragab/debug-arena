@@ -65,6 +65,46 @@ describe("ResultsScreen Component", () => {
     expect(screen.getByText("Fix Quality")).toBeInTheDocument();
   });
 
+  it("renders dynamic AI evaluation details including correctness and enhancement suggestions", () => {
+    renderWithProviders(
+      <ResultsScreen
+        aiFeedback="The explanation captures the interval closure but omitted the functional updater fix."
+        canonicalExplanation="setInterval captures stale count 0 on mount."
+        challengeTitle="Stale Closure in Counter Interval"
+        evaluationDetails={{
+          alignmentPercent: 88,
+          enhancementSuggestions: [
+            "Elaborate on functional state updater pattern.",
+          ],
+          isAiGraded: true,
+          isCorrect: true,
+          keyConceptsIdentified: ["Stale closure"],
+          missedMechanisms: ["State updater syntax"],
+          needsEnhancement: true,
+        }}
+        maxScore={100}
+        scoreParts={mockScoreParts}
+        totalScore={85}
+        userExplanation="State variable count is captured in interval closure."
+        userSolution="setCount(count + 1)"
+      />
+    );
+
+    expect(screen.getByText("Correct Diagnosis")).toBeInTheDocument();
+    expect(screen.getByText("Needs Enhancement")).toBeInTheDocument();
+    expect(screen.getByText("88% alignment")).toBeInTheDocument();
+    expect(
+      screen.getByText("Elaborate on functional state updater pattern.")
+    ).toBeInTheDocument();
+    expect(screen.getByText("✓ Stale closure")).toBeInTheDocument();
+    expect(screen.getByText("• State updater syntax")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "The explanation captures the interval closure but omitted the functional updater fix."
+      )
+    ).toBeInTheDocument();
+  });
+
   it("invokes onNext when clicking Back to challenges button", async () => {
     const handleNext = vi.fn();
     const user = userEvent.setup();

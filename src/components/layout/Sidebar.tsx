@@ -1,12 +1,21 @@
 "use client";
 
 import { useLingui } from "@lingui/react";
-import { Bug, LayoutGrid, Settings, Trophy, User, X } from "lucide-react";
+import {
+  Bug,
+  LayoutGrid,
+  Settings,
+  Sparkles,
+  Trophy,
+  User,
+  X,
+} from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
 export function Logo({ compact = false }: { compact?: boolean }) {
@@ -33,6 +42,8 @@ export function Sidebar({
 }) {
   const { i18n } = useLingui();
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const isAdmin = (session?.user as { role?: string })?.role === "admin";
 
   const NAV: Array<{
     to: Route;
@@ -43,6 +54,18 @@ export function Sidebar({
     { icon: Trophy, label: i18n._("Leaderboard"), to: "/leaderboard" },
     { icon: User, label: i18n._("Profile"), to: "/profile" },
     { icon: Settings, label: i18n._("Settings"), to: "/settings" },
+  ];
+
+  const ADMIN_NAV: Array<{
+    to: Route;
+    label: string;
+    icon: typeof Sparkles;
+  }> = [
+    {
+      icon: Sparkles,
+      label: i18n._("AI Question Studio"),
+      to: "/admin/questions" as Route,
+    },
   ];
 
   return (
@@ -99,6 +122,41 @@ export function Sidebar({
             );
           })}
         </nav>
+
+        {Boolean(isAdmin) && (
+          <div className="mt-6">
+            <p className="px-3 pb-2 font-medium text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
+              {i18n._("Admin Portal")}
+            </p>
+            <nav className="flex flex-col gap-1">
+              {ADMIN_NAV.map(({ to, label, icon: Icon }) => {
+                const isActive = pathname.startsWith(to);
+                return (
+                  <Link
+                    className={cn(
+                      "relative flex items-center gap-3 rounded-md px-3 py-2.5 font-medium text-sm transition-colors",
+                      isActive
+                        ? "bg-primary/10 font-semibold text-heading"
+                        : "text-muted-foreground hover:bg-inset hover:text-foreground"
+                    )}
+                    href={to}
+                    key={to}
+                    onClick={onClose}
+                  >
+                    {Boolean(isActive) && (
+                      <span className="absolute start-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-e bg-primary" />
+                    )}
+                    <Icon
+                      className={isActive ? "text-primary" : "text-primary/70"}
+                      size={18}
+                    />
+                    <span>{label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        )}
       </div>
 
       <div className="mt-auto border-border border-t p-4">

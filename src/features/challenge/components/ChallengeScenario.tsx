@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronRight, Clock } from "lucide-react";
 import { CategoryTag } from "@/components/ui/CategoryTag";
 import { DiffBadge } from "@/components/ui/DiffBadge";
+import { FormattedMarkdown } from "@/components/ui/FormattedMarkdown";
 import { SCENARIO_PARAGRAPHS } from "@/features/challenge/data/challenges";
 import type { CategoryConfig } from "@/lib/domain/categories";
 import type { Challenge } from "@/lib/domain/types";
@@ -24,7 +25,7 @@ export function ChallengeScenario({
   scenarioParagraphs = SCENARIO_PARAGRAPHS,
   className,
 }: Props) {
-  const lastIndex = scenarioParagraphs.length - 1;
+  const scenarioContent = scenarioParagraphs.join("\n\n");
 
   return (
     <div
@@ -49,12 +50,8 @@ export function ChallengeScenario({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 py-4 text-[12.5px] text-muted-foreground leading-relaxed">
-        {scenarioParagraphs.map((p, i) => (
-          <p className={i < lastIndex ? "mb-3" : ""} key={p.slice(0, 30)}>
-            {p}
-          </p>
-        ))}
+      <div className="flex-1 overflow-y-auto px-5 py-4 text-[12.5px] leading-relaxed">
+        <FormattedMarkdown content={scenarioContent} />
 
         <div className="mt-5">
           <button

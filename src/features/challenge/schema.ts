@@ -170,12 +170,14 @@ export const challengeEmbeddings = pgTable(
 export const submissions = pgTable(
   "submissions",
   {
+    aiFeedback: text("ai_feedback"),
     challengeId: uuid("challenge_id")
       .notNull()
       .references(() => challenges.id),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    evaluationDetails: jsonb("evaluation_details"),
     fixCorrect: boolean("fix_correct"),
     hintsUsed: integer("hints_used").notNull().default(0),
     id: uuid("id").primaryKey().defaultRandom(),

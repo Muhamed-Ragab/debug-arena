@@ -26,9 +26,14 @@ export interface ScorePart {
 export interface GradingResult {
   aiFeedback: string;
   canonicalExplanation: string;
+  enhancementSuggestions: string[];
   fixCorrect: boolean;
   isAiGraded: boolean;
+  isCorrect: boolean;
+  keyConceptsIdentified: string[];
   localizationCorrect: boolean;
+  missedMechanisms: string[];
+  needsEnhancement: boolean;
   preventionNotes: string[];
   preventionScore: number;
   rootCauseScore: number;
@@ -285,12 +290,35 @@ export function gradeSubmission(input: GradingInput): GradingResult {
     ];
   }
 
+  const isCorrect =
+    input.aiEvaluation?.isCorrect ?? (rc.score >= 17 && fix.correct);
+  const needsEnhancement =
+    input.aiEvaluation?.needsEnhancement ?? totalScore < 85;
+  const enhancementSuggestions =
+    input.aiEvaluation?.enhancementSuggestions ??
+    (needsEnhancement
+      ? [
+          "Review the canonical mechanism to strengthen low-level failure precision.",
+        ]
+      : []);
+  const keyConceptsIdentified =
+    input.aiEvaluation?.keyConceptsIdentified ??
+    (isCorrect
+      ? ["Identified core failure mechanism"]
+      : ["Surface symptoms analyzed"]);
+  const missedMechanisms = input.aiEvaluation?.missedMechanisms ?? [];
+
   return {
     aiFeedback: generateFeedback(totalScore, input.aiEvaluation),
     canonicalExplanation: input.canonicalRootCause,
+    enhancementSuggestions,
     fixCorrect: fix.correct,
     isAiGraded: Boolean(input.aiEvaluation?.isAiGraded),
+    isCorrect,
+    keyConceptsIdentified,
     localizationCorrect: loc.correct,
+    missedMechanisms,
+    needsEnhancement,
     preventionNotes,
     preventionScore,
     rootCauseScore: rc.score,

@@ -205,11 +205,25 @@ export const submitChallengeAction = authActionClient
 
     const localizationAnswer = formatLocalizationAnswer(activeLines);
 
+    const evaluationDetails = {
+      alignmentPercent: aiEvaluation.alignmentPercent,
+      confidence: aiEvaluation.confidence ?? "high",
+      enhancementSuggestions: grading.enhancementSuggestions,
+      isAiGraded: grading.isAiGraded,
+      isCorrect: grading.isCorrect,
+      keyConceptsIdentified: grading.keyConceptsIdentified,
+      missedMechanisms: grading.missedMechanisms,
+      modelUsed: aiEvaluation.modelUsed,
+      needsEnhancement: grading.needsEnhancement,
+    };
+
     // 7. Save submission record
     const [submission] = await db
       .insert(schema.submissions)
       .values({
+        aiFeedback: grading.aiFeedback,
         challengeId,
+        evaluationDetails,
         fixCorrect: grading.fixCorrect,
         hintsUsed: hintsRevealedCount,
         localizationAnswer,
@@ -219,6 +233,8 @@ export const submitChallengeAction = authActionClient
           "Follow architectural safeguards & CI regression tests",
         preventionScore: grading.preventionScore,
         proposedFix: {
+          aiEvaluation: evaluationDetails,
+          aiFeedback: grading.aiFeedback,
           code: proposedFixCode,
           score: fixScore,
           solution: solutionExplanation,
@@ -255,7 +271,13 @@ export const submitChallengeAction = authActionClient
     return {
       aiFeedback: grading.aiFeedback,
       canonicalExplanation: grading.canonicalExplanation,
+      enhancementSuggestions: grading.enhancementSuggestions,
+      evaluationDetails,
       isAiGraded: grading.isAiGraded,
+      isCorrect: grading.isCorrect,
+      keyConceptsIdentified: grading.keyConceptsIdentified,
+      missedMechanisms: grading.missedMechanisms,
+      needsEnhancement: grading.needsEnhancement,
       preventionNotes: grading.preventionNotes,
       scoreParts: grading.scoreParts,
       submissionId: submission.id,

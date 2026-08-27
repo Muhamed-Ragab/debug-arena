@@ -7,6 +7,7 @@ const PROTECTED_PREFIXES = [
   "/profile",
   "/settings",
   "/submissions",
+  "/admin",
 ];
 const AUTH_ROUTES = ["/login", "/register", "/forgot-password"];
 
@@ -39,6 +40,7 @@ export const config = {
     "/profile/:path*",
     "/settings/:path*",
     "/submissions/:path*",
+    "/admin/:path*",
     "/login",
     "/register",
     "/forgot-password",
