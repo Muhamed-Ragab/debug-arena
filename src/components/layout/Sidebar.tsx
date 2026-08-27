@@ -16,6 +16,7 @@ import { usePathname } from "next/navigation";
 import { LanguageSwitcher } from "@/components/preferences/LanguageSwitcher";
 import { ThemeToggle } from "@/components/preferences/ThemeToggle";
 import { Button } from "@/components/ui/button";
+import { SignOutButton } from "@/features/auth/components/SignOutButton";
 import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
@@ -73,7 +74,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "absolute inset-y-0 z-50 flex h-full w-[260px] shrink-0 flex-col border-border border-e bg-surface transition-transform duration-300 lg:static lg:translate-x-0",
+        "absolute inset-y-0 z-50 flex h-full w-65 shrink-0 flex-col border-border border-e bg-surface transition-transform duration-300 lg:static lg:translate-x-0",
         open
           ? "translate-x-0"
           : "max-lg:-translate-x-full max-lg:rtl:translate-x-full"
@@ -117,7 +118,7 @@ export function Sidebar({
                 onClick={onClose}
               >
                 {Boolean(isActive) && (
-                  <span className="absolute start-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-e bg-primary" />
+                  <span className="absolute inset-s-0 top-1/2 h-5 w-0.75 -translate-y-1/2 rounded-e bg-primary" />
                 )}
                 <Icon className={isActive ? "text-primary" : ""} size={18} />
                 <span>{label}</span>
@@ -147,7 +148,7 @@ export function Sidebar({
                     onClick={onClose}
                   >
                     {Boolean(isActive) && (
-                      <span className="absolute start-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-e bg-primary" />
+                      <span className="absolute inset-s-0 top-1/2 h-5 w-0.75 -translate-y-1/2 rounded-e bg-primary" />
                     )}
                     <Icon
                       className={isActive ? "text-primary" : "text-primary/70"}
@@ -163,7 +164,7 @@ export function Sidebar({
       </div>
 
       <div className="mt-auto border-border border-t p-4">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="font-medium text-muted-foreground text-sm">
               {i18n._("Theme")}
@@ -175,6 +176,12 @@ export function Sidebar({
               {i18n._("Language")}
             </span>
             <LanguageSwitcher />
+          </div>
+          <div className="pt-1">
+            <SignOutButton
+              className="w-full justify-start px-2 py-2 text-sm"
+              size="sm"
+            />
           </div>
         </div>
       </div>

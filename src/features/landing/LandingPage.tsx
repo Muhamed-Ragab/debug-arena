@@ -14,6 +14,8 @@ import { Logo } from "@/components/layout/Sidebar";
 import { LanguageSwitcher } from "@/components/preferences/LanguageSwitcher";
 import { ThemeToggle } from "@/components/preferences/ThemeToggle";
 import { buttonVariants } from "@/components/ui/button";
+import { SignOutButton } from "@/features/auth/components/SignOutButton";
+import { useSession } from "@/lib/auth/client";
 import {
   CATEGORY_CONFIG,
   CATEGORY_ORDER,
@@ -39,7 +41,7 @@ function HeroBackdrop() {
         }}
       />
       <div
-        className="absolute start-1/2 top-[-10%] h-[520px] w-[820px] -translate-x-1/2 rounded-full opacity-30 blur-[120px]"
+        className="absolute inset-s-1/2 top-[-10%] h-130 w-205 -translate-x-1/2 rounded-full opacity-30 blur-[120px]"
         style={{
           background:
             "radial-gradient(circle, rgba(79,70,229,0.55), transparent 70%)",
@@ -244,6 +246,8 @@ function SocialProof() {
 
 export function LandingPage() {
   const { i18n } = useLingui();
+  const { data: session } = useSession();
+
   return (
     <div className="min-h-screen w-full bg-background text-foreground">
       <header className="sticky top-0 z-30 border-border border-b bg-header backdrop-blur-md">
@@ -254,18 +258,37 @@ export function LandingPage() {
               <LanguageSwitcher />
               <ThemeToggle />
             </div>
-            <Link
-              className={buttonVariants({ size: "sm", variant: "ghost" })}
-              href="/login"
-            >
-              Log in
-            </Link>
-            <Link
-              className={buttonVariants({ size: "sm", variant: "default" })}
-              href="/register"
-            >
-              Sign up
-            </Link>
+            {session?.user ? (
+              <>
+                <Link
+                  className={buttonVariants({ size: "sm", variant: "default" })}
+                  href="/challenges"
+                >
+                  {i18n._("Enter Arena")}
+                </Link>
+                <SignOutButton
+                  className="text-xs"
+                  redirectTo="/"
+                  size="sm"
+                  variant="ghost"
+                />
+              </>
+            ) : (
+              <>
+                <Link
+                  className={buttonVariants({ size: "sm", variant: "ghost" })}
+                  href="/login"
+                >
+                  Log in
+                </Link>
+                <Link
+                  className={buttonVariants({ size: "sm", variant: "default" })}
+                  href="/register"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </header>

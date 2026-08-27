@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import "../lib/env/env";

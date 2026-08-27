@@ -1,10 +1,57 @@
+import "dotenv/config";
 import { eq } from "drizzle-orm";
-import "@/lib/env";
 import { SEED_CATEGORIES } from "@/features/challenge/constants";
 import { SEED_CHALLENGES } from "@/features/challenge/data/challenges.seed";
 import { generateDeterministicEmbedding } from "@/features/challenge/lib/embedding";
+import { auth } from "@/lib/auth";
+import { env } from "@/lib/env/env";
 import { db } from "./client";
 import * as schema from "./schema";
+
+async function seedAdmin() {
+  const adminEmail =
+    env.ADMIN_EMAIL ?? process.env.ADMIN_EMAIL ?? "admin@debugarena.dev";
+  const adminPassword =
+    env.ADMIN_PASSWORD ?? process.env.ADMIN_PASSWORD ?? "Admin123456!";
+  const adminName =
+    env.ADMIN_NAME ?? process.env.ADMIN_NAME ?? "Debug Arena Admin";
+
+  console.log(`\n👤 Seeding admin account (${adminEmail})...`);
+
+  const existing = await db.query.users.findFirst({
+    where: eq(schema.users.email, adminEmail),
+  });
+
+  if (existing) {
+    if (existing.role !== "admin" || !existing.emailVerified) {
+      await db
+        .update(schema.users)
+        .set({ emailVerified: true, role: "admin" })
+        .where(eq(schema.users.id, existing.id));
+      console.log(`  ✓ Updated existing user "${adminEmail}" to admin role`);
+    } else {
+      console.log(
+        `  ✓ Admin user "${adminEmail}" already exists with admin role`
+      );
+    }
+    return;
+  }
+
+  await auth.api.signUpEmail({
+    body: {
+      email: adminEmail,
+      name: adminName,
+      password: adminPassword,
+    },
+  });
+
+  await db
+    .update(schema.users)
+    .set({ emailVerified: true, role: "admin" })
+    .where(eq(schema.users.email, adminEmail));
+
+  console.log(`  + Created admin user "${adminEmail}" with role "admin"`);
+}
 
 async function main() {
   console.log("🌱 Seeding database with categories and challenges...");
@@ -110,7 +157,10 @@ async function main() {
     }
   }
 
-  console.log("✅ Seeding complete!");
+  // 3. Seed Admin User
+  await seedAdmin();
+
+  console.log("\n✅ Seeding complete!");
   process.exit(0);
 }
 

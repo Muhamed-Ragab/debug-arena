@@ -4,6 +4,7 @@ import { useLingui } from "@lingui/react";
 import type { Route } from "next";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
+import { SignOutButton } from "@/features/auth/components/SignOutButton";
 import { useSession } from "@/lib/auth/client";
 import { Logo } from "./Sidebar";
 
@@ -64,7 +65,7 @@ export function TopBar({ crumbs, right }: TopBarProps) {
           ))}
         </nav>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {right}
         <Link
           className="flex items-center gap-2.5 transition-opacity hover:opacity-90"
@@ -81,6 +82,15 @@ export function TopBar({ crumbs, right }: TopBarProps) {
             <p className="text-muted-foreground text-xs">{userJobTitle}</p>
           </div>
         </Link>
+        <div className="h-4 w-px bg-border" />
+        <SignOutButton
+          aria-label={i18n._("Log out")}
+          className="h-8 w-8 p-0"
+          size="icon"
+          title={i18n._("Log out")}
+        >
+          <span className="sr-only">{i18n._("Log out")}</span>
+        </SignOutButton>
       </div>
     </header>
   );

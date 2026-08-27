@@ -11,6 +11,9 @@ export const env = createEnv({
   },
   isServer: typeof window === "undefined" || process.env.NODE_ENV === "test",
   server: {
+    ADMIN_EMAIL: z.string().email().optional(),
+    ADMIN_NAME: z.string().min(2).optional(),
+    ADMIN_PASSWORD: z.string().min(8).optional(),
     BETTER_AUTH_SECRET: z
       .string()
       .min(1)
