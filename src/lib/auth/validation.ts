@@ -21,6 +21,8 @@ export const forgetPasswordSchema = z.object({
   email: z.string().email(),
 });
 
-export type SignUpEmailInput = z.infer<typeof signUpEmailSchema>;
-export type SignInEmailInput = z.infer<typeof signInEmailSchema>;
-export type ForgetPasswordInput = z.infer<typeof forgetPasswordSchema>;
+export type {
+  ForgetPasswordInput,
+  SignInEmailInput,
+  SignUpEmailInput,
+} from "./types";
