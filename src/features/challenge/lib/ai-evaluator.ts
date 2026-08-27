@@ -1,4 +1,8 @@
+import { generateText, Output } from "ai";
+import { z } from "zod";
 import type { AIEvaluationResult } from "@/features/challenge/types";
+import { getAIModel } from "@/lib/ai/client";
+import { AI_FAST_MODEL, AI_PRIMARY_MODEL } from "@/lib/ai/constants";
 import { env } from "@/lib/env/env";
 import { cosineSimilarity, generateDeterministicEmbedding } from "./embedding";
 
@@ -15,20 +19,17 @@ export interface EvaluateExplanationParams {
 export interface SocraticHintParams {
   challengeTitle: string;
   codeSnippet: string;
-  hintLevel: number; // 1, 2, or 3
+  hintLevel: number;
   prompt: string;
   selectedLine?: number | null;
   userExplanation?: string;
 }
 
-const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-const PRIMARY_MODEL = "llama-3.3-70b-versatile";
-const FAST_MODEL = "llama-3.1-8b-instant";
-const REQUEST_TIMEOUT_MS = 6000;
+export type EvaluatorStrategy = (
+  params: EvaluateExplanationParams
+) => Promise<AIEvaluationResult>;
+export type HintStrategy = (params: SocraticHintParams) => Promise<string>;
 
-/**
- * Fallback evaluator using deterministic vector embeddings and rule heuristics when AI is offline or key is missing.
- */
 function fallbackEvaluation(
   userExplanation: string,
   canonicalRootCause: string,
@@ -165,35 +166,49 @@ function fallbackEvaluation(
   };
 }
 
-/**
- * Evaluates a user's bug explanation against the canonical root cause using Groq LLM (Llama 3.3 70B / 3.1 8B).
- * Directly compares user answers against canonical answers, deciding correctness, enhancement needs, and dynamic feedback.
- */
-export async function evaluateExplanationWithGroq(
-  params: EvaluateExplanationParams,
-  apiKey: string | undefined = env.GROQ_API_KEY
-): Promise<AIEvaluationResult> {
-  const {
-    userExplanation,
-    solutionExplanation,
-    canonicalRootCause,
-    canonicalPreventionNotes,
-    challengeTitle,
-    buggyCodeSnippet,
-    proposedFix,
-  } = params;
+const aiEvaluationSchema = z.object({
+  alignmentPercent: z.number().min(0).max(100),
+  constructiveFeedback: z.string(),
+  enhancementSuggestions: z.array(z.string()),
+  fixScore: z.number().min(0).max(25),
+  isCorrect: z.boolean(),
+  keyConceptsIdentified: z.array(z.string()),
+  missedMechanisms: z.array(z.string()),
+  needsEnhancement: z.boolean(),
+  preventionAnalysis: z.string(),
+  preventionScore: z.number().min(0).max(25),
+  rootCauseScore: z.number().min(0).max(25),
+});
 
-  if (!apiKey || apiKey.trim().length === 0) {
-    return fallbackEvaluation(
-      userExplanation,
-      canonicalRootCause,
-      solutionExplanation,
-      canonicalPreventionNotes
-    );
+export const getEvaluatorStrategy = (apiKey?: string): EvaluatorStrategy => {
+  const effectiveKey = apiKey || env.GROQ_API_KEY;
+  if (!effectiveKey) {
+    return (params) =>
+      Promise.resolve(
+        fallbackEvaluation(
+          params.userExplanation,
+          params.canonicalRootCause,
+          params.solutionExplanation,
+          params.canonicalPreventionNotes
+        )
+      );
   }
 
-  const systemPrompt = `
-You are an expert principal software engineer and staff debugging mentor at Debug Arena.
+  // ponytail: resolve model facade dynamically per strategy invocation
+  const model = getAIModel(AI_PRIMARY_MODEL, effectiveKey);
+
+  return async (params) => {
+    const {
+      userExplanation,
+      solutionExplanation,
+      canonicalRootCause,
+      canonicalPreventionNotes,
+      challengeTitle,
+      buggyCodeSnippet,
+      proposedFix,
+    } = params;
+
+    const systemPrompt = `You are an expert principal software engineer and staff debugging mentor at Debug Arena.
 Your task is to evaluate a candidate engineer's written root cause explanation and proposed solution/fix for a software bug by deeply comparing their answer against the canonical ground truth.
 
 Evaluation Directives:
@@ -218,25 +233,9 @@ Scoring Criteria:
    - 20-25: Demonstrates strong understanding of architectural safeguards, type safety, and CI regression testing.
    - 10-19: Basic understanding of bug prevention.
    - 0-9: No prevention insight.
-4. Alignment Percent (0 to 100%): Semantic alignment with the canonical explanation.
+4. Alignment Percent (0 to 100%): Semantic alignment with the canonical explanation.`;
 
-Respond STRICTLY with a valid JSON object matching this schema:
-{
-  "isCorrect": boolean,
-  "needsEnhancement": boolean,
-  "enhancementSuggestions": string[],
-  "rootCauseScore": number,
-  "fixScore": number,
-  "preventionScore": number,
-  "alignmentPercent": number,
-  "keyConceptsIdentified": string[],
-  "missedMechanisms": string[],
-  "constructiveFeedback": string,
-  "preventionAnalysis": string
-}
-`;
-
-  const userPrompt = `
+    const userPrompt = `
 Challenge: "${challengeTitle}"
 
 Canonical Root Cause:
@@ -256,36 +255,29 @@ ${userExplanation}
 Candidate's Proposed Solution & Fix Explanation:
 """
 ${solutionExplanation || userExplanation}
-"""
-`;
+"""`;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(GROQ_ENDPOINT, {
-      body: JSON.stringify({
-        messages: [
-          { content: systemPrompt, role: "system" },
-          { content: userPrompt, role: "user" },
-        ],
-        model: PRIMARY_MODEL,
-        response_format: { type: "json_object" },
+    try {
+      const { output } = await generateText({
+        model,
+        output: Output.object({
+          schema: aiEvaluationSchema,
+        }),
+        prompt: userPrompt,
+        system: systemPrompt,
         temperature: 0.1,
-      }),
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      signal: controller.signal,
-    });
+      });
 
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
+      return {
+        ...output,
+        confidence: "high",
+        isAiGraded: true,
+        modelUsed: AI_PRIMARY_MODEL,
+      };
+    } catch (err: unknown) {
       console.warn(
-        `[Groq AI] API call returned status ${response.status}. Falling back to deterministic evaluation.`
+        "[Groq AI] Request failed or timed out. Using fallback evaluation:",
+        err instanceof Error ? err.message : err
       );
       return fallbackEvaluation(
         userExplanation,
@@ -294,153 +286,37 @@ ${solutionExplanation || userExplanation}
         canonicalPreventionNotes
       );
     }
-
-    const data = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-      model?: string;
-    };
-
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) {
-      return fallbackEvaluation(
-        userExplanation,
-        canonicalRootCause,
-        solutionExplanation,
-        canonicalPreventionNotes
-      );
-    }
-
-    return parseGroqEvaluationResponse(content, data.model);
-  } catch (err: unknown) {
-    clearTimeout(timeoutId);
-    console.warn(
-      "[Groq AI] Request failed or timed out. Using fallback evaluation:",
-      err instanceof Error ? err.message : err
-    );
-    return fallbackEvaluation(
-      userExplanation,
-      canonicalRootCause,
-      solutionExplanation,
-      canonicalPreventionNotes
-    );
-  }
-}
-
-interface RawGroqEvaluation {
-  alignmentPercent?: number;
-  confidence?: "high" | "medium" | "low";
-  constructiveFeedback?: string;
-  enhancementSuggestions?: string[];
-  fixScore?: number;
-  isCorrect?: boolean;
-  keyConceptsIdentified?: string[];
-  missedMechanisms?: string[];
-  needsEnhancement?: boolean;
-  preventionAnalysis?: string;
-  preventionScore?: number;
-  rootCauseScore?: number;
-}
-
-function parseGroqEvaluationResponse(
-  content: string,
-  modelName: string | undefined
-): AIEvaluationResult {
-  const parsed = JSON.parse(content) as RawGroqEvaluation;
-
-  const rawRcScore = Number(parsed.rootCauseScore);
-  const rootCauseScore = Number.isFinite(rawRcScore)
-    ? Math.max(0, Math.min(25, Math.round(rawRcScore)))
-    : 15;
-
-  const rawFixScore = Number(parsed.fixScore);
-  const fixScore = Number.isFinite(rawFixScore)
-    ? Math.max(0, Math.min(25, Math.round(rawFixScore)))
-    : Math.max(10, Math.round(rootCauseScore * 0.9));
-
-  const rawPrevScore = Number(parsed.preventionScore);
-  const preventionScore = Number.isFinite(rawPrevScore)
-    ? Math.max(0, Math.min(25, Math.round(rawPrevScore)))
-    : 18;
-
-  const rawAlignment = Number(parsed.alignmentPercent);
-  const alignmentPercent = Number.isFinite(rawAlignment)
-    ? Math.max(0, Math.min(100, Math.round(rawAlignment)))
-    : 70;
-
-  const isCorrect =
-    typeof parsed.isCorrect === "boolean"
-      ? parsed.isCorrect
-      : rootCauseScore >= 17;
-
-  const needsEnhancement =
-    typeof parsed.needsEnhancement === "boolean"
-      ? parsed.needsEnhancement
-      : rootCauseScore < 22 || fixScore < 22;
-
-  let enhancementSuggestions: string[] = [];
-  if (Array.isArray(parsed.enhancementSuggestions)) {
-    enhancementSuggestions = parsed.enhancementSuggestions.filter(
-      (s): s is string => typeof s === "string" && s.trim().length > 0
-    );
-  } else if (needsEnhancement) {
-    enhancementSuggestions = [
-      "Review the canonical mechanism to strengthen low-level failure precision.",
-    ];
-  }
-
-  return {
-    alignmentPercent,
-    confidence: "high",
-    constructiveFeedback:
-      parsed.constructiveFeedback ||
-      "Good effort. Compare your explanation with the canonical root cause.",
-    enhancementSuggestions,
-    fixScore,
-    isAiGraded: true,
-    isCorrect,
-    keyConceptsIdentified: parsed.keyConceptsIdentified || [
-      "Identified bug symptoms",
-    ],
-    missedMechanisms: parsed.missedMechanisms || [],
-    modelUsed: modelName ?? PRIMARY_MODEL,
-    needsEnhancement,
-    preventionAnalysis:
-      parsed.preventionAnalysis ||
-      "Add automated unit tests and architectural constraints.",
-    preventionScore,
-    rootCauseScore,
   };
-}
+};
 
-/**
- * Generates progressive Socratic hints using Groq LLM without spoiling the direct solution.
- */
-export async function generateSocraticHintWithGroq(
-  params: SocraticHintParams,
-  apiKey: string | undefined = env.GROQ_API_KEY
-): Promise<string> {
-  const {
-    challengeTitle,
-    prompt,
-    codeSnippet,
-    selectedLine,
-    userExplanation,
-    hintLevel,
-  } = params;
-
-  if (!apiKey || apiKey.trim().length === 0) {
-    return `Think about how the state and lifecycle interact when ${challengeTitle.toLowerCase()} occurs.`;
+export const getSocraticHintStrategy = (apiKey?: string): HintStrategy => {
+  const effectiveKey = apiKey || env.GROQ_API_KEY;
+  if (!effectiveKey) {
+    return (params) =>
+      Promise.resolve(
+        `Think about how the state and lifecycle interact when ${params.challengeTitle.toLowerCase()} occurs.`
+      );
   }
 
-  const systemPrompt = `
-You are a Socratic debugging mentor.
+  const model = getAIModel(AI_FAST_MODEL, effectiveKey);
+
+  return async (params) => {
+    const {
+      challengeTitle,
+      prompt,
+      codeSnippet,
+      selectedLine,
+      userExplanation,
+      hintLevel,
+    } = params;
+
+    const systemPrompt = `You are a Socratic debugging mentor.
 Provide ONE concise hint (1-2 sentences maximum) that guides the developer toward the bug without giving away the direct code fix.
 - Level 1: Ask a targeted question about the suspicious flow or variable lifecycle.
 - Level 2: Point to the mechanism or asynchronous timing discrepancy.
-- Level 3: Specifically highlight the exact interaction or missing guard without writing the fix code.
-`;
+- Level 3: Specifically highlight the exact interaction or missing guard without writing the fix code.`;
 
-  const userPrompt = `
+    const userPrompt = `
 Challenge: ${challengeTitle}
 Context: ${prompt}
 Hint Level: ${hintLevel} / 3
@@ -448,47 +324,40 @@ ${selectedLine ? `User selected Line ${selectedLine}` : ""}
 ${userExplanation ? `User's current hypothesis: "${userExplanation}"` : ""}
 
 Code Snippet:
-${codeSnippet}
-`;
+${codeSnippet}`;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(GROQ_ENDPOINT, {
-      body: JSON.stringify({
-        max_tokens: 150,
-        messages: [
-          { content: systemPrompt, role: "system" },
-          { content: userPrompt, role: "user" },
-        ],
-        model: FAST_MODEL,
+    try {
+      const { text } = await generateText({
+        model,
+        prompt: userPrompt,
+        system: systemPrompt,
         temperature: 0.3,
-      }),
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      signal: controller.signal,
-    });
+      });
 
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      return `Examine the variable updates and execution order closely in ${challengeTitle}.`;
+      return (
+        text.trim() ||
+        "Consider how asynchronous execution affects state in this scenario."
+      );
+    } catch {
+      return "Look closely at the lifecycle boundaries and invariants.";
     }
+  };
+};
 
-    const data = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
+// Deprecated exact-match legacy exports to not break callers that haven't updated yet,
+// they just wrap the strategies with the default env keys.
+export function evaluateExplanationWithGroq(
+  params: EvaluateExplanationParams,
+  apiKey?: string
+): Promise<AIEvaluationResult> {
+  const strategy = getEvaluatorStrategy(apiKey);
+  return strategy(params);
+}
 
-    return (
-      data.choices?.[0]?.message?.content?.trim() ||
-      "Consider how asynchronous execution affects state in this scenario."
-    );
-  } catch {
-    clearTimeout(timeoutId);
-    return "Look closely at the lifecycle boundaries and invariants.";
-  }
+export function generateSocraticHintWithGroq(
+  params: SocraticHintParams,
+  apiKey?: string
+): Promise<string> {
+  const strategy = getSocraticHintStrategy(apiKey);
+  return strategy(params);
 }

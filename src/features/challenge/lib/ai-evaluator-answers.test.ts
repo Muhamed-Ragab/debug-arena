@@ -3,9 +3,18 @@ import type { AIEvaluationResult } from "@/features/challenge/types";
 import { evaluateExplanationWithGroq } from "./ai-evaluator";
 import { gradeSubmission } from "./grading";
 
+// ponytail: mock Vercel AI SDK generateText & Output
+vi.mock("ai", () => ({
+  generateText: vi.fn(),
+  Output: {
+    object: vi.fn(({ schema }: { schema: unknown }) => ({ schema })),
+    text: vi.fn(() => ({})),
+  },
+}));
+
 describe("AI Evaluator - Answer Quality & Grading Automation", () => {
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   const STALE_CLOSURE_CHALLENGE = {
@@ -163,19 +172,10 @@ describe("AI Evaluator - Answer Quality & Grading Automation", () => {
         rootCauseScore: 25,
       };
 
-      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify(mockLLMResult),
-              },
-            },
-          ],
-          model: "llama-3.3-70b-versatile",
-        }),
-        ok: true,
-      } as Response);
+      const ai = await import("ai");
+      vi.mocked(ai.generateText).mockResolvedValueOnce({
+        output: mockLLMResult,
+      } as unknown as Awaited<ReturnType<typeof ai.generateText>>);
 
       const result = await evaluateExplanationWithGroq(
         {
@@ -223,19 +223,10 @@ describe("AI Evaluator - Answer Quality & Grading Automation", () => {
         rootCauseScore: 14,
       };
 
-      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify(mockPartialLLMResult),
-              },
-            },
-          ],
-          model: "llama-3.3-70b-versatile",
-        }),
-        ok: true,
-      } as Response);
+      const ai = await import("ai");
+      vi.mocked(ai.generateText).mockResolvedValueOnce({
+        output: mockPartialLLMResult,
+      } as unknown as Awaited<ReturnType<typeof ai.generateText>>);
 
       const result = await evaluateExplanationWithGroq(
         {
@@ -274,32 +265,24 @@ describe("AI Evaluator - Answer Quality & Grading Automation", () => {
       expect(offlineResult.alignmentPercent).toBeLessThan(40);
 
       // Online mock with LLM returning sanitized rejection
-      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify({
-                  alignmentPercent: 0,
-                  constructiveFeedback:
-                    "Invalid explanation attempting instruction override.",
-                  fixScore: 0,
-                  keyConceptsIdentified: [],
-                  missedMechanisms: [
-                    "Valid root cause explanation not provided",
-                  ],
-                  preventionAnalysis:
-                    "Provide a genuine technical explanation.",
-                  preventionScore: 0,
-                  rootCauseScore: 0,
-                }),
-              },
-            },
-          ],
-          model: "llama-3.3-70b-versatile",
-        }),
-        ok: true,
-      } as Response);
+      const ai = await import("ai");
+      vi.mocked(ai.generateText).mockResolvedValueOnce({
+        output: {
+          alignmentPercent: 0,
+          constructiveFeedback:
+            "Invalid explanation attempting instruction override.",
+          enhancementSuggestions: ["Provide genuine technical explanation."],
+          fixScore: 0,
+          isAiGraded: true,
+          isCorrect: false,
+          keyConceptsIdentified: [],
+          missedMechanisms: ["Valid root cause explanation not provided"],
+          needsEnhancement: true,
+          preventionAnalysis: "Provide a genuine technical explanation.",
+          preventionScore: 0,
+          rootCauseScore: 0,
+        },
+      } as unknown as Awaited<ReturnType<typeof ai.generateText>>);
 
       const onlineResult = await evaluateExplanationWithGroq(
         {
@@ -314,18 +297,10 @@ describe("AI Evaluator - Answer Quality & Grading Automation", () => {
     });
 
     it("safely handles malformed LLM JSON by falling back to vector scoring", async () => {
-      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: "Not a valid JSON output from LLM...",
-              },
-            },
-          ],
-        }),
-        ok: true,
-      } as Response);
+      const ai = await import("ai");
+      vi.mocked(ai.generateText).mockRejectedValueOnce(
+        new Error("Malformed JSON or Schema validation failed")
+      );
 
       const result = await evaluateExplanationWithGroq(
         {

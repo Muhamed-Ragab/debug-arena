@@ -4,46 +4,50 @@ import {
   generateSocraticHintWithGroq,
 } from "./ai-evaluator";
 
+vi.mock("ai", () => ({
+  generateText: vi.fn().mockImplementation(({ output }) => {
+    if (output) {
+      return {
+        output: {
+          alignmentPercent: 92,
+          constructiveFeedback:
+            "Spot on diagnosis! You accurately identified the stale closure inside setInterval.",
+          enhancementSuggestions: [
+            "Consider also mentioning memory cleanup with clearInterval.",
+          ],
+          fixScore: 20,
+          isAiGraded: true,
+          isCorrect: true,
+          keyConceptsIdentified: [
+            "Stale closure",
+            "Empty dependency array",
+            "Functional state update needed",
+          ],
+          missedMechanisms: [],
+          needsEnhancement: false,
+          preventionAnalysis:
+            "Use the functional state updater syntax setCount(c => c + 1) or ESLint react-hooks/exhaustive-deps.",
+          preventionScore: 20,
+          rootCauseScore: 24,
+        },
+      };
+    }
+    return {
+      text: "Think about what value of count the interval function sees across multiple ticks.",
+    };
+  }),
+  Output: {
+    object: vi.fn(({ schema }: { schema: unknown }) => ({ schema })),
+    text: vi.fn(() => ({})),
+  },
+}));
+
 describe("Groq AI Evaluator", () => {
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   it("evaluates explanation using Groq API response when key is present", async () => {
-    const mockGroqResponse = {
-      choices: [
-        {
-          message: {
-            content: JSON.stringify({
-              alignmentPercent: 92,
-              constructiveFeedback:
-                "Spot on diagnosis! You accurately identified the stale closure inside setInterval.",
-              enhancementSuggestions: [
-                "Consider also mentioning memory cleanup with clearInterval.",
-              ],
-              isCorrect: true,
-              keyConceptsIdentified: [
-                "Stale closure",
-                "Empty dependency array",
-                "Functional state update needed",
-              ],
-              missedMechanisms: [],
-              needsEnhancement: false,
-              preventionAnalysis:
-                "Use the functional state updater syntax setCount(c => c + 1) or ESLint react-hooks/exhaustive-deps.",
-              rootCauseScore: 24,
-            }),
-          },
-        },
-      ],
-      model: "llama-3.3-70b-versatile",
-    };
-
-    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
-      json: async () => mockGroqResponse,
-      ok: true,
-    } as Response);
-
     const result = await evaluateExplanationWithGroq(
       {
         canonicalRootCause:
@@ -55,7 +59,6 @@ describe("Groq AI Evaluator", () => {
       "gsk_test_api_key"
     );
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
     expect(result.isAiGraded).toBe(true);
     expect(result.isCorrect).toBe(true);
     expect(result.needsEnhancement).toBe(false);
@@ -66,7 +69,8 @@ describe("Groq AI Evaluator", () => {
   });
 
   it("falls back gracefully to deterministic vector scoring when API fails", async () => {
-    vi.spyOn(globalThis, "fetch").mockRejectedValueOnce(
+    const ai = await import("ai");
+    vi.mocked(ai.generateText).mockRejectedValueOnce(
       new Error("Network connection timeout")
     );
 
@@ -101,22 +105,6 @@ describe("Groq AI Evaluator", () => {
   });
 
   it("generates progressive Socratic hints via Groq", async () => {
-    const mockHintResponse = {
-      choices: [
-        {
-          message: {
-            content:
-              "Think about what value of `count` the interval function sees across multiple ticks.",
-          },
-        },
-      ],
-    };
-
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
-      json: async () => mockHintResponse,
-      ok: true,
-    } as Response);
-
     const hint = await generateSocraticHintWithGroq(
       {
         challengeTitle: "Stale Closure in Counter Interval",
@@ -129,6 +117,6 @@ describe("Groq AI Evaluator", () => {
       "gsk_test_api_key"
     );
 
-    expect(hint).toContain("Think about what value of `count`");
+    expect(hint).toContain("Think about what value of count");
   });
 });
