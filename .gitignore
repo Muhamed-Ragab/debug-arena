@@ -36,3 +36,6 @@ src/locales/*/messages.js
 
 # ShipStudio metadata
 .shipstudio/
+
+# OhMyOpenCode session/continuation artifacts
+.omo/
