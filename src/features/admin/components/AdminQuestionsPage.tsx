@@ -6,10 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  type AdminChallengeItem,
-  AdminChallengeList,
-} from "./AdminChallengeList";
+import type { AdminChallengeItem } from "../types";
+import { AdminChallengeList } from "./AdminChallengeList";
 import { ManualChallengeCreator } from "./ManualChallengeCreator";
 import { QuestionGeneratorStudio } from "./QuestionGeneratorStudio";
 

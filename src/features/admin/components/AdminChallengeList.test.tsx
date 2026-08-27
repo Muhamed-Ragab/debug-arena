@@ -1,10 +1,8 @@
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { renderWithProviders, screen } from "@/test/test-utils";
-import {
-  type AdminChallengeItem,
-  AdminChallengeList,
-} from "./AdminChallengeList";
+import type { AdminChallengeItem } from "../types";
+import { AdminChallengeList } from "./AdminChallengeList";
 
 const SEARCH_CHALLENGES_REGEX = /search challenges/i;
 

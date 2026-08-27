@@ -27,14 +27,9 @@ import {
   refineQuestionAction,
   saveAdminChallengeAction,
 } from "../actions";
+import { DIFFICULTY_VALUES } from "../constants";
 import type { GeneratedChallengeDraft } from "../lib/question-generator-agent";
-
-interface CategoryOption {
-  description: string | null;
-  id: string;
-  name: string;
-  slug: string;
-}
+import type { CategoryOption } from "../types";
 
 interface QuestionGeneratorStudioProps {
   categories: CategoryOption[];
@@ -307,7 +302,7 @@ export function QuestionGeneratorStudio({
               {i18n._("Difficulty")}
             </span>
             <div className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-inset p-1">
-              {(["easy", "medium", "hard"] as const).map((d) => (
+              {DIFFICULTY_VALUES.map((d) => (
                 <button
                   className={`rounded py-1.5 font-semibold text-xs uppercase tracking-wider transition-colors ${
                     difficulty === d
