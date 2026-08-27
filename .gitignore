@@ -1,14 +1,36 @@
-node_modules/
-dist/
-build/
-.turbo/
+# dependencies
+/node_modules
+/.pnpm-store
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+/dist
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
 .env
-.env.local
-*.log
-.DS_Store
-coverage/
-drizzle/meta/
-.omo
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# compiled lingui catalogs (sources .po and .json are committed)
+src/locales/*/messages.js
+
+# vitest / testing
+/coverage
 
 # ShipStudio metadata
 .shipstudio/

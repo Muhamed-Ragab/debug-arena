@@ -1,5 +1,11 @@
 # Architecture — Debug Arena
 
+> **MIGRATION NOTE (2026-08-26):** The NestJS API and Vite SPA are being replaced by a single
+> Next.js 16 app (see docs/superpowers/plans/2026-08-26-nextjs-migration.md). Sections describing
+> `apps/api` modules apply to their Next.js equivalents: controllers → route handlers/server actions,
+> guards → `auth.api.getSession` + `proxy.ts`, AuthModule mount `/auth` → `/api/auth/[...all]`.
+> Data layer (Drizzle/pgvector/RLS), job queue design, sandbox model are unchanged conceptually.
+
 ## 1. High-Level Overview
 
 ```

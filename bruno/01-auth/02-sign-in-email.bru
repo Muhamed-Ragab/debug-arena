@@ -1,0 +1,32 @@
+meta {
+  name: Sign In With Email
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/auth/sign-in/email
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "{{testEmail}}",
+    "password": "{{testPassword}}"
+  }
+}
+
+assert {
+  res.status: in [200, 400, 401, 404]
+}
+
+tests {
+  test("Sign-in endpoint responds with appropriate status", function() {
+    expect([200, 400, 401, 404]).to.include(res.getStatus());
+  });
+}

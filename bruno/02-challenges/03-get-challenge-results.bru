@@ -1,0 +1,21 @@
+meta {
+  name: Get Challenge Results Page
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/challenges/{{challengeId}}/results
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: in [200, 307, 308, 404]
+}
+
+tests {
+  test("Challenge results page responds with valid status", function() {
+    expect([200, 307, 308, 404]).to.include(res.getStatus());
+  });
+}

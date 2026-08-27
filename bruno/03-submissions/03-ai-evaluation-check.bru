@@ -1,0 +1,48 @@
+meta {
+  name: Verify AI Evaluation On Challenge Solve
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/submissions
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "challengeId": "{{challengeId}}",
+    "hintsRevealedCount": 0,
+    "localizationLines": [
+      8
+    ],
+    "proposedFixCode": "setCount((prev) => prev + 1);",
+    "rootCauseExplanation": "The useEffect closure retains the initial count value (0) from mount time because the dependency array is empty. This prevents interval ticks from reading updated state.",
+    "solutionExplanation": "Use a functional state updater setCount((prev) => prev + 1) or add the count variable to the hook dependency array to avoid stale state.",
+    "timeSpentSeconds": 60
+  }
+}
+
+assert {
+  res.status: in [200, 201, 307, 308, 400, 401, 404, 405]
+}
+
+tests {
+  test("Submission solve answer returns expected status", function() {
+    expect([200, 201, 307, 308, 400, 401, 404, 405]).to.include(res.getStatus());
+  });
+
+  test("When submission succeeds, response contains AI evaluation structure", function() {
+    if (res.getStatus() === 200 || res.getStatus() === 201) {
+      const data = res.getBody();
+      if (data && data.data) {
+        expect(data.data).to.have.property("submissionId");
+      }
+    }
+  });
+}

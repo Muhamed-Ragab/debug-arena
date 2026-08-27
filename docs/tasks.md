@@ -9,6 +9,8 @@ Scoped to Phase 0 + Phase 1 (manual MVP). Later-phase tasks live in plan.md unti
 - [ ] Set up ts-rest contract package shared between API and frontend
 - [ ] Auth: integrate better-auth (drizzle adapter, /api/auth/* proxy controller, google+github OAuth, session guards, RLS bridge via SET LOCAL request.jwt.claims) + frontend auth flow with better-auth/client
 - [ ] Migrate auth schema: extend users (uuid id, add emailVerified/name/image, map passwordHash), let better-auth own sessions/accounts/verifications; drop legacy oauth_accounts/email_verifications/password_resets; keep login_attempts (schema.ts + migrate.ts)
+- [x] Resolve better-auth ↔ drizzle-orm peer conflict — RESOLVED 2026-08-25: workspace on drizzle-orm 0.45.2 (adapter peer match) + drizzle-kit 0.31.10; schema.ts extraConfig converted to object-return, native Drizzle `vector` used (npm pgvector pkg removed); lint/typecheck/build green
+- [x] Add `@typescript/native-preview` to `apps/api` devDependencies so `tsgo --noEmit` typecheck runs (fixed 2026-08-25 along with: array→object extraConfig returns in schema.ts, missing `better-auth`/`@types/express` declarations, removal of nonexistent `pgvector/drizzle-orm` import — Drizzle has native `vector` since 0.31)
 - [ ] CI: lint + typecheck + migration check on PR
 
 ## Phase 1 — Manual MVP

@@ -1,0 +1,21 @@
+meta {
+  name: Get Leaderboard
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/leaderboard
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: in [200, 307, 308]
+}
+
+tests {
+  test("Leaderboard page responds successfully", function() {
+    expect([200, 307, 308]).to.include(res.getStatus());
+  });
+}

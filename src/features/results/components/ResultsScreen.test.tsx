@@ -1,0 +1,88 @@
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+import { renderWithProviders, screen } from "@/test/test-utils";
+import { ResultsScreen } from "./ResultsScreen";
+
+const BACK_BTN_REGEX = /back to challenges/i;
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/submissions/123/results",
+  useRouter: () => ({ push: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+describe("ResultsScreen Component", () => {
+  const mockScoreParts = [
+    {
+      desc: "Exact bug location identified",
+      label: "Localization",
+      max: 25,
+      score: 25,
+    },
+    {
+      desc: "Accurately diagnosed stale closure mechanism",
+      label: "Root Cause",
+      max: 25,
+      score: 24,
+    },
+    {
+      desc: "Passed all hidden unit test cases",
+      label: "Fix Quality",
+      max: 25,
+      score: 25,
+    },
+    {
+      desc: "Strong prevention analysis",
+      label: "Prevention",
+      max: 25,
+      score: 20,
+    },
+  ];
+
+  it("renders total score and challenge title accurately", () => {
+    renderWithProviders(
+      <ResultsScreen
+        aiFeedback="Spot on diagnosis!"
+        canonicalExplanation="setInterval captured initial count."
+        challengeTitle="Stale Closure in Counter Interval"
+        maxScore={100}
+        preventionNotes={[
+          "Use functional state updater setCount(c => c + 1).",
+          "Enable ESLint exhaustive-deps rule.",
+        ]}
+        scoreParts={mockScoreParts}
+        totalScore={94}
+        userExplanation="The setInterval callback forms a closure over count = 0."
+      />
+    );
+
+    expect(
+      screen.getByText("Stale Closure in Counter Interval")
+    ).toBeInTheDocument();
+    expect(screen.getByText("94")).toBeInTheDocument();
+    expect(screen.getByText("/ 100")).toBeInTheDocument();
+    expect(screen.getByText("Localization")).toBeInTheDocument();
+    expect(screen.getByText("Fix Quality")).toBeInTheDocument();
+  });
+
+  it("invokes onNext when clicking Back to challenges button", async () => {
+    const handleNext = vi.fn();
+    const user = userEvent.setup();
+
+    renderWithProviders(
+      <ResultsScreen
+        challengeTitle="Stale Closure in Counter Interval"
+        onNext={handleNext}
+        scoreParts={mockScoreParts}
+        totalScore={94}
+      />
+    );
+
+    const backButton = screen.getByRole("button", {
+      name: BACK_BTN_REGEX,
+    });
+    await user.click(backButton);
+
+    expect(handleNext).toHaveBeenCalledTimes(1);
+  });
+});
