@@ -2,13 +2,11 @@
 
 import { i18n } from "@lingui/core";
 import { messages as enMessages } from "../locales/en/messages";
-
-export const locales = {
-  ar: "العربية",
-  en: "English",
-} as const;
+import { locales } from "./constants";
 
 export type SupportedLocale = keyof typeof locales;
+
+export { locales } from "./constants";
 
 // Preload default English catalog synchronously
 i18n.load("en", enMessages);
