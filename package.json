@@ -24,6 +24,7 @@
     "i18n:compile": "lingui compile --typescript"
   },
   "dependencies": {
+    "@ai-sdk/groq": "^4.0.33",
     "@base-ui/react": "^1.7.0",
     "@better-auth/drizzle-adapter": "^1.7.1",
     "@better-auth/redis-storage": "^1.7.1",
@@ -31,6 +32,7 @@
     "@lingui/react": "^6.6.0",
     "@t3-oss/env-nextjs": "^0.13.11",
     "@tanstack/react-query": "^5.69.0",
+    "ai": "^7.0.83",
     "better-auth": "^1.7.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
