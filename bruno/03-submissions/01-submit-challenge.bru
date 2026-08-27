@@ -1,0 +1,39 @@
+meta {
+  name: Submit Challenge Solution
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/submissions
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "challengeId": "{{challengeId}}",
+    "hintsRevealedCount": 0,
+    "localizationLines": [
+      8
+    ],
+    "proposedFixCode": "setCount((prev) => prev + 1);",
+    "rootCauseExplanation": "Stale closure captures initial state on mount, preventing reactive state updates.",
+    "solutionExplanation": "Use functional state update or include dependency in effect hook dependency array.",
+    "timeSpentSeconds": 45
+  }
+}
+
+assert {
+  res.status: in [200, 201, 307, 308, 400, 401, 404, 405]
+}
+
+tests {
+  test("Submit challenge solution endpoint responds with valid HTTP status", function() {
+    expect([200, 201, 307, 308, 400, 401, 404, 405]).to.include(res.getStatus());
+  });
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Get Current Session
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/auth/get-session
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: in [200, 401]
+}
+
+tests {
+  test("Session endpoint responds with standard payload or unauthenticated", function() {
+    expect([200, 401]).to.include(res.getStatus());
+  });
+}

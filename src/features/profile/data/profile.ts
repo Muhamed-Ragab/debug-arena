@@ -2,13 +2,30 @@ import type { LucideIcon } from "lucide-react";
 import type { Category } from "@/lib/domain/types";
 import type { StrengthPoint } from "../types";
 
-export const PROFILE = {
-  handle: "@mreyes",
-  joined: "Joined Feb 2024",
-  name: "Marcus Reyes",
-  points: "4,820",
-  rank: "#128",
-  streak: "12-day streak",
+export interface ProfileInfo {
+  avatarColor?: string;
+  bio: string;
+  handle: string;
+  image?: string | null;
+  jobTitle?: string;
+  joined: string;
+  name: string;
+  points: string;
+  rank: string;
+  streak: string;
+}
+
+export const PROFILE: ProfileInfo = {
+  avatarColor: "#4f46e5",
+  bio: "",
+  handle: "@developer",
+  image: null,
+  jobTitle: "Software Engineer",
+  joined: "Member",
+  name: "Developer",
+  points: "0",
+  rank: "#--",
+  streak: "0-day streak",
 };
 
 export interface ProfileStat {

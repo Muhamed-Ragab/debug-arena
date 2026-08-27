@@ -8,6 +8,7 @@ import { DangerZone } from "./components/DangerZone";
 import { EditProfileForm } from "./components/EditProfileForm";
 import { LinkedAccounts } from "./components/LinkedAccounts";
 import { SessionManager } from "./components/SessionManager";
+import type { LinkedAccount, SessionData } from "./data/settings";
 
 type SectionId = "profile" | "sessions" | "accounts" | "danger";
 
@@ -33,7 +34,26 @@ function getNavClasses(isActive: boolean, danger?: boolean): string {
   return "bg-primary/10 font-semibold text-heading";
 }
 
-export function ProfileSettingsPage() {
+interface ProfileSettingsPageProps {
+  initialAccounts?: LinkedAccount[];
+  initialProfile?: {
+    avatarColor?: string;
+    avatarUrl?: string;
+    bio?: string;
+    displayName?: string;
+    handle?: string;
+    interests?: string[];
+    isPublic?: boolean;
+    jobTitle?: string;
+  };
+  initialSessions?: SessionData[];
+}
+
+export function ProfileSettingsPage({
+  initialProfile,
+  initialAccounts,
+  initialSessions,
+}: ProfileSettingsPageProps) {
   const [active, setActive] = useState<SectionId>("profile");
 
   return (
@@ -44,7 +64,7 @@ export function ProfileSettingsPage() {
         {/* Section nav */}
         <nav
           aria-label="Settings sections"
-          className="shrink-0 space-y-1 border-border border-b bg-surface px-4 py-3 lg:w-[220px] lg:border-e lg:border-b-0 lg:px-3 lg:py-6"
+          className="shrink-0 space-y-1 border-border border-b bg-surface px-4 py-3 lg:w-55 lg:border-e lg:border-b-0 lg:px-3 lg:py-6"
         >
           {SECTIONS.map(({ id, label, icon: Icon, danger }) => {
             const isActive = active === id;
@@ -62,7 +82,7 @@ export function ProfileSettingsPage() {
                 {Boolean(isActive) && (
                   <span
                     className={cn(
-                      "absolute start-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-e",
+                      "absolute inset-s-0 top-1/2 h-5 w-0.75 -translate-y-1/2 rounded-e",
                       danger ? "bg-destructive" : "bg-primary"
                     )}
                   />
@@ -80,10 +100,18 @@ export function ProfileSettingsPage() {
         {/* Active section */}
         <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
           <div className="mx-auto max-w-[760px]">
-            {active === "profile" ? <EditProfileForm /> : null}
-            {active === "sessions" ? <SessionManager /> : null}
-            {active === "accounts" ? <LinkedAccounts /> : null}
-            {active === "danger" ? <DangerZone /> : null}
+            {active === "profile" ? (
+              <EditProfileForm initialProfile={initialProfile} />
+            ) : null}
+            {active === "sessions" ? (
+              <SessionManager initialSessions={initialSessions} />
+            ) : null}
+            {active === "accounts" ? (
+              <LinkedAccounts initialAccounts={initialAccounts} />
+            ) : null}
+            {active === "danger" ? (
+              <DangerZone handle={initialProfile?.handle} />
+            ) : null}
           </div>
         </main>
       </div>

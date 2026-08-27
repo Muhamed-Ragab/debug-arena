@@ -1,0 +1,21 @@
+meta {
+  name: Get Profile & Stats
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/profile
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: in [200, 307, 308]
+}
+
+tests {
+  test("Profile page responds with expected status", function() {
+    expect([200, 307, 308]).to.include(res.getStatus());
+  });
+}

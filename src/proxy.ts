@@ -6,6 +6,7 @@ const PROTECTED_PREFIXES = [
   "/leaderboard",
   "/profile",
   "/settings",
+  "/submissions",
 ];
 const AUTH_ROUTES = ["/login", "/register", "/forgot-password"];
 
@@ -37,6 +38,7 @@ export const config = {
     "/leaderboard/:path*",
     "/profile/:path*",
     "/settings/:path*",
+    "/submissions/:path*",
     "/login",
     "/register",
     "/forgot-password",

@@ -26,6 +26,7 @@ interface Props {
   scoreParts?: ScorePart[];
   totalScore?: number;
   userExplanation?: string;
+  userSolution?: string;
 }
 
 export function ResultsScreen({
@@ -35,6 +36,7 @@ export function ResultsScreen({
   totalScore,
   maxScore,
   userExplanation = USER_EXPLANATION,
+  userSolution,
   canonicalExplanation = CANONICAL,
   aiFeedback = AI_FEEDBACK,
   preventionNotes = PREVENTION,
@@ -84,12 +86,13 @@ export function ResultsScreen({
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-[1100px] space-y-8 px-4 py-6 sm:px-8">
+        <div className="mx-auto w-full max-w-275 space-y-8 px-4 py-6 sm:px-8">
           <ScoreBreakdown parts={scoreParts} />
           <ExplanationComparison
             aiFeedback={aiFeedback}
             canonical={canonicalExplanation}
             userExplanation={userExplanation}
+            userSolution={userSolution}
           />
           <Prevention items={preventionNotes} />
 

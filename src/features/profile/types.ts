@@ -16,6 +16,7 @@ export interface StrengthPoint {
 
 export interface RecentSubmission {
   category: Category;
+  id?: string;
   pts: number;
   score: number;
   title: string;

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { SignOutButton } from "@/features/auth/components/SignOutButton";
+import { revokeAllOtherSessionsAction, revokeSessionAction } from "../actions";
 import { type DeviceType, SESSIONS, type SessionData } from "../data/settings";
 
 const DEVICE_ICON: Record<DeviceType, typeof Laptop> = {
@@ -20,17 +21,42 @@ const DEVICE_ICON: Record<DeviceType, typeof Laptop> = {
   tablet: Tablet,
 };
 
-export function SessionManager() {
-  const [sessions, setSessions] = useState<SessionData[]>(SESSIONS);
+interface SessionManagerProps {
+  initialSessions?: SessionData[];
+}
+
+export function SessionManager({ initialSessions }: SessionManagerProps) {
+  const [sessions, setSessions] = useState<SessionData[]>(
+    initialSessions || SESSIONS
+  );
+  const [isRevoking, setIsRevoking] = useState<string | null>(null);
 
   const otherSessions = sessions.filter((s) => !s.current);
   const hasOthers = otherSessions.length > 0;
 
-  const revoke = (id: string) =>
-    setSessions((prev) => prev.filter((s) => s.id !== id));
+  const revoke = async (id: string) => {
+    setIsRevoking(id);
+    try {
+      await revokeSessionAction({ sessionId: id });
+      setSessions((prev) => prev.filter((s) => s.id !== id));
+    } catch (err) {
+      console.warn("Failed to revoke session:", err);
+    } finally {
+      setIsRevoking(null);
+    }
+  };
 
-  const revokeAllOthers = () =>
-    setSessions((prev) => prev.filter((s) => s.current));
+  const revokeAllOthers = async () => {
+    setIsRevoking("all");
+    try {
+      await revokeAllOtherSessionsAction();
+      setSessions((prev) => prev.filter((s) => s.current));
+    } catch (err) {
+      console.warn("Failed to revoke all other sessions:", err);
+    } finally {
+      setIsRevoking(null);
+    }
+  };
 
   return (
     <section className="rounded-lg border border-border bg-card p-5 sm:p-6">
@@ -49,18 +75,20 @@ export function SessionManager() {
         </div>
         <button
           className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 font-medium text-[12px] text-foreground transition-colors hover:bg-inset disabled:cursor-not-allowed disabled:opacity-40"
-          disabled={!hasOthers}
+          disabled={!hasOthers || isRevoking === "all"}
           onClick={revokeAllOthers}
           type="button"
         >
           <LogOut size={14} />
-          Revoke all other sessions
+          {isRevoking === "all" ? "Revoking..." : "Revoke all other sessions"}
         </button>
       </div>
 
       <ul className="mt-5 divide-y divide-border">
         {sessions.map((s) => {
-          const Icon = DEVICE_ICON[s.deviceType];
+          const Icon = DEVICE_ICON[s.deviceType] || Laptop;
+          const loading = isRevoking === s.id;
+
           return (
             <li
               className={`flex items-center gap-4 py-4 ${
@@ -103,11 +131,12 @@ export function SessionManager() {
 
               {s.current ? null : (
                 <button
-                  className="shrink-0 rounded-md border border-border bg-card px-3 py-1.5 font-medium text-[12px] text-destructive transition-colors hover:border-destructive/40 hover:bg-destructive/10"
+                  className="shrink-0 rounded-md border border-border bg-card px-3 py-1.5 font-medium text-[12px] text-destructive transition-colors hover:border-destructive/40 hover:bg-destructive/10 disabled:opacity-50"
+                  disabled={loading}
                   onClick={() => revoke(s.id)}
                   type="button"
                 >
-                  Revoke
+                  {loading ? "Revoking..." : "Revoke"}
                 </button>
               )}
             </li>

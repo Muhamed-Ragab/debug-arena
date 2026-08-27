@@ -3,6 +3,7 @@
 import { useLingui } from "@lingui/react";
 import type { Route } from "next";
 import Link from "next/link";
+import { Avatar } from "@/components/ui/Avatar";
 import { NotificationBell } from "@/components/ui/NotificationBell";
 import { useSession } from "@/lib/auth/client";
 import { Logo } from "./Sidebar";
@@ -21,13 +22,18 @@ export function TopBar({ crumbs, right }: TopBarProps) {
   const { i18n } = useLingui();
   const { data: session } = useSession();
 
-  const userName = session?.user?.name ?? "Marcus Reyes";
-  const userInitials = userName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const user = session?.user as
+    | {
+        displayName?: string;
+        image?: string;
+        jobTitle?: string;
+        name?: string;
+        preferredColor?: string;
+      }
+    | undefined;
+
+  const userName = user?.displayName || user?.name || "Developer";
+  const userJobTitle = user?.jobTitle || i18n._("Developer");
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-border border-b bg-surface px-6">
@@ -66,14 +72,15 @@ export function TopBar({ crumbs, right }: TopBarProps) {
           className="flex items-center gap-2.5 transition-opacity hover:opacity-90"
           href="/profile"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20 font-semibold text-primary text-sm">
-            {userInitials}
-          </div>
+          <Avatar
+            image={user?.image}
+            name={userName}
+            preferredColor={user?.preferredColor}
+            size={36}
+          />
           <div className="text-start leading-tight">
             <p className="font-medium text-heading text-sm">{userName}</p>
-            <p className="text-muted-foreground text-xs">
-              {i18n._("Senior Engineer")}
-            </p>
+            <p className="text-muted-foreground text-xs">{userJobTitle}</p>
           </div>
         </Link>
       </div>

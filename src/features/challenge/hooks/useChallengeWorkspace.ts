@@ -1,21 +1,27 @@
+"use client";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { submitChallengeAction } from "../actions";
 import type { RightTab } from "../types";
 
 export interface ChallengeWorkspace {
+  clearLines: () => void;
   error: string | null;
   explanation: string;
   hintsOpen: number[];
   isSubmitting: boolean;
   rightTab: RightTab;
   selectedLine: number | null;
+  selectedLines: number[];
   setExplanation: (v: string) => void;
   setRightTab: (t: RightTab) => void;
+  setSolution: (v: string) => void;
   setTreeOpen: (v: boolean) => void;
+  solution: string;
   submit: () => Promise<void>;
   toggleHint: (i: number) => void;
-  toggleLine: (n: number) => void;
+  toggleLine: (n: number, isShift?: boolean) => void;
   treeOpen: boolean;
 }
 
@@ -24,16 +30,44 @@ export function useChallengeWorkspace(
   onSubmitted?: (submissionId: string) => void
 ): ChallengeWorkspace {
   const router = useRouter();
-  const [selectedLine, setSelectedLine] = useState<number | null>(null);
+  const [selectedLines, setSelectedLines] = useState<number[]>([]);
+  const [lastClickedLine, setLastClickedLine] = useState<number | null>(null);
   const [rightTab, setRightTab] = useState<RightTab>("explain");
   const [explanation, setExplanation] = useState("");
+  const [solution, setSolution] = useState("");
   const [hintsOpen, setHintsOpen] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [treeOpen, setTreeOpen] = useState(true);
 
-  const toggleLine = (n: number) =>
-    setSelectedLine((prev) => (prev === n ? null : n));
+  const selectedLine = selectedLines.length > 0 ? selectedLines[0] : null;
+
+  const toggleLine = (n: number, isShift?: boolean) => {
+    setSelectedLines((prev) => {
+      if (isShift && lastClickedLine !== null) {
+        const start = Math.min(lastClickedLine, n);
+        const end = Math.max(lastClickedLine, n);
+        const range: number[] = [];
+        for (let i = start; i <= end; i += 1) {
+          range.push(i);
+        }
+        const set = new Set([...prev, ...range]);
+        return Array.from(set).sort((a, b) => a - b);
+      }
+
+      if (prev.includes(n)) {
+        return prev.filter((x) => x !== n);
+      }
+      return [...prev, n].sort((a, b) => a - b);
+    });
+
+    setLastClickedLine(n);
+  };
+
+  const clearLines = () => {
+    setSelectedLines([]);
+    setLastClickedLine(null);
+  };
 
   const toggleHint = (i: number) =>
     setHintsOpen((prev) =>
@@ -41,7 +75,7 @@ export function useChallengeWorkspace(
     );
 
   const submit = async () => {
-    if (!selectedLine || isSubmitting) {
+    if (selectedLines.length === 0 || isSubmitting) {
       return;
     }
 
@@ -74,8 +108,9 @@ export function useChallengeWorkspace(
       const response = await submitChallengeAction({
         challengeId,
         hintsRevealedCount: hintsOpen.length,
-        localizationLine: selectedLine,
+        localizationLines: selectedLines,
         rootCauseExplanation: explanation,
+        solutionExplanation: solution,
       });
 
       if (response?.data?.submissionId) {
@@ -102,15 +137,19 @@ export function useChallengeWorkspace(
   };
 
   return {
+    clearLines,
     error,
     explanation,
     hintsOpen,
     isSubmitting,
     rightTab,
     selectedLine,
+    selectedLines,
     setExplanation,
     setRightTab,
+    setSolution,
     setTreeOpen,
+    solution,
     submit,
     toggleHint,
     toggleLine,

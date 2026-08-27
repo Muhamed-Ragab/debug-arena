@@ -6,14 +6,12 @@ const globalForRedis = globalThis as unknown as { redis?: Redis };
 export function getRedis(): Redis {
   if (!globalForRedis.redis) {
     const client = new Redis(env.REDIS_URL, {
-      enableOfflineQueue: false,
-      lazyConnect: true,
-      maxRetriesPerRequest: 0,
+      maxRetriesPerRequest: null,
       retryStrategy: (times) => {
-        if (times > 3) {
+        if (times > 5) {
           return null;
         }
-        return Math.min(times * 200, 2000);
+        return Math.min(times * 100, 2000);
       },
     });
 

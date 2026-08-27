@@ -16,15 +16,13 @@ async function main() {
 
   for (const cat of SEED_CATEGORIES) {
     // biome-ignore lint/performance/noAwaitInLoops: sequential category lookup
-    const existing = await db
-      .select()
-      .from(schema.categories)
-      .where(eq(schema.categories.slug, cat.slug))
-      .limit(1);
+    const existing = await db.query.categories.findFirst({
+      where: eq(schema.categories.slug, cat.slug),
+    });
 
-    if (existing.length > 0) {
-      categoryMap.set(cat.slug, existing[0].id);
-      console.log(`  ✓ Category "${cat.name}" exists (${existing[0].id})`);
+    if (existing) {
+      categoryMap.set(cat.slug, existing.id);
+      console.log(`  ✓ Category "${cat.name}" exists (${existing.id})`);
     } else {
       const [inserted] = await db
         .insert(schema.categories)
@@ -50,16 +48,14 @@ async function main() {
     const embedding = generateDeterministicEmbedding(ch.rootCauseSummary);
 
     // biome-ignore lint/performance/noAwaitInLoops: sequential challenge lookup
-    const existing = await db
-      .select()
-      .from(schema.challenges)
-      .where(eq(schema.challenges.title, ch.title))
-      .limit(1);
+    const existing = await db.query.challenges.findFirst({
+      where: eq(schema.challenges.title, ch.title),
+    });
 
     let challengeId: string;
 
-    if (existing.length > 0) {
-      challengeId = existing[0].id;
+    if (existing) {
+      challengeId = existing.id;
       await db
         .update(schema.challenges)
         .set({

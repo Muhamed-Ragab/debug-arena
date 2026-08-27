@@ -1,7 +1,12 @@
 "use client";
 
 import { ProfileScreen } from "./components/ProfileScreen";
+import type { UserProfileData } from "./queries";
 
-export function ProfilePage() {
-  return <ProfileScreen />;
+interface Props {
+  data?: UserProfileData | null;
+}
+
+export function ProfilePage({ data }: Props) {
+  return <ProfileScreen data={data} />;
 }

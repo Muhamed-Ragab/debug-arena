@@ -11,7 +11,7 @@ describe("gradeSubmission", () => {
         "setInterval captured stale closure count without functional updater.",
       hintsUsedCount: 0,
       hintsUsedPenalty: 0,
-      localizationLine: 8,
+      localizationLines: [8],
       rootCauseExplanation:
         "The setInterval callback closes over the initial count without functional updater.",
       sandboxResult: {
@@ -37,7 +37,7 @@ describe("gradeSubmission", () => {
       canonicalRootCause: "Race condition in database read-then-write",
       hintsUsedCount: 3,
       hintsUsedPenalty: 50,
-      localizationLine: 3, // wrong line
+      localizationLines: [3], // wrong line
       rootCauseExplanation: "I am not sure what is wrong",
       sandboxResult: {
         executionTimeMs: 1,

@@ -21,6 +21,9 @@ export const users = pgTable(
   "users",
   {
     avatarUrl: text("avatar_url"),
+    banExpires: timestamp("ban_expires", { withTimezone: true }),
+    banned: boolean("banned").default(false),
+    banReason: text("ban_reason"),
     bio: text("bio"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -31,8 +34,12 @@ export const users = pgTable(
     emailVerified: boolean("email_verified").notNull().default(false),
     id: uuid("id").primaryKey().defaultRandom(),
     image: text("image"),
+    interests: text("interests").array(),
+    isPublic: boolean("is_public").notNull().default(true),
+    jobTitle: text("job_title"),
     lastActivityDate: timestamp("last_activity_date", { mode: "date" }),
     name: text("name"),
+    preferredColor: text("preferred_color"),
     role: userRoleEnum("role").notNull().default("user"),
     streakCount: integer("streak_count").notNull().default(0),
     updatedAt: timestamp("updated_at", { withTimezone: true })
@@ -73,7 +80,7 @@ export const accounts = pgTable(
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
     idToken: text("id_token"),
-    issuer: text("issuer").notNull(),
+    issuer: text("issuer"),
     password: text("password"),
     providerId: text("provider_id").notNull(),
     refreshToken: text("refresh_token"),
@@ -118,6 +125,10 @@ export const loginAttempts = pgTable(
     }),
   ]
 );
+
+// Aliases for better-auth drizzle-adapter
+export const user = users;
+export const account = accounts;
 
 export type UserSelect = typeof users.$inferSelect;
 export type UserInsert = typeof users.$inferInsert;

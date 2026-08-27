@@ -12,6 +12,8 @@ interface Props {
   rightTab: RightTab;
   setExplanation: (v: string) => void;
   setRightTab: (t: RightTab) => void;
+  setSolution?: (v: string) => void;
+  solution?: string;
   toggleHint: (i: number) => void;
 }
 
@@ -22,6 +24,8 @@ export function ChallengeTabs({
   setRightTab,
   explanation,
   setExplanation,
+  solution,
+  setSolution,
   hintsOpen,
   toggleHint,
   hints,
@@ -52,6 +56,8 @@ export function ChallengeTabs({
           <ExplainPanel
             explanation={explanation}
             setExplanation={setExplanation}
+            setSolution={setSolution}
+            solution={solution}
           />
         )}
         {rightTab === "fix" && <FixPanel diffLines={diffLines} />}

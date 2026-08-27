@@ -1,0 +1,21 @@
+meta {
+  name: List Published Challenges
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/challenges
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: in [200, 307, 308]
+}
+
+tests {
+  test("Challenges route returns successfully", function() {
+    expect([200, 307, 308]).to.include(res.getStatus());
+  });
+}

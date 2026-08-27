@@ -44,14 +44,11 @@ export function HintsPanel({ hintsOpen, toggleHint, hints }: Props) {
             >
               {open ? (
                 <ChevronDown
-                  className="flex-shrink-0 text-muted-foreground"
+                  className="shrink-0 text-muted-foreground"
                   size={12}
                 />
               ) : (
-                <Lock
-                  className="flex-shrink-0 text-muted-foreground"
-                  size={11}
-                />
+                <Lock className="shrink-0 text-muted-foreground" size={11} />
               )}
               <span
                 className={open ? "text-foreground" : "text-muted-foreground"}

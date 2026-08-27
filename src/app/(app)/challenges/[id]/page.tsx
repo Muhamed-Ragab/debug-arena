@@ -2,7 +2,10 @@ import { notFound } from "next/navigation";
 import { ChallengeScreen } from "@/features/challenge/components/ChallengeScreen";
 import { getChallengeById } from "@/features/challenge/queries";
 import type { DiffLine } from "@/features/challenge/types";
+import { getServerSession } from "@/lib/auth/session";
 import type { Category, Challenge, Difficulty } from "@/lib/domain/types";
+
+export const dynamic = "force-dynamic";
 
 export default async function Page({
   params,
@@ -10,9 +13,13 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await getServerSession();
   const dbChallenge = await getChallengeById(id);
 
-  if (!dbChallenge) {
+  if (
+    !dbChallenge ||
+    (dbChallenge.status !== "published" && session?.user?.role !== "admin")
+  ) {
     notFound();
   }
 

@@ -53,8 +53,13 @@ export const profileLinks = pgTable(
 
 // --- Zod Schemas ---
 export const editProfileSchema = z.object({
-  bio: z.string().max(300).optional(),
+  avatarUrl: z.string().url().or(z.literal("")).optional().nullable(),
+  bio: z.string().max(300).optional().nullable(),
   displayName: z.string().min(2).max(50),
+  interests: z.array(z.string()).optional(),
+  isPublic: z.boolean().optional(),
+  jobTitle: z.string().max(100).optional().nullable(),
+  preferredColor: z.string().max(30).optional().nullable(),
   username: z
     .string()
     .min(3)

@@ -1,7 +1,12 @@
 "use client";
 
 import { LeaderboardScreen } from "./components/LeaderboardScreen";
+import type { LeaderboardEntry } from "./types";
 
-export function LeaderboardPage() {
-  return <LeaderboardScreen />;
+interface Props {
+  initialEntries?: LeaderboardEntry[];
+}
+
+export function LeaderboardPage({ initialEntries }: Props) {
+  return <LeaderboardScreen initialEntries={initialEntries} />;
 }

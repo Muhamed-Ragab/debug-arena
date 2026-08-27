@@ -1,16 +1,19 @@
+import type { AIEvaluationResult } from "./ai-evaluator";
 import { cosineSimilarity, generateDeterministicEmbedding } from "./embedding";
 import type { SandboxExecutionResult } from "./sandbox";
 
 export interface GradingInput {
+  aiEvaluation?: AIEvaluationResult;
   buggyLines: [number, number];
   canonicalPreventionNotes: string;
   canonicalRootCause: string;
   hintsUsedCount: number;
   hintsUsedPenalty: number;
-  localizationLine: number | null;
+  localizationLines?: number[];
   proposedFixCode?: string;
   rootCauseExplanation: string;
   sandboxResult: SandboxExecutionResult;
+  solutionExplanation?: string;
 }
 
 export interface ScorePart {
@@ -24,6 +27,7 @@ export interface GradingResult {
   aiFeedback: string;
   canonicalExplanation: string;
   fixCorrect: boolean;
+  isAiGraded: boolean;
   localizationCorrect: boolean;
   preventionNotes: string[];
   preventionScore: number;
@@ -35,44 +39,65 @@ export interface GradingResult {
 const SENTENCE_SPLIT_REGEX = /(?<=[.?!])\s+/;
 
 function evaluateLocalization(
-  line: number | null,
+  lines: number[] | undefined,
   [start, end]: [number, number]
 ): { correct: boolean; desc: string; score: number } {
-  if (line === null) {
+  const lineArray = lines ?? [];
+
+  if (lineArray.length === 0) {
     return {
       correct: false,
-      desc: "No line marked or incorrect location",
+      desc: "No lines marked or incorrect location",
       score: 0,
     };
   }
-  if (line >= start && line <= end) {
+
+  // Check if any selected line is directly inside the buggy line range
+  const exactMatch = lineArray.some((l) => l >= start && l <= end);
+  if (exactMatch) {
+    const desc =
+      lineArray.length > 1
+        ? `Exact bug location identified (Lines ${lineArray.join(", ")})`
+        : `Exact bug location identified (Line ${lineArray[0]})`;
     return {
       correct: true,
-      desc: "Exact bug location identified",
+      desc,
       score: 25,
     };
   }
-  if (line >= start - 2 && line <= end + 2) {
+
+  // Check proximity (within 2 lines)
+  const nearMatch = lineArray.some((l) => l >= start - 2 && l <= end + 2);
+  if (nearMatch) {
     return {
       correct: true,
       desc: "Near the bug location (within 2 lines)",
       score: 15,
     };
   }
+
   return {
     correct: false,
-    desc: "No line marked or incorrect location",
+    desc: "Incorrect lines selected",
     score: 0,
   };
 }
 
 function evaluateRootCause(
   userExplanation: string,
-  canonical: string
+  canonical: string,
+  aiEvaluation?: AIEvaluationResult
 ): { desc: string; score: number } {
-  if (!userExplanation || userExplanation.trim().length < 10) {
+  if (aiEvaluation) {
     return {
-      desc: "Explanation was missing or too brief",
+      desc: aiEvaluation.constructiveFeedback,
+      score: aiEvaluation.rootCauseScore,
+    };
+  }
+
+  if (!userExplanation || userExplanation.trim().length < 5) {
+    return {
+      desc: "No explanation provided for the root cause.",
       score: 0,
     };
   }
@@ -80,68 +105,91 @@ function evaluateRootCause(
   const canonicalEmbedding = generateDeterministicEmbedding(canonical);
   const similarity = cosineSimilarity(userEmbedding, canonicalEmbedding);
 
-  if (similarity >= 0.7) {
+  if (similarity >= 0.65) {
     return {
-      desc: "Comprehensive and accurate root cause explanation",
+      desc: "Accurately diagnosed failure mechanism and state lifecycle.",
       score: 25,
     };
   }
   if (similarity >= 0.45) {
     return {
-      desc: "Correctly identified problem; mechanism not fully named",
+      desc: "Partially identified the failure mechanism, but missed key lifecycle subtleties.",
       score: 18,
     };
   }
   if (similarity >= 0.25) {
     return {
-      desc: "Identified symptom but missed underlying failure mechanism",
-      score: 12,
+      desc: "Identified surface symptoms, but missed the underlying root cause mechanism.",
+      score: 10,
     };
   }
   return {
-    desc: "Partial diagnosis; key concepts missing",
-    score: 6,
+    desc: "Explanation does not match the canonical failure mechanism.",
+    score: 5,
   };
 }
 
 function evaluateFix(
   sandboxResult: SandboxExecutionResult,
-  proposedFixCode?: string
+  proposedFixCode?: string,
+  solutionExplanation?: string,
+  aiEvaluation?: AIEvaluationResult
 ): { correct: boolean; desc: string; score: number } {
-  const fixCorrect = sandboxResult.passed && sandboxResult.totalTests > 0;
+  if (aiEvaluation?.fixScore !== undefined) {
+    const isPassing = aiEvaluation.fixScore >= 17;
+    return {
+      correct: isPassing,
+      desc: isPassing
+        ? "Sound and effective solution approach"
+        : "Fix partially addresses the issue or introduces regressions",
+      score: aiEvaluation.fixScore,
+    };
+  }
 
-  if (fixCorrect) {
+  if (sandboxResult.passed) {
     return {
       correct: true,
-      desc: `Passed all ${sandboxResult.totalTests} hidden test cases`,
+      desc: "All regression tests passed in sandbox environment.",
       score: 25,
     };
   }
-  if (sandboxResult.totalTests > 0) {
+
+  if (sandboxResult.passedTests > 0) {
     const ratio = sandboxResult.passedTests / sandboxResult.totalTests;
     return {
       correct: false,
-      desc: `Passed ${sandboxResult.passedTests}/${sandboxResult.totalTests} hidden tests`,
-      score: Math.round(25 * ratio),
+      desc: `Passed ${sandboxResult.passedTests}/${sandboxResult.totalTests} tests. Some edge cases failed.`,
+      score: Math.round(ratio * 20),
     };
   }
-  if (proposedFixCode && proposedFixCode.length > 20) {
+
+  if (
+    (proposedFixCode && proposedFixCode.trim().length > 0) ||
+    (solutionExplanation && solutionExplanation.trim().length > 10)
+  ) {
     return {
-      correct: true,
-      desc: "Fix provided and validated",
-      score: 20,
+      correct: false,
+      desc: "Proposed fix code failed test suite assertions.",
+      score: 5,
     };
   }
+
   return {
     correct: false,
-    desc: "Fix failed hidden test assertions",
+    desc: "No fix or invalid solution proposed.",
     score: 0,
   };
 }
 
-function generateFeedback(totalScore: number): string {
+function generateFeedback(
+  totalScore: number,
+  aiEvaluation?: AIEvaluationResult
+): string {
+  if (aiEvaluation?.constructiveFeedback) {
+    return aiEvaluation.constructiveFeedback;
+  }
   if (totalScore >= 85) {
-    return "Excellent diagnosis! You identified the exact failure mechanism and provided a complete, resilient fix.";
+    return "Outstanding diagnosis! You identified the exact failure mechanism and provided a solid, resilient fix.";
   }
   if (totalScore >= 65) {
     return "Solid debugging work. You identified the primary symptoms and addressed the bug, but compare your explanation with the canonical root cause to see the exact mechanism details.";
@@ -150,29 +198,40 @@ function generateFeedback(totalScore: number): string {
 }
 
 /**
- * Grades a user challenge submission combining localization check, vector similarity of the explanation,
+ * Grades a user challenge submission combining localization check, vector similarity or Groq AI evaluation,
  * sandbox unit test verification, prevention assessment, and hint penalties.
  */
 export function gradeSubmission(input: GradingInput): GradingResult {
-  const loc = evaluateLocalization(input.localizationLine, input.buggyLines);
+  const loc = evaluateLocalization(input.localizationLines, input.buggyLines);
   const rc = evaluateRootCause(
     input.rootCauseExplanation,
-    input.canonicalRootCause
+    input.canonicalRootCause,
+    input.aiEvaluation
   );
-  const fix = evaluateFix(input.sandboxResult, input.proposedFixCode);
+  const fix = evaluateFix(
+    input.sandboxResult,
+    input.proposedFixCode,
+    input.solutionExplanation,
+    input.aiEvaluation
+  );
 
-  const preventionScore = Math.min(
-    25,
-    Math.max(
-      10,
-      Math.round(rc.score * 0.8) +
-        (input.rootCauseExplanation.length > 80 ? 5 : 0)
-    )
-  );
+  const preventionScore =
+    input.aiEvaluation?.preventionScore === undefined
+      ? Math.min(
+          25,
+          Math.max(
+            10,
+            Math.round(rc.score * 0.8) +
+              ((input.solutionExplanation?.length ?? 0) > 20 ? 5 : 0)
+          )
+        )
+      : input.aiEvaluation.preventionScore;
+
   const preventionDesc =
-    preventionScore >= 20
-      ? "Strong prevention analysis"
-      : "Basic understanding; CI/architectural safeguards omitted";
+    input.aiEvaluation?.preventionAnalysis ??
+    (preventionScore >= 20
+      ? "Strong prevention analysis and safeguards"
+      : "Basic understanding; CI/architectural safeguards omitted");
 
   const rawParts: ScorePart[] = [
     {
@@ -207,19 +266,30 @@ export function gradeSubmission(input: GradingInput): GradingResult {
     Math.min(100, subtotal - input.hintsUsedPenalty)
   );
 
-  const preventionNotes = input.canonicalPreventionNotes
-    ? input.canonicalPreventionNotes
-        .split(SENTENCE_SPLIT_REGEX)
-        .filter((s) => s.trim().length > 0)
-    : [
-        "Add automated regression tests in CI to verify this interaction pattern.",
-        "Implement architectural guardrails and type-safe constraints.",
-      ];
+  let preventionNotes: string[] = [];
+  if (input.aiEvaluation?.preventionAnalysis) {
+    preventionNotes.push(input.aiEvaluation.preventionAnalysis);
+  }
+
+  if (input.canonicalPreventionNotes) {
+    const splitNotes = input.canonicalPreventionNotes
+      .split(SENTENCE_SPLIT_REGEX)
+      .filter((s) => s.trim().length > 0);
+    preventionNotes.push(...splitNotes);
+  }
+
+  if (preventionNotes.length === 0) {
+    preventionNotes = [
+      "Add automated regression tests in CI to verify this interaction pattern.",
+      "Implement architectural guardrails and type-safe constraints.",
+    ];
+  }
 
   return {
-    aiFeedback: generateFeedback(totalScore),
+    aiFeedback: generateFeedback(totalScore, input.aiEvaluation),
     canonicalExplanation: input.canonicalRootCause,
     fixCorrect: fix.correct,
+    isAiGraded: Boolean(input.aiEvaluation?.isAiGraded),
     localizationCorrect: loc.correct,
     preventionNotes,
     preventionScore,

@@ -28,35 +28,38 @@ interface Props {
 
 export function FixPanel({ diffLines = DIFF_LINES }: Props) {
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <p className="mb-3 text-[11.5px] text-muted-foreground leading-relaxed">
-        Canonical fix. Your score reflects how closely your explanation matches
-        this approach.
+        Canonical fix. Your score reflects how closely your diagnosis and
+        solution match this approach.
       </p>
-      <div className="overflow-hidden rounded border border-border bg-inset font-mono text-[11.5px]">
-        {diffLines.map((line) => {
-          const style = LINE_STYLES[line.type] ?? LINE_STYLES.ctx;
-          return (
-            <div
-              className="flex items-start"
-              key={`${line.type}-${line.text}`}
-              style={{ backgroundColor: style.bg }}
-            >
-              <span
-                className="w-6 shrink-0 select-none py-[3px] ps-3"
-                style={{ color: style.signColor }}
+      <div className="w-full flex-1 overflow-x-auto rounded-md border border-border bg-inset font-mono text-[12px]">
+        <div className="min-w-max p-1">
+          {diffLines.map((line) => {
+            const style = LINE_STYLES[line.type] ?? LINE_STYLES.ctx;
+            const lineKey = `${line.line ?? ""}:${line.type}:${line.text}`;
+            return (
+              <div
+                className="flex items-start rounded-sm py-0.5"
+                key={lineKey}
+                style={{ backgroundColor: style.bg }}
               >
-                {style.sign}
-              </span>
-              <span
-                className="whitespace-pre px-2 py-[3px]"
-                style={{ color: style.textColor }}
-              >
-                {line.text || " "}
-              </span>
-            </div>
-          );
-        })}
+                <span
+                  className="w-7 shrink-0 select-none ps-2 font-bold font-mono text-[12px]"
+                  style={{ color: style.signColor }}
+                >
+                  {style.sign}
+                </span>
+                <span
+                  className="pe-4 font-mono text-[12px] leading-relaxed"
+                  style={{ color: style.textColor, whiteSpace: "pre" }}
+                >
+                  {line.text || " "}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

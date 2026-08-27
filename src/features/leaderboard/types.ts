@@ -17,4 +17,5 @@ export interface LeaderboardEntry {
   solved: number;
   streak: number;
   strongest: Category;
+  userId?: string;
 }

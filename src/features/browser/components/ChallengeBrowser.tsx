@@ -10,16 +10,23 @@ import { ChallengeFilters } from "./ChallengeFilters";
 
 const PAGE_SIZE = 6;
 
-const STATS = [
-  { label: "Solved", value: "37 / 104" },
-  { label: "Current Streak", value: "12 days" },
+export interface ChallengeBrowserStat {
+  label: string;
+  value: string;
+}
+
+const DEFAULT_STATS: ChallengeBrowserStat[] = [
+  { label: "Solved", value: "0 / 10" },
+  { label: "Current Streak", value: "0 days" },
   { label: "Rank", value: "#128" },
 ];
 
 export function ChallengeBrowser({
   initialChallenges = CHALLENGES,
+  stats = DEFAULT_STATS,
 }: {
   initialChallenges?: Challenge[];
+  stats?: ChallengeBrowserStat[];
 }) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<Category | "all">("all");
@@ -68,7 +75,7 @@ export function ChallengeBrowser({
         </div>
 
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {STATS.map((s) => (
+          {stats.map((s) => (
             <div
               className="rounded-xl border border-border bg-card p-4"
               key={s.label}

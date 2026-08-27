@@ -1,15 +1,32 @@
 "use client";
 
+import { useMemo } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { LEADERBOARD } from "@/features/leaderboard/data/leaderboard";
 import { CATEGORY_CONFIG } from "@/lib/domain/categories";
 import { useLeaderboard } from "../hooks/useLeaderboard";
+import type { LeaderboardEntry } from "../types";
 import { LeaderboardTable } from "./LeaderboardTable";
 import { LeaderboardTabs } from "./LeaderboardTabs";
 import { LeaderboardTopThree } from "./LeaderboardTopThree";
 
-export function LeaderboardScreen() {
+interface Props {
+  initialEntries?: LeaderboardEntry[];
+}
+
+export function LeaderboardScreen({ initialEntries = LEADERBOARD }: Props) {
   const { tab, setTab, categoryTab } = useLeaderboard();
+
+  const filteredEntries = useMemo(() => {
+    const list = initialEntries.length > 0 ? initialEntries : LEADERBOARD;
+    if (!categoryTab) {
+      return list;
+    }
+    const matching = list.filter((e) => e.strongest === categoryTab);
+    return matching.length > 0
+      ? matching.map((e, idx) => ({ ...e, rank: idx + 1 }))
+      : list;
+  }, [categoryTab, initialEntries]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -22,6 +39,7 @@ export function LeaderboardScreen() {
           </h1>
           <p className="mt-1 text-muted-foreground text-sm">
             Top debuggers ranked by accuracy, streak, and diagnosis speed.
+            (Cached 24h)
           </p>
         </div>
         <LeaderboardTabs setTab={setTab} tab={tab} />
@@ -54,8 +72,8 @@ export function LeaderboardScreen() {
             })()
           : null}
 
-        <LeaderboardTopThree />
-        <LeaderboardTable entries={LEADERBOARD} />
+        <LeaderboardTopThree entries={filteredEntries} />
+        <LeaderboardTable entries={filteredEntries} />
       </div>
     </div>
   );

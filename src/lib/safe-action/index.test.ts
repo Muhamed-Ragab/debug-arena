@@ -5,7 +5,7 @@ import { ActionError, actionClient } from "./index";
 describe("safe-action client", () => {
   it("creates and runs a safe action successfully", async () => {
     const testAction = actionClient
-      .schema(z.object({ name: z.string() }))
+      .inputSchema(z.object({ name: z.string() }))
       .action(async ({ parsedInput }) => ({
         greeting: `Hello, ${parsedInput.name}!`,
       }));

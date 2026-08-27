@@ -3,6 +3,7 @@ export type RightTab = "explain" | "fix" | "hints";
 export type DiffLineType = "ctx" | "add" | "del";
 
 export interface DiffLine {
+  line?: number;
   text: string;
   type: DiffLineType;
 }

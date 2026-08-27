@@ -4,11 +4,13 @@ import { DiffBadge } from "@/components/ui/DiffBadge";
 import { SCENARIO_PARAGRAPHS } from "@/features/challenge/data/challenges";
 import type { CategoryConfig } from "@/lib/domain/categories";
 import type { Challenge } from "@/lib/domain/types";
+import { cn } from "@/lib/utils";
 import { FileTree } from "./FileTree";
 
 interface Props {
   cfg: CategoryConfig;
   challenge: Challenge;
+  className?: string;
   scenarioParagraphs?: string[];
   setTreeOpen: (v: boolean) => void;
   treeOpen: boolean;
@@ -20,11 +22,17 @@ export function ChallengeScenario({
   treeOpen,
   setTreeOpen,
   scenarioParagraphs = SCENARIO_PARAGRAPHS,
+  className,
 }: Props) {
   const lastIndex = scenarioParagraphs.length - 1;
 
   return (
-    <div className="flex max-h-[45vh] w-full shrink-0 flex-col overflow-hidden border-border border-e border-b bg-surface lg:max-h-none lg:w-[272px] lg:border-b-0">
+    <div
+      className={cn(
+        "flex max-h-[45vh] w-full shrink-0 flex-col overflow-hidden border-border border-b bg-surface lg:max-h-none lg:border-b-0",
+        className
+      )}
+    >
       <div className="border-border border-b px-5 pt-5 pb-4">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <CategoryTag category={challenge.category} />
