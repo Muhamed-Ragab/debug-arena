@@ -148,14 +148,17 @@ describe("AI Evaluator - Answer Quality & Grading Automation", () => {
         alignmentPercent: 95,
         constructiveFeedback:
           "Outstanding analysis! You identified the exact closure binding and suggested the canonical functional updater fix.",
+        enhancementSuggestions: [],
         fixScore: 25,
         isAiGraded: true,
+        isCorrect: true,
         keyConceptsIdentified: [
           "Stale closure capture",
           "Empty dependency array effect",
           "Functional updater pattern",
         ],
         missedMechanisms: [],
+        needsEnhancement: false,
         preventionAnalysis:
           "Enable ESLint exhaustive-deps and enforce pure state updaters in CI tests.",
         preventionScore: 24,
@@ -189,6 +192,8 @@ describe("AI Evaluator - Answer Quality & Grading Automation", () => {
       );
 
       expect(result.isAiGraded).toBe(true);
+      expect(result.isCorrect).toBe(true);
+      expect(result.needsEnhancement).toBe(false);
       expect(result.rootCauseScore).toBe(25);
       expect(result.fixScore).toBe(25);
       expect(result.preventionScore).toBe(24);
@@ -202,13 +207,18 @@ describe("AI Evaluator - Answer Quality & Grading Automation", () => {
         alignmentPercent: 60,
         constructiveFeedback:
           "You observed the symptom (counter stops incrementing), but missed the lexical closure mechanics inside setInterval.",
+        enhancementSuggestions: [
+          "Explain the closure lifecycle mechanism in detail.",
+        ],
         fixScore: 14,
         isAiGraded: true,
+        isCorrect: true,
         keyConceptsIdentified: ["Effect only runs once"],
         missedMechanisms: [
           "Lexical scope closure over initial render",
           "Functional state updater requirement",
         ],
+        needsEnhancement: true,
         preventionAnalysis:
           "Review React closure lifecycle and test with multi-tick assertions.",
         preventionScore: 12,
@@ -239,6 +249,9 @@ describe("AI Evaluator - Answer Quality & Grading Automation", () => {
       );
 
       expect(result.isAiGraded).toBe(true);
+      expect(result.isCorrect).toBe(true);
+      expect(result.needsEnhancement).toBe(true);
+      expect(result.enhancementSuggestions).toHaveLength(1);
       expect(result.rootCauseScore).toBe(14);
       expect(result.missedMechanisms.length).toBeGreaterThan(0);
       expect(result.keyConceptsIdentified.length).toBeGreaterThan(0);
@@ -337,10 +350,13 @@ describe("AI Evaluator - Answer Quality & Grading Automation", () => {
         alignmentPercent: 90,
         constructiveFeedback:
           "Excellent diagnosis of the stale closure mechanism.",
+        enhancementSuggestions: [],
         fixScore: 25,
         isAiGraded: true,
+        isCorrect: true,
         keyConceptsIdentified: ["Stale closure", "Functional updater"],
         missedMechanisms: [],
+        needsEnhancement: false,
         preventionAnalysis: "Add ESLint rule and unit tests.",
         preventionScore: 23,
         rootCauseScore: 24,
@@ -372,6 +388,8 @@ describe("AI Evaluator - Answer Quality & Grading Automation", () => {
       });
 
       expect(grade.isAiGraded).toBe(true);
+      expect(grade.isCorrect).toBe(true);
+      expect(grade.needsEnhancement).toBe(false);
       expect(grade.localizationCorrect).toBe(true);
       expect(grade.fixCorrect).toBe(true);
       expect(grade.rootCauseScore).toBe(24);

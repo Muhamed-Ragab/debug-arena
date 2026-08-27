@@ -141,7 +141,47 @@ export async function getSubmissionById(submissionId: string) {
     return null;
   }
 
+  const proposedFixObj =
+    typeof submission.proposedFix === "object" &&
+    submission.proposedFix !== null
+      ? (submission.proposedFix as {
+          aiEvaluation?: {
+            alignmentPercent?: number;
+            confidence?: string;
+            enhancementSuggestions?: string[];
+            isAiGraded?: boolean;
+            isCorrect?: boolean;
+            keyConceptsIdentified?: string[];
+            missedMechanisms?: string[];
+            modelUsed?: string;
+            needsEnhancement?: boolean;
+          };
+          aiFeedback?: string;
+          code?: string;
+          score?: number;
+          solution?: string;
+        })
+      : null;
+
+  const aiFeedback =
+    submission.aiFeedback || proposedFixObj?.aiFeedback || null;
+  const evaluationDetails =
+    (submission.evaluationDetails as {
+      alignmentPercent?: number;
+      confidence?: string;
+      enhancementSuggestions?: string[];
+      isAiGraded?: boolean;
+      isCorrect?: boolean;
+      keyConceptsIdentified?: string[];
+      missedMechanisms?: string[];
+      modelUsed?: string;
+      needsEnhancement?: boolean;
+    } | null) ||
+    proposedFixObj?.aiEvaluation ||
+    null;
+
   return {
+    aiFeedback,
     canonicalPreventionNotes: submission.challenge.preventionNotes,
     canonicalRootCause: submission.challenge.rootCauseSummary,
     categoryName: submission.challenge.category.name,
@@ -149,6 +189,7 @@ export async function getSubmissionById(submissionId: string) {
     challengeId: submission.challengeId,
     challengeTitle: submission.challenge.title,
     createdAt: submission.createdAt,
+    evaluationDetails,
     fixCorrect: submission.fixCorrect,
     hintsUsed: submission.hintsUsed,
     id: submission.id,
