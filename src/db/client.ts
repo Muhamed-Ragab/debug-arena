@@ -2,7 +2,7 @@ import "server-only";
 
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { env } from "@/lib/env/env";
+import { env } from "../lib/env/env";
 import * as schema from "./schema";
 
 const globalForDb = globalThis as unknown as { pool?: Pool };

@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
-import "@/lib/env";
+import "../lib/env/env";
 import { db } from "./client";
 
 async function main() {
