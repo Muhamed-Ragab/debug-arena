@@ -1,15 +1,40 @@
 import { describe, expect, it } from "vitest";
-import { generateFallbackChallenge } from "./lib/question-generator-agent";
+import { normalizeChallengeDraft } from "./lib/question-generator-agent";
 
 describe("Admin Actions and Schemas", () => {
-  it("generates a valid challenge draft structure matching schema requirements", () => {
-    const draft = generateFallbackChallenge({
-      categorySlug: "react-rendering",
-      difficulty: "easy",
-      topic: "Stale state update",
-    });
+  it("normalizes a challenge draft structure matching schema requirements", () => {
+    const draft = normalizeChallengeDraft(
+      {
+        buggyArtifact: {
+          buggyLines: [10, 11],
+          entryFile: "EventFeed.tsx",
+          files: [{ code: "const buggy = true;", name: "EventFeed.tsx" }],
+          language: "typescript",
+          points: 100,
+          timeLimit: "15 min",
+        },
+        categorySlug: "react-rendering",
+        difficulty: "easy",
+        format: "code_snippet",
+        hints: [
+          { order: 1, penaltyPoints: 10, socraticPrompt: "Hint 1" },
+          { order: 2, penaltyPoints: 20, socraticPrompt: "Hint 2" },
+          { order: 3, penaltyPoints: 30, socraticPrompt: "Hint 3" },
+        ],
+        preventionNotes: "Add unit tests.",
+        prompt: "Fix the race condition in the feed.",
+        referenceFix: {
+          explanation: "Fixed stale closure.",
+          files: [{ code: "const buggy = false;", name: "EventFeed.tsx" }],
+        },
+        rootCauseSummary: "Stale closure over initial render state.",
+        title: "Stale State in Feed",
+      },
+      "react-rendering",
+      "easy"
+    );
 
-    expect(draft.title).toBeDefined();
+    expect(draft.title).toBe("Stale State in Feed");
     expect(draft.buggyArtifact.entryFile).toBe("EventFeed.tsx");
     expect(draft.buggyArtifact.files.length).toBeGreaterThan(0);
     expect(draft.referenceFix.files.length).toBeGreaterThan(0);
@@ -21,12 +46,40 @@ describe("Admin Actions and Schemas", () => {
     expect(draft.prompt.length).toBeGreaterThan(10);
   });
 
-  it("handles backend concurrency challenge generation correctly", () => {
-    const draft = generateFallbackChallenge({
-      categorySlug: "backend-concurrency",
-      difficulty: "hard",
-      topic: "Double spend race condition",
-    });
+  it("handles backend concurrency challenge draft normalization correctly", () => {
+    const draft = normalizeChallengeDraft(
+      {
+        buggyArtifact: {
+          buggyLines: [14, 23],
+          entryFile: "transfer.ts",
+          files: [{ code: "transfer();", name: "transfer.ts" }],
+          language: "typescript",
+          points: 300,
+          timeLimit: "20 min",
+        },
+        categorySlug: "backend-concurrency",
+        difficulty: "hard",
+        format: "code_snippet",
+        hiddenTests: [
+          {
+            description: "No negative balance",
+            name: "Prevents race",
+            testCode: "expect(true).toBe(true);",
+          },
+        ],
+        hints: [],
+        preventionNotes: "Atomic transaction required.",
+        prompt: "Prevent double spending.",
+        referenceFix: {
+          explanation: "Wrap in transaction.",
+          files: [{ code: "tx.transfer();", name: "transfer.ts" }],
+        },
+        rootCauseSummary: "TOCTOU race condition without row locking.",
+        title: "Double Spend Race Condition",
+      },
+      "backend-concurrency",
+      "hard"
+    );
 
     expect(draft.difficulty).toBe("hard");
     expect(draft.buggyArtifact.points).toBe(300);

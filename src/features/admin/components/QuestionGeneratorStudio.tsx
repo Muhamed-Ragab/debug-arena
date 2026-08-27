@@ -28,8 +28,7 @@ import {
   saveAdminChallengeAction,
 } from "../actions";
 import { DIFFICULTY_VALUES } from "../constants";
-import type { GeneratedChallengeDraft } from "../lib/question-generator-agent";
-import type { CategoryOption } from "../types";
+import type { CategoryOption, GeneratedChallengeDraft } from "../types";
 
 interface QuestionGeneratorStudioProps {
   categories: CategoryOption[];

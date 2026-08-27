@@ -21,14 +21,16 @@ import { Button } from "@/components/ui/button";
 import { saveAdminChallengeAction } from "../actions";
 import { DIFFICULTY_VALUES } from "../constants";
 import {
-  type ChallengeFile,
-  type ChallengeHiddenTest,
-  type ChallengeHint,
   computeUnifiedDiff,
-  type DiffLine,
   detectBuggyLines,
 } from "../lib/question-generator-agent";
-import type { CategoryOption } from "../types";
+import type {
+  CategoryOption,
+  ChallengeFile,
+  ChallengeHiddenTest,
+  ChallengeHint,
+  DiffLine,
+} from "../types";
 
 interface ManualChallengeCreatorProps {
   categories: CategoryOption[];
