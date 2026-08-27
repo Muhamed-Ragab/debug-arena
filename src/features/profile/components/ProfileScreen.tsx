@@ -3,7 +3,7 @@
 import { Flame, Trophy } from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Avatar } from "@/components/ui/avatar";
-import type { UserProfileData } from "../queries";
+import type { UserProfileData } from "@/features/profile/types";
 import { CategoryStrengthChart } from "./CategoryStrengthChart";
 import { ProfileStats } from "./ProfileStats";
 import { RecentSubmissions } from "./RecentSubmissions";

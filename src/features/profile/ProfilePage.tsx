@@ -1,8 +1,8 @@
 "use client";
 
 import { TopBar } from "@/components/layout/TopBar";
+import type { UserProfileData } from "@/features/profile/types";
 import { ProfileScreen } from "./components/ProfileScreen";
-import type { UserProfileData } from "./queries";
 
 interface Props {
   data?: UserProfileData | null;

@@ -68,3 +68,27 @@ export interface LinkedAccount {
   label: string;
   provider: ProviderId;
 }
+
+export interface UserProfileData {
+  categoryStats: CategoryStat[];
+  profile: {
+    avatarColor?: string;
+    bio: string;
+    displayName: string;
+    handle: string;
+    image?: string | null;
+    jobTitle?: string;
+    joined: string;
+    name: string;
+    points: string;
+    rank: string;
+    streak: string;
+  };
+  profileStats: ProfileStat[];
+  radarData: RadarPoint[];
+  recentSubmissions: (RecentSubmission & {
+    id?: string;
+    submittedAt?: string;
+  })[];
+  strengthData: StrengthPoint[];
+}
