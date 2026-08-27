@@ -14,10 +14,21 @@ import {
   User,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { CATEGORY_CONFIG, CATEGORY_ORDER } from "@/lib/domain/categories";
 import type { Category } from "@/lib/domain/types";
 import { updateProfileAction } from "../actions";
-import { AVATAR_PRESETS } from "../data/settings";
+import { AVATAR_PRESETS } from "../constants";
 
 const MAX_NAME = 50;
 const MAX_BIO = 250;
@@ -36,7 +47,7 @@ function renderHandleStatus(error: string | null, available: boolean) {
   if (available) {
     return (
       <span className="flex items-center gap-1 text-[12px] text-emerald-400">
-        <CheckCircle2 size={12} /> Valid handle
+        <CheckCircle2 size={12} /> Handle looks good
       </span>
     );
   }
@@ -85,19 +96,19 @@ function AvatarPickerSection({
       </div>
 
       <div className="mt-3">
-        <label
-          className="mb-1 block font-medium text-[11px] text-muted-foreground"
+        <Label
+          className="mb-1.5 block font-medium text-[11px] text-muted-foreground"
           htmlFor="avatarUrl"
         >
           Or custom avatar image URL
-        </label>
+        </Label>
         <div className="relative">
           <ImageIcon
             className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
             size={14}
           />
-          <input
-            className="w-full rounded-md border border-border bg-inset py-1.5 ps-9 pe-3 text-[12px] text-foreground transition-colors placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
+          <Input
+            className="h-8 ps-9 pe-3 text-[12px]"
             id="avatarUrl"
             onChange={(e) => setAvatarUrl(e.target.value)}
             placeholder="https://..."
@@ -187,17 +198,13 @@ function PrivacySection({
               : "Your profile is hidden from the public leaderboard."}
           </p>
         </div>
-        <button
-          className={`rounded-md border px-3 py-1.5 font-medium text-[12px] transition-colors ${
-            isPublic
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
-              : "border-border bg-inset text-muted-foreground hover:text-foreground"
-          }`}
+        <Button
           onClick={() => setIsPublic(!isPublic)}
-          type="button"
+          size="sm"
+          variant={isPublic ? "default" : "outline"}
         >
           {isPublic ? "Enabled" : "Private"}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -230,7 +237,9 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
   );
   const [avatarUrl, setAvatarUrl] = useState(initialProfile?.avatarUrl || "");
   const [interests, setInterests] = useState<Category[]>(
-    (initialProfile?.interests as Category[]) || []
+    (initialProfile?.interests ?? []).filter((v): v is Category =>
+      CATEGORY_ORDER.includes(v as Category)
+    )
   );
   const [isPublic, setIsPublic] = useState(initialProfile?.isPublic ?? true);
 
@@ -313,195 +322,192 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
   };
 
   return (
-    <section className="rounded-lg border border-border bg-card p-5 sm:p-6">
-      <h2 className="font-semibold text-[15px] text-heading">
-        Profile details
-      </h2>
-      <p className="mt-1 text-[13px] text-muted-foreground">
-        Customize your public persona, job title, avatar color, and preferences.
-      </p>
+    <Card className="p-1">
+      <CardHeader>
+        <CardTitle className="text-base">Profile details</CardTitle>
+        <CardDescription>
+          Customize your public persona, job title, avatar color, and
+          preferences.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {/* Display name */}
+          <div>
+            <Label
+              className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
+              htmlFor="displayName"
+            >
+              Display name
+            </Label>
+            <div className="relative">
+              <User
+                className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                size={15}
+              />
+              <Input
+                className="ps-9 pe-3 text-[13px]"
+                id="displayName"
+                maxLength={MAX_NAME + 10}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="e.g. Alex Morgan"
+                value={displayName}
+              />
+            </div>
+            <div className="mt-1 flex items-center justify-between">
+              {nameError ? (
+                <span className="flex items-center gap-1 text-[12px] text-destructive">
+                  <AlertCircle size={12} /> {nameError}
+                </span>
+              ) : (
+                <span className="text-[12px] text-muted-foreground/70">
+                  Public-facing name.
+                </span>
+              )}
+              <span className="text-[11px] text-muted-foreground/60 tabular-nums">
+                {displayName.length}/{MAX_NAME}
+              </span>
+            </div>
+          </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
-        {/* Display name */}
-        <div>
-          <label
+          {/* Handle */}
+          <div>
+            <Label
+              className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
+              htmlFor="handle"
+            >
+              Username / handle
+            </Label>
+            <div className="relative">
+              <AtSign
+                className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                size={15}
+              />
+              <Input
+                className="ps-9 pe-3 font-mono text-[13px]"
+                id="handle"
+                onChange={(e) => setHandle(e.target.value)}
+                placeholder="username"
+                value={handle}
+              />
+            </div>
+            <div className="mt-1 flex items-center justify-between">
+              {renderHandleStatus(handleError, handleAvailable)}
+              <span className="text-[11px] text-muted-foreground/60">
+                @debug.arena/{handle || "…"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Job Title / Role */}
+        <div className="mt-5">
+          <Label
             className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
-            htmlFor="displayName"
+            htmlFor="jobTitle"
           >
-            Display name
-          </label>
+            Job title / Role
+          </Label>
           <div className="relative">
-            <User
+            <Briefcase
               className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               size={15}
             />
-            <input
-              className="w-full rounded-md border border-border bg-inset py-2 ps-9 pe-3 text-[13px] text-foreground transition-colors placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
-              id="displayName"
-              maxLength={MAX_NAME + 10}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="e.g. Alex Morgan"
-              value={displayName}
+            <Input
+              className="ps-9 pe-3 text-[13px]"
+              id="jobTitle"
+              maxLength={MAX_JOB}
+              onChange={(e) => setJobTitle(e.target.value)}
+              placeholder="e.g. Senior Frontend Engineer, Distributed Systems"
+              value={jobTitle}
+            />
+          </div>
+        </div>
+
+        {/* Bio */}
+        <div className="mt-5">
+          <Label
+            className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
+            htmlFor="bio"
+          >
+            Bio / tagline
+          </Label>
+          <div className="relative">
+            <FileText
+              className="pointer-events-none absolute start-3 top-3 text-muted-foreground"
+              size={15}
+            />
+            <Textarea
+              className="resize-none ps-9 pe-3 text-[13px] leading-relaxed"
+              id="bio"
+              maxLength={MAX_BIO + 20}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="Tell us a bit about your engineering interests or background..."
+              rows={3}
+              value={bio}
             />
           </div>
           <div className="mt-1 flex items-center justify-between">
-            {nameError ? (
+            {bioError ? (
               <span className="flex items-center gap-1 text-[12px] text-destructive">
-                <AlertCircle size={12} /> {nameError}
+                <AlertCircle size={12} /> {bioError}
               </span>
             ) : (
               <span className="text-[12px] text-muted-foreground/70">
-                Public-facing name.
+                Shown on your public profile.
               </span>
             )}
             <span className="text-[11px] text-muted-foreground/60 tabular-nums">
-              {displayName.length}/{MAX_NAME}
+              {bio.length}/{MAX_BIO}
             </span>
           </div>
         </div>
 
-        {/* Handle */}
-        <div>
-          <label
-            className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
-            htmlFor="handle"
-          >
-            Username / handle
-          </label>
-          <div className="relative">
-            <AtSign
-              className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              size={15}
-            />
-            <input
-              className="w-full rounded-md border border-border bg-inset py-2 ps-9 pe-3 font-mono text-[13px] text-foreground transition-colors placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
-              id="handle"
-              onChange={(e) => setHandle(e.target.value)}
-              placeholder="username"
-              value={handle}
-            />
-          </div>
-          <div className="mt-1 flex items-center justify-between">
-            {renderHandleStatus(handleError, handleAvailable)}
-            <span className="text-[11px] text-muted-foreground/60">
-              @debug.arena/{handle || "…"}
-            </span>
-          </div>
-        </div>
-      </div>
+        <AvatarPickerSection
+          avatarColor={avatarColor}
+          avatarUrl={avatarUrl}
+          setAvatarColor={setAvatarColor}
+          setAvatarUrl={setAvatarUrl}
+        />
 
-      {/* Job Title / Role */}
-      <div className="mt-5">
-        <label
-          className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
-          htmlFor="jobTitle"
-        >
-          Job title / Role
-        </label>
-        <div className="relative">
-          <Briefcase
-            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            size={15}
-          />
-          <input
-            className="w-full rounded-md border border-border bg-inset py-2 ps-9 pe-3 text-[13px] text-foreground transition-colors placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
-            id="jobTitle"
-            maxLength={MAX_JOB}
-            onChange={(e) => setJobTitle(e.target.value)}
-            placeholder="e.g. Senior Frontend Engineer, Distributed Systems"
-            value={jobTitle}
-          />
-        </div>
-      </div>
+        <CategoryInterestsSection
+          interests={interests}
+          toggleInterest={toggleInterest}
+        />
 
-      {/* Bio */}
-      <div className="mt-5">
-        <label
-          className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
-          htmlFor="bio"
-        >
-          Bio / tagline
-        </label>
-        <div className="relative">
-          <FileText
-            className="pointer-events-none absolute start-3 top-3 text-muted-foreground"
-            size={15}
-          />
-          <textarea
-            className="w-full resize-none rounded-md border border-border bg-inset py-2 ps-9 pe-3 text-[13px] text-foreground leading-relaxed transition-colors placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
-            id="bio"
-            maxLength={MAX_BIO + 20}
-            onChange={(e) => setBio(e.target.value)}
-            placeholder="Tell us a bit about your engineering interests or background..."
-            rows={3}
-            value={bio}
-          />
-        </div>
-        <div className="mt-1 flex items-center justify-between">
-          {bioError ? (
-            <span className="flex items-center gap-1 text-[12px] text-destructive">
-              <AlertCircle size={12} /> {bioError}
-            </span>
-          ) : (
-            <span className="text-[12px] text-muted-foreground/70">
-              Shown on your public profile.
+        <PrivacySection isPublic={isPublic} setIsPublic={setIsPublic} />
+
+        {/* Save bar */}
+        <div className="mt-7 flex flex-wrap items-center gap-3 border-border border-t pt-5">
+          <Button disabled={hasErrors || isSaving} onClick={onSave} size="md">
+            {saved ? <Check size={14} /> : null}
+            {(() => {
+              if (isSaving) {
+                return "Saving...";
+              }
+              if (saved) {
+                return "Saved";
+              }
+              return "Save changes";
+            })()}
+          </Button>
+          {Boolean(saved) && (
+            <span className="flex items-center gap-1 text-[12px] text-emerald-400">
+              <CheckCircle2 size={13} /> Profile updated successfully.
             </span>
           )}
-          <span className="text-[11px] text-muted-foreground/60 tabular-nums">
-            {bio.length}/{MAX_BIO}
-          </span>
+          {Boolean(serverError) && (
+            <span className="flex items-center gap-1 text-[12px] text-destructive">
+              <AlertCircle size={13} /> {serverError}
+            </span>
+          )}
+          {Boolean(hasErrors && !serverError) && (
+            <span className="text-[12px] text-muted-foreground/70">
+              Fix the highlighted fields to save.
+            </span>
+          )}
         </div>
-      </div>
-
-      <AvatarPickerSection
-        avatarColor={avatarColor}
-        avatarUrl={avatarUrl}
-        setAvatarColor={setAvatarColor}
-        setAvatarUrl={setAvatarUrl}
-      />
-
-      <CategoryInterestsSection
-        interests={interests}
-        toggleInterest={toggleInterest}
-      />
-
-      <PrivacySection isPublic={isPublic} setIsPublic={setIsPublic} />
-
-      {/* Save bar */}
-      <div className="mt-7 flex flex-wrap items-center gap-3 border-border border-t pt-5">
-        <button
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 font-medium text-[13px] text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={hasErrors || isSaving}
-          onClick={onSave}
-          type="button"
-        >
-          {saved ? <Check size={14} /> : null}
-          {(() => {
-            if (isSaving) {
-              return "Saving...";
-            }
-            if (saved) {
-              return "Saved";
-            }
-            return "Save changes";
-          })()}
-        </button>
-        {Boolean(saved) && (
-          <span className="flex items-center gap-1 text-[12px] text-emerald-400">
-            <CheckCircle2 size={13} /> Profile updated successfully.
-          </span>
-        )}
-        {Boolean(serverError) && (
-          <span className="flex items-center gap-1 text-[12px] text-destructive">
-            <AlertCircle size={13} /> {serverError}
-          </span>
-        )}
-        {Boolean(hasErrors && !serverError) && (
-          <span className="text-[12px] text-muted-foreground/70">
-            Fix the highlighted fields to save.
-          </span>
-        )}
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 }

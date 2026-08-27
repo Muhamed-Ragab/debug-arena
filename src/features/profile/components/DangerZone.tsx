@@ -3,6 +3,9 @@
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth/client";
 import { deleteAccountAction } from "../actions";
 
@@ -42,7 +45,7 @@ export function DangerZone({ handle }: DangerZoneProps) {
   };
 
   return (
-    <section className="rounded-lg border border-destructive/30 bg-destructive/5 p-5 sm:p-6">
+    <Card className="border-destructive/30 bg-destructive/5 p-5 sm:p-6">
       <div className="flex items-start gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-destructive/30 bg-destructive/10 text-destructive">
           <AlertTriangle size={17} />
@@ -67,40 +70,37 @@ export function DangerZone({ handle }: DangerZoneProps) {
             </code>{" "}
             below.
           </p>
-          <input
-            className="mt-3 w-full rounded-md border border-destructive/30 bg-background px-3 py-2 font-mono text-[13px] text-foreground transition-colors placeholder:text-muted-foreground/50 focus:border-destructive/60 focus:outline-none"
+          <Input
+            className="mt-3 border-destructive/30 bg-background font-mono text-[13px] focus-visible:ring-destructive"
             onChange={(e) => setTyped(e.target.value)}
             placeholder={CONFIRM_PHRASE}
             value={typed}
           />
           <div className="mt-3 flex items-center gap-2">
-            <button
-              className="inline-flex items-center gap-2 rounded-md bg-destructive px-4 py-2 font-medium text-[13px] text-destructive-foreground transition-colors hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-40"
+            <Button
               disabled={!matches || isDeleting}
               onClick={handleDelete}
-              type="button"
+              size="sm"
+              variant="destructive"
             >
               <Trash2 size={14} />{" "}
               {isDeleting ? "Deleting..." : "Permanently delete"}
-            </button>
-            <button
-              className="rounded-md border border-border bg-card px-4 py-2 font-medium text-[13px] text-foreground transition-colors hover:bg-inset"
-              onClick={reset}
-              type="button"
-            >
+            </Button>
+            <Button onClick={reset} size="sm" variant="outline">
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
-        <button
-          className="mt-4 inline-flex items-center gap-2 rounded-md border border-destructive/40 bg-transparent px-4 py-2 font-medium text-[13px] text-destructive transition-colors hover:bg-destructive/10"
+        <Button
+          className="mt-4 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
           onClick={() => setConfirming(true)}
-          type="button"
+          size="sm"
+          variant="outline"
         >
           <Trash2 size={14} /> Delete account
-        </button>
+        </Button>
       )}
-    </section>
+    </Card>
   );
 }

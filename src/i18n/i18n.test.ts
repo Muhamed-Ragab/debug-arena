@@ -1,8 +1,8 @@
 import { i18n } from "@lingui/core";
 import { describe, expect, it } from "vitest";
+import { messages as ar } from "../locales/ar/messages";
+import { messages as en } from "../locales/en/messages";
 import { dynamicActivate } from "./i18n";
-import { messages as ar } from "./locales/ar/messages";
-import { messages as en } from "./locales/en/messages";
 
 describe("i18n catalogs", () => {
   it("translates every en key into ar", () => {

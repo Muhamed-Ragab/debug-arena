@@ -5,12 +5,13 @@ import { calculateUserRank } from "@/features/leaderboard/queries";
 import type { Category } from "@/lib/domain/types";
 import type {
   CategoryStat,
+  LinkedAccount,
   ProfileStat,
   RadarPoint,
   RecentSubmission,
-} from "./data/profile";
-import type { LinkedAccount, SessionData } from "./data/settings";
-import type { StrengthPoint } from "./types";
+  SessionData,
+  StrengthPoint,
+} from "./types";
 
 export interface UserProfileData {
   categoryStats: CategoryStat[];

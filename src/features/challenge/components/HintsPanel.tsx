@@ -1,5 +1,6 @@
 import { ChevronDown, Lock } from "lucide-react";
-import { HINTS } from "@/features/challenge/data/challenges";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 
 export interface HintItem {
   order: number;
@@ -8,37 +9,35 @@ export interface HintItem {
 }
 
 interface Props {
-  hints?: HintItem[];
+  hints: HintItem[];
   hintsOpen: number[];
   toggleHint: (i: number) => void;
 }
 
 export function HintsPanel({ hintsOpen, toggleHint, hints }: Props) {
-  // Normalize hints format if custom hints array provided, else fallback to HINTS
-  const formattedHints: HintItem[] =
-    hints && hints.length > 0
-      ? hints
-      : HINTS.map((h, i) => ({
-          order: i + 1,
-          penaltyPoints: (i + 1) * 10,
-          socraticPrompt: h,
-        }));
+  if (hints.length === 0) {
+    return (
+      <p className="text-[12px] text-muted-foreground leading-relaxed">
+        No hints are available for this challenge.
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-2.5">
       <p className="mb-4 text-[11.5px] text-muted-foreground leading-relaxed">
         Each revealed hint reduces your maximum score for this challenge.
       </p>
-      {formattedHints.map((hint, i) => {
+      {hints.map((hint, i) => {
         const open = hintsOpen.includes(i);
         const cost = hint.penaltyPoints;
         return (
-          <div
-            className="overflow-hidden rounded border border-border bg-card"
+          <Card
+            className="overflow-hidden"
             key={`${hint.order}-${hint.socraticPrompt.slice(0, 20)}`}
           >
             <button
-              className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-[12px]"
+              className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-[12px] transition-colors hover:bg-muted/50"
               onClick={() => toggleHint(i)}
               type="button"
             >
@@ -51,14 +50,19 @@ export function HintsPanel({ hintsOpen, toggleHint, hints }: Props) {
                 <Lock className="shrink-0 text-muted-foreground" size={11} />
               )}
               <span
-                className={open ? "text-foreground" : "text-muted-foreground"}
+                className={
+                  open ? "font-medium text-foreground" : "text-muted-foreground"
+                }
               >
                 Hint {hint.order}
               </span>
               {!open && (
-                <span className="ms-auto font-mono text-[11px] text-amber-500">
+                <Badge
+                  className="ms-auto font-mono text-[11px]"
+                  variant="warning"
+                >
                   Reveal (−{cost} pts)
-                </span>
+                </Badge>
               )}
             </button>
             {open && (
@@ -66,7 +70,7 @@ export function HintsPanel({ hintsOpen, toggleHint, hints }: Props) {
                 {hint.socraticPrompt}
               </div>
             )}
-          </div>
+          </Card>
         );
       })}
     </div>

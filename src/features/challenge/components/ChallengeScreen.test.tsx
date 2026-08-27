@@ -60,7 +60,7 @@ describe("ChallengeScreen Component", () => {
     expect(
       screen.getAllByText("Stale Closure in Counter Interval").length
     ).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("Counter.tsx")).toBeInTheDocument();
+    expect(screen.getAllByText("Counter.tsx").length).toBeGreaterThanOrEqual(1);
     expect(
       screen.getByText("The counter increments once then stops.")
     ).toBeInTheDocument();

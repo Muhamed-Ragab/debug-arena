@@ -6,9 +6,9 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { CategoryTag } from "@/components/ui/CategoryTag";
-import { DiffBadge } from "@/components/ui/DiffBadge";
-import { formatSolves } from "@/features/challenge/data/challenges";
+import { CategoryTag } from "@/components/shared/CategoryTag";
+import { DiffBadge } from "@/components/shared/DiffBadge";
+import { formatSolves } from "@/features/challenge/lib/format";
 import { CATEGORY_CONFIG } from "@/lib/domain/categories";
 import type { Challenge } from "@/lib/domain/types";
 

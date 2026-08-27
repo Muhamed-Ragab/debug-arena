@@ -1,7 +1,17 @@
 import { ChevronLeft, ChevronRight, Flame } from "lucide-react";
 import { useState } from "react";
-import { Avatar } from "@/components/ui/Avatar";
-import { RankMedal } from "@/components/ui/RankMedal";
+import { RankMedal } from "@/components/shared/RankMedal";
+import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import type { LeaderboardEntry } from "../types";
 
@@ -32,80 +42,70 @@ export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-130 border-collapse">
-          <thead>
-            <tr>
-              {["Rank", "User", "Score", "Solved", "Streak"].map((col) => (
-                <th
-                  className={cn(
-                    "pb-3 text-start font-medium font-mono text-[11px] text-muted-foreground uppercase tracking-wider",
-                    (col === "Score" || col === "Solved" || col === "Streak") &&
-                      "text-end"
-                  )}
-                  key={col}
-                >
-                  {col}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {pagedEntries.map((row) => (
-              <tr
-                className={cn(
-                  "border-border border-t transition-colors hover:bg-white/2",
-                  row.isUser && "bg-primary/10"
-                )}
-                key={row.rank}
-              >
-                <td className="w-12 px-4 py-3">
-                  <RankMedal rank={row.rank} />
-                </td>
-                <td className="py-3">
-                  <div className="flex items-center gap-2.5">
-                    <Avatar name={row.name} size={26} />
-                    <span
-                      className={cn(
-                        "text-[13px]",
-                        row.isUser
-                          ? "font-semibold text-primary"
-                          : "text-foreground"
-                      )}
-                    >
-                      {row.name}
-                      {Boolean(row.isUser) && (
-                        <span className="ms-2 rounded bg-primary/20 px-1.5 py-0.5 font-mono text-[10px] text-primary">
-                          you
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                </td>
-                <td className="py-3 text-end">
-                  <span className="font-mono text-[13px] text-foreground tabular-nums">
-                    {row.score.toLocaleString()}
-                  </span>
-                </td>
-                <td className="py-3 text-end">
-                  <span className="font-mono text-[13px] text-muted-foreground tabular-nums">
-                    {row.solved}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-end">
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="w-16">Rank</TableHead>
+            <TableHead>User</TableHead>
+            <TableHead className="text-end">Score</TableHead>
+            <TableHead className="text-end">Solved</TableHead>
+            <TableHead className="text-end">Streak</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {pagedEntries.map((row) => (
+            <TableRow
+              className={cn(
+                "transition-colors",
+                row.isUser && "bg-primary/10 hover:bg-primary/15"
+              )}
+              key={row.rank}
+            >
+              <TableCell className="w-16 px-3 py-3">
+                <RankMedal rank={row.rank} />
+              </TableCell>
+              <TableCell className="py-3">
+                <div className="flex items-center gap-2.5">
+                  <Avatar name={row.name} size={26} />
                   <span
-                    className="inline-flex items-center gap-1 font-mono text-[12px] tabular-nums"
-                    style={{ color: getStreakColor(row.streak) }}
+                    className={cn(
+                      "text-[13px]",
+                      row.isUser
+                        ? "font-semibold text-primary"
+                        : "text-foreground"
+                    )}
                   >
-                    {row.streak >= 7 ? <Flame size={11} /> : null}
-                    {row.streak}d
+                    {row.name}
+                    {Boolean(row.isUser) && (
+                      <Badge
+                        className="ms-2 font-mono text-[10px]"
+                        variant="default"
+                      >
+                        you
+                      </Badge>
+                    )}
                   </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </div>
+              </TableCell>
+              <TableCell className="py-3 text-end font-mono text-[13px] text-foreground tabular-nums">
+                {row.score.toLocaleString()}
+              </TableCell>
+              <TableCell className="py-3 text-end font-mono text-[13px] text-muted-foreground tabular-nums">
+                {row.solved}
+              </TableCell>
+              <TableCell className="px-3 py-3 text-end">
+                <span
+                  className="inline-flex items-center gap-1 font-mono text-[12px] tabular-nums"
+                  style={{ color: getStreakColor(row.streak) }}
+                >
+                  {row.streak >= 7 ? <Flame size={11} /> : null}
+                  {row.streak}d
+                </span>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-between border-border border-t pt-4">
@@ -115,36 +115,35 @@ export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
             entries
           </p>
           <div className="flex items-center gap-1">
-            <button
-              className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:text-foreground disabled:opacity-40"
+            <Button
+              className="h-8 w-8 p-0"
               disabled={safePage === 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              type="button"
+              size="sm"
+              variant="outline"
             >
               <ChevronLeft size={14} />
-            </button>
+            </Button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <button
-                className={`h-8 min-w-8 rounded-md border px-2.5 font-medium text-xs transition-colors ${
-                  p === safePage
-                    ? "border-primary bg-primary/10 font-semibold text-heading"
-                    : "border-border bg-card text-muted-foreground hover:text-foreground"
-                }`}
+              <Button
+                className="h-8 min-w-8 px-2.5 text-xs"
                 key={p}
                 onClick={() => setPage(p)}
-                type="button"
+                size="sm"
+                variant={p === safePage ? "default" : "outline"}
               >
                 {p}
-              </button>
+              </Button>
             ))}
-            <button
-              className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:text-foreground disabled:opacity-40"
+            <Button
+              className="h-8 w-8 p-0"
               disabled={safePage === totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              type="button"
+              size="sm"
+              variant="outline"
             >
               <ChevronRight size={14} />
-            </button>
+            </Button>
           </div>
         </div>
       )}

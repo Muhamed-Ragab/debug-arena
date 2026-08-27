@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CategoryTag } from "@/components/ui/CategoryTag";
+import { CategoryTag } from "@/components/shared/CategoryTag";
 import type { RecentSubmission } from "../types";
 
 function getScoreColor(pct: number): string {

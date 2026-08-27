@@ -116,7 +116,7 @@ export function ChallengeScreen({
             cfg={cfg}
             challenge={challenge}
             className="h-full w-full"
-            scenarioParagraphs={scenarioParagraphs}
+            scenarioParagraphs={scenarioParagraphs ?? []}
             setTreeOpen={ws.setTreeOpen}
             treeOpen={ws.treeOpen}
           />
@@ -144,8 +144,8 @@ export function ChallengeScreen({
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <CodeViewer
             cfg={cfg}
-            codeLines={codeLines}
-            fileName={fileName}
+            codeLines={codeLines ?? []}
+            fileName={fileName ?? challenge.filePath ?? challenge.title}
             onClearLines={ws.clearLines}
             onToggleLine={ws.toggleLine}
             selectedLine={ws.selectedLine}
@@ -177,9 +177,9 @@ export function ChallengeScreen({
           style={{ width: `${rightWidth}px` }}
         >
           <ChallengeTabs
-            diffLines={diffLines}
+            diffLines={diffLines ?? []}
             explanation={ws.explanation}
-            hints={hints}
+            hints={hints ?? []}
             hintsOpen={ws.hintsOpen}
             rightTab={ws.rightTab}
             setExplanation={ws.setExplanation}

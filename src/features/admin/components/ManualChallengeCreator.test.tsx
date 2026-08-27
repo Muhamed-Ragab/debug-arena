@@ -3,6 +3,9 @@ import { describe, expect, it } from "vitest";
 import { renderWithProviders, screen } from "@/test/test-utils";
 import { ManualChallengeCreator } from "./ManualChallengeCreator";
 
+const TITLE_PLACEHOLDER_REGEX =
+  /e\.g\. Race Condition in Distributed Cache Store/i;
+
 const mockCategories = [
   {
     description: "Component lifecycle and state",
@@ -36,7 +39,7 @@ describe("ManualChallengeCreator Component", () => {
     renderWithProviders(<ManualChallengeCreator categories={mockCategories} />);
 
     const titleInput = screen.getByPlaceholderText(
-      /e\.g\. Race Condition in Distributed Cache Store/i
+      TITLE_PLACEHOLDER_REGEX
     ) as HTMLInputElement;
 
     await user.type(titleInput, "Custom Stale Lock Bug");

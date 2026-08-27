@@ -1,14 +1,13 @@
 "use client";
 
 import { FileCode, X } from "lucide-react";
-import { CODE_LINES } from "@/features/challenge/data/challenges";
 import type { CategoryConfig } from "@/lib/domain/categories";
 import { tokenizeLine } from "../lib/tokenize";
 
 interface Props {
   cfg: CategoryConfig;
-  codeLines?: string[];
-  fileName?: string;
+  codeLines: string[];
+  fileName: string;
   onClearLines?: () => void;
   onToggleLine: (n: number, isShift?: boolean) => void;
   selectedLine?: number | null;
@@ -21,8 +20,8 @@ export function CodeViewer({
   selectedLines,
   onToggleLine,
   onClearLines,
-  codeLines = CODE_LINES,
-  fileName = "Dashboard.tsx",
+  codeLines,
+  fileName,
 }: Props) {
   let activeLines: number[] = [];
   if (Array.isArray(selectedLines)) {

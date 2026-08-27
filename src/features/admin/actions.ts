@@ -8,7 +8,6 @@ import * as schema from "@/db/schema";
 import { generateDeterministicEmbedding } from "@/features/challenge/lib/embedding";
 import { ActionError, adminActionClient } from "@/lib/safe-action";
 import {
-  type GeneratedChallengeDraft,
   generateQuestionDraft,
   refineQuestionDraft,
 } from "./lib/question-generator-agent";
@@ -162,7 +161,10 @@ export const generateQuestionAction = adminActionClient
     } catch (err) {
       console.error("Failed to generate question draft:", err);
       throw new ActionError(
-        "Failed to generate challenge draft with AI agent."
+        "Failed to generate challenge draft with AI agent.",
+        {
+          cause: err,
+        }
       );
     }
   });
@@ -185,7 +187,9 @@ export const refineQuestionAction = adminActionClient
       };
     } catch (err) {
       console.error("Failed to refine question draft:", err);
-      throw new ActionError("Failed to refine challenge draft.");
+      throw new ActionError("Failed to refine challenge draft.", {
+        cause: err,
+      });
     }
   });
 
@@ -196,25 +200,14 @@ export const saveAdminChallengeAction = adminActionClient
   .schema(saveChallengeSchema)
   .action(async ({ parsedInput }) => {
     // 1. Resolve category
-    let category = await db.query.categories.findFirst({
+    const category = await db.query.categories.findFirst({
       where: eq(schema.categories.slug, parsedInput.categorySlug),
     });
 
     if (!category) {
-      // Create category or find first fallback
-      category = await db.query.categories.findFirst();
-      if (!category) {
-        const [newCat] = await db
-          .insert(schema.categories)
-          .values({
-            description:
-              "General software engineering and debugging challenges",
-            name: "General Debugging",
-            slug: "general-debugging",
-          })
-          .returning();
-        category = newCat;
-      }
+      throw new ActionError(
+        `Unknown category slug: ${parsedInput.categorySlug}`
+      );
     }
 
     const embedding = generateDeterministicEmbedding(

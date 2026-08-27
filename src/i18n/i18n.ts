@@ -1,7 +1,7 @@
 "use client";
 
 import { i18n } from "@lingui/core";
-import { messages as enMessages } from "./locales/en/messages";
+import { messages as enMessages } from "../locales/en/messages";
 
 export const locales = {
   ar: "العربية",
@@ -20,7 +20,7 @@ export async function dynamicActivate(locale: string): Promise<void> {
     i18n.load("en", enMessages);
     i18n.activate("en");
   } else if (targetLocale === "ar") {
-    const { messages: arMessages } = await import("./locales/ar/messages");
+    const { messages: arMessages } = await import("../locales/ar/messages");
     i18n.load("ar", arMessages);
     i18n.activate("ar");
   }

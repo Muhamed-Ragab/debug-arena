@@ -1,4 +1,4 @@
-import { env, type OAuthCredentials } from "@/lib/env";
+import { env, type OAuthCredentials } from "@/lib/env/env";
 
 export function buildSocialProviders(): Record<string, OAuthCredentials> {
   const providers: Record<string, OAuthCredentials> = {};

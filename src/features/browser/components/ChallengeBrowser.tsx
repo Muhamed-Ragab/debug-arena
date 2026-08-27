@@ -3,7 +3,8 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { CHALLENGES } from "@/features/challenge/data/challenges";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import type { Category, Challenge, Difficulty } from "@/lib/domain/types";
 import { ChallengeCard } from "./ChallengeCard";
 import { ChallengeFilters } from "./ChallengeFilters";
@@ -15,18 +16,12 @@ export interface ChallengeBrowserStat {
   value: string;
 }
 
-const DEFAULT_STATS: ChallengeBrowserStat[] = [
-  { label: "Solved", value: "0 / 10" },
-  { label: "Current Streak", value: "0 days" },
-  { label: "Rank", value: "#128" },
-];
-
 export function ChallengeBrowser({
-  initialChallenges = CHALLENGES,
-  stats = DEFAULT_STATS,
+  initialChallenges,
+  stats,
 }: {
-  initialChallenges?: Challenge[];
-  stats?: ChallengeBrowserStat[];
+  initialChallenges: Challenge[];
+  stats: ChallengeBrowserStat[];
 }) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<Category | "all">("all");
@@ -76,17 +71,14 @@ export function ChallengeBrowser({
 
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {stats.map((s) => (
-            <div
-              className="rounded-xl border border-border bg-card p-4"
-              key={s.label}
-            >
+            <Card className="p-4" key={s.label}>
               <p className="font-medium text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
                 {s.label}
               </p>
               <p className="mt-1 font-semibold text-heading text-xl">
                 {s.value}
               </p>
-            </div>
+            </Card>
           ))}
         </div>
 
@@ -120,36 +112,35 @@ export function ChallengeBrowser({
         )}
 
         <div className="mt-8 flex items-center justify-center gap-1">
-          <button
-            className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:text-foreground disabled:opacity-40"
+          <Button
+            className="h-9 w-9 p-0"
             disabled={safePage === 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            type="button"
+            size="sm"
+            variant="outline"
           >
             <ChevronLeft size={16} />
-          </button>
+          </Button>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <button
-              className={`h-9 min-w-9 rounded-md border px-3 font-medium text-sm transition-colors ${
-                p === safePage
-                  ? "border-primary bg-primary/10 font-semibold text-heading"
-                  : "border-border bg-card text-muted-foreground hover:text-foreground"
-              }`}
+            <Button
+              className="h-9 min-w-9 px-3 text-sm"
               key={p}
               onClick={() => setPage(p)}
-              type="button"
+              size="sm"
+              variant={p === safePage ? "default" : "outline"}
             >
               {p}
-            </button>
+            </Button>
           ))}
-          <button
-            className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:text-foreground disabled:opacity-40"
+          <Button
+            className="h-9 w-9 p-0"
             disabled={safePage === totalPages}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            type="button"
+            size="sm"
+            variant="outline"
           >
             <ChevronRight size={16} />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

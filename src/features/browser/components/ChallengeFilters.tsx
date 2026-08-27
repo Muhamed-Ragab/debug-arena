@@ -1,7 +1,8 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { type SelectOption, SimpleSelect } from "@/components/ui/Select";
+import { Input } from "@/components/ui/input";
+import { type SelectOption, SimpleSelect } from "@/components/ui/select";
 import {
   CATEGORY_CONFIG,
   CATEGORY_ORDER,
@@ -53,8 +54,8 @@ export function ChallengeFilters({
           className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           size={16}
         />
-        <input
-          className="w-full rounded-lg border border-border bg-card py-2 ps-10 pe-4 text-foreground text-sm transition-colors placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+        <Input
+          className="bg-card ps-10 pe-4"
           onChange={(e) => onSearch(e.target.value)}
           placeholder="Search challenges..."
           value={search}

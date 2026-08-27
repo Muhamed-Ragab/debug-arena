@@ -1,8 +1,7 @@
 import { ChevronDown, ChevronRight, Clock } from "lucide-react";
-import { CategoryTag } from "@/components/ui/CategoryTag";
-import { DiffBadge } from "@/components/ui/DiffBadge";
-import { FormattedMarkdown } from "@/components/ui/FormattedMarkdown";
-import { SCENARIO_PARAGRAPHS } from "@/features/challenge/data/challenges";
+import { CategoryTag } from "@/components/shared/CategoryTag";
+import { DiffBadge } from "@/components/shared/DiffBadge";
+import { FormattedMarkdown } from "@/components/shared/FormattedMarkdown";
 import type { CategoryConfig } from "@/lib/domain/categories";
 import type { Challenge } from "@/lib/domain/types";
 import { cn } from "@/lib/utils";
@@ -12,7 +11,7 @@ interface Props {
   cfg: CategoryConfig;
   challenge: Challenge;
   className?: string;
-  scenarioParagraphs?: string[];
+  scenarioParagraphs: string[];
   setTreeOpen: (v: boolean) => void;
   treeOpen: boolean;
 }
@@ -22,10 +21,11 @@ export function ChallengeScenario({
   cfg,
   treeOpen,
   setTreeOpen,
-  scenarioParagraphs = SCENARIO_PARAGRAPHS,
+  scenarioParagraphs,
   className,
 }: Props) {
   const scenarioContent = scenarioParagraphs.join("\n\n");
+  const fileNode = challenge.filePath ?? challenge.title;
 
   return (
     <div
@@ -62,7 +62,7 @@ export function ChallengeScenario({
             {treeOpen ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
             Relevant files
           </button>
-          {Boolean(treeOpen) && <FileTree cfg={cfg} />}
+          {Boolean(treeOpen) && <FileTree cfg={cfg} fileName={fileNode} />}
         </div>
       </div>
     </div>

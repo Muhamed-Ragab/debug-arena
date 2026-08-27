@@ -8,7 +8,7 @@ import { DangerZone } from "./components/DangerZone";
 import { EditProfileForm } from "./components/EditProfileForm";
 import { LinkedAccounts } from "./components/LinkedAccounts";
 import { SessionManager } from "./components/SessionManager";
-import type { LinkedAccount, SessionData } from "./data/settings";
+import type { LinkedAccount, SessionData } from "./types";
 
 type SectionId = "profile" | "sessions" | "accounts" | "danger";
 
@@ -98,20 +98,20 @@ export function ProfileSettingsPage({
         </nav>
 
         {/* Active section */}
-        <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
-          <div className="mx-auto max-w-[760px]">
-            {active === "profile" ? (
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto max-w-3xl">
+            {active === "profile" && (
               <EditProfileForm initialProfile={initialProfile} />
-            ) : null}
-            {active === "sessions" ? (
-              <SessionManager initialSessions={initialSessions} />
-            ) : null}
-            {active === "accounts" ? (
-              <LinkedAccounts initialAccounts={initialAccounts} />
-            ) : null}
-            {active === "danger" ? (
+            )}
+            {active === "sessions" && (
+              <SessionManager sessions={initialSessions ?? []} />
+            )}
+            {active === "accounts" && (
+              <LinkedAccounts accounts={initialAccounts ?? []} />
+            )}
+            {active === "danger" && (
               <DangerZone handle={initialProfile?.handle} />
-            ) : null}
+            )}
           </div>
         </main>
       </div>

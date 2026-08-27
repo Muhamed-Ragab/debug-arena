@@ -1,3 +1,5 @@
+import "server-only";
+
 import { headers } from "next/headers";
 import { createSafeActionClient } from "next-safe-action";
 import { auth } from "@/lib/auth";
@@ -33,7 +35,7 @@ export const authActionClient = actionClient.use(async ({ next }) => {
 });
 
 export const adminActionClient = authActionClient.use(async ({ ctx, next }) => {
-  const userRole = (ctx.user as { role?: string }).role;
+  const userRole = (ctx.user as { role?: string | null }).role ?? "";
   if (userRole !== "admin") {
     throw new ActionError("Forbidden: Admin access required");
   }

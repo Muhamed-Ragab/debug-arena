@@ -10,10 +10,10 @@ import {
   Radar,
 } from "lucide-react";
 import Link from "next/link";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Logo } from "@/components/layout/Sidebar";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { buttonVariants } from "@/components/ui/Button";
+import { LanguageSwitcher } from "@/components/preferences/LanguageSwitcher";
+import { ThemeToggle } from "@/components/preferences/ThemeToggle";
+import { buttonVariants } from "@/components/ui/button";
 import {
   CATEGORY_CONFIG,
   CATEGORY_ORDER,
@@ -261,7 +261,7 @@ export function LandingPage() {
               Log in
             </Link>
             <Link
-              className={buttonVariants({ size: "sm", variant: "primary" })}
+              className={buttonVariants({ size: "sm", variant: "default" })}
               href="/register"
             >
               Sign up
@@ -288,7 +288,7 @@ export function LandingPage() {
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
-                className={buttonVariants({ size: "lg", variant: "primary" })}
+                className={buttonVariants({ size: "lg", variant: "default" })}
                 href="/challenges"
               >
                 {i18n._("Start a challenge")}
@@ -328,7 +328,7 @@ export function LandingPage() {
             {i18n._("Ready to find out why it broke?")}
           </h3>
           <Link
-            className={buttonVariants({ size: "lg", variant: "primary" })}
+            className={buttonVariants({ size: "lg", variant: "default" })}
             href="/challenges"
           >
             {i18n._("Start a challenge")}

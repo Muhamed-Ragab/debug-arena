@@ -1,4 +1,3 @@
-import { DIFF_LINES } from "@/features/challenge/data/challenges";
 import type { DiffLine } from "../types";
 
 const LINE_STYLES = {
@@ -23,10 +22,10 @@ const LINE_STYLES = {
 } as const;
 
 interface Props {
-  diffLines?: DiffLine[];
+  diffLines: DiffLine[];
 }
 
-export function FixPanel({ diffLines = DIFF_LINES }: Props) {
+export function FixPanel({ diffLines }: Props) {
   return (
     <div className="flex h-full flex-col">
       <p className="mb-3 text-[11.5px] text-muted-foreground leading-relaxed">

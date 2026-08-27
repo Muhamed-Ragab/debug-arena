@@ -164,6 +164,549 @@ msgid "Already have an account?"
 msgstr "لديك حساب بالفعل؟"
 
 #. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Challenge published live to the arena!"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Challenge status set to draft."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Failed to update status."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Are you sure you want to delete this challenge?"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Challenge deleted successfully."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Failed to delete challenge."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Search challenges by title or category..."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "All Statuses"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Published"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Draft"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Archived"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "All Sources"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "AI Generated"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Manual"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Challenge"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Category"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Difficulty"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Status"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Source"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Submissions"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Actions"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "AI Agent"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "total"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "solves"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "View in Arena"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Unpublish to Draft"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Publish to Arena"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "Delete Challenge"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminChallengeList.tsx
+msgid "No challenges found matching your filters."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgid "Challenge & Question Studio"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgid "Admin"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgid "Generate with AI or manually author debugging challenges with automated diff calculations, formatted code blocks, and Socratic guidance."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgid "Total:"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgid "AI Synthesized:"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgid "Published:"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgid "Drafts:"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgid "AI Question Generator"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgid "Manual Challenge Authoring"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgid "Challenge Management ({count})"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Challenge must have at least one file."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Auto-calculated diff and detected buggy lines: [{start}, {end}]"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Challenge title is required."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Scenario prompt is required."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Root cause summary is required."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Challenge draft saved successfully."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Failed to save challenge."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Manual Challenge Authoring Studio"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Create and configure debugging scenarios with custom multi-file code, test cases, and Socratic hints."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Save Draft"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Challenge created and published successfully!"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Play in Arena"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Challenge Title *"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Category *"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Difficulty *"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/components/layout/Sidebar.tsx
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Language"
+msgstr "اللغة"
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Format"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Code Snippet / Multi-file"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Log Trace Only"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "UI Recording"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Points"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Time Limit"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Scenario Markdown Description *"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Edit Raw Markdown"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Preview Formatted Markdown"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Challenge Files & Bug Injection"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Auto-Compute Diff & Lines"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Add File"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Entry File"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Buggy Code ({name})"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Fixed Reference Code ({name})"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Buggy Lines Location (1-Indexed):"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Start:"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "End:"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "(Players get graded on whether their selected lines overlap this range)"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Reference Fix Explanation"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Progressive Socratic Hints"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Hint {order}"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Canonical Root Cause Breakdown *"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Prevention Notes & Safeguards"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgid "Save Challenge Draft"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "AI Agent generated challenge draft successfully!"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Failed to generate challenge."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Challenge refined by AI Agent!"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Failed to refine challenge draft."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "AI Challenge Synthesis Agent"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Synthesize high-fidelity debugging scenarios, buggy multi-file code, reference fixes, and progressive hints."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Llama 3.3 70B & Vector Embedder"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Scenario Presets"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Scenario / Bug Topic Idea"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Custom Instructions (Optional)"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Synthesizing Challenge with AI..."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Synthesize Challenge Draft"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Save as Draft"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Challenge is saved and ready in the database!"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Scenario Prompt"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Buggy Code"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Reference Fix & Diff"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Socratic Hints"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Root Cause & Prevention"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Verification Tests"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Scenario Markdown Description"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Fix Explanation:"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Canonical Root Cause Breakdown"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "No specific automated test scripts defined for this challenge."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "AI Agent Refinement Chat"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgid "Refine Draft"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/components/layout/Sidebar.tsx
 msgid "Challenges"
 msgstr "التحديات"
@@ -185,8 +728,18 @@ msgstr "الإعدادات"
 
 #. js-lingui-explicit-id
 #: src/components/layout/Sidebar.tsx
+msgid "AI Question Studio"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/components/layout/Sidebar.tsx
 msgid "Navigation"
 msgstr "التنقل"
+
+#. js-lingui-explicit-id
+#: src/components/layout/Sidebar.tsx
+msgid "Admin Portal"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/components/layout/Sidebar.tsx
@@ -194,11 +747,6 @@ msgid "Theme"
 msgstr "المظهر"
 
 #. js-lingui-explicit-id
-#: src/components/layout/Sidebar.tsx
-msgid "Language"
-msgstr "اللغة"
-
-#. js-lingui-explicit-id
 #: src/components/layout/TopBar.tsx
-msgid "Senior Engineer"
-msgstr "مهندس أول"
+msgid "Developer"
+msgstr ""

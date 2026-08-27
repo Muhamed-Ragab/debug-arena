@@ -5,9 +5,9 @@ import { FixPanel } from "./FixPanel";
 import { type HintItem, HintsPanel } from "./HintsPanel";
 
 interface Props {
-  diffLines?: DiffLine[];
+  diffLines: DiffLine[];
   explanation: string;
-  hints?: HintItem[];
+  hints: HintItem[];
   hintsOpen: number[];
   rightTab: RightTab;
   setExplanation: (v: string) => void;

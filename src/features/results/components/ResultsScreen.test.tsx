@@ -45,6 +45,12 @@ describe("ResultsScreen Component", () => {
         aiFeedback="Spot on diagnosis!"
         canonicalExplanation="setInterval captured initial count."
         challengeTitle="Stale Closure in Counter Interval"
+        evaluationDetails={{
+          alignmentPercent: 90,
+          isAiGraded: true,
+          isCorrect: true,
+          needsEnhancement: false,
+        }}
         maxScore={100}
         preventionNotes={[
           "Use functional state updater setCount(c => c + 1).",
@@ -53,6 +59,7 @@ describe("ResultsScreen Component", () => {
         scoreParts={mockScoreParts}
         totalScore={94}
         userExplanation="The setInterval callback forms a closure over count = 0."
+        userSolution="setCount(c => c + 1)"
       />
     );
 
@@ -83,6 +90,10 @@ describe("ResultsScreen Component", () => {
           needsEnhancement: true,
         }}
         maxScore={100}
+        preventionNotes={[
+          "Use functional state updater setCount(c => c + 1).",
+          "Enable ESLint exhaustive-deps rule.",
+        ]}
         scoreParts={mockScoreParts}
         totalScore={85}
         userExplanation="State variable count is captured in interval closure."
@@ -111,10 +122,22 @@ describe("ResultsScreen Component", () => {
 
     renderWithProviders(
       <ResultsScreen
+        aiFeedback="Good diagnosis."
+        canonicalExplanation="setInterval captures stale count."
         challengeTitle="Stale Closure in Counter Interval"
+        evaluationDetails={{
+          alignmentPercent: 80,
+          isAiGraded: true,
+          isCorrect: true,
+          needsEnhancement: false,
+        }}
+        maxScore={100}
         onNext={handleNext}
+        preventionNotes={["Use functional state updater."]}
         scoreParts={mockScoreParts}
         totalScore={94}
+        userExplanation="The interval closure captures stale count."
+        userSolution="setCount(c => c + 1)"
       />
     );
 

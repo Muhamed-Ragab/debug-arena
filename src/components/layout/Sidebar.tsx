@@ -13,8 +13,9 @@ import {
 import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/preferences/LanguageSwitcher";
+import { ThemeToggle } from "@/components/preferences/ThemeToggle";
+import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +44,8 @@ export function Sidebar({
   const { i18n } = useLingui();
   const pathname = usePathname();
   const { data: session } = useSession();
-  const isAdmin = (session?.user as { role?: string })?.role === "admin";
+  const user = session?.user as { role?: string } | undefined;
+  const isAdmin = user?.role === "admin";
 
   const NAV: Array<{
     to: Route;
@@ -80,14 +82,15 @@ export function Sidebar({
       <div className="flex h-16 items-center justify-between px-5">
         <Logo />
         {Boolean(onClose) && (
-          <button
+          <Button
             aria-label="Close sidebar"
-            className="rounded p-1 hover:bg-inset lg:hidden"
+            className="h-8 w-8 p-0 lg:hidden"
             onClick={onClose}
-            type="button"
+            size="icon"
+            variant="ghost"
           >
             <X className="text-muted-foreground" size={20} />
-          </button>
+          </Button>
         )}
       </div>
 

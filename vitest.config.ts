@@ -13,6 +13,12 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      // `server-only` resolves to a throwing module outside the `react-server`
+      // export condition (i.e. in vitest's jsdom environment). Alias it to a
+      // no-op shim so server-targeted modules can be imported in tests.
+      "server-only": fileURLToPath(
+        new URL("./src/test/server-only-shim.ts", import.meta.url),
+      ),
     },
   },
 });

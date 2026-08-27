@@ -53,7 +53,7 @@ const mockChallenges: Challenge[] = [
 describe("ChallengeBrowser Component", () => {
   it("renders challenge cards from initialChallenges", () => {
     renderWithProviders(
-      <ChallengeBrowser initialChallenges={mockChallenges} />
+      <ChallengeBrowser initialChallenges={mockChallenges} stats={[]} />
     );
 
     expect(
@@ -70,7 +70,7 @@ describe("ChallengeBrowser Component", () => {
   it("filters challenges by search term", async () => {
     const user = userEvent.setup();
     renderWithProviders(
-      <ChallengeBrowser initialChallenges={mockChallenges} />
+      <ChallengeBrowser initialChallenges={mockChallenges} stats={[]} />
     );
 
     const searchInput = screen.getByPlaceholderText(SEARCH_INPUT_REGEX);
@@ -87,12 +87,12 @@ describe("ChallengeBrowser Component", () => {
   it("filters challenges by category", async () => {
     const user = userEvent.setup();
     renderWithProviders(
-      <ChallengeBrowser initialChallenges={mockChallenges} />
+      <ChallengeBrowser initialChallenges={mockChallenges} stats={[]} />
     );
 
-    const categorySelectTrigger = screen.getByRole("button", {
-      name: ALL_CATEGORIES_REGEX,
-    });
+    const categorySelectTrigger =
+      screen.queryByRole("combobox", { name: ALL_CATEGORIES_REGEX }) ??
+      screen.getByText(ALL_CATEGORIES_REGEX);
     await user.click(categorySelectTrigger);
 
     const categoryOption = screen.getByRole("option", {
@@ -111,12 +111,12 @@ describe("ChallengeBrowser Component", () => {
   it("filters challenges by difficulty", async () => {
     const user = userEvent.setup();
     renderWithProviders(
-      <ChallengeBrowser initialChallenges={mockChallenges} />
+      <ChallengeBrowser initialChallenges={mockChallenges} stats={[]} />
     );
 
-    const diffSelectTrigger = screen.getByRole("button", {
-      name: ALL_LEVELS_REGEX,
-    });
+    const diffSelectTrigger =
+      screen.queryByRole("combobox", { name: ALL_LEVELS_REGEX }) ??
+      screen.getByText(ALL_LEVELS_REGEX);
     await user.click(diffSelectTrigger);
 
     const hardOption = screen.getByRole("option", { name: HARD_DIFF_REGEX });

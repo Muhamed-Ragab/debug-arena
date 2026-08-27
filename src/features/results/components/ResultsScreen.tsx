@@ -3,58 +3,44 @@
 import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TopBar } from "@/components/layout/TopBar";
-import { Button } from "@/components/ui/Button";
-import {
-  AI_FEEDBACK,
-  CANONICAL,
-  PREVENTION,
-  SCORE_PARTS,
-  USER_EXPLANATION,
-} from "@/features/results/data/results";
+import { Button } from "@/components/ui/button";
 import type { EvaluationDetails, ScorePart } from "@/features/results/types";
 import { ExplanationComparison } from "./ExplanationComparison";
 import { Prevention } from "./Prevention";
 import { ScoreBreakdown } from "./ScoreBreakdown";
 
 interface Props {
-  aiFeedback?: string;
-  canonicalExplanation?: string;
-  challengeTitle?: string;
-  evaluationDetails?: EvaluationDetails | null;
-  maxScore?: number;
+  aiFeedback: string;
+  canonicalExplanation: string;
+  challengeTitle: string;
+  evaluationDetails: EvaluationDetails;
+  maxScore: number;
   onNext?: () => void;
-  preventionNotes?: string[];
-  scoreParts?: ScorePart[];
-  totalScore?: number;
-  userExplanation?: string;
-  userSolution?: string;
+  preventionNotes: string[];
+  scoreParts: ScorePart[];
+  totalScore: number;
+  userExplanation: string;
+  userSolution: string;
 }
 
 export function ResultsScreen({
   onNext,
-  challengeTitle = "Dashboard freezes after third click",
-  scoreParts = SCORE_PARTS,
+  challengeTitle,
+  scoreParts,
   totalScore,
   maxScore,
-  userExplanation = USER_EXPLANATION,
+  userExplanation,
   userSolution,
-  canonicalExplanation = CANONICAL,
-  aiFeedback = AI_FEEDBACK,
+  canonicalExplanation,
+  aiFeedback,
   evaluationDetails,
-  preventionNotes = PREVENTION,
+  preventionNotes,
 }: Props) {
   const router = useRouter();
   const handleNext = onNext ?? (() => router.push("/challenges"));
 
-  const calculatedTotal =
-    totalScore === undefined
-      ? scoreParts.reduce((s, p) => s + p.score, 0)
-      : totalScore;
-
-  const calculatedMax =
-    maxScore === undefined
-      ? scoreParts.reduce((s, p) => s + p.max, 0)
-      : maxScore;
+  const calculatedTotal = totalScore;
+  const calculatedMax = maxScore;
 
   return (
     <div className="flex h-full w-full flex-col">

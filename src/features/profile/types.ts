@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import type { Category } from "@/lib/domain/types";
 
 export interface RadarPoint {
@@ -20,4 +21,50 @@ export interface RecentSubmission {
   pts: number;
   score: number;
   title: string;
+}
+
+export interface CategoryStat {
+  category: Category;
+  score: number;
+  solved: number;
+}
+
+export interface ProfileStat {
+  Icon?: LucideIcon;
+  iconColor?: string;
+  label: string;
+  value: string;
+}
+
+export type ProviderId = "github" | "google" | "gitlab" | "discord";
+
+export type DeviceType = "desktop" | "mobile" | "tablet";
+
+export interface SessionData {
+  browser: string;
+  current: boolean;
+  device: string;
+  deviceType: DeviceType;
+  id: string;
+  /** Masked IP for display only. */
+  ip: string;
+  /** Human-readable last-active label. */
+  lastActive: string;
+  /** Coarse, IP-derived location — never precise. */
+  location: string;
+  /** Surfaced when a login is new / unexpected. */
+  newLogin?: boolean;
+  os: string;
+}
+
+export interface LinkedAccount {
+  connected: boolean;
+  /** Email shown when connected. */
+  email?: string;
+  /** The method used to sign in to this session. */
+  isCurrentSignIn: boolean;
+  /** Primary provider for avatar/display name. */
+  isPrimary: boolean;
+  label: string;
+  provider: ProviderId;
 }

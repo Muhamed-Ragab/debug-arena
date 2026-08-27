@@ -4,7 +4,7 @@ import { LeaderboardScreen } from "./components/LeaderboardScreen";
 import type { LeaderboardEntry } from "./types";
 
 interface Props {
-  initialEntries?: LeaderboardEntry[];
+  initialEntries: LeaderboardEntry[];
 }
 
 export function LeaderboardPage({ initialEntries }: Props) {

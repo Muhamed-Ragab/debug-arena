@@ -6,7 +6,7 @@ import { admin } from "better-auth/plugins";
 import { validator } from "validation-better-auth";
 import { db } from "@/db/client";
 import * as schema from "@/db/schema";
-import { env } from "@/lib/env";
+import { env } from "@/lib/env/env";
 import { getRedis } from "@/lib/redis";
 import { buildSocialProviders } from "./social-providers";
 import {

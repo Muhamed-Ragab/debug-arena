@@ -2,15 +2,7 @@
 
 import { Flame, Trophy } from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
-import { Avatar } from "@/components/ui/Avatar";
-import {
-  CATEGORY_STATS,
-  PROFILE,
-  PROFILE_STATS,
-  RADAR_DATA,
-  RECENT_SUBMISSIONS,
-  STRENGTH_DATA,
-} from "@/features/profile/data/profile";
+import { Avatar } from "@/components/ui/avatar";
 import type { UserProfileData } from "../queries";
 import { CategoryStrengthChart } from "./CategoryStrengthChart";
 import { ProfileStats } from "./ProfileStats";
@@ -18,16 +10,18 @@ import { RecentSubmissions } from "./RecentSubmissions";
 import { SolvedByDifficultyChart } from "./SolvedByDifficultyChart";
 
 interface Props {
-  data?: UserProfileData | null;
+  data: UserProfileData;
 }
 
 export function ProfileScreen({ data }: Props) {
-  const profile = data?.profile ?? PROFILE;
-  const stats = data?.profileStats ?? PROFILE_STATS;
-  const categoryStats = data?.categoryStats ?? CATEGORY_STATS;
-  const radarData = data?.radarData ?? RADAR_DATA;
-  const strengthData = data?.strengthData ?? STRENGTH_DATA;
-  const recentSubmissions = data?.recentSubmissions ?? RECENT_SUBMISSIONS;
+  const {
+    profile,
+    profileStats,
+    categoryStats,
+    radarData,
+    strengthData,
+    recentSubmissions,
+  } = data;
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -80,7 +74,7 @@ export function ProfileScreen({ data }: Props) {
             )}
           </div>
 
-          <ProfileStats categoryStats={categoryStats} stats={stats} />
+          <ProfileStats categoryStats={categoryStats} stats={profileStats} />
         </div>
 
         {/* Right column: Performance Charts & Submissions */}

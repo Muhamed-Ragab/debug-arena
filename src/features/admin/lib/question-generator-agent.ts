@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { env } from "@/lib/env";
+import { env } from "@/lib/env/env";
 
 export interface DiffLine {
   line?: number;
@@ -153,10 +153,12 @@ function findLookAhead(
 function processMismatch(
   buggyLines: string[],
   fixedLines: string[],
-  i: number,
-  j: number,
+  initialBuggyIndex: number,
+  initialFixedIndex: number,
   diff: DiffLine[]
 ): [number, number] {
+  let i = initialBuggyIndex;
+  let j = initialFixedIndex;
   const hasBuggy = i < buggyLines.length;
   const hasFixed = j < fixedLines.length;
 

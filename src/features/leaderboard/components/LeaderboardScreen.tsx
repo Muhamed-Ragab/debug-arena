@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { LEADERBOARD } from "@/features/leaderboard/data/leaderboard";
 import { CATEGORY_CONFIG } from "@/lib/domain/categories";
 import { useLeaderboard } from "../hooks/useLeaderboard";
 import type { LeaderboardEntry } from "../types";
@@ -11,14 +10,14 @@ import { LeaderboardTabs } from "./LeaderboardTabs";
 import { LeaderboardTopThree } from "./LeaderboardTopThree";
 
 interface Props {
-  initialEntries?: LeaderboardEntry[];
+  initialEntries: LeaderboardEntry[];
 }
 
-export function LeaderboardScreen({ initialEntries = LEADERBOARD }: Props) {
+export function LeaderboardScreen({ initialEntries }: Props) {
   const { tab, setTab, categoryTab } = useLeaderboard();
 
   const filteredEntries = useMemo(() => {
-    const list = initialEntries.length > 0 ? initialEntries : LEADERBOARD;
+    const list = initialEntries;
     if (!categoryTab) {
       return list;
     }
@@ -72,8 +71,19 @@ export function LeaderboardScreen({ initialEntries = LEADERBOARD }: Props) {
             })()
           : null}
 
-        <LeaderboardTopThree entries={filteredEntries} />
-        <LeaderboardTable entries={filteredEntries} />
+        {filteredEntries.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-lg border border-border border-dashed py-16 text-center">
+            <p className="font-medium text-heading">No leaderboard data yet</p>
+            <p className="mt-1 text-muted-foreground text-sm">
+              Solve challenges to earn a spot on the leaderboard.
+            </p>
+          </div>
+        ) : (
+          <>
+            <LeaderboardTopThree entries={filteredEntries} />
+            <LeaderboardTable entries={filteredEntries} />
+          </>
+        )}
       </div>
     </div>
   );

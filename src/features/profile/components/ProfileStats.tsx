@@ -1,8 +1,5 @@
-import type {
-  CategoryStat,
-  ProfileStat,
-} from "@/features/profile/data/profile";
 import { CATEGORY_CONFIG } from "@/lib/domain/categories";
+import type { CategoryStat, ProfileStat } from "../types";
 
 interface Props {
   categoryStats: CategoryStat[];

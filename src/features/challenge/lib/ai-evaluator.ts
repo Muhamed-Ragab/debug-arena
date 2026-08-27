@@ -1,4 +1,4 @@
-import { env } from "@/lib/env";
+import { env } from "@/lib/env/env";
 import { cosineSimilarity, generateDeterministicEmbedding } from "./embedding";
 
 export interface AIEvaluationResult {

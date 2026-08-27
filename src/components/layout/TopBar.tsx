@@ -3,8 +3,7 @@
 import { useLingui } from "@lingui/react";
 import type { Route } from "next";
 import Link from "next/link";
-import { Avatar } from "@/components/ui/Avatar";
-import { NotificationBell } from "@/components/ui/NotificationBell";
+import { Avatar } from "@/components/ui/avatar";
 import { useSession } from "@/lib/auth/client";
 import { Logo } from "./Sidebar";
 
@@ -67,7 +66,6 @@ export function TopBar({ crumbs, right }: TopBarProps) {
       </div>
       <div className="flex items-center gap-4">
         {right}
-        <NotificationBell />
         <Link
           className="flex items-center gap-2.5 transition-opacity hover:opacity-90"
           href="/profile"

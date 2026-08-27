@@ -210,7 +210,7 @@ export default async function SubmissionResultsPage({
       userExplanation={
         submission.rootCauseExplanation ?? "No explanation submitted."
       }
-      userSolution={userSolution}
+      userSolution={userSolution ?? ""}
     />
   );
 }

@@ -5,7 +5,7 @@ import { I18nProvider } from "@lingui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { dynamicActivate } from "@/i18n";
+import { dynamicActivate } from "@/i18n/i18n";
 
 function LocaleBootstrap({ children }: { children: React.ReactNode }) {
   useEffect(() => {

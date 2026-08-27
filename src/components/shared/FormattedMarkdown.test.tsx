@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { renderWithProviders, screen } from "@/test/test-utils";
 import { FormattedMarkdown } from "./FormattedMarkdown";
 
+const TYPESCRIPT_REGEX = /typescript/i;
+
 describe("FormattedMarkdown Component", () => {
   it("renders fenced code blocks with language badge and syntax lines", () => {
     const markdown =
@@ -10,7 +12,7 @@ describe("FormattedMarkdown Component", () => {
     renderWithProviders(<FormattedMarkdown content={markdown} />);
 
     expect(screen.getByText("Here is an example:")).toBeDefined();
-    expect(screen.getByText(/typescript/i)).toBeDefined();
+    expect(screen.getByText(TYPESCRIPT_REGEX)).toBeDefined();
     expect(screen.getByText("Copy")).toBeDefined();
     expect(screen.getAllByText("const").length).toBeGreaterThan(0);
   });

@@ -1,7 +1,6 @@
 import { Flame } from "lucide-react";
-import { Avatar } from "@/components/ui/Avatar";
-import { RankMedal } from "@/components/ui/RankMedal";
-import { LEADERBOARD } from "@/features/leaderboard/data/leaderboard";
+import { RankMedal } from "@/components/shared/RankMedal";
+import { Avatar } from "@/components/ui/avatar";
 import { CATEGORY_CONFIG } from "@/lib/domain/categories";
 import { cn } from "@/lib/utils";
 import type { LeaderboardEntry } from "../types";
@@ -88,9 +87,20 @@ function TopThreeCard({ entry }: { entry: LeaderboardEntry }) {
 export function LeaderboardTopThree({
   entries,
 }: {
-  entries?: LeaderboardEntry[];
+  entries: LeaderboardEntry[];
 }) {
-  const top3 = (entries ?? LEADERBOARD).slice(0, 3);
+  const top3 = entries.slice(0, 3);
+
+  if (top3.length === 0) {
+    return (
+      <div className="mb-8 flex flex-col items-center justify-center rounded-lg border border-border border-dashed py-12 text-center">
+        <p className="font-medium text-heading">No top solvers yet</p>
+        <p className="mt-1 text-muted-foreground text-sm">
+          Be the first to climb the podium.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-start">

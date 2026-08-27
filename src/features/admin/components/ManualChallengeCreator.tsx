@@ -2,33 +2,29 @@
 
 import { useLingui } from "@lingui/react";
 import {
-  AlertCircle,
   CheckCircle2,
   FileCode,
   FilePlus,
-  Flame,
-  Layers,
   Lightbulb,
   Play,
   Plus,
   RotateCcw,
   Save,
   ShieldAlert,
-  TestTube,
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/Button";
-import { FormattedMarkdown } from "@/components/ui/FormattedMarkdown";
+import { FormattedMarkdown } from "@/components/shared/FormattedMarkdown";
+import { Button } from "@/components/ui/button";
 import { saveAdminChallengeAction } from "../actions";
 import {
   type ChallengeFile,
   type ChallengeHiddenTest,
   type ChallengeHint,
-  type DiffLine,
   computeUnifiedDiff,
+  type DiffLine,
   detectBuggyLines,
 } from "../lib/question-generator-agent";
 
@@ -74,7 +70,7 @@ export function ManualChallengeCreator({
   // Buggy Files
   const [buggyFiles, setBuggyFiles] = useState<ChallengeFile[]>([
     {
-      code: `export function App() {\n  // Insert buggy code here\n  return <div>Debug Arena</div>;\n}`,
+      code: "export function App() {\n  // Insert buggy code here\n  return <div>Debug Arena</div>;\n}",
       isEntry: true,
       name: "App.tsx",
     },
@@ -84,7 +80,7 @@ export function ManualChallengeCreator({
   // Fixed Files & Diff
   const [fixedFiles, setFixedFiles] = useState<ChallengeFile[]>([
     {
-      code: `export function App() {\n  // Insert fixed code here\n  return <div>Debug Arena</div>;\n}`,
+      code: "export function App() {\n  // Insert fixed code here\n  return <div>Debug Arena</div>;\n}",
       isEntry: true,
       name: "App.tsx",
     },
@@ -122,7 +118,7 @@ export function ManualChallengeCreator({
   );
 
   // Tests
-  const [hiddenTests, setHiddenTests] = useState<ChallengeHiddenTest[]>([
+  const [hiddenTests, _setHiddenTests] = useState<ChallengeHiddenTest[]>([
     {
       description: "Verify state synchronization under sequential updates",
       name: "Handles sequential transitions correctly",
@@ -185,23 +181,29 @@ export function ManualChallengeCreator({
       toast.success(
         i18n._(
           "Auto-calculated diff and detected buggy lines: [{start}, {end}]",
-          { start: lines[0], end: lines[1] }
+          { end: lines[1], start: lines[0] }
         )
       );
     }
   };
 
-  const handleSave = async (status: "draft" | "published") => {
+  const validateChallenge = (): string | null => {
     if (!title.trim()) {
-      toast.error(i18n._("Challenge title is required."));
-      return;
+      return i18n._("Challenge title is required.");
     }
     if (!prompt.trim()) {
-      toast.error(i18n._("Scenario prompt is required."));
-      return;
+      return i18n._("Scenario prompt is required.");
     }
     if (!rootCauseSummary.trim()) {
-      toast.error(i18n._("Root cause summary is required."));
+      return i18n._("Root cause summary is required.");
+    }
+    return null;
+  };
+
+  const handleSave = async (status: "draft" | "published") => {
+    const validationError = validateChallenge();
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
 
@@ -210,12 +212,12 @@ export function ManualChallengeCreator({
       const entryBuggy = buggyFiles.find((f) => f.isEntry) || buggyFiles[0];
       const entryFixed =
         fixedFiles.find((f) => f.name === entryBuggy?.name) || fixedFiles[0];
-      const computedDiff =
-        diffLines.length > 0
-          ? diffLines
-          : entryBuggy && entryFixed
-            ? computeUnifiedDiff(entryBuggy.code, entryFixed.code)
-            : [];
+      let computedDiff: DiffLine[] = [];
+      if (diffLines.length > 0) {
+        computedDiff = diffLines;
+      } else if (entryBuggy && entryFixed) {
+        computedDiff = computeUnifiedDiff(entryBuggy.code, entryFixed.code);
+      }
 
       const res = await saveAdminChallengeAction({
         buggyArtifact: {
@@ -268,13 +270,13 @@ export function ManualChallengeCreator({
       {/* Form Container */}
       <div className="flex flex-col gap-6 rounded-xl border border-border bg-surface/80 p-6 shadow-md backdrop-blur-md">
         {/* Header */}
-        <div className="flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-border border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <FilePlus size={20} />
             </div>
             <div>
-              <h2 className="font-semibold text-lg text-heading">
+              <h2 className="font-semibold text-heading text-lg">
                 {i18n._("Manual Challenge Authoring Studio")}
               </h2>
               <p className="text-muted-foreground text-xs">
@@ -299,7 +301,7 @@ export function ManualChallengeCreator({
               disabled={isSaving}
               onClick={() => handleSave("published")}
               size="sm"
-              variant="primary"
+              variant="default"
             >
               <Play size={14} />
               {i18n._("Publish to Arena")}
@@ -317,7 +319,7 @@ export function ManualChallengeCreator({
               </span>
             </div>
             <Link
-              className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500 px-3 py-1 font-semibold text-xs text-black hover:bg-emerald-400 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500 px-3 py-1 font-semibold text-black text-xs transition-colors hover:bg-emerald-400"
               href={`/challenges/${publishedId}`}
               target="_blank"
             >
@@ -329,11 +331,15 @@ export function ManualChallengeCreator({
         {/* 1. Core Metadata */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
           <div className="md:col-span-6">
-            <label className="mb-1.5 block font-semibold text-xs text-heading">
+            <label
+              className="mb-1.5 block font-semibold text-heading text-xs"
+              htmlFor="challenge-title"
+            >
               {i18n._("Challenge Title *")}
             </label>
             <input
-              className="w-full rounded-lg border border-border bg-inset px-3.5 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+              className="w-full rounded-lg border border-border bg-inset px-3.5 py-2 text-foreground text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+              id="challenge-title"
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Race Condition in Distributed Cache Store"
               type="text"
@@ -342,11 +348,15 @@ export function ManualChallengeCreator({
           </div>
 
           <div className="md:col-span-3">
-            <label className="mb-1.5 block font-semibold text-xs text-heading">
+            <label
+              className="mb-1.5 block font-semibold text-heading text-xs"
+              htmlFor="challenge-category"
+            >
               {i18n._("Category *")}
             </label>
             <select
-              className="w-full rounded-lg border border-border bg-inset px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
+              className="w-full rounded-lg border border-border bg-inset px-3 py-2 text-foreground text-xs focus:border-primary focus:outline-none"
+              id="challenge-category"
               onChange={(e) => setCategorySlug(e.target.value)}
               value={categorySlug}
             >
@@ -359,13 +369,16 @@ export function ManualChallengeCreator({
           </div>
 
           <div className="md:col-span-3">
-            <label className="mb-1.5 block font-semibold text-xs text-heading">
+            <span className="mb-1.5 block font-semibold text-heading text-xs">
               {i18n._("Difficulty *")}
-            </label>
-            <div className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-inset p-1">
+            </span>
+            <fieldset
+              aria-label={i18n._("Difficulty")}
+              className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-inset p-1"
+            >
               {(["easy", "medium", "hard"] as const).map((d) => (
                 <button
-                  className={`rounded py-1 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                  className={`rounded py-1 font-semibold text-xs uppercase tracking-wider transition-colors ${
                     difficulty === d
                       ? "bg-primary text-white shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
@@ -377,15 +390,19 @@ export function ManualChallengeCreator({
                   {d}
                 </button>
               ))}
-            </div>
+            </fieldset>
           </div>
 
           <div className="md:col-span-3">
-            <label className="mb-1.5 block font-semibold text-xs text-heading">
+            <label
+              className="mb-1.5 block font-semibold text-heading text-xs"
+              htmlFor="challenge-language"
+            >
               {i18n._("Language")}
             </label>
             <select
-              className="w-full rounded-lg border border-border bg-inset px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
+              className="w-full rounded-lg border border-border bg-inset px-3 py-2 text-foreground text-xs focus:border-primary focus:outline-none"
+              id="challenge-language"
               onChange={(e) => setLanguage(e.target.value)}
               value={language}
             >
@@ -398,11 +415,15 @@ export function ManualChallengeCreator({
           </div>
 
           <div className="md:col-span-3">
-            <label className="mb-1.5 block font-semibold text-xs text-heading">
+            <label
+              className="mb-1.5 block font-semibold text-heading text-xs"
+              htmlFor="challenge-format"
+            >
               {i18n._("Format")}
             </label>
             <select
-              className="w-full rounded-lg border border-border bg-inset px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
+              className="w-full rounded-lg border border-border bg-inset px-3 py-2 text-foreground text-xs focus:border-primary focus:outline-none"
+              id="challenge-format"
               onChange={(e) =>
                 setFormat(
                   e.target.value as "code_snippet" | "log_only" | "ui_recording"
@@ -419,11 +440,15 @@ export function ManualChallengeCreator({
           </div>
 
           <div className="md:col-span-3">
-            <label className="mb-1.5 block font-semibold text-xs text-heading">
+            <label
+              className="mb-1.5 block font-semibold text-heading text-xs"
+              htmlFor="challenge-points"
+            >
               {i18n._("Points")}
             </label>
             <input
-              className="w-full rounded-lg border border-border bg-inset px-3.5 py-2 text-xs font-mono text-foreground focus:border-primary focus:outline-none"
+              className="w-full rounded-lg border border-border bg-inset px-3.5 py-2 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
+              id="challenge-points"
               onChange={(e) => setPoints(Number(e.target.value))}
               type="number"
               value={points}
@@ -431,11 +456,15 @@ export function ManualChallengeCreator({
           </div>
 
           <div className="md:col-span-3">
-            <label className="mb-1.5 block font-semibold text-xs text-heading">
+            <label
+              className="mb-1.5 block font-semibold text-heading text-xs"
+              htmlFor="challenge-time-limit"
+            >
               {i18n._("Time Limit")}
             </label>
             <input
-              className="w-full rounded-lg border border-border bg-inset px-3.5 py-2 text-xs font-mono text-foreground focus:border-primary focus:outline-none"
+              className="w-full rounded-lg border border-border bg-inset px-3.5 py-2 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
+              id="challenge-time-limit"
               onChange={(e) => setTimeLimit(e.target.value)}
               type="text"
               value={timeLimit}
@@ -446,11 +475,11 @@ export function ManualChallengeCreator({
         {/* 2. Scenario Prompt */}
         <div className="flex flex-col gap-2 rounded-xl border border-border bg-inset/40 p-4">
           <div className="flex items-center justify-between">
-            <label className="font-semibold text-xs text-heading uppercase tracking-wider">
+            <span className="font-semibold text-heading text-xs uppercase tracking-wider">
               {i18n._("Scenario Markdown Description *")}
-            </label>
+            </span>
             <button
-              className="font-semibold text-xs text-primary hover:underline"
+              className="font-semibold text-primary text-xs hover:underline"
               onClick={() => setShowPromptPreview(!showPromptPreview)}
               type="button"
             >
@@ -466,7 +495,7 @@ export function ManualChallengeCreator({
             </div>
           ) : (
             <textarea
-              className="h-48 w-full rounded-lg border border-border bg-surface p-3 font-mono text-xs text-foreground focus:border-primary focus:outline-none"
+              className="h-48 w-full rounded-lg border border-border bg-surface p-3 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
               onChange={(e) => setPrompt(e.target.value)}
               rows={8}
               value={prompt}
@@ -479,7 +508,7 @@ export function ManualChallengeCreator({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FileCode className="text-primary" size={16} />
-              <h3 className="font-semibold text-sm text-heading">
+              <h3 className="font-semibold text-heading text-sm">
                 {i18n._("Challenge Files & Bug Injection")}
               </h3>
             </div>
@@ -503,12 +532,12 @@ export function ManualChallengeCreator({
           {buggyFiles.map((file, idx) => (
             <div
               className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"
-              key={`file-${idx}-${file.name}`}
+              key={file.name}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <input
-                    className="rounded border border-border bg-inset px-2.5 py-1 font-mono text-xs text-heading font-semibold focus:border-primary focus:outline-none"
+                    className="rounded border border-border bg-inset px-2.5 py-1 font-mono font-semibold text-heading text-xs focus:border-primary focus:outline-none"
                     onChange={(e) => {
                       const name = e.target.value;
                       setBuggyFiles((prev) =>
@@ -521,7 +550,7 @@ export function ManualChallengeCreator({
                     type="text"
                     value={file.name}
                   />
-                  <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer">
+                  <label className="flex cursor-pointer items-center gap-1.5 text-muted-foreground text-xs">
                     <input
                       checked={Boolean(file.isEntry)}
                       name="isEntryRadio"
@@ -550,11 +579,11 @@ export function ManualChallengeCreator({
               {/* Buggy Code vs Fixed Code Comparison */}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
-                  <span className="font-mono text-[11px] text-amber-400 font-semibold">
+                  <span className="font-mono font-semibold text-[11px] text-amber-400">
                     {i18n._("Buggy Code ({name})", { name: file.name })}
                   </span>
                   <textarea
-                    className="h-52 w-full rounded border border-border bg-black/80 p-3 font-mono text-xs text-amber-100 focus:border-primary focus:outline-none"
+                    className="h-52 w-full rounded border border-border bg-black/80 p-3 font-mono text-amber-100 text-xs focus:border-primary focus:outline-none"
                     onChange={(e) => {
                       const code = e.target.value;
                       setBuggyFiles((prev) =>
@@ -566,13 +595,13 @@ export function ManualChallengeCreator({
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <span className="font-mono text-[11px] text-emerald-400 font-semibold">
+                  <span className="font-mono font-semibold text-[11px] text-emerald-400">
                     {i18n._("Fixed Reference Code ({name})", {
                       name: file.name,
                     })}
                   </span>
                   <textarea
-                    className="h-52 w-full rounded border border-border bg-black/80 p-3 font-mono text-xs text-emerald-100 focus:border-primary focus:outline-none"
+                    className="h-52 w-full rounded border border-border bg-black/80 p-3 font-mono text-emerald-100 text-xs focus:border-primary focus:outline-none"
                     onChange={(e) => {
                       const code = e.target.value;
                       setFixedFiles((prev) =>
@@ -594,7 +623,7 @@ export function ManualChallengeCreator({
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">{i18n._("Start:")}</span>
               <input
-                className="w-16 rounded border border-border bg-surface px-2 py-1 font-mono text-xs text-foreground focus:border-primary focus:outline-none"
+                className="w-16 rounded border border-border bg-surface px-2 py-1 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
                 onChange={(e) =>
                   setBuggyLines([Number(e.target.value), buggyLines[1]])
                 }
@@ -603,7 +632,7 @@ export function ManualChallengeCreator({
               />
               <span className="text-muted-foreground">{i18n._("End:")}</span>
               <input
-                className="w-16 rounded border border-border bg-surface px-2 py-1 font-mono text-xs text-foreground focus:border-primary focus:outline-none"
+                className="w-16 rounded border border-border bg-surface px-2 py-1 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
                 onChange={(e) =>
                   setBuggyLines([buggyLines[0], Number(e.target.value)])
                 }
@@ -620,11 +649,15 @@ export function ManualChallengeCreator({
 
           {/* Fix Explanation */}
           <div className="flex flex-col gap-1.5">
-            <label className="font-semibold text-xs text-heading">
+            <label
+              className="font-semibold text-heading text-xs"
+              htmlFor="challenge-fix-explanation"
+            >
               {i18n._("Reference Fix Explanation")}
             </label>
             <input
-              className="w-full rounded-lg border border-border bg-inset px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
+              className="w-full rounded-lg border border-border bg-inset px-3 py-2 text-foreground text-xs focus:border-primary focus:outline-none"
+              id="challenge-fix-explanation"
               onChange={(e) => setFixExplanation(e.target.value)}
               placeholder="e.g. Wrapped balance decrement and update in an atomic transaction..."
               type="text"
@@ -637,7 +670,7 @@ export function ManualChallengeCreator({
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <Lightbulb className="text-amber-400" size={16} />
-            <h3 className="font-semibold text-sm text-heading">
+            <h3 className="font-semibold text-heading text-sm">
               {i18n._("Progressive Socratic Hints")}
             </h3>
           </div>
@@ -649,7 +682,7 @@ export function ManualChallengeCreator({
                 key={`hint-card-${hint.order}`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-xs text-heading">
+                  <span className="font-semibold text-heading text-xs">
                     {i18n._("Hint {order}", { order: hint.order })}
                   </span>
                   <div className="flex items-center gap-1 font-mono text-[11px] text-rose-400">
@@ -671,7 +704,7 @@ export function ManualChallengeCreator({
                   </div>
                 </div>
                 <textarea
-                  className="h-24 w-full rounded border border-border bg-inset p-2 font-mono text-xs text-foreground focus:border-primary focus:outline-none"
+                  className="h-24 w-full rounded border border-border bg-inset p-2 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
                   onChange={(e) => {
                     const socraticPrompt = e.target.value;
                     setHints((prev) =>
@@ -692,12 +725,12 @@ export function ManualChallengeCreator({
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <ShieldAlert className="text-primary" size={16} />
-              <h3 className="font-semibold text-xs text-heading uppercase tracking-wider">
+              <h3 className="font-semibold text-heading text-xs uppercase tracking-wider">
                 {i18n._("Canonical Root Cause Breakdown *")}
               </h3>
             </div>
             <textarea
-              className="h-32 w-full rounded-lg border border-border bg-inset p-3 font-mono text-xs text-foreground focus:border-primary focus:outline-none"
+              className="h-32 w-full rounded-lg border border-border bg-inset p-3 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
               onChange={(e) => setRootCauseSummary(e.target.value)}
               placeholder="Explain the failure mechanism, event loop or state lifecycle that triggers the bug..."
               value={rootCauseSummary}
@@ -707,12 +740,12 @@ export function ManualChallengeCreator({
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <ShieldAlert className="text-emerald-400" size={16} />
-              <h3 className="font-semibold text-xs text-heading uppercase tracking-wider">
+              <h3 className="font-semibold text-heading text-xs uppercase tracking-wider">
                 {i18n._("Prevention Notes & Safeguards")}
               </h3>
             </div>
             <textarea
-              className="h-32 w-full rounded-lg border border-border bg-inset p-3 font-mono text-xs text-foreground focus:border-primary focus:outline-none"
+              className="h-32 w-full rounded-lg border border-border bg-inset p-3 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
               onChange={(e) => setPreventionNotes(e.target.value)}
               placeholder="Recommended ESLint rules, architecture patterns, and regression tests..."
               value={preventionNotes}
@@ -721,7 +754,7 @@ export function ManualChallengeCreator({
         </div>
 
         {/* Action Bar */}
-        <div className="flex items-center justify-end gap-3 border-t border-border pt-4">
+        <div className="flex items-center justify-end gap-3 border-border border-t pt-4">
           <Button
             disabled={isSaving}
             onClick={() => handleSave("draft")}
@@ -735,7 +768,7 @@ export function ManualChallengeCreator({
             disabled={isSaving}
             onClick={() => handleSave("published")}
             size="md"
-            variant="primary"
+            variant="default"
           >
             <Play size={15} />
             {i18n._("Publish to Arena")}
