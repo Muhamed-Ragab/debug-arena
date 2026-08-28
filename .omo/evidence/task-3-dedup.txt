@@ -1,7 +1,0 @@
-=== file exists ===
-ok
-=== repositories dir check ===
-ok: no repositories dir
-=== no-math grep ===
-0 matches
-=== exports check ===
