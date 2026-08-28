@@ -7,6 +7,13 @@ import { Checkbox } from "./checkbox";
 import { Dialog, DialogContent, DialogTrigger } from "./dialog";
 import { Input } from "./input";
 import { Label } from "./label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
 import { Separator } from "./separator";
 import { Skeleton } from "./skeleton";
 import { Switch } from "./switch";
@@ -142,5 +149,27 @@ describe("Shadcn UI Components Suite", () => {
     expect(screen.queryByText("Modal Inner Content")).not.toBeInTheDocument();
     fireEvent.click(screen.getByText("Open Modal"));
     expect(screen.getByText("Modal Inner Content")).toBeInTheDocument();
+  });
+
+  it("renders Select and handles value selection", async () => {
+    render(
+      <Select defaultValue="opt1">
+        <SelectTrigger aria-label="test-select">
+          <SelectValue placeholder="Choose..." />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="opt1">Option 1</SelectItem>
+          <SelectItem value="opt2">Option 2</SelectItem>
+        </SelectContent>
+      </Select>
+    );
+
+    const trigger = screen.getByRole("combobox", { name: "test-select" });
+    expect(trigger).toBeInTheDocument();
+
+    fireEvent.click(trigger);
+    const option2 = await screen.findByRole("option", { name: "Option 2" });
+    expect(option2).toBeInTheDocument();
+    fireEvent.click(option2);
   });
 });

@@ -3,6 +3,7 @@
 import { Link2, MonitorSmartphone, ShieldAlert, User } from "lucide-react";
 import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DangerZone } from "./components/DangerZone";
 import { EditProfileForm } from "./components/EditProfileForm";
@@ -69,7 +70,7 @@ export function ProfileSettingsPage({
           {SECTIONS.map(({ id, label, icon: Icon, danger }) => {
             const isActive = active === id;
             return (
-              <button
+              <Button
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "relative flex w-full items-center gap-3 rounded-md px-3 py-2.5 font-medium text-[13px] transition-colors",
@@ -78,6 +79,7 @@ export function ProfileSettingsPage({
                 key={id}
                 onClick={() => setActive(id)}
                 type="button"
+                variant="ghost"
               >
                 {Boolean(isActive) && (
                   <span
@@ -92,7 +94,7 @@ export function ProfileSettingsPage({
                   size={17}
                 />
                 <span>{label}</span>
-              </button>
+              </Button>
             );
           })}
         </nav>

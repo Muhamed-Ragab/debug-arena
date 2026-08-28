@@ -1,7 +1,11 @@
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface Props {
+  fieldErrors?: {
+    localizationLines?: string[];
+  } | null;
   fileName?: string;
   isSubmitting: boolean;
   onSubmit: () => void;
@@ -10,11 +14,12 @@ interface Props {
 }
 
 export function SubmitBar({
-  selectedLine,
-  selectedLines,
+  fieldErrors,
+  fileName = "main.ts",
   isSubmitting,
   onSubmit,
-  fileName = "main.ts",
+  selectedLine,
+  selectedLines,
 }: Props) {
   let activeLines: number[] = [];
   if (Array.isArray(selectedLines)) {
@@ -23,7 +28,8 @@ export function SubmitBar({
     activeLines = [selectedLine];
   }
 
-  const disabled = activeLines.length === 0 || isSubmitting;
+  const localizationError = fieldErrors?.localizationLines?.[0];
+  const disabled = isSubmitting;
 
   const getLineSummary = () => {
     if (activeLines.length === 0) {
@@ -40,8 +46,15 @@ export function SubmitBar({
 
   return (
     <div className="border-border border-t bg-card/60 p-4">
-      <p className="mb-2 truncate font-mono text-[11px] text-muted-foreground">
-        {getLineSummary()}
+      <p
+        className={cn(
+          "mb-2 truncate font-mono text-[11px]",
+          localizationError
+            ? "font-medium text-destructive"
+            : "text-muted-foreground"
+        )}
+      >
+        {localizationError ?? getLineSummary()}
       </p>
       <Button
         className="flex w-full items-center justify-center gap-2 rounded py-2.5 font-medium text-[13px] transition-all"

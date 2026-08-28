@@ -8,7 +8,7 @@ export function Prevention({ items }: { items: string[] }) {
         {items.map((t) => (
           <p
             className="flex gap-2 text-[13px] text-muted-foreground leading-relaxed"
-            key={t.slice(0, 30)}
+            key={t}
           >
             <span className="select-none text-muted-foreground">•</span>
             <span>{t}</span>

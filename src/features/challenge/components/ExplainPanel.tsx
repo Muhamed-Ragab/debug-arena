@@ -1,8 +1,12 @@
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 interface Props {
   explanation: string;
+  fieldErrors?: {
+    rootCauseExplanation?: string[];
+  } | null;
   setExplanation: (v: string) => void;
   setSolution?: (v: string) => void;
   solution?: string;
@@ -10,13 +14,15 @@ interface Props {
 
 export function ExplainPanel({
   explanation,
+  fieldErrors,
   setExplanation,
-  solution = "",
   setSolution,
+  solution = "",
 }: Props) {
+  const rootCauseError = fieldErrors?.rootCauseExplanation?.[0];
+
   return (
     <div className="flex h-full flex-col gap-4 overflow-y-auto">
-      {/* 1. Root Cause */}
       <div className="flex flex-col gap-1.5">
         <Label
           className="font-medium font-mono text-[11px] text-muted-foreground uppercase tracking-wider"
@@ -29,12 +35,22 @@ export function ExplainPanel({
           it fail?
         </p>
         <Textarea
-          className="min-h-35 bg-card p-3 text-[13px] leading-relaxed"
+          aria-invalid={Boolean(rootCauseError)}
+          className={cn(
+            "min-h-35 bg-card p-3 text-[13px] leading-relaxed",
+            rootCauseError &&
+              "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/30"
+          )}
           id="root-cause-input"
           onChange={(e) => setExplanation(e.target.value)}
           placeholder="The bug occurs because..."
           value={explanation}
         />
+        {rootCauseError ? (
+          <p className="font-medium text-[12px] text-destructive" role="alert">
+            {rootCauseError}
+          </p>
+        ) : null}
       </div>
 
       {/* 2. Proposed Solution / Fix */}

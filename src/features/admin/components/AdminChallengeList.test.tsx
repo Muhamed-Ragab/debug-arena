@@ -5,6 +5,7 @@ import type { AdminChallengeItem } from "../types";
 import { AdminChallengeList } from "./AdminChallengeList";
 
 const SEARCH_CHALLENGES_REGEX = /search challenges/i;
+const DIFFICULTY_REGEX = /difficulty/i;
 
 const mockChallenges: AdminChallengeItem[] = [
   {
@@ -67,6 +68,22 @@ describe("AdminChallengeList", () => {
 
     const searchInput = screen.getByPlaceholderText(SEARCH_CHALLENGES_REGEX);
     await user.type(searchInput, "Deadlock");
+
+    expect(screen.getByText("Deadlock In Distributed Mutex")).toBeDefined();
+    expect(screen.queryByText("Stale Closure In React Interval")).toBeNull();
+  });
+
+  it("filters challenges by difficulty", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AdminChallengeList challenges={mockChallenges} />);
+
+    const difficultySelect = screen.getByRole("combobox", {
+      name: DIFFICULTY_REGEX,
+    });
+    await user.click(difficultySelect);
+
+    const hardOption = await screen.findByRole("option", { name: "Hard" });
+    await user.click(hardOption);
 
     expect(screen.getByText("Deadlock In Distributed Mutex")).toBeDefined();
     expect(screen.queryByText("Stale Closure In React Interval")).toBeNull();

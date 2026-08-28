@@ -89,3 +89,23 @@ export interface RefineQuestionParams {
   currentDraft: GeneratedChallengeDraft;
   instruction: string;
 }
+
+export interface SaveChallengeInput {
+  buggyArtifact?: unknown;
+  categorySlug: string;
+  difficulty: string;
+  format?: string;
+  hints: Array<{
+    order?: number;
+    penaltyPoints?: number;
+    socraticPrompt: string;
+  }>;
+  id?: string | null;
+  preventionNotes?: string | null;
+  prompt: string;
+  referenceFix?: unknown;
+  rootCauseSummary: string;
+  source?: string;
+  status: string;
+  title: string;
+}

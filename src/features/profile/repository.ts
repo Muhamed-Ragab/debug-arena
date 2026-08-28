@@ -29,31 +29,49 @@ export type UserForSettings = UserRow & {
   loginAttempts: LoginAttemptRow[];
 };
 
-export type PublishedChallenge = ChallengeRow & { category: CategoryRow | null };
+export type PublishedChallenge = ChallengeRow & {
+  category: CategoryRow | null;
+};
 
 export interface ProfileRepository {
-  findByIdWithRelations: (
-    userId: string
-  ) => Promise<{
+  deleteUser: (userId: string) => Promise<void>;
+  findByIdForSettings: (userId: string) => Promise<UserForSettings | null>;
+  findByIdWithRelations: (userId: string) => Promise<{
     user: UserWithRelations | null;
     publishedChallenges: PublishedChallenge[];
   }>;
-  findByIdForSettings: (userId: string) => Promise<UserForSettings | null>;
-  updateUser: (
-    userId: string,
-    data: Partial<typeof schema.users.$inferInsert>
-  ) => Promise<UserRow | null>;
   findCategoryStats: (
     userId: string,
     category: string
   ) => Promise<CategoryStatRow | null>;
+  updateUser: (
+    userId: string,
+    data: Partial<typeof schema.users.$inferInsert>
+  ) => Promise<UserRow | null>;
   upsertCategoryStats: (
     data: typeof schema.userCategoryStats.$inferInsert
   ) => Promise<CategoryStatRow | null>;
-  deleteUser: (userId: string) => Promise<void>;
 }
 
 export const profileRepository: ProfileRepository = {
+  async deleteUser(userId) {
+    await db.delete(schema.users).where(eq(schema.users.id, userId));
+  },
+
+  async findByIdForSettings(userId) {
+    const user = await db.query.users.findFirst({
+      where: eq(schema.users.id, userId),
+      with: {
+        accounts: true,
+        loginAttempts: {
+          limit: 5,
+          orderBy: [desc(schema.loginAttempts.attemptedAt)],
+        },
+      },
+    });
+
+    return user ?? null;
+  },
   async findByIdWithRelations(userId) {
     const user = await db.query.users.findFirst({
       where: eq(schema.users.id, userId),
@@ -86,32 +104,7 @@ export const profileRepository: ProfileRepository = {
       },
     });
 
-    return { user: user ?? null, publishedChallenges };
-  },
-
-  async findByIdForSettings(userId) {
-    const user = await db.query.users.findFirst({
-      where: eq(schema.users.id, userId),
-      with: {
-        accounts: true,
-        loginAttempts: {
-          limit: 5,
-          orderBy: [desc(schema.loginAttempts.attemptedAt)],
-        },
-      },
-    });
-
-    return user ?? null;
-  },
-
-  async updateUser(userId, data) {
-    const [updated] = await db
-      .update(schema.users)
-      .set({ ...data, updatedAt: new Date() })
-      .where(eq(schema.users.id, userId))
-      .returning();
-
-    return updated ?? null;
+    return { publishedChallenges, user: user ?? null };
   },
 
   async findCategoryStats(userId, category) {
@@ -125,23 +118,29 @@ export const profileRepository: ProfileRepository = {
     return stat ?? null;
   },
 
+  async updateUser(userId, data) {
+    const [updated] = await db
+      .update(schema.users)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(schema.users.id, userId))
+      .returning();
+
+    return updated ?? null;
+  },
+
   async upsertCategoryStats(data) {
     const [row] = await db
       .insert(schema.userCategoryStats)
       .values(data)
       .onConflictDoUpdate({
+        set: data,
         target: [
           schema.userCategoryStats.userId,
           schema.userCategoryStats.categoryId,
         ],
-        set: data,
       })
       .returning();
 
     return row ?? null;
-  },
-
-  async deleteUser(userId) {
-    await db.delete(schema.users).where(eq(schema.users.id, userId));
   },
 };

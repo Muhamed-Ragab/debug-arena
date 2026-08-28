@@ -27,6 +27,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CATEGORY_CONFIG, CATEGORY_ORDER } from "@/lib/domain/categories";
 import type { Category } from "@/lib/domain/types";
+import { cn } from "@/lib/utils";
 import { updateProfileAction } from "../actions";
 import { AVATAR_PRESETS } from "../constants";
 
@@ -76,21 +77,24 @@ function AvatarPickerSection({
         {AVATAR_PRESETS.map((preset) => {
           const selected = preset.color === avatarColor;
           return (
-            <button
+            <Button
               aria-label={`Select ${preset.id} avatar`}
               aria-pressed={selected}
-              className={`flex h-9 w-9 items-center justify-center rounded-full font-semibold text-[13px] text-white transition-all ${
+              className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-full font-semibold text-[13px] text-white transition-all",
                 selected
                   ? "scale-105 ring-2 ring-primary ring-offset-2"
                   : "opacity-80 hover:opacity-100"
-              }`}
+              )}
               key={preset.id}
               onClick={() => setAvatarColor(preset.color)}
+              size="icon"
               style={{ backgroundColor: preset.color }}
               type="button"
+              variant="ghost"
             >
               {selected ? <Check size={15} /> : null}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -140,11 +144,12 @@ function CategoryInterestsSection({
           const cfg = CATEGORY_CONFIG[cat];
           const selected = interests.includes(cat);
           return (
-            <button
+            <Button
               aria-pressed={selected}
               className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 font-medium text-[12px] transition-colors"
               key={cat}
               onClick={() => toggleInterest(cat)}
+              size="sm"
               style={
                 selected
                   ? {
@@ -158,6 +163,7 @@ function CategoryInterestsSection({
                     }
               }
               type="button"
+              variant="ghost"
             >
               <span
                 className="h-1.5 w-1.5 rounded-full"
@@ -165,7 +171,7 @@ function CategoryInterestsSection({
               />
               {cfg.label}
               {Boolean(selected) && <Check className="ms-auto" size={12} />}
-            </button>
+            </Button>
           );
         })}
       </div>

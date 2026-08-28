@@ -20,6 +20,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -48,6 +55,7 @@ export function AdminChallengeList({
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
 
   const filteredChallenges = challenges.filter((c) => {
     const matchesSearch =
@@ -55,8 +63,10 @@ export function AdminChallengeList({
       c.categoryName.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || c.status === statusFilter;
     const matchesSource = sourceFilter === "all" || c.source === sourceFilter;
+    const matchesDifficulty =
+      difficultyFilter === "all" || c.difficulty === difficultyFilter;
 
-    return matchesSearch && matchesStatus && matchesSource;
+    return matchesSearch && matchesStatus && matchesSource && matchesDifficulty;
   });
 
   const handleToggleStatus = async (
@@ -158,7 +168,7 @@ export function AdminChallengeList({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative flex-1">
             <Search
-              className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className="pointer-events-none absolute inset-s-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               size={16}
             />
             <Input
@@ -172,27 +182,64 @@ export function AdminChallengeList({
 
           <div className="flex flex-wrap items-center gap-2">
             {/* Status Filter */}
-            <select
-              className="rounded-lg border border-border bg-inset px-3 py-2 text-foreground text-xs focus:border-primary focus:outline-none"
-              onChange={(e) => setStatusFilter(e.target.value)}
+            <Select
+              onValueChange={(val) => setStatusFilter(val ?? "all")}
               value={statusFilter}
             >
-              <option value="all">{i18n._("All Statuses")}</option>
-              <option value="published">{i18n._("Published")}</option>
-              <option value="draft">{i18n._("Draft")}</option>
-              <option value="archived">{i18n._("Archived")}</option>
-            </select>
+              <SelectTrigger
+                aria-label={i18n._("Status")}
+                className="h-9 min-w-36 rounded-lg border-border bg-inset px-3 text-foreground text-xs"
+              >
+                <SelectValue placeholder={i18n._("All Statuses")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{i18n._("All Statuses")}</SelectItem>
+                <SelectItem value="published">{i18n._("Published")}</SelectItem>
+                <SelectItem value="draft">{i18n._("Draft")}</SelectItem>
+                <SelectItem value="archived">{i18n._("Archived")}</SelectItem>
+              </SelectContent>
+            </Select>
 
             {/* Source Filter */}
-            <select
-              className="rounded-lg border border-border bg-inset px-3 py-2 text-foreground text-xs focus:border-primary focus:outline-none"
-              onChange={(e) => setSourceFilter(e.target.value)}
+            <Select
+              onValueChange={(val) => setSourceFilter(val ?? "all")}
               value={sourceFilter}
             >
-              <option value="all">{i18n._("All Sources")}</option>
-              <option value="ai_generated">{i18n._("AI Generated")}</option>
-              <option value="manual">{i18n._("Manual")}</option>
-            </select>
+              <SelectTrigger
+                aria-label={i18n._("Source")}
+                className="h-9 min-w-36 rounded-lg border-border bg-inset px-3 text-foreground text-xs"
+              >
+                <SelectValue placeholder={i18n._("All Sources")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{i18n._("All Sources")}</SelectItem>
+                <SelectItem value="ai_generated">
+                  {i18n._("AI Generated")}
+                </SelectItem>
+                <SelectItem value="manual">{i18n._("Manual")}</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Difficulty Filter */}
+            <Select
+              onValueChange={(val) => setDifficultyFilter(val ?? "all")}
+              value={difficultyFilter}
+            >
+              <SelectTrigger
+                aria-label={i18n._("Difficulty")}
+                className="h-9 min-w-36 rounded-lg border-border bg-inset px-3 text-foreground text-xs"
+              >
+                <SelectValue placeholder={i18n._("All Difficulties")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  {i18n._("All Difficulties")}
+                </SelectItem>
+                <SelectItem value="easy">{i18n._("Easy")}</SelectItem>
+                <SelectItem value="medium">{i18n._("Medium")}</SelectItem>
+                <SelectItem value="hard">{i18n._("Hard")}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </Card>

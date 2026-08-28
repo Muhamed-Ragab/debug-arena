@@ -339,7 +339,7 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
   **Commit**: YES
   - Message: `refactor(admin): extract repository.ts flat`
 
-- [ ] 5. Challenge service - `challenge/service.ts` flat + optional utils
+- [x] 5. Challenge service - `challenge/service.ts` flat + optional utils
 
   **What to do**:
   - Create `src/features/challenge/service.ts` (flat) with `ChallengeService` interface. Consolidate `updateUserCategoryStats`, `updateUserRatingAndStreak`, `formatLocalizationAnswer`, mappers, `getPublishedChallengesMapped`, `getChallengeByIdMapped`, `getUserChallengeStats`, `submitChallenge` 9-step orchestration. Dedup predicates: import shared `isSolved`/`calcRatingDelta`/`totalPoints` from `src/lib/domain/` or `challenge/utils/` (single source; per-feature keep exception). Inject repo via param for DIP. Transaction: service calls `challengeRepository.transaction` or `repository.withTransaction` — `db.transaction` stays inside repository (DB concern, not service). If file >300 lines, extract mappers/predicates to `src/features/challenge/utils/` and re-export via service.
@@ -385,7 +385,7 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
   **Commit**: YES
   - Message: `refactor(challenge): extract service.ts flat (+ utils if needed)`
 
-- [ ] 6. Profile service - `profile/service.ts` flat + optional utils
+- [x] 6. Profile service - `profile/service.ts` flat + optional utils
 
   **What to do**:
   - Create `src/features/profile/service.ts` (flat) with aggregation: `solvedChallengeIds` via `isSolved`, `totalPoints`, `profileStats`, `joinedFormatted`, `handleDisplay`, `radarData`, `categoryStats`, `strengthData`, `recentSubmissions`. `isSolved`/`calcPoints` 1 def each, utils extraction allowed if >300 lines (`profile/utils/stats.ts` etc) but service re-exports.
@@ -426,7 +426,7 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
   **Commit**: YES
   - Message: `refactor(profile): extract service.ts flat`
 
-- [ ] 7. Leaderboard service - `leaderboard/service.ts` flat
+- [x] 7. Leaderboard service - `leaderboard/service.ts` flat
 
   **What to do**:
   - Create `src/features/leaderboard/service.ts` (flat) with `isSolved` + `calcPoints` 1 def each, `buildUserLeaderboardEntry`, `calculateUserRank`, `getTopLeaderboard` orchestrating cache + repo.
@@ -462,7 +462,7 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
 
   **Commit**: YES
 
-- [ ] 8. Admin service - `admin/service.ts` flat
+- [x] 8. Admin service - `admin/service.ts` flat
 
   **What to do**:
   - Create `src/features/admin/service.ts` (flat) orchestrating AI (`generateQuestionDraft`/`refineQuestionDraft`), `generateDeterministicEmbedding`, `saveChallenge`, `toggleStatus`, `deleteChallengeCascade`. Utils allowed for Zod schemas if needed (`admin/utils/validation.ts`).
@@ -497,7 +497,7 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
 
   **Commit**: YES
 
-- [ ] 9. Results service - `results/service.ts` flat (pure)
+- [x] 9. Results service - `results/service.ts` flat (pure)
 
   **What to do**:
   - Create `src/features/results/service.ts` (flat) extracting `getRootCauseDesc`, `getFixQualityDesc`, `getDynamicAiFeedback`, `computeSubmissionScores` (+ `SENTENCE_SPLIT_REGEX`) from `results/page.tsx:11-150`. Pure function, takes submission data, returns view model. Helpers may go to `results/utils/` if >300 lines but re-export via service.
@@ -532,7 +532,7 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
 
   **Commit**: YES
 
-- [ ] 10. Refactor challenges pages to thin glue via challenge/service
+- [x] 10. Refactor challenges pages to thin glue via challenge/service
 
   **What to do**:
   - `challenges/page.tsx`: replace inline mapping + `isSolved` with `challenge/service` mapped calls. Remove `drizzle-orm`.
@@ -574,7 +574,7 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
 
   **Commit**: YES
 
-- [ ] 11. Refactor results page via results/service
+- [x] 11. Refactor results page via results/service
 
   **What to do**:
   - `submissions/[id]/results/page.tsx`: delete 4 helpers, call `results/service` (`compute` + `getPreventionNotes` + `getDynamicFeedback`). Keep only session + `getSubmissionById` via repo + `<ResultsScreen>`.
@@ -598,7 +598,7 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
 
   **Commit**: YES
 
-- [ ] 12. Refactor profile/leaderboard/admin pages + hook dedup
+- [x] 12. Refactor profile/leaderboard/admin pages + hook dedup
 
   **What to do**:
   - Ensure `profile/page.tsx`, `leaderboard/page.tsx`, `admin/questions/page.tsx` call respective `service.ts` (via queries now facades).
@@ -623,7 +623,7 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
 
   **Commit**: YES
 
-- [ ] 13. Wire queries.ts/actions.ts as thin facades
+- [x] 13. Wire queries.ts/actions.ts as thin facades
 
   **What to do**:
   - Rewrite each `queries.ts` to `export { ... } from "./repository"` or `from "./service"` preserving names. Rewrite `actions.ts` to delegate to `service.ts`. Keep Zod. No `db` leaks. Facades stay at feature root, import `./repository` / `./service` (flat path).
@@ -661,7 +661,7 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
 
   **Commit**: YES
 
-- [ ] 14. Tests-after batch (service unit tests)
+- [x] 14. Tests-after batch (service unit tests)
 
   **What to do**:
   - Add `src/features/challenge/service.test.ts`, `profile/service.test.ts`, `leaderboard/service.test.ts`, `admin/service.test.ts`, `results/service.test.ts` (5 files at feature root). Mock repository interfaces, stub sandbox/AI. Assert dedup contracts. `pnpm test src/features/*/service.test.ts`.
@@ -686,7 +686,7 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
   **Commit**: YES
   - Message: `test: service batch at feature roots`
 
-- [ ] 15. Pure components & hooks extraction (all features)
+- [x] 15. Pure components & hooks extraction (all features)
 
   **What to do**:
   - Audit `src/features/*/components/*.tsx` + `src/components/**` — make **pure** (props-only, no `useState` business logic, no direct `fetch`/`mapping`/`calculations`). Extract state/effects/events to `src/features/{feature}/hooks/` (e.g., `useChallengeWorkspace` already, new `useChallengeBrowser`, `useProfileView`, `useLeaderboardView`, `useResultsView`, `useAdminStudio`). For `ChallengeScreen`, `ChallengeBrowser`, `ProfileScreen`, `LeaderboardScreen`, `ResultsScreen`, `AdminQuestionsPage`, move resize/selection/filter/validation logic to hooks; components receive `value`/`onChange`/`data` only.
@@ -745,7 +745,7 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
   - Message: `refactor(components): extract to pure + hooks`
   - Files: `src/features/*/components/*`, `src/features/*/hooks/*`, `src/components/**`
 
-- [ ] 16. Object maps + switch refactor (replace if-chains)
+- [x] 16. Object maps + switch refactor (replace if-chains)
 
   **What to do**:
   - Replace conditional chains with **object lookup maps** where lookup suits: `const DIFFICULTY_LABEL: Record<Difficulty,string> = { easy:'Easy', medium:'Medium', hard:'Hard' }` instead of `if (d==='easy')...`, `STATUS_MAP`, `CATEGORY_MAP`, `SCORE_LEVEL_MAP` (for `getRootCauseDesc`/`getFixQualityDesc` ranges), `SENTENCE_SPLIT_REGEX` already; in `profile/service.ts` and `results/service.ts` use `SCORE_TO_DESC = { 25:'...', 15:'...' }` objects.
@@ -804,7 +804,7 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
   - Message: `refactor: use object maps + switch over if-chains`
   - Files: `src/features/*/service.ts`, `src/features/*/utils/*`, `src/lib/domain/*`, `src/app/**`
 
-- [ ] 17. Per-feature README.md via implementation_guide skill
+- [x] 17. Per-feature README.md via implementation_guide skill
 
   **What to do**:
   - For each feature dir `src/features/{challenge,profile,leaderboard,admin,results,browser,auth}` generate `<feature>/README.md` (or `docs.md`) using `implementation_guide` skill — **load skill** `skill(name="implementation-guide")` for structure. Each README must cover: **Overview** (what feature does), **How it works** (flow: `page.tsx` → `service.ts` → `repository.ts` → `db`, hook → component for client), **File map** (table: `repository.ts`, `service.ts`, `utils/`, `hooks/`, `components/`, `queries.ts` facade, `actions.ts` facade), **Data flow diagram** (ASCII or mermaid), **SOLID notes** (which pattern where: Repository, Service Layer, Pure Components, Map/Switch), **How to run/test** (`pnpm test src/features/{feature}/service.test.ts`), **Conventions** (flat `repository.ts`/`service.ts`, `import "server-only"`, pure components).
@@ -866,7 +866,7 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
   - Message: `docs(features): per-feature README via implementation_guide`
   - Files: `src/features/*/README.md`
 
-- [ ] 18. Update global docs/* + AGENTS.md + arch-wiki if applicable
+- [x] 18. Update global docs/* + AGENTS.md + arch-wiki if applicable
 
   **What to do**:
   - Update `docs/architecture.md`: new section **Layered Architecture (Flat)** — describe `feature/repository.ts` (data access only, `server-only`), `feature/service.ts` (business, DIP, transaction via repo), `feature/utils/` (mappers/maps), `feature/hooks/` (client logic, pure components), object maps + switch convention, facade `queries.ts`/`actions.ts`. Add diagram (mermaid) `page → service → repository → db` and `component ← hook ← service`.
@@ -988,3 +988,4 @@ pnpm build
 - [ ] All Must Have present, Must NOT Have absent
 - [ ] Tests pass + evidence in `.omo/evidence/`
 - [ ] Thin facades, utils only for helpers, no `db` leak
+

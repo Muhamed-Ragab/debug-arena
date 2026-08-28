@@ -1,0 +1,45 @@
+F3 — REAL MANUAL QA EVIDENCE
+Plan: .omo/plans/separate-constants-types.md (pure relocation refactor — extract shared constants/types, zero behavior change)
+Repo: D:\Projects\Full_Stack\debug-arena
+Date: 2026-08-27
+
+=== GATE RESULTS (run in order from repo root) ===
+
+1. pnpm typecheck  -> tsc --noEmit
+   EXIT CODE: 0
+   Result: PASS (no type errors)
+
+2. pnpm lint  -> biome check src
+   EXIT CODE: 0
+   Result: PASS — Checked 171 files in 16s. No fixes applied.
+
+3. pnpm test  -> vitest run (full suite)
+   EXIT CODE: 0
+   Result: PASS — Test Files 22 passed (22), Tests 67 passed (67)
+   (67 expected — MATCH)
+
+4. pnpm build  -> next build
+   EXIT CODE: 0
+   Result: PASS — Compiled successfully in 2.0s; Finished TypeScript in 7.3s;
+   Generating static pages (6/6) complete; Finalizing page optimization done.
+   NOTE: Redis "not reachable" warnings appeared during static generation
+   (REDIS_URL=redis://localhost:6379) — non-fatal as predicted; build completed.
+
+=== TARGETED SUITES ===
+
+- pnpm test src/features/challenge
+  EXIT CODE: 0 — Test Files 6 passed (6), Tests 22 passed (22)
+  (covers grading.test.ts, ai-evaluator.test.ts, ai-evaluator-answers.test.ts, sandbox.test.ts, ChallengeScreen.test.tsx, actions.test.ts)
+
+- pnpm test src/features/admin
+  EXIT CODE: 0 — Test Files 5 passed (5), Tests 16 passed (16)
+  (covers AdminChallengeList.test.tsx + question-generator-agent / QuestionGeneratorStudio / ManualChallengeCreator / actions)
+
+- pnpm test src/lib/auth
+  EXIT CODE: 0 — Test Files 1 passed (1), Tests 1 passed (1)
+  (social-providers.test.ts)
+
+=== VERDICT ===
+Typecheck [0] | Lint [0] | Tests [67 passed] | Build [0] | VERDICT: APPROVE
+
+All four gates green. No errors encountered. Refactor is behavior-preserving.

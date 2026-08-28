@@ -1,6 +1,11 @@
 import type { LucideIcon } from "lucide-react";
 import type { Category } from "@/lib/domain/types";
 
+export interface AvatarPreset {
+  color: string;
+  id: string;
+}
+
 export interface RadarPoint {
   fullMark: number;
   score: number;
@@ -91,4 +96,19 @@ export interface UserProfileData {
     submittedAt?: string;
   })[];
   strengthData: StrengthPoint[];
+}
+
+export interface UserSettingsData {
+  accounts: LinkedAccount[];
+  profile: {
+    avatarColor?: string;
+    avatarUrl?: string;
+    bio?: string;
+    displayName?: string;
+    handle?: string;
+    interests?: string[];
+    isPublic?: boolean;
+    jobTitle?: string;
+  };
+  sessions: SessionData[];
 }

@@ -1,5 +1,6 @@
 import { ChevronDown, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { HintItem } from "@/features/challenge/types";
 
@@ -31,10 +32,11 @@ export function HintsPanel({ hintsOpen, toggleHint, hints }: Props) {
             className="overflow-hidden"
             key={`${hint.order}-${hint.socraticPrompt.slice(0, 20)}`}
           >
-            <button
-              className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-[12px] transition-colors hover:bg-muted/50"
+            <Button
+              className="flex h-auto w-full items-center gap-2 rounded-none px-3 py-2.5 text-start text-[12px] transition-colors hover:bg-muted/50"
               onClick={() => toggleHint(i)}
               type="button"
+              variant="ghost"
             >
               {open ? (
                 <ChevronDown
@@ -59,7 +61,7 @@ export function HintsPanel({ hintsOpen, toggleHint, hints }: Props) {
                   Reveal (−{cost} pts)
                 </Badge>
               )}
-            </button>
+            </Button>
             {open && (
               <div className="border-border border-t px-3 pt-2 pb-3 text-[12px] text-muted-foreground leading-relaxed">
                 {hint.socraticPrompt}

@@ -18,6 +18,14 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { FormattedMarkdown } from "@/components/shared/FormattedMarkdown";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { saveAdminChallengeAction } from "../actions";
 import { DIFFICULTY_VALUES } from "../constants";
 import {
@@ -351,18 +359,24 @@ export function ManualChallengeCreator({
             >
               {i18n._("Category *")}
             </label>
-            <select
-              className="w-full rounded-lg border border-border bg-inset px-3 py-2 text-foreground text-xs focus:border-primary focus:outline-none"
-              id="challenge-category"
-              onChange={(e) => setCategorySlug(e.target.value)}
+            <Select
+              onValueChange={(val) => setCategorySlug(val ?? "")}
               value={categorySlug}
             >
-              {categories.map((c) => (
-                <option key={c.slug} value={c.slug}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger
+                className="w-full rounded-lg border-border bg-inset px-3 py-2 text-foreground text-xs"
+                id="challenge-category"
+              >
+                <SelectValue placeholder={i18n._("Select category...")} />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((c) => (
+                  <SelectItem key={c.slug} value={c.slug}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="md:col-span-3">
@@ -374,18 +388,21 @@ export function ManualChallengeCreator({
               className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-inset p-1"
             >
               {DIFFICULTY_VALUES.map((d) => (
-                <button
-                  className={`rounded py-1 font-semibold text-xs uppercase tracking-wider transition-colors ${
+                <Button
+                  className={cn(
+                    "rounded py-1 font-semibold text-xs uppercase tracking-wider transition-colors",
                     difficulty === d
                       ? "bg-primary text-white shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                  )}
                   key={d}
                   onClick={() => handleDifficultyChange(d)}
+                  size="sm"
                   type="button"
+                  variant="ghost"
                 >
                   {d}
-                </button>
+                </Button>
               ))}
             </fieldset>
           </div>
@@ -397,18 +414,24 @@ export function ManualChallengeCreator({
             >
               {i18n._("Language")}
             </label>
-            <select
-              className="w-full rounded-lg border border-border bg-inset px-3 py-2 text-foreground text-xs focus:border-primary focus:outline-none"
-              id="challenge-language"
-              onChange={(e) => setLanguage(e.target.value)}
+            <Select
+              onValueChange={(val) => setLanguage(val ?? "typescript")}
               value={language}
             >
-              <option value="typescript">TypeScript</option>
-              <option value="javascript">JavaScript</option>
-              <option value="python">Python</option>
-              <option value="sql">SQL / Postgres</option>
-              <option value="go">Go</option>
-            </select>
+              <SelectTrigger
+                className="w-full rounded-lg border-border bg-inset px-3 py-2 text-foreground text-xs"
+                id="challenge-language"
+              >
+                <SelectValue placeholder="TypeScript" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="typescript">TypeScript</SelectItem>
+                <SelectItem value="javascript">JavaScript</SelectItem>
+                <SelectItem value="python">Python</SelectItem>
+                <SelectItem value="sql">SQL / Postgres</SelectItem>
+                <SelectItem value="go">Go</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="md:col-span-3">
@@ -418,22 +441,36 @@ export function ManualChallengeCreator({
             >
               {i18n._("Format")}
             </label>
-            <select
-              className="w-full rounded-lg border border-border bg-inset px-3 py-2 text-foreground text-xs focus:border-primary focus:outline-none"
-              id="challenge-format"
-              onChange={(e) =>
-                setFormat(
-                  e.target.value as "code_snippet" | "log_only" | "ui_recording"
-                )
-              }
+            <Select
+              onValueChange={(val) => {
+                if (val) {
+                  setFormat(
+                    val as "code_snippet" | "log_only" | "ui_recording"
+                  );
+                }
+              }}
               value={format}
             >
-              <option value="code_snippet">
-                {i18n._("Code Snippet / Multi-file")}
-              </option>
-              <option value="log_only">{i18n._("Log Trace Only")}</option>
-              <option value="ui_recording">{i18n._("UI Recording")}</option>
-            </select>
+              <SelectTrigger
+                className="w-full rounded-lg border-border bg-inset px-3 py-2 text-foreground text-xs"
+                id="challenge-format"
+              >
+                <SelectValue
+                  placeholder={i18n._("Code Snippet / Multi-file")}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="code_snippet">
+                  {i18n._("Code Snippet / Multi-file")}
+                </SelectItem>
+                <SelectItem value="log_only">
+                  {i18n._("Log Trace Only")}
+                </SelectItem>
+                <SelectItem value="ui_recording">
+                  {i18n._("UI Recording")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="md:col-span-3">
@@ -475,15 +512,17 @@ export function ManualChallengeCreator({
             <span className="font-semibold text-heading text-xs uppercase tracking-wider">
               {i18n._("Scenario Markdown Description *")}
             </span>
-            <button
-              className="font-semibold text-primary text-xs hover:underline"
+            <Button
+              className="h-auto p-0 font-semibold text-primary text-xs hover:underline"
               onClick={() => setShowPromptPreview(!showPromptPreview)}
+              size="sm"
               type="button"
+              variant="link"
             >
               {showPromptPreview
                 ? i18n._("Edit Raw Markdown")
                 : i18n._("Preview Formatted Markdown")}
-            </button>
+            </Button>
           </div>
 
           {showPromptPreview ? (
@@ -563,13 +602,15 @@ export function ManualChallengeCreator({
                 </div>
 
                 {buggyFiles.length > 1 && (
-                  <button
+                  <Button
                     className="text-rose-400 hover:text-rose-300"
                     onClick={() => handleRemoveFile(idx)}
+                    size="icon-sm"
                     type="button"
+                    variant="ghost"
                   >
                     <Trash2 size={15} />
-                  </button>
+                  </Button>
                 )}
               </div>
 

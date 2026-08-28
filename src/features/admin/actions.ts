@@ -1,16 +1,15 @@
 "use server";
 
-import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { db } from "@/db/client";
-import * as schema from "@/db/schema";
-import { generateDeterministicEmbedding } from "@/features/challenge/lib/embedding";
 import { ActionError, adminActionClient } from "@/lib/safe-action";
 import {
+  deleteChallengeCascade,
   generateQuestionDraft,
   refineQuestionDraft,
-} from "./lib/question-generator-agent";
+  saveChallenge,
+  toggleStatus,
+} from "./service";
 
 const generateQuestionSchema = z.object({
   additionalInstructions: z.string().optional(),
@@ -136,30 +135,13 @@ const deleteChallengeSchema = z.object({
   challengeId: z.string().uuid(),
 });
 
-/**
- * Generates a challenge draft using the AI Agent.
- */
 export const generateQuestionAction = adminActionClient
   .schema(generateQuestionSchema)
   .action(async ({ parsedInput }) => {
     try {
-      const draft = await generateQuestionDraft({
-        additionalInstructions: parsedInput.additionalInstructions,
-        bugPattern: parsedInput.bugPattern,
-        categoryName: parsedInput.categoryName,
-        categorySlug: parsedInput.categorySlug,
-        difficulty: parsedInput.difficulty,
-        format: parsedInput.format,
-        language: parsedInput.language,
-        topic: parsedInput.topic,
-      });
-
-      return {
-        draft,
-        success: true,
-      };
+      const draft = await generateQuestionDraft(parsedInput);
+      return { draft, success: true };
     } catch (err) {
-      console.error("Failed to generate question draft:", err);
       throw new ActionError(
         "Failed to generate challenge draft with AI agent.",
         {
@@ -169,188 +151,59 @@ export const generateQuestionAction = adminActionClient
     }
   });
 
-/**
- * Refines an existing challenge draft with admin feedback using the AI Agent.
- */
 export const refineQuestionAction = adminActionClient
   .schema(refineQuestionSchema)
   .action(async ({ parsedInput }) => {
     try {
-      const refined = await refineQuestionDraft({
-        currentDraft: parsedInput.currentDraft,
-        instruction: parsedInput.instruction,
-      });
-
-      return {
-        draft: refined,
-        success: true,
-      };
+      const refined = await refineQuestionDraft(parsedInput);
+      return { draft: refined, success: true };
     } catch (err) {
-      console.error("Failed to refine question draft:", err);
       throw new ActionError("Failed to refine challenge draft.", {
         cause: err,
       });
     }
   });
 
-/**
- * Saves a challenge to the database as draft or published.
- */
 export const saveAdminChallengeAction = adminActionClient
   .schema(saveChallengeSchema)
   .action(async ({ parsedInput }) => {
-    // 1. Resolve category
-    const category = await db.query.categories.findFirst({
-      where: eq(schema.categories.slug, parsedInput.categorySlug),
+    const result = await saveChallenge({
+      buggyArtifact: parsedInput.buggyArtifact,
+      categorySlug: parsedInput.categorySlug,
+      difficulty: parsedInput.difficulty,
+      format: parsedInput.format,
+      hints: parsedInput.hints,
+      id: parsedInput.id,
+      preventionNotes: parsedInput.preventionNotes,
+      prompt: parsedInput.prompt,
+      referenceFix: parsedInput.referenceFix,
+      rootCauseSummary: parsedInput.rootCauseSummary,
+      source: parsedInput.source,
+      status: parsedInput.status,
+      title: parsedInput.title,
     });
-
-    if (!category) {
-      throw new ActionError(
-        `Unknown category slug: ${parsedInput.categorySlug}`
-      );
-    }
-
-    const embedding = generateDeterministicEmbedding(
-      parsedInput.rootCauseSummary
-    );
-
-    let challengeId = parsedInput.id;
-
-    if (challengeId) {
-      // Update existing challenge
-      await db
-        .update(schema.challenges)
-        .set({
-          buggyArtifact: parsedInput.buggyArtifact,
-          categoryId: category.id,
-          difficulty: parsedInput.difficulty,
-          format: parsedInput.format,
-          preventionNotes: parsedInput.preventionNotes,
-          prompt: parsedInput.prompt,
-          referenceFix: parsedInput.referenceFix,
-          rootCauseEmbedding: embedding,
-          rootCauseSummary: parsedInput.rootCauseSummary,
-          source: parsedInput.source,
-          status: parsedInput.status,
-          title: parsedInput.title,
-        })
-        .where(eq(schema.challenges.id, challengeId));
-
-      // Remove existing hints and re-insert
-      await db
-        .delete(schema.hints)
-        .where(eq(schema.hints.challengeId, challengeId));
-    } else {
-      // Insert new challenge
-      const [inserted] = await db
-        .insert(schema.challenges)
-        .values({
-          buggyArtifact: parsedInput.buggyArtifact,
-          categoryId: category.id,
-          difficulty: parsedInput.difficulty,
-          format: parsedInput.format,
-          preventionNotes: parsedInput.preventionNotes,
-          prompt: parsedInput.prompt,
-          referenceFix: parsedInput.referenceFix,
-          rootCauseEmbedding: embedding,
-          rootCauseSummary: parsedInput.rootCauseSummary,
-          source: parsedInput.source,
-          status: parsedInput.status,
-          title: parsedInput.title,
-        })
-        .returning();
-
-      challengeId = inserted.id;
-    }
-
-    // Insert hints
-    if (parsedInput.hints.length > 0 && challengeId) {
-      await db.insert(schema.hints).values(
-        parsedInput.hints.map((hint, idx) => ({
-          challengeId,
-          order: hint.order ?? idx + 1,
-          penaltyPoints: hint.penaltyPoints ?? 10,
-          socraticPrompt: hint.socraticPrompt,
-        }))
-      );
-    }
-
-    // Insert or update challenge embedding
-    if (challengeId) {
-      await db
-        .delete(schema.challengeEmbeddings)
-        .where(eq(schema.challengeEmbeddings.challengeId, challengeId));
-
-      await db.insert(schema.challengeEmbeddings).values({
-        challengeId,
-        content: `${parsedInput.title} ${parsedInput.rootCauseSummary} ${parsedInput.prompt}`,
-        embedding,
-      });
-    }
-
     revalidatePath("/challenges");
     revalidatePath("/admin/questions");
-
-    return {
-      challengeId,
-      status: parsedInput.status,
-      success: true,
-    };
+    return result;
   });
 
-/**
- * Toggles a challenge's status (draft, published, archived).
- */
 export const toggleChallengeStatusAction = adminActionClient
   .schema(toggleStatusSchema)
   .action(async ({ parsedInput }) => {
-    await db
-      .update(schema.challenges)
-      .set({
-        status: parsedInput.status,
-      })
-      .where(eq(schema.challenges.id, parsedInput.challengeId));
-
+    const result = await toggleStatus(
+      parsedInput.challengeId,
+      parsedInput.status
+    );
     revalidatePath("/challenges");
     revalidatePath("/admin/questions");
-
-    return {
-      challengeId: parsedInput.challengeId,
-      status: parsedInput.status,
-      success: true,
-    };
+    return result;
   });
 
-/**
- * Deletes a challenge and associated data.
- */
 export const deleteAdminChallengeAction = adminActionClient
   .schema(deleteChallengeSchema)
   .action(async ({ parsedInput }) => {
-    // Cascade delete associated records
-    await db
-      .delete(schema.hints)
-      .where(eq(schema.hints.challengeId, parsedInput.challengeId));
-
-    await db
-      .delete(schema.challengeEmbeddings)
-      .where(
-        eq(schema.challengeEmbeddings.challengeId, parsedInput.challengeId)
-      );
-
-    await db
-      .delete(schema.submissions)
-      .where(eq(schema.submissions.challengeId, parsedInput.challengeId));
-
-    await db
-      .delete(schema.challenges)
-      .where(eq(schema.challenges.id, parsedInput.challengeId));
-
+    const result = await deleteChallengeCascade(parsedInput.challengeId);
     revalidatePath("/challenges");
     revalidatePath("/admin/questions");
-
-    return {
-      challengeId: parsedInput.challengeId,
-      success: true,
-    };
+    return result;
   });

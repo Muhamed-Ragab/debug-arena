@@ -62,53 +62,22 @@ export interface UserChallengeStatsData {
 
 // --- Repository interface (functional, no class) ---
 export interface ChallengeRepository {
-  findPublished: () => Promise<PublishedChallengeDTO[]>;
   findById: (id: string) => Promise<ChallengeDetailDTO | null>;
   findChallengeByIdForDetail: (
     id: string
   ) => Promise<(ChallengeDetailDTO & { submissions: SubmissionRow[] }) | null>;
+  findHintsByChallengeId: (id: string) => Promise<HintRow[]>;
+  findPublished: () => Promise<PublishedChallengeDTO[]>;
   findSubmissionById: (id: string) => Promise<SubmissionWithRelations | null>;
+  findUserChallengeStatsData: (
+    userId: string
+  ) => Promise<UserChallengeStatsData>;
   insertSubmission: (
     data: typeof schema.submissions.$inferInsert
   ) => Promise<SubmissionRow>;
-  findHintsByChallengeId: (id: string) => Promise<HintRow[]>;
-  findUserChallengeStatsData: (userId: string) => Promise<UserChallengeStatsData>;
 }
 
 export const challengeRepository: ChallengeRepository = {
-  async findPublished() {
-    const challengesList = await db.query.challenges.findMany({
-      orderBy: [desc(schema.challenges.createdAt)],
-      where: eq(schema.challenges.status, "published"),
-      with: {
-        category: true,
-        hints: {
-          orderBy: [asc(schema.hints.order)],
-        },
-        submissions: true,
-      },
-    });
-
-    return challengesList.map((c) => ({
-      buggyArtifact: c.buggyArtifact,
-      categoryId: c.categoryId,
-      categoryName: c.category.name,
-      categorySlug: c.category.slug,
-      createdAt: c.createdAt,
-      difficulty: c.difficulty,
-      format: c.format,
-      hints: c.hints,
-      id: c.id,
-      preventionNotes: c.preventionNotes,
-      prompt: c.prompt,
-      referenceFix: c.referenceFix,
-      rootCauseSummary: c.rootCauseSummary,
-      status: c.status,
-      submissions: c.submissions,
-      title: c.title,
-    }));
-  },
-
   async findById(challengeId: string) {
     const challenge = await db.query.challenges.findFirst({
       where: eq(schema.challenges.id, challengeId),
@@ -179,6 +148,47 @@ export const challengeRepository: ChallengeRepository = {
     };
   },
 
+  async findHintsByChallengeId(challengeId: string) {
+    const hintsList = await db.query.hints.findMany({
+      orderBy: [asc(schema.hints.order)],
+      where: eq(schema.hints.challengeId, challengeId),
+    });
+
+    return hintsList;
+  },
+  async findPublished() {
+    const challengesList = await db.query.challenges.findMany({
+      orderBy: [desc(schema.challenges.createdAt)],
+      where: eq(schema.challenges.status, "published"),
+      with: {
+        category: true,
+        hints: {
+          orderBy: [asc(schema.hints.order)],
+        },
+        submissions: true,
+      },
+    });
+
+    return challengesList.map((c) => ({
+      buggyArtifact: c.buggyArtifact,
+      categoryId: c.categoryId,
+      categoryName: c.category.name,
+      categorySlug: c.category.slug,
+      createdAt: c.createdAt,
+      difficulty: c.difficulty,
+      format: c.format,
+      hints: c.hints,
+      id: c.id,
+      preventionNotes: c.preventionNotes,
+      prompt: c.prompt,
+      referenceFix: c.referenceFix,
+      rootCauseSummary: c.rootCauseSummary,
+      status: c.status,
+      submissions: c.submissions,
+      title: c.title,
+    }));
+  },
+
   async findSubmissionById(submissionId: string) {
     const submission = await db.query.submissions.findFirst({
       where: eq(schema.submissions.id, submissionId),
@@ -199,24 +209,6 @@ export const challengeRepository: ChallengeRepository = {
     return submission;
   },
 
-  async insertSubmission(data) {
-    const [inserted] = await db
-      .insert(schema.submissions)
-      .values(data)
-      .returning();
-
-    return inserted;
-  },
-
-  async findHintsByChallengeId(challengeId: string) {
-    const hintsList = await db.query.hints.findMany({
-      where: eq(schema.hints.challengeId, challengeId),
-      orderBy: [asc(schema.hints.order)],
-    });
-
-    return hintsList;
-  },
-
   async findUserChallengeStatsData(userId: string) {
     const totalPublished = await db.query.challenges.findMany({
       columns: { id: true },
@@ -235,5 +227,14 @@ export const challengeRepository: ChallengeRepository = {
       totalPublishedCount,
       user: user ?? null,
     };
+  },
+
+  async insertSubmission(data) {
+    const [inserted] = await db
+      .insert(schema.submissions)
+      .values(data)
+      .returning();
+
+    return inserted;
   },
 };

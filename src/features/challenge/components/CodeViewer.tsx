@@ -1,6 +1,7 @@
 "use client";
 
 import { FileCode, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { CategoryConfig } from "@/lib/domain/categories";
 import { tokenizeLine } from "../lib/tokenize";
 
@@ -59,14 +60,16 @@ export function CodeViewer({
             {formatSelectionText()}
           </span>
           {activeLines.length > 0 && onClearLines ? (
-            <button
-              className="inline-flex items-center gap-1 rounded bg-white/5 px-2 py-0.5 font-mono text-[10px] text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+            <Button
+              className="h-6 gap-1 rounded bg-white/5 px-2 py-0.5 font-mono text-[10px] text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
               onClick={onClearLines}
+              size="xs"
               title="Clear selected lines"
               type="button"
+              variant="ghost"
             >
               <X size={11} /> Clear
-            </button>
+            </Button>
           ) : null}
         </div>
       </div>

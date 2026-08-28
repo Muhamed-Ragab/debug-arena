@@ -21,7 +21,17 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+import { DiffBadge } from "@/components/shared/DiffBadge";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { Difficulty } from "@/lib/domain";
+import { cn } from "@/lib/utils";
 import {
   generateQuestionAction,
   refineQuestionAction,
@@ -29,6 +39,16 @@ import {
 } from "../actions";
 import { DIFFICULTY_VALUES } from "../constants";
 import type { CategoryOption, GeneratedChallengeDraft } from "../types";
+
+const formatDifficulty = (d?: string): Difficulty => {
+  if (d === "easy") {
+    return "Easy";
+  }
+  if (d === "hard") {
+    return "Hard";
+  }
+  return "Medium";
+};
 
 interface QuestionGeneratorStudioProps {
   categories: CategoryOption[];
@@ -239,7 +259,7 @@ export function QuestionGeneratorStudio({
           </p>
           <div className="flex flex-wrap gap-2">
             {PROMPT_PRESETS.map((preset) => (
-              <button
+              <Button
                 className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 text-foreground/80 text-xs transition-all hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
                 key={preset.label}
                 onClick={() => {
@@ -247,11 +267,13 @@ export function QuestionGeneratorStudio({
                   setCategorySlug(preset.category);
                   setDifficulty(preset.difficulty);
                 }}
+                size="sm"
                 type="button"
+                variant="outline"
               >
                 <Flame className="text-amber-500" size={12} />
                 {preset.label}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -282,18 +304,24 @@ export function QuestionGeneratorStudio({
             >
               {i18n._("Category")}
             </label>
-            <select
-              className="w-full rounded-lg border border-border bg-inset px-3 py-2.5 text-foreground text-sm focus:border-primary focus:outline-none"
-              id="category-select"
-              onChange={(e) => setCategorySlug(e.target.value)}
+            <Select
+              onValueChange={(val) => setCategorySlug(val ?? "")}
               value={categorySlug}
             >
-              {categories.map((c) => (
-                <option key={c.slug} value={c.slug}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger
+                className="w-full rounded-lg border-border bg-inset px-3 py-2 text-foreground text-xs"
+                id="category-select"
+              >
+                <SelectValue placeholder={i18n._("Select category...")} />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((c) => (
+                  <SelectItem key={c.slug} value={c.slug}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="md:col-span-3">
@@ -302,18 +330,21 @@ export function QuestionGeneratorStudio({
             </span>
             <div className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-inset p-1">
               {DIFFICULTY_VALUES.map((d) => (
-                <button
-                  className={`rounded py-1.5 font-semibold text-xs uppercase tracking-wider transition-colors ${
+                <Button
+                  className={cn(
+                    "rounded py-1.5 font-semibold text-xs uppercase tracking-wider transition-colors",
                     difficulty === d
                       ? "bg-primary text-white shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                  )}
                   key={d}
                   onClick={() => setDifficulty(d)}
+                  size="sm"
                   type="button"
+                  variant="ghost"
                 >
                   {d}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -325,18 +356,24 @@ export function QuestionGeneratorStudio({
             >
               {i18n._("Language")}
             </label>
-            <select
-              className="w-full rounded-lg border border-border bg-inset px-3 py-2.5 text-foreground text-sm focus:border-primary focus:outline-none"
-              id="qgs-language"
-              onChange={(e) => setLanguage(e.target.value)}
+            <Select
+              onValueChange={(val) => setLanguage(val ?? "typescript")}
               value={language}
             >
-              <option value="typescript">TypeScript</option>
-              <option value="javascript">JavaScript</option>
-              <option value="python">Python</option>
-              <option value="sql">SQL / Postgres</option>
-              <option value="go">Go</option>
-            </select>
+              <SelectTrigger
+                className="w-full rounded-lg border-border bg-inset px-3 py-2 text-foreground text-xs"
+                id="qgs-language"
+              >
+                <SelectValue placeholder="TypeScript" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="typescript">TypeScript</SelectItem>
+                <SelectItem value="javascript">JavaScript</SelectItem>
+                <SelectItem value="python">Python</SelectItem>
+                <SelectItem value="sql">SQL / Postgres</SelectItem>
+                <SelectItem value="go">Go</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="md:col-span-9">
@@ -388,9 +425,7 @@ export function QuestionGeneratorStudio({
           <div className="flex flex-col gap-3 border-border border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center gap-2">
-                <span className="rounded bg-primary/10 px-2.5 py-0.5 font-bold text-primary text-xs uppercase">
-                  {draft?.difficulty}
-                </span>
+                <DiffBadge difficulty={formatDifficulty(draft?.difficulty)} />
                 <span className="rounded bg-inset px-2.5 py-0.5 font-mono text-muted-foreground text-xs">
                   {draft?.buggyArtifact.points} pts
                 </span>
@@ -484,19 +519,22 @@ export function QuestionGeneratorStudio({
                 label: i18n._("Verification Tests"),
               },
             ].map(({ id, icon: Icon, label }) => (
-              <button
-                className={`flex items-center gap-2 rounded-md px-3.5 py-2 font-semibold text-xs transition-all ${
+              <Button
+                className={cn(
+                  "flex items-center gap-2 rounded-md px-3.5 py-2 font-semibold text-xs transition-all",
                   activeTab === id
                     ? "bg-primary text-white shadow-xs"
                     : "text-muted-foreground hover:bg-inset hover:text-foreground"
-                }`}
+                )}
                 key={id}
                 onClick={() => setActiveTab(id)}
+                size="sm"
                 type="button"
+                variant="ghost"
               >
                 <Icon size={14} />
                 {label}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -527,15 +565,18 @@ export function QuestionGeneratorStudio({
                 {/* File Tabs */}
                 <div className="flex items-center gap-1.5 overflow-x-auto">
                   {draft?.buggyArtifact.files.map((file, idx) => (
-                    <button
-                      className={`flex items-center gap-1.5 rounded-t-md border-b-2 px-3 py-1.5 font-mono text-xs transition-colors ${
+                    <Button
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-t-md border-b-2 px-3 py-1.5 font-mono text-xs transition-colors",
                         selectedFileIdx === idx
                           ? "border-primary bg-inset font-bold text-heading"
                           : "border-transparent text-muted-foreground hover:text-foreground"
-                      }`}
+                      )}
                       key={file.name}
                       onClick={() => setSelectedFileIdx(idx)}
+                      size="sm"
                       type="button"
+                      variant="ghost"
                     >
                       <FileCode size={13} />
                       {file.name}
@@ -544,7 +585,7 @@ export function QuestionGeneratorStudio({
                           entry
                         </span>
                       )}
-                    </button>
+                    </Button>
                   ))}
                 </div>
 
@@ -558,42 +599,55 @@ export function QuestionGeneratorStudio({
               </div>
 
               {/* Code viewer with line numbers */}
-              <div className="overflow-x-auto rounded-lg border border-border bg-black/80 p-4 font-mono text-slate-200 text-xs">
-                <pre className="grid grid-cols-[3rem_1fr] gap-4">
-                  <div className="select-none text-right text-slate-600">
-                    {currentBuggyFile?.code.split("\n").map((line, i) => (
-                      <div
-                        className={
-                          draft &&
-                          i + 1 >= draft.buggyArtifact.buggyLines[0] &&
-                          i + 1 <= draft.buggyArtifact.buggyLines[1]
-                            ? "font-bold text-amber-400"
-                            : ""
-                        }
-                        key={line}
-                      >
-                        {i + 1}
+              {(() => {
+                const codeLines = (currentBuggyFile?.code ?? "")
+                  .split("\n")
+                  .map((line, index) => ({
+                    id: `line-${index + 1}`,
+                    line,
+                    lineNum: index + 1,
+                  }));
+                return (
+                  <div className="overflow-x-auto rounded-lg border border-border bg-black/80 p-4 font-mono text-slate-200 text-xs">
+                    <pre className="grid grid-cols-[3rem_1fr] gap-4">
+                      <div className="select-none text-right text-slate-600">
+                        {codeLines.map((item) => (
+                          <div
+                            className={
+                              draft &&
+                              item.lineNum >=
+                                draft.buggyArtifact.buggyLines[0] &&
+                              item.lineNum <= draft.buggyArtifact.buggyLines[1]
+                                ? "font-bold text-amber-400"
+                                : ""
+                            }
+                            key={`num-${item.id}`}
+                          >
+                            {item.lineNum}
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                  <div>
-                    {currentBuggyFile?.code.split("\n").map((line, i) => (
-                      <div
-                        className={
-                          draft &&
-                          i + 1 >= draft.buggyArtifact.buggyLines[0] &&
-                          i + 1 <= draft.buggyArtifact.buggyLines[1]
-                            ? "rounded bg-amber-500/15 px-1 text-amber-200"
-                            : ""
-                        }
-                        key={line}
-                      >
-                        {line || " "}
+                      <div>
+                        {codeLines.map((item) => (
+                          <div
+                            className={
+                              draft &&
+                              item.lineNum >=
+                                draft.buggyArtifact.buggyLines[0] &&
+                              item.lineNum <= draft.buggyArtifact.buggyLines[1]
+                                ? "rounded bg-amber-500/15 px-1 text-amber-200"
+                                : ""
+                            }
+                            key={`code-${item.id}`}
+                          >
+                            {item.line || " "}
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </pre>
                   </div>
-                </pre>
-              </div>
+                );
+              })()}
             </div>
           )}
 
@@ -621,7 +675,7 @@ export function QuestionGeneratorStudio({
                   }
                   return (
                     <div
-                      className={`flex gap-3 rounded px-2 py-0.5 ${bg}`}
+                      className={cn("flex gap-3 rounded px-2 py-0.5", bg)}
                       key={`diff-${item.line}`}
                     >
                       <span className="w-6 select-none text-slate-600">

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { CATEGORY_CONFIG } from "@/lib/domain/categories";
 import type { Category } from "@/lib/domain/types";
 import { cn } from "@/lib/utils";
@@ -42,22 +43,24 @@ export function LeaderboardTabs({ tab, setTab }: Props) {
         const isCat = CATEGORY_TABS.includes(id as Category);
         const cfg = isCat ? CATEGORY_CONFIG[id as Category] : null;
         return (
-          <button
+          <Button
             className={cn(
-              "whitespace-nowrap border-b-2 px-3 py-2 font-medium text-[12px] transition-colors",
+              "whitespace-nowrap rounded-none border-b-2 px-3 py-2 font-medium text-[12px] transition-colors",
               getTabClasses(active, Boolean(cfg))
             )}
             key={id}
             onClick={() => setTab(id)}
+            size="sm"
             style={
               active && cfg
                 ? { borderBottomColor: cfg.color, color: cfg.color }
                 : {}
             }
             type="button"
+            variant="ghost"
           >
             {label}
-          </button>
+          </Button>
         );
       })}
     </div>

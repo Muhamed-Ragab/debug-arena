@@ -69,81 +69,85 @@ export function AdminQuestionsPage({
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="font-bold text-2xl text-heading tracking-tight">
-              {i18n._("Challenge & Question Studio")}
-            </h1>
-            <Badge className="font-bold text-xs uppercase" variant="default">
-              {i18n._("Admin")}
+    <div className="flex h-full flex-1 flex-col overflow-y-auto">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-6">
+        {/* Header */}
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h1 className="font-bold text-2xl text-heading tracking-tight">
+                {i18n._("Challenge & Question Studio")}
+              </h1>
+              <Badge className="font-bold text-xs uppercase" variant="default">
+                {i18n._("Admin")}
+              </Badge>
+            </div>
+            <p className="text-muted-foreground text-sm">
+              {i18n._(
+                "Generate with AI or manually author debugging challenges with automated diff calculations, formatted code blocks, and Socratic guidance."
+              )}
+            </p>
+          </div>
+
+          {/* Stats Chips */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge className="gap-1.5 px-3 py-1.5 text-xs" variant="outline">
+              <Layers className="text-muted-foreground" size={14} />
+              <span className="text-muted-foreground">{i18n._("Total:")}</span>
+              <span className="font-bold text-heading">{totalChallenges}</span>
+            </Badge>
+            <Badge className="gap-1.5 px-3 py-1.5 text-xs" variant="default">
+              <Bot size={14} />
+              <span>{i18n._("AI Synthesized:")}</span>
+              <span className="font-bold">{aiGeneratedCount}</span>
+            </Badge>
+            <Badge className="gap-1.5 px-3 py-1.5 text-xs" variant="success">
+              <span>{i18n._("Published:")}</span>
+              <span className="font-bold">{publishedCount}</span>
+            </Badge>
+            <Badge className="gap-1.5 px-3 py-1.5 text-xs" variant="warning">
+              <span>{i18n._("Drafts:")}</span>
+              <span className="font-bold">{draftCount}</span>
             </Badge>
           </div>
-          <p className="text-muted-foreground text-sm">
-            {i18n._(
-              "Generate with AI or manually author debugging challenges with automated diff calculations, formatted code blocks, and Socratic guidance."
-            )}
-          </p>
         </div>
 
-        {/* Stats Chips */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge className="gap-1.5 px-3 py-1.5 text-xs" variant="outline">
-            <Layers className="text-muted-foreground" size={14} />
-            <span className="text-muted-foreground">{i18n._("Total:")}</span>
-            <span className="font-bold text-heading">{totalChallenges}</span>
-          </Badge>
-          <Badge className="gap-1.5 px-3 py-1.5 text-xs" variant="default">
-            <Bot size={14} />
-            <span>{i18n._("AI Synthesized:")}</span>
-            <span className="font-bold">{aiGeneratedCount}</span>
-          </Badge>
-          <Badge className="gap-1.5 px-3 py-1.5 text-xs" variant="success">
-            <span>{i18n._("Published:")}</span>
-            <span className="font-bold">{publishedCount}</span>
-          </Badge>
-          <Badge className="gap-1.5 px-3 py-1.5 text-xs" variant="warning">
-            <span>{i18n._("Drafts:")}</span>
-            <span className="font-bold">{draftCount}</span>
-          </Badge>
+        {/* Main Mode Tabs */}
+        <div className="flex items-center gap-2 border-border border-b pb-2">
+          <Button
+            className="gap-2"
+            onClick={() => setActiveTab("studio")}
+            size="md"
+            variant={activeTab === "studio" ? "default" : "ghost"}
+          >
+            <Sparkles size={16} />
+            {i18n._("AI Question Generator")}
+          </Button>
+          <Button
+            className="gap-2"
+            onClick={() => setActiveTab("manual")}
+            size="md"
+            variant={activeTab === "manual" ? "default" : "ghost"}
+          >
+            <FilePlus size={16} />
+            {i18n._("Manual Challenge Authoring")}
+          </Button>
+          <Button
+            className="gap-2"
+            onClick={() => setActiveTab("list")}
+            size="md"
+            variant={activeTab === "list" ? "default" : "ghost"}
+          >
+            <FileText size={16} />
+            {i18n._("Challenge Management ({count})", {
+              count: totalChallenges,
+            })}
+          </Button>
         </div>
-      </div>
 
-      {/* Main Mode Tabs */}
-      <div className="flex items-center gap-2 border-border border-b pb-2">
-        <Button
-          className="gap-2"
-          onClick={() => setActiveTab("studio")}
-          size="md"
-          variant={activeTab === "studio" ? "default" : "ghost"}
-        >
-          <Sparkles size={16} />
-          {i18n._("AI Question Generator")}
-        </Button>
-        <Button
-          className="gap-2"
-          onClick={() => setActiveTab("manual")}
-          size="md"
-          variant={activeTab === "manual" ? "default" : "ghost"}
-        >
-          <FilePlus size={16} />
-          {i18n._("Manual Challenge Authoring")}
-        </Button>
-        <Button
-          className="gap-2"
-          onClick={() => setActiveTab("list")}
-          size="md"
-          variant={activeTab === "list" ? "default" : "ghost"}
-        >
-          <FileText size={16} />
-          {i18n._("Challenge Management ({count})", { count: totalChallenges })}
-        </Button>
+        {/* Tab Panels */}
+        {renderTab()}
       </div>
-
-      {/* Tab Panels */}
-      {renderTab()}
     </div>
   );
 }

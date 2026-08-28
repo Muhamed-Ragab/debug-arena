@@ -21,6 +21,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SignOutButton } from "@/features/auth/components/SignOutButton";
+import { cn } from "@/lib/utils";
 import { revokeAllOtherSessionsAction, revokeSessionAction } from "../actions";
 import type { DeviceType, SessionData } from "../types";
 
@@ -101,9 +102,10 @@ export function SessionManager({
 
             return (
               <li
-                className={`flex items-center gap-4 py-4 ${
-                  s.newLogin ? "-mx-3 rounded-md bg-amber-500/5 px-3" : ""
-                }`}
+                className={cn(
+                  "flex items-center gap-4 py-4",
+                  s.newLogin && "-mx-3 rounded-md bg-amber-500/5 px-3"
+                )}
                 key={s.id}
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border bg-inset text-muted-foreground">

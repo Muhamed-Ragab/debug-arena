@@ -12,3 +12,15 @@ export const SEED_CATEGORIES = [
     slug: "backend-concurrency",
   },
 ] as const;
+
+export const DIFFICULTY_LABEL: Record<string, string> = {
+  easy: "Easy",
+  hard: "Hard",
+  medium: "Medium",
+};
+
+export const STATUS_LABEL: Record<string, string> = {
+  archived: "Archived",
+  draft: "Draft",
+  published: "Published",
+};

@@ -7,6 +7,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import type { HintItem } from "@/features/challenge/types";
 import { CATEGORY_CONFIG } from "@/lib/domain/categories";
 import type { Challenge } from "@/lib/domain/types";
+import { cn } from "@/lib/utils";
 import { useChallengeWorkspace } from "../hooks/useChallengeWorkspace";
 import type { DiffLine } from "../types";
 import { ChallengeScenario } from "./ChallengeScenario";
@@ -98,7 +99,10 @@ export function ChallengeScreen({
 
   return (
     <div
-      className={`flex h-full w-full flex-col ${isResizing ? "cursor-col-resize select-none" : ""}`}
+      className={cn(
+        "flex h-full w-full flex-col",
+        isResizing && "cursor-col-resize select-none"
+      )}
     >
       <TopBar
         crumbs={[
@@ -179,6 +183,7 @@ export function ChallengeScreen({
           <ChallengeTabs
             diffLines={diffLines ?? []}
             explanation={ws.explanation}
+            fieldErrors={ws.fieldErrors}
             hints={hints ?? []}
             hintsOpen={ws.hintsOpen}
             rightTab={ws.rightTab}
@@ -189,11 +194,23 @@ export function ChallengeScreen({
             toggleHint={ws.toggleHint}
           />
           {ws.error ? (
-            <div className="bg-destructive/10 px-4 py-2 text-destructive text-xs">
+            <div
+              className="border-destructive/20 border-t bg-destructive/10 px-4 py-2.5 text-destructive text-xs leading-relaxed"
+              role="alert"
+            >
               {ws.error}
             </div>
           ) : null}
+          {ws.fieldErrors?.localizationLines?.[0] ? (
+            <div
+              className="bg-destructive/10 px-4 py-2 text-destructive text-xs"
+              role="alert"
+            >
+              {ws.fieldErrors.localizationLines[0]}
+            </div>
+          ) : null}
           <SubmitBar
+            fieldErrors={ws.fieldErrors}
             fileName={fileName}
             isSubmitting={ws.isSubmitting}
             onSubmit={ws.submit}

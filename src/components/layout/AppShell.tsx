@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Sidebar } from "./Sidebar";
 
 interface AppShellProps {
@@ -31,11 +32,12 @@ export function AppShell({ children }: AppShellProps) {
       <Sidebar onClose={() => setNavOpen(false)} open={navOpen} />
 
       {Boolean(navOpen) && (
-        <button
+        <Button
           aria-label="Close navigation"
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 h-auto w-auto rounded-none bg-black/60 p-0 backdrop-blur-sm lg:hidden"
           onClick={() => setNavOpen(false)}
           type="button"
+          variant="ghost"
         />
       )}
 

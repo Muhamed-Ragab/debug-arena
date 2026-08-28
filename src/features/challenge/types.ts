@@ -34,3 +34,20 @@ export interface HintItem {
   penaltyPoints: number;
   socraticPrompt: string;
 }
+
+export interface UserChallengeStats {
+  rank: string;
+  solvedRatio: string;
+  streak: string;
+}
+
+export interface SubmitChallengeInput {
+  challengeId: string;
+  hintsRevealedCount: number;
+  localizationLines: number[];
+  proposedFixCode: string;
+  rootCauseExplanation: string;
+  solutionExplanation: string;
+  timeSpentSeconds: number;
+  userId: string;
+}

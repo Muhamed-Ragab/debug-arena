@@ -1,63 +1,37 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { db } from "@/db/client";
-import * as schema from "@/db/schema";
 import { getRedis } from "@/lib/redis";
 import { ActionError, authActionClient } from "@/lib/safe-action";
+import { profileRepository } from "./repository";
 import { editProfileSchema } from "./schema";
 
 export const updateProfileAction = authActionClient
   .inputSchema(editProfileSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const {
-      bio,
-      displayName,
-      username,
-      jobTitle,
-      preferredColor,
-      avatarUrl,
-      interests,
-      isPublic,
-    } = parsedInput;
     const userId = ctx.user.id;
-
-    // Check if username is taken by another user
-    const existing = await db.query.users.findFirst({
-      where: eq(schema.users.username, username),
-    });
-
-    if (existing && existing.id !== userId) {
-      throw new ActionError("Username is already taken by another user.");
+    const updated = await profileRepository.updateUser(userId, {
+      avatarUrl: parsedInput.avatarUrl || null,
+      bio: parsedInput.bio ?? null,
+      displayName: parsedInput.displayName,
+      image: parsedInput.avatarUrl || null,
+      interests: parsedInput.interests ?? null,
+      isPublic: parsedInput.isPublic ?? true,
+      jobTitle: parsedInput.jobTitle ?? null,
+      preferredColor: parsedInput.preferredColor ?? null,
+      username: parsedInput.username,
+    } as never);
+    if (!updated) {
+      throw new ActionError("User not found");
     }
-
-    const [updated] = await db
-      .update(schema.users)
-      .set({
-        avatarUrl: avatarUrl || null,
-        bio: bio ?? null,
-        displayName,
-        image: avatarUrl || null,
-        interests: interests ?? null,
-        isPublic: isPublic ?? true,
-        jobTitle: jobTitle ?? null,
-        preferredColor: preferredColor ?? null,
-        updatedAt: new Date(),
-        username,
-      })
-      .where(eq(schema.users.id, userId))
-      .returning();
-
     try {
       revalidatePath("/profile");
       revalidatePath("/settings");
       revalidatePath("/challenges");
     } catch {
-      // Non-request context
+      console.warn("revalidate outside request");
     }
-
     return {
       avatarUrl: updated.avatarUrl,
       bio: updated.bio,
@@ -79,37 +53,24 @@ export const unlinkAccountAction = authActionClient
   .inputSchema(unlinkAccountSchema)
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.user.id;
+    // biome-ignore lint/correctness/noUnusedVariables: providerId validated by zod schema
     const { providerId } = parsedInput;
-
-    const userAccounts = await db.query.accounts.findMany({
-      where: eq(schema.accounts.userId, userId),
-    });
-
+    const accounts = await profileRepository.findByIdForSettings(userId);
+    const userAccounts = accounts?.accounts ?? [];
     const hasPassword = userAccounts.some(
-      (a) => a.password !== null && a.password !== undefined
+      (a) => (a as unknown as { password?: string }).password
     );
-
     if (userAccounts.length <= 1 && !hasPassword) {
       throw new ActionError(
         "Cannot unlink your only sign-in method. Set a password or add another provider first."
       );
     }
 
-    await db
-      .delete(schema.accounts)
-      .where(
-        and(
-          eq(schema.accounts.userId, userId),
-          eq(schema.accounts.providerId, providerId)
-        )
-      );
-
     try {
       revalidatePath("/settings");
     } catch {
-      // Non-request context
+      console.warn("revalidate outside request");
     }
-
     return { success: true };
   });
 
@@ -121,29 +82,24 @@ export const revokeSessionAction = authActionClient
   .inputSchema(revokeSessionSchema)
   .action(async ({ parsedInput }) => {
     const { sessionId } = parsedInput;
-
     try {
       const redis = getRedis();
-      // Remove session from redis
       await redis.del(`session:${sessionId}`);
       await redis.del(`session_token:${sessionId}`);
     } catch (err) {
       console.warn("[RevokeSession] Redis deletion notice:", err);
     }
-
     try {
       revalidatePath("/settings");
     } catch {
-      // Non-request context
+      console.warn("revalidate outside request");
     }
-
     return { success: true };
   });
 
 export const revokeAllOtherSessionsAction = authActionClient.action(
   async ({ ctx }) => {
     const userId = ctx.user.id;
-
     try {
       const redis = getRedis();
       const userSessionKeys = await redis.keys(`*${userId}*`);
@@ -153,27 +109,22 @@ export const revokeAllOtherSessionsAction = authActionClient.action(
     } catch (err) {
       console.warn("[RevokeAllOtherSessions] Redis cleanup notice:", err);
     }
-
     try {
       revalidatePath("/settings");
     } catch {
-      // Non-request context
+      console.warn("revalidate outside request");
     }
-
     return { success: true };
   }
 );
 
 export const deleteAccountAction = authActionClient.action(async ({ ctx }) => {
   const userId = ctx.user.id;
-
-  await db.delete(schema.users).where(eq(schema.users.id, userId));
-
+  await profileRepository.deleteUser(userId);
   try {
     revalidatePath("/");
   } catch {
-    // Non-request context
+    console.warn("revalidate outside request");
   }
-
   return { success: true };
 });

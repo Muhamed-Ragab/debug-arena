@@ -5,6 +5,7 @@ import {
   Sparkles,
   XCircle,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { EvaluationDetails } from "../types";
 
 interface Props {
@@ -44,11 +45,12 @@ export function ExplanationComparison({
                 </p>
                 {isCorrect !== undefined && (
                   <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-[11px] ${
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-[11px]",
                       isCorrect
                         ? "bg-emerald-500/15 text-emerald-400"
                         : "bg-rose-500/15 text-rose-400"
-                    }`}
+                    )}
                   >
                     {isCorrect ? (
                       <>

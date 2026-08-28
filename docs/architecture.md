@@ -33,6 +33,33 @@
                      (model orchestration)
 ```
 
+## 1.1 Layered Architecture (Flat)
+
+Per-feature flat `repository.ts` + `service.ts` (no `repositories/`/`services/` subfolders), pure components, object maps + `switch`.
+
+```
+page.tsx (server, thin glue)
+   │
+   ▼
+service.ts (business, DIP via repository param, isSolved/calcPoints deduped, DIFFICULTY_LABEL maps)
+   │
+   ▼
+repository.ts (data access only, server-only, thin DTO, db.transaction stays here)
+   │
+   ▼
+db (Drizzle) + Redis (cache) + AI (Groq)
+
+components/*.tsx (pure, props-only, no useState business) ← hooks/* (client logic: useChallengeWorkspace, useLeaderboard, etc.)
+queries.ts / actions.ts (thin facades: export from ./repository / ./service, no db leak)
+constants.ts (data) / types.ts (interfaces) / utils/ (helpers if service >300 lines) / README.md (per-feature docs)
+```
+
+- **Repository**: `import "server-only"`, `ChallengeRepository` interface + `challengeRepository` const, methods `findPublished`, `findById`, etc. No business.
+- **Service**: `isSolved` 1 def, `DIFFICULTY_LABEL` object map + `switch` for discriminant (≥3 branches), injects repo via param.
+- **Hooks**: `features/challenge/hooks/useChallengeWorkspace`, `features/browser/hooks/useChallengeFilters` (consolidate dup), `features/leaderboard/hooks/useLeaderboard`.
+- **Pure Components**: `ChallengeScreen`, `ChallengeBrowser`, `ProfileScreen`, `LeaderboardScreen`, `ResultsScreen`, `AdminQuestionsPage` — receive `value/onChange/data` only.
+- **Facades**: `queries.ts` `export { getPublishedChallenges } from "./service"` etc, `actions.ts` wraps `service.submitChallenge` with `authActionClient`.
+
 ## 2. Core Components
 
 ### 2.1 Frontend (React + Vite + shadcn/ui)
