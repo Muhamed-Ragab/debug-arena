@@ -51,3 +51,21 @@ Pattern used: flat functional repository at src/features/leaderboard/repository.
 - `upsertCategoryStats` uses `onConflictDoUpdate` on `[userId, categoryId]` PK of `userCategoryStats` (analyticsSchema table, exported via schema barrel).
 - NOTE: fixed a blocking type error in parallel `src/features/leaderboard/repository.ts` (interface declared `Promise<UserWithSubmissions[]>` but `UserWithSubmissions` is already an array) so the shared `pnpm typecheck` gate passes.
 - `pnpm typecheck` passes. Evidence: .omo/evidence/task-2-flat.txt
+
+## [docs-update] erd/design layered architecture sync
+
+Brought `docs/erd.md` and `docs/design.md` into sync with the completed layer-separation plan
+(AGENTS.md + docs/architecture.md already had the "Layered Architecture (Flat)" section).
+
+- erd.md: added "## Data Access Layer (Layered Architecture, Flat)" at end of file. Clarifies
+  that Drizzle schema is still split by feature and re-exported from `src/db/schema/index.ts`,
+  but the app now reads/writes only via each feature's flat `repository.ts`. Includes the
+  `page -> service -> repository -> db/Redis/AI` flow diagram, repository/service/facade/constants
+  rules, and the `pnpm lint / typecheck / test src/features/*/service.test.ts` verification block.
+- design.md: added "## 5. Component Architecture (Layered, Flat)" (pushing Open Design Questions
+  to section 6). Clarifies pure components (props-only, no business useState), hooks own client
+  UI state, service owns business logic, facades re-export without importing `@/db/client`, and
+  constants/types split. Notes this is what keeps category color-coding/badges/score-reveal
+  identical across screens. Same verification block appended.
+- No code files touched. No dependencies added. Existing ER diagram and design content preserved.
+- Verification: both files now contain "repository.ts" and "service.ts" 2+ times each.

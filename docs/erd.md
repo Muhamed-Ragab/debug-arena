@@ -242,3 +242,46 @@
 - `challenges` 1—N `challenge_embeddings` (RAG search via pgvector)
 - `login_attempts` keyed by `email`/`ip_address` for rate limiting (no FK to users, supports pre-account attempts).
 - *RLS policies remain keyed on `request.jwt.claim.sub`; the value is populated per-request from the better-auth session via a `SET LOCAL` bridge (see implementation_guide.md §6).*
+
+## Data Access Layer (Layered Architecture, Flat)
+
+The Drizzle schema is still split by feature and re-exported from `src/db/schema/index.ts`
+(see `AGENTS.md` layout). What changed is *how the app reads and writes these tables*: every
+feature owns a flat `repository.ts` that is the only place touching `db` (Drizzle) directly.
+
+Per-feature flat `repository.ts` + `service.ts` (no `repositories/`/`services/` subfolders):
+
+```
+page.tsx (server, thin glue)
+   │
+   ▼
+service.ts (business, DIP via repository param, isSolved/calcPoints/calcRatingDelta deduped)
+   │
+   ▼
+repository.ts (data access only, server-only, thin DTO, db.transaction stays here)
+   │
+   ▼
+db (Drizzle) + Redis (cache) + AI (Groq)
+```
+
+- **Schema ownership**: `src/db/schema/index.ts` barrel re-exports each feature's `schema.ts`.
+  The ER entities above map 1:1 to those Drizzle tables. The schema layer is shared and
+  read-only from the app's perspective; features never import `db` outside their `repository.ts`.
+- **Repository**: `import "server-only"`, a `ChallengeRepository` interface plus a
+  `challengeRepository` const. Methods like `findPublished`, `findById`, `createSubmission`.
+  No business logic, no scoring, no grading. Thin DTO mapping only.
+- **Service**: business logic (scoring, `isSolved`, `calcPoints`, `calcRatingDelta`) lives here,
+  injected with the repo via a parameter (DIP). Pure functions, deduped across the feature.
+- **Facades**: `queries.ts` / `actions.ts` re-export from `./repository` / `./service` and must
+  never import `from "@/db/client"` directly. `actions.ts` wraps service calls with
+  `authActionClient` / `adminActionClient`.
+- **Constants / types**: `constants.ts` holds data (e.g. `DIFFICULTY_LABEL`); `types.ts` holds
+  interfaces. `utils/` only when a service exceeds ~300 lines.
+
+Verification after touching data access:
+
+```
+pnpm lint
+pnpm typecheck
+pnpm test src/features/*/service.test.ts
+```

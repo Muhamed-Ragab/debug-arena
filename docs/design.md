@@ -82,6 +82,44 @@ Advanced account management surface (distinct from the read-only stats/profile p
 - Category color-coding used consistently across browser, challenge screen tags, and stats charts — one color per category, never reused for anything else.
 - Avoid gamification kitsch (badges/confetti) beyond a subtle streak counter and score reveal animation — keep the tone closer to "engineering tool" than "consumer game," matching the audience's taste.
 
-## 5. Open Design Questions
+## 5. Component Architecture (Layered, Flat)
+
+The UX principles above are realized through a strict split between *presentation* and
+*business logic*. Each feature is a flat directory with `repository.ts` + `service.ts` at its
+root (no `repositories/`/`services/` subfolders). This keeps components pure and the design
+system consistent across screens.
+
+```
+repository.ts -> service.ts -> queries.ts/actions.ts -> hooks -> components
+```
+
+- **Pure components** (`features/*/components/*.tsx`): presentational only. They receive
+  `value` / `onChange` / `data` props and render the design system. No `useState` holding
+  business state, no direct `db` or scoring calls. Examples: `ChallengeScreen`,
+  `ChallengeBrowser`, `ProfileScreen`, `LeaderboardScreen`, `ResultsScreen`, `AdminQuestionsPage`.
+- **Hooks** (`features/*/hooks/`): the only place client-side UI state lives
+  (`useChallengeWorkspace`, `useChallengeFilters`, `useLeaderboard`). They call the facades and
+  feed data into pure components.
+- **Service** (`service.ts`): all business logic, scoring, and `isSolved`/`calcPoints` decisions.
+  Pure functions, deduped, injected with the repository via a parameter (DIP).
+- **Facades** (`queries.ts` / `actions.ts`): thin re-exports of `repository.ts` / `service.ts`.
+  `actions.ts` wraps service calls with `authActionClient`. They never import `from "@/db/client"`.
+- **Constants / types**: `constants.ts` holds data (e.g. `DIFFICULTY_LABEL` object maps used for
+  badges and tags); `types.ts` holds interfaces. Prefer object maps + `switch` over `if/else`
+  chains for discriminant unions (difficulty, status, score level).
+
+This separation is what lets the same category color-coding, badge styling, and score-reveal
+animation stay identical across the browser, challenge, results, and leaderboard screens: the
+visual rules live in pure components and shared `constants.ts`, not scattered through business code.
+
+Verification after changing any screen or its logic:
+
+```
+pnpm lint
+pnpm typecheck
+pnpm test src/features/*/service.test.ts
+```
+
+## 6. Open Design Questions
 - Whether localization step should be click-to-select-line (lower friction, more guessable) or free-text function name (higher signal, more friction) — worth A/B testing once there's traffic.
 - How much of the canonical fix to reveal on a wrong answer before letting the user retry vs. moving on.

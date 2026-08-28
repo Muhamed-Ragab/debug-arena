@@ -32,7 +32,11 @@ export function useChallengeFilters(challenges: Challenge[]): ChallengeFilters {
         if (diffFilter && c.difficulty !== diffFilter) {
           return false;
         }
-        if (query && !c.title.toLowerCase().includes(query.toLowerCase())) {
+        if (
+          query &&
+          !c.title.toLowerCase().includes(query.toLowerCase()) &&
+          !c.filePath?.toLowerCase().includes(query.toLowerCase())
+        ) {
           return false;
         }
         return true;

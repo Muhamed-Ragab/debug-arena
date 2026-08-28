@@ -1,10 +1,11 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useChallengeFilters } from "@/features/browser/hooks/useChallengeFilters";
 import type { Category, Challenge, Difficulty } from "@/lib/domain/types";
 import { ChallengeCard } from "./ChallengeCard";
 import { ChallengeFilters } from "./ChallengeFilters";
@@ -23,30 +24,17 @@ export function ChallengeBrowser({
   initialChallenges: Challenge[];
   stats: ChallengeBrowserStat[];
 }) {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<Category | "all">("all");
-  const [difficulty, setDifficulty] = useState<Difficulty | "all">("all");
   const [page, setPage] = useState(1);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return initialChallenges.filter((c) => {
-      if (category !== "all" && c.category !== category) {
-        return false;
-      }
-      if (difficulty !== "all" && c.difficulty !== difficulty) {
-        return false;
-      }
-      if (
-        q &&
-        !c.title.toLowerCase().includes(q) &&
-        !c.filePath?.toLowerCase().includes(q)
-      ) {
-        return false;
-      }
-      return true;
-    });
-  }, [search, category, difficulty, initialChallenges.filter]);
+  const {
+    query,
+    setQuery,
+    catFilter,
+    setCatFilter,
+    diffFilter,
+    setDiffFilter,
+    filtered,
+  } = useChallengeFilters(initialChallenges);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -84,18 +72,18 @@ export function ChallengeBrowser({
 
         <div className="mb-6">
           <ChallengeFilters
-            category={category}
-            difficulty={difficulty}
+            category={(catFilter ?? "all") as Category | "all"}
+            difficulty={(diffFilter ?? "all") as Difficulty | "all"}
             onCategory={(c) => {
-              setCategory(c);
+              setCatFilter(c === "all" ? null : c);
               setPage(1);
             }}
             onDifficulty={(d) => {
-              setDifficulty(d);
+              setDiffFilter(d === "all" ? null : d);
               setPage(1);
             }}
-            onSearch={setSearch}
-            search={search}
+            onSearch={setQuery}
+            search={query}
           />
         </div>
 
