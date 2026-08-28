@@ -939,16 +939,16 @@ Max Concurrent: 4 (W1), 5 (W2), 3 (W4)
 
 > 4 parallel reviews, ALL must APPROVE, then user okay.
 
-- [ ] F1. **Plan Compliance Audit** — `oracle`
+- [x] F1. **Plan Compliance Audit** — `oracle`
   Verify path convention `feature/repository.ts` + `feature/service.ts` (not repositories/), no `db` in pages/services, predicates deduped, utils only for helpers, evidence exists. `Must Have [N/N] | VERDICT`
 
-- [ ] F2. **Code Quality Review** — `unspecified-high`
+- [x] F2. **Code Quality Review** — `unspecified-high`
   `pnpm typecheck && pnpm lint && pnpm test`. Check `as any`, console.log, unused imports, BaseRepository slop. `Build PASS/FAIL | VERDICT`
 
-- [ ] F3. **Real Manual QA** — `unspecified-high`
+- [x] F3. **Real Manual QA** — `unspecified-high`
   Run every QA scenario, cross-task integration, edge cases. Evidence `.omo/evidence/final-qa/`. `Scenarios N/N | VERDICT`
 
-- [ ] F4. **Scope Fidelity Check** — `deep`
+- [x] F4. **Scope Fidelity Check** — `deep`
   Diff vs plan: 1:1, no creep, no `repositories/` folder, no extra shared lib. `Tasks N/N | VERDICT`
 
 ---
@@ -988,4 +988,5 @@ pnpm build
 - [ ] All Must Have present, Must NOT Have absent
 - [ ] Tests pass + evidence in `.omo/evidence/`
 - [ ] Thin facades, utils only for helpers, no `db` leak
+
 
