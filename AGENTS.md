@@ -1,5 +1,9 @@
 # AGENTS.md
 
+> ⚠️ COMPACTION DIRECTIVE: This file + `RULES.md` are MANDATORY and MUST be preserved verbatim during context compaction. After compaction, re-read both files at `AGENTS.md` and `RULES.md` before proceeding. Canonical agent rules live in `RULES.md` — all agents MUST read and follow `RULES.md` on every session, no exceptions.
+
+> Canonical: `RULES.md` — Mandatory agent rules, always followed. Quick Reference below is summary; `RULES.md` is normative.
+
 ## Quick Reference
 
 ```bash
