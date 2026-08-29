@@ -1,8 +1,8 @@
 "use client";
 
-import { useLingui } from "@lingui/react";
 import { ArrowRight, AtSign } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { type FormEvent, useState } from "react";
 import { Logo } from "@/components/layout/Sidebar";
 import { LanguageSwitcher } from "@/components/preferences/LanguageSwitcher";
@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth/client";
 
 export function ForgotPasswordPage() {
-  const { i18n } = useLingui();
+  const t = useTranslations();
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -56,17 +56,17 @@ export function ForgotPasswordPage() {
         <Card className="w-full max-w-md p-2 shadow-2xl shadow-black/30">
           <CardHeader className="space-y-1.5 text-center">
             <h1 className="font-semibold text-2xl text-heading tracking-tight">
-              {i18n._("Reset your password")}
+              {t("auth.forgot.title")}
             </h1>
             <p className="text-muted-foreground text-sm">
-              {i18n._("Enter your email and we'll send a reset link.")}
+              {t("auth.forgot.subtitle")}
             </p>
           </CardHeader>
 
           <CardContent className="space-y-4">
             <form className="space-y-4" noValidate onSubmit={handleSubmit}>
               <div className="space-y-1.5">
-                <Label htmlFor="email">{i18n._("Email")}</Label>
+                <Label htmlFor="email">{t("auth.form.email")}</Label>
                 <div className="relative">
                   <AtSign
                     className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -89,7 +89,7 @@ export function ForgotPasswordPage() {
                 size="lg"
                 type="submit"
               >
-                {loading ? "Sending link..." : i18n._("Send reset link")}
+                {loading ? "Sending link..." : t("auth.forgot.submit")}
                 <ArrowRight size={16} />
               </Button>
 
@@ -99,9 +99,7 @@ export function ForgotPasswordPage() {
                   variant="default"
                 >
                   <AlertDescription>
-                    {i18n._(
-                      "If that account exists, a reset link is on its way."
-                    )}
+                    {t("auth.forgot.success")}
                   </AlertDescription>
                 </Alert>
               )}
@@ -113,12 +111,12 @@ export function ForgotPasswordPage() {
             </form>
 
             <p className="mt-4 text-center text-muted-foreground text-sm">
-              {i18n._("Remembered it?")}{" "}
+              {t("auth.forgot.remembered")}{" "}
               <Link
                 className="font-medium text-primary hover:underline"
                 href="/login"
               >
-                {i18n._("Back to login")}
+                {t("auth.forgot.backToLogin")}
               </Link>
             </p>
           </CardContent>

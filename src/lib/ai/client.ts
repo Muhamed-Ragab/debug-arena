@@ -16,6 +16,18 @@ export function createAIProvider(options?: AIProviderOptions): GroqProvider {
   if (providerType === "groq") {
     return createGroq({
       apiKey: apiKey || "",
+      fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), 30_000);
+        try {
+          return await fetch(input, {
+            ...init,
+            signal: controller.signal,
+          });
+        } finally {
+          clearTimeout(t);
+        }
+      },
     });
   }
 

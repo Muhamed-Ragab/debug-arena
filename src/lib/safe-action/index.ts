@@ -3,17 +3,24 @@ import "server-only";
 import { headers } from "next/headers";
 import { createSafeActionClient } from "next-safe-action";
 import { auth } from "@/lib/auth";
+import { isOfflineError, OFFLINE_MESSAGE } from "@/lib/offline";
+import { ActionError } from "./errors";
 
-export class ActionError extends Error {}
+export { ActionError, ConflictError, NotFoundError } from "./errors";
+
+export function handleServerError(e: Error): string {
+  if (isOfflineError(e)) {
+    return OFFLINE_MESSAGE;
+  }
+  if (e instanceof ActionError) {
+    return e.message;
+  }
+  console.error(e);
+  return "Something went wrong";
+}
 
 export const actionClient = createSafeActionClient({
-  handleServerError(e) {
-    if (e instanceof ActionError) {
-      return e.message;
-    }
-    console.error("Action error:", e);
-    return "An unexpected server error occurred.";
-  },
+  handleServerError,
 });
 
 export const authActionClient = actionClient.use(async ({ next }) => {
@@ -35,7 +42,7 @@ export const authActionClient = actionClient.use(async ({ next }) => {
 });
 
 export const adminActionClient = authActionClient.use(async ({ ctx, next }) => {
-  const userRole = (ctx.user as { role?: string | null }).role ?? "";
+  const userRole = ctx.user?.role;
   if (userRole !== "admin") {
     throw new ActionError("Forbidden: Admin access required");
   }

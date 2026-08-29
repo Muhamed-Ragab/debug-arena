@@ -38,6 +38,8 @@ export const users = pgTable(
     isPublic: boolean("is_public").notNull().default(true),
     jobTitle: text("job_title"),
     lastActivityDate: timestamp("last_activity_date", { mode: "date" }),
+    lastLoginMethod: text("last_login_method"),
+    locale: text("locale").default("en"),
     name: text("name"),
     preferredColor: text("preferred_color"),
     role: userRoleEnum("role").notNull().default("user"),
