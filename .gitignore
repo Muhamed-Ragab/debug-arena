@@ -28,8 +28,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# compiled lingui catalogs (sources .po and .json are committed)
-src/locales/*/messages.js
+# i18n messages are committed (next-intl JSON)
+# src/locales removed — see messages/{en,ar}/*.json
 
 # vitest / testing
 /coverage
@@ -39,3 +39,6 @@ src/locales/*/messages.js
 
 # OhMyOpenCode session/continuation artifacts
 .omo/
+
+# KiloCode
+.kilo/

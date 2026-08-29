@@ -1,112 +1,88 @@
-# RULES.md — MANDATORY AGENT RULES — MUST SURVIVE COMPACTION
+# RULES.md — Canonical Agent Rules (Normative)
 
-> ⚠️ COMPACTION DIRECTIVE: These rules are MANDATORY and MUST be preserved verbatim during context compaction. If you are summarizing or compressing, keep this file's content intact — do not paraphrase, shorten, or drop sections. After compaction: if any rule below feels unclear, re-read `RULES.md` before proceeding. `AGENTS.md` references this file as canonical.
+> ⚠️ COMPACTION DIRECTIVE: This file + `AGENTS.md` are MANDATORY and MUST be preserved verbatim during context compaction. After compaction, re-read both files at `AGENTS.md` and `RULES.md` before proceeding. This file is the canonical normative source — `AGENTS.md` is a summary.
 
-## 0. Meta — How Agents Must Use This File
-- On session start, read `RULES.md` (and `AGENTS.md`) before any other file.
-- Before any response, check available skills — if a relevant skill applies (even 1% chance), load it first.
-- Never skip skill checks for "simple questions" or "just one small change".
-- Re-read this file after context compaction.
-- When you make a decision, save it to memory if the memory tool is available.
+## Quick Reference
 
-## 1. Universal (all projects)
-- **Language: English only.** All responses, code comments, and docs in English. Never switch languages mid-conversation.
-- **No secrets in commits, logs, or messages.** Never commit `.env`, API keys, tokens, or secrets. Scan with `envsitter-guard` before committing if available.
-- **Ask before guessing.** When unsure about intent, scope, or file location — ask ONE clarifying question instead of assuming.
-- **Follow existing patterns.** Match the project's conventions, not your defaults.
+```bash
+pnpm install                # pnpm 9.9.0, Node >= 20.9
+docker compose up -d        # Postgres pgvector:pg16 (5432) + Redis 7 (6379)
+cp .env.example .env        # fill BETTER_AUTH_SECRET, DATABASE_URL, GROQ_API_KEY, etc.
+pnpm db:generate && pnpm db:migrate  # Drizzle codegen -> ./drizzle + migrate (creates pgvector extension)
+pnpm db:seed                # optional seed
+pnpm dev                    # `next dev` (Turbopack) with next-intl via `src/i18n/request.ts` + `next.config.ts: withNextIntl`
+```
 
-## 2. Project — Debug Arena (this repo)
-### 2.1 Stack (do not deviate)
-- Next.js 16 App Router (`src/` dir, Turbopack, `reactCompiler: true`, `typedRoutes: true`) + Tailwind v4 + Base UI + Biome 2.5.10 (ultracite) + Drizzle 0.45.2 + pgvector + better-auth + Vercel AI SDK (Groq). See `AGENTS.md` Toolchain.
+Verification order: `pnpm lint` -> `pnpm format:check` -> `pnpm typecheck` -> `pnpm test` -> `pnpm build` (also `pnpm test src/features/*/service.test.ts` for service batch)
 
-### 2.2 Commands (use pnpm 9.9.0, Node >= 20.9)
-- `pnpm lint` / `pnpm lint:fix` — `biome check src`
-- `pnpm format` / `pnpm format:check` — `biome format`
-- `pnpm typecheck` — `tsc --noEmit` (strict, `bundler` resolution, `@/*` -> `./src/*`)
-- `pnpm test` — `vitest run` (jsdom, `src/**/*.test.{ts,tsx}`, alias `server-only` -> `src/test/server-only-shim.ts`). Single: `pnpm vitest run src/path/file.test.ts`
-- `pnpm build` — `lingui compile --typescript && next build` (must compile catalogs first)
-- `pnpm db:generate` / `pnpm db:migrate` (uses `tsx --env-file=.env src/db/migrate.ts` — env file flag matters) / `pnpm db:seed`
-- `pnpm i18n:extract` / `pnpm i18n:compile`
-- Verification order: `pnpm lint` -> `pnpm format:check` -> `pnpm typecheck` -> `pnpm test` -> `pnpm build` (also `pnpm test src/features/*/service.test.ts`)
+## Commands
 
-### 2.3 Layout (do not invent folders)
-- `src/app/` — App Router (`(app)` protected + `(auth)` + `api/`)
-- `src/features/{name}/` — one flat directory per feature (`admin`, `auth`, `browser`, `challenge`, `leaderboard`, `profile`, `results`, `landing`): each has `repository.ts` + `service.ts` + `constants.ts` + `types.ts` + `README.md` + `hooks/`/`utils/` if needed. **Never** `repositories/` or `services/` subfolders.
-- `src/components/ui/` — shadcn on Base UI; `src/components/{shared,layout,preferences}` — cross-feature
-- `src/lib/{auth,env,safe-action,redis,domain}` — as in AGENTS.md
-- `src/db/schema/index.ts` — barrel re-exports `features/*/schema` + `relations.ts` + `roles.ts`
-- `drizzle/` — generated migrations (Biome-ignored); `src/locales/{en,ar}/` — Lingui catalogs
+- `pnpm build` — `next build` (Turbopack) with `withNextIntl` from `next.config.ts` + `src/i18n/request.ts` — no separate compile step.
+- `pnpm lint` — `biome check src` (extends `ultracite/biome/{core,react,next,vitest}`, ignores `.next/dist/drizzle`). Fix: `pnpm lint:fix` or `pnpm lint:sort` (unsafe sort).
+- `pnpm format` / `pnpm format:check` — `biome format --write src` / `biome format src`
+- `pnpm typecheck` — `tsc --noEmit` (strict, `bundler` resolution, `paths: {"@/*": ["./src/*"]}`)
+- `pnpm test` — `vitest run` (jsdom, `src/**/*.test.{ts,tsx}`, setup `src/test/setup.ts`). Single test: `pnpm vitest run src/path/file.test.ts` or `pnpm test -- src/path/file.test.ts`. Watch: `pnpm test:watch`.
+- `pnpm test:e2e:bruno` — `bru run bruno --env local` (requires running app + DB/Redis).
+- `pnpm i18n:check` — `tsc --noEmit` (type-checks `messages/*` and `src/i18n/*`; namespaces `common,auth,admin,…`).
+- `pnpm db:generate` — `drizzle-kit generate` (config `drizzle.config.ts`: schema `./src/db/schema/index.ts` -> out `./drizzle`, dialect `postgresql`). `pnpm db:migrate` uses `tsx --env-file=.env src/db/migrate.ts` — env file flag matters, not `dotenv/config` alone. Prod variants: `pnpm db:migrate:prod` / `pnpm db:seed:prod` read `.env.prod`.
 
-### 2.4 Layered Architecture (Flat) — MANDATORY
-- `feature/repository.ts` — data access ONLY, `import "server-only"`, thin DTO mapping, no business logic, no `any`, functional (no class). Drizzle array syntax `(t) => [...]`.
-- `feature/service.ts` — business ONLY, DIP via `repository` param (injected), deduped `isSolved`/`calcPoints`/`calcRatingDelta`, object maps (`DIFFICULTY_LABEL`, `STATUS_LABEL`, `SCORE_LEVEL_MAP`) instead of `if/else if`, `switch` for ≥3 branches.
-- `feature/hooks/` — client logic only (`useChallengeFilters`, `useChallengeWorkspace`, etc.). Components do `filtered = useChallengeFilters(challenges)`.
-- `feature/components/*.tsx` — **pure**, props-only, `"use client"` only when using hooks/context/window. No business `useState`; only UI ephemeral state (hover, pagination `page`). No `db` or scoring calls.
-- `feature/constants.ts` — data/constants only. `feature/types.ts` — interfaces/types only.
-- Facades `feature/queries.ts` / `actions.ts` — **thin**, re-export from `./repository`/`./service` (explicit `async` delegation, NOT `export { } from`), **must not** `import { db } from "@/db/client"` or `from "@/db/client"`. Neither should services.
-- Tests: `feature/service.test.ts` covers pure business; components have `*.test.tsx`.
+## Layout
 
-### 2.5 Conventions
-- Client Components: `"use client"` only for hooks/context/window/localStorage/recharts/better-auth hooks. Keep presentational as Server Components.
-- Routing: `Link` from `next/link`, `useRouter/usePathname/useParams/useSearchParams` from `next/navigation` (`typedRoutes: true` — typed `href`).
-- Auth guards: `src/proxy.ts` (NOT `middleware.ts`) checks `getSessionCookie(request)` for `PROTECTED_PREFIXES` + `AUTH_ROUTES`; `ProtectedRoute` in `src/app/(app)/layout.tsx`. Matcher in `proxy.ts` `config.matcher`.
-- Server Actions: `actionClient` / `authActionClient` / `adminActionClient` from `@/lib/safe-action` with Zod schemas. `ActionError` surfaces; others sanitized.
-- API envelope `{ success, data, error }` only for `src/app/api/**` — better-auth at `/api/auth/**` native.
-- i18n: `useLingui().i18n._("key")` + `dynamicActivate` loading `src/locales/{locale}/messages.ts`. No Lingui macros. `sourceLocale: en`, `locales: [en, ar]`, `compileNamespace: es`, `format: @lingui/format-po`.
-- Env: `src/lib/env/env.ts` via `createEnv` (`emptyStringAsUndefined: true`). Never read `process.env` directly. Defaults allow dev but DB/Redis fail without Docker.
-- Drizzle: `CREATE EXTENSION IF NOT EXISTS vector` before `migrate()`.
-- Redis: `getRedis()` singleton (ioredis, globalThis cache, silent in test).
-- Vitest aliases: `@ -> src`, `server-only -> src/test/server-only-shim.ts`.
+| Path | Role |
+|---|---|
+| `src/app/` | App Router routes (`(app)` protected group + `(auth)` + `api/`) |
+| `src/features/{name}/` | One directory per page/feature (`admin`, `auth`, `browser`, `challenge`, `leaderboard`, `profile`, `results`, `landing`) — own `schema.ts` (Drizzle-only) if DB-backed; each has flat `repository.ts` (`createXRepository(db = db)` factory, `server-only`, closure over db, `export const xRepository = createXRepository()`) + `service.ts` (`createXService(repo = xRepository)` factory, closure over repo, `export const xService = createXService(xRepository)` singleton-only, no destructured re-exports) + `validation.ts` (Zod-only, singular, paired `*InputSchema`/`*OutputSchema` generic passthrough) + `types.ts` (ALL types including row aliases, DTOs, repository interfaces) + `constants.ts` (data). Facade `feature/actions.ts` only (pages import via `xService.method`; pure helpers like `slugify`, `isSolved`, `calcPoints` stay outside factory as named exports). `utils/`/`hooks/`/`README.md` if needed (no `repositories/`/`services/` subfolders) |
+| `src/components/ui/` | shadcn primitives on Base UI (`@base-ui/react`) |
+| `src/components/{shared,layout,preferences}` | Cross-feature markdown/badges, Sidebar/TopBar, lang/theme toggles |
+| `src/lib/auth/` | better-auth server (`index.ts`) + React client (`client.ts`) |
+| `src/lib/env/` | `@t3-oss/env-nextjs` schema (`env.ts`) — defaults allow dev without `.env` but DB/Redis will fail |
+| `src/lib/safe-action/` | `next-safe-action` clients: `actionClient`, `authActionClient`, `adminActionClient` |
+| `src/lib/redis/` | `getRedis()` singleton (ioredis, globalThis cache, silent in test) |
+| `src/lib/domain/` | Category/difficulty enums and domain types |
+| `src/db/schema/` | Barrel `index.ts` re-exports `features/*/schema` + `relations.ts` + `roles.ts`; Drizzle array syntax `(t) => [...]` |
+| `src/db/client.ts` | `drizzle(pool, {schema})` with globalThis pool reuse outside production |
+| `drizzle/` | Generated migrations (Biome-ignored) |
+| `messages/{en,ar}/` | next-intl JSON namespaces (`common,auth,admin,…`, Biome-ignored) |
+| `src/i18n/` | `routing.ts` (`defineRouting`), `request.ts` (`getRequestConfig`), `navigation.ts` |
+| `src/test/` | `setup.ts` (jest-dom + cleanup) + `server-only-shim.ts` |
 
-### 2.6 TypeScript Strictness — HARD BLOCKS
-- **NEVER `any`.** Strict mode, `noEmit: true`. Use explicit interfaces, Zod inference, `unknown` + narrowing.
-- **NEVER** `as any`, `@ts-ignore`, `@ts-expect-error`, empty `catch(e) {}`.
-- **NEVER** suppress type errors to make build pass — fix the type.
-- **NEVER** leave code in broken state after 3 failed fixes — revert, document, consult Oracle, ask user.
+## Toolchain
+
+- Next.js 16 App Router, `src/` dir, Turbopack dev+build, `reactCompiler: true` + `typedRoutes: true` (`next.config.ts`)
+- Tailwind CSS v4 + `tw-animate-css`, `shadcn` CLI
+- Biome 2.5.10 via ultracite presets — no ESLint/Prettier
+- Drizzle ORM 0.45.2 + drizzle-kit 0.31.1 + `pg` + `pgvector/pgvector:pg16`
+- better-auth 1.7.1 + `@better-auth/drizzle-adapter` + `@better-auth/redis-storage` (ioredis)
+- Vercel AI SDK (`ai` + `@ai-sdk/groq`) for bug-injection/grading
+- Single app — Turborepo removed. No `opencode.json`, no `.opencode/`, no CI workflows, no Husky/lint-staged.
+
+## Conventions
+
+- Client Components: add `"use client"` only when using hooks/context/window/localStorage/recharts/better-auth hooks. Presentational stays Server Component.
+- Routing: `Link` from `next/link`, `useRouter/usePathname/useParams/useSearchParams` from `next/navigation`. `typedRoutes: true` — use typed `href` values.
+- Auth guards: `src/proxy.ts` (not `middleware.ts` — Next 16 `proxy` convention) checks `getSessionCookie(request)` for `PROTECTED_PREFIXES` + `AUTH_ROUTES`; client `ProtectedRoute` in `src/app/(app)/layout.tsx` does full session check. Matcher list in `proxy.ts` `config.matcher`.
+- Server Actions: import `actionClient` / `authActionClient` / `adminActionClient` from `@/lib/safe-action` with Zod schemas from `validation.ts`. Every action chains `.inputSchema(inputSchema).outputSchema(outputSchema)` (both required, output is `z.object({ success: z.boolean() }).passthrough()` initially). `ActionError` surfaces as user-facing message; other errors are sanitized.
+- API envelope `{ success, data, error }` applies only to `src/app/api/**` handlers — better-auth endpoints at `/api/auth/**` return their native shape.
+- i18n: next-intl 4.x, `useTranslations()` client / `getTranslations()` server, `defineRouting` in `src/i18n/routing.ts` (locales `en,ar`, `localePrefix:"never"`), `getRequestConfig` in `src/i18n/request.ts` loading `messages/{locale}/{ns}.json` namespaces (`common,auth,admin,…`), `createMiddleware` in `src/proxy.ts`, `NextIntlClientProvider` in `src/app/layout.tsx`, scripts `i18n:check` (`tsc --noEmit`).
+- Env: `src/lib/env/env.ts` via `createEnv` — server keys (`DATABASE_URL`, `BETTER_AUTH_SECRET`, `REDIS_URL`, `GROQ_API_KEY`, `GOOGLE_*`, `GITHUB_*`) default for dev; `emptyStringAsUndefined: true`. Never read `process.env` directly.
+- Drizzle: schema split by feature, re-exported from `src/db/schema/index.ts`. Migrations via `drizzle.config.ts`. `src/db/migrate.ts` runs `CREATE EXTENSION IF NOT EXISTS vector` before `migrate()`.
+- Layered Architecture (Flat): `feature/repository.ts`: `export function createXRepository(dbClient = db) { async function findX(){ use dbClient } return { findX } }` + `export const xRepository = createXRepository()` (db injected once, FP closure, no `Impl` suffix, shorthand return). `feature/service.ts`: `export function createXService(repo = xRepository) { async function getX(){ use repo } return { getX } }` + `export const xService = createXService(xRepository)` singleton-only (no `export const { getX } = xService`; call sites use `xService.getX`). For tests: `const svc = createXService(mockRepo)` then `svc.getX`. No `queries.ts` — pages/actions import via `xService.method` or `xRepository` singleton. `feature/validation.ts` (singular) holds ALL Zod schemas (`*InputSchema` + permissive `*OutputSchema` via `.passthrough()`) — `schema.ts` is Drizzle-only. `feature/types.ts` holds ALL types/interfaces (including private row aliases, DTOs, `XRepository`). `feature/actions.ts` uses `adminActionClient.inputSchema(schema).outputSchema(outputSchema)` (both required) calling `xService`. `feature/constants.ts` holds data. `feature/hooks/` (client logic) → `feature/components/` (pure, props-only). Pure helpers (`slugify`, `isSolved`, `calcPoints`, `buildRadarData`) stay outside factory as top-level named exports for direct test import.
+- Pure Components: all `features/*/components/*.tsx` presentational, client logic in `features/*/hooks/`; use object maps (`DIFFICULTY_LABEL`, `STATUS_LABEL`, `SCORE_LEVEL_MAP`) instead of `if (x==='a')...else if`, prefer `switch` for discriminant unions (`switch(difficulty)`, `switch(status)`) where ≥3 branches.
+- Redis: call `getRedis()` — handles `ECONNREFUSED` warning when Docker down.
+- Vitest: `vitest.config.ts` aliases `@ -> src` and `server-only -> src/test/server-only-shim.ts` (jsdom lacks `react-server` export condition). `include: ["src/**/*.test.{ts,tsx}"]`, `environment: jsdom`.
+
+## TypeScript Strictness
+
+- **NEVER use `any`.** Strict mode on; `noEmit: true`. Use explicit interfaces or Zod inference; unknown + narrowing if type unclear.
 - Path alias `@/*` -> `./src/*` (both `tsconfig.json` and `vitest.config.ts`).
+- Layered files: `repository.ts` + `service.ts` flat at `feature/` root, `server-only` in repository, `createXRepository`/`createXService` factories with closure singletons, `actions.ts` facade only (no `queries.ts`), `validation.ts` singular Zod-only with paired schemas, `types.ts` holds ALL types.
 
-### 2.7 Verification & Evidence — BEFORE "done"
-A task is NOT complete without evidence:
-- File edit → `lsp_diagnostics` clean on changed files
-- Build command → exit 0 (`pnpm typecheck`, `pnpm lint`)
-- Test run → pass (or note pre-existing failures explicitly)
-- Delegation → agent result received and verified
-- For layered tasks: `grep -r 'from "@/db/client"' src/app src/features/*/service.ts src/features/*/queries.ts src/features/*/actions.ts` must be 0; `repository.ts`/`service.ts` flat at feature root; no `repositories/` folder
+<!-- BEGIN:nextjs-agent-rules -->
 
-### 2.8 Workflow & Delegation (Orchestrator = Atlas/Sisyphus)
-- On every message: **Skill check first** (1% rule). If a skill applies, load it before implementation.
-- Classify intent before acting: trivial → direct tools; exploratory → `explore` (background, 1-3) + tools in parallel; open-ended → assess codebase (disciplined/transitional/legacy/greenfield) then propose; ambiguous → ask ONE question.
-- Turn-local intent reset: reclassify from CURRENT message only; never auto-carry "implementation mode"; do not create todos unless user explicitly asks to implement.
-- Context-completion gate: implement only when (1) explicit verb (implement/add/create/fix/change/write), (2) concrete scope, (3) no blocking specialist pending (especially Oracle).
-- **Decompose & delegate:** Any implementation with 2+ independent units → spawn `deep`/`unspecified-high` agents in **parallel** (`run_in_background=true`), one goal + one deliverable per call, 5+ line prompts with GOAL / EXPECTED OUTCOME / REQUIRED TOOLS / MUST DO / MUST NOT DO / CONTEXT. Your value is orchestration, not direct edits. Resume via `task(task_id="ses_...")`, collect via `background_output(task_id="bg_...")` only after `<system-reminder>`.
-- **Anti-duplication:** Once explore/librarian delegated, do NOT re-grep the same topic yourself. Wait for notification.
-- **Explore/Librarian = grep, not consultants.** Free/cheap, always `run_in_background=true`, always parallel. Continue only non-overlapping work.
-- **Oracle = expensive, read-only.** Consult for complex architecture, after 2+ failed fixes, after significant work, or multi-system tradeoffs. Never cancel Oracle, never deliver final answer before collecting Oracle result.
-- **Plan dependency:** Multi-step task → consult Plan agent first. Single-file fix → proceed directly.
-- **Todo discipline:** Multi-step → `todowrite` immediately with atomic todos `"[WHERE] [HOW] to [WHY] - expect [RESULT]"`, 1 `in_progress` at a time, mark `completed` immediately, split if >3 tool calls.
-- **Delegation prompt structure (all 6 sections mandatory):** TASK / EXPECTED OUTCOME / REQUIRED TOOLS / MUST DO / MUST NOT DO / CONTEXT.
-- **Verification before completion:** Run `lsp_diagnostics` on changed files at end of logical unit, before marking todo done, before reporting completion. If project has build/test, run them.
-- **Failure recovery:** After 3 consecutive failures → STOP, REVERT to last working state, DOCUMENT attempts, CONSULT Oracle, ASK USER.
-- **Commits:** Never commit unless explicitly requested. When requested: atomic commits, inspect `git status/diff/log --oneline -10`, never commit secrets, conventional commits, subject ≤50 chars. Never `background_cancel(all=true)`, always individual. Never deliver final answer before collecting Oracle.
+# This is NOT the Next.js you know
 
-### 2.9 File Operations
-- Prefer `ctx_*` tools (lean-ctx) over native `Read/Grep/Shell/Glob` when available. `ctx_read` with mode `signatures` for orientation, `full` before edit, `diff` after edit.
-- Never use native `Read` when `ctx_read` exists — self-correct.
-- Use `.opencode` codemaps, `ctx_compose` for orientation.
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
-## 3. Completion Checklist (every task)
-- [ ] Todos marked done, diagnostics clean, build passes, user's request fully addressed
-- [ ] Per-task evidence files under `.omo/evidence/` if plan requires
-- [ ] No pre-existing lint/type errors introduced (report as "pre-existing" if found)
-- [ ] If Oracle running: end response and wait for notification first; cancel disposable background tasks individually via `background_cancel(taskId="...")`
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
-## 4. Where These Rules Live
-- Canonical: `RULES.md` (this file) — agents read this first.
-- `AGENTS.md` — Quick Reference + Commands + Layout + Toolchain + Conventions (references RULES.md).
-- Global: `~/.config/opencode/AGENTS.md` — survives compaction, re-read after compaction.
-- `docs/architecture.md` / `docs/erd.md` / `docs/design.md` — system design layers.
-
-## 5. Enforcement
-- Any agent that violates a HARD BLOCK must revert and fix minimally.
-- Any "done" claim without evidence is treated as NOT done.
-- When in doubt about a rule, re-read `RULES.md` — do not guess.
+<!-- END:nextjs-agent-rules -->

@@ -15,9 +15,21 @@
       "!dist",
       "!build",
       "!drizzle",
-      "!src/locales/**/messages.*"
+      "!messages"
     ]
   },
+  "overrides": [
+    {
+      "includes": ["src/features/admin/lib/question-generator-agent.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useErrorCause": "off"
+          }
+        }
+      }
+    }
+  ],
   "linter": {
     "rules": {
       "style": {
@@ -42,7 +54,8 @@
       "performance": {
         "noBarrelFile": "off",
         "noNamespaceImport": "off",
-        "noJsxPropsBind": "off"
+        "noJsxPropsBind": "off",
+        "useTopLevelRegex": "off"
       }
     }
   }

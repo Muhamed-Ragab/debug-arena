@@ -36,6 +36,34 @@
       "when": 1787835142097,
       "tag": "0004_bouncy_joseph",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1787963140813,
+      "tag": "0005_add_category_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787963190728,
+      "tag": "0006_add_fk_restrict",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1787985395126,
+      "tag": "0007_add_user_locale",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788003449323,
+      "tag": "0008_organic_king_cobra",
+      "breakpoints": true
     }
   ]
 }
