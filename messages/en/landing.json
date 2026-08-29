@@ -1,0 +1,43 @@
+{
+  "features": {
+    "realBugClasses": {
+      "title": "Real bug classes",
+      "body": "React rendering, state mutation, race conditions, memory leaks — the bugs that actually page you, not toy algorithms."
+    },
+    "explainRootCause": {
+      "title": "Explain the root cause",
+      "body": "The graded deliverable is the diagnosis, not a passing test. You prove you understood the bug, not just that you patched it."
+    },
+    "hiddenTests": {
+      "title": "Hidden tests + grading agent",
+      "body": "Your fix runs against hidden tests, then an agent grades the explanation against the canonical root cause."
+    },
+    "weakSpotAnalytics": {
+      "title": "Weak-spot analytics",
+      "body": "A per-category radar shows exactly where you keep getting paged, so practice targets your real gaps."
+    },
+    "sectionTitle": "Practice the bugs that actually page you.",
+    "sectionSubtitle": "Four bug classes, one graded deliverable: the diagnosis. Pick your weak spot and train it."
+  },
+  "stats": {
+    "bugsDiagnosed": "bugs diagnosed",
+    "bugClasses": "bug classes",
+    "hiddenTestGrading": "hidden-test grading"
+  },
+  "socialProof": {
+    "trusted": "Trusted by engineers who would rather not get paged twice"
+  },
+  "actions": {
+    "enterArena": "Enter Arena",
+    "startChallenge": "Start a challenge",
+    "seeGrading": "See how grading works"
+  },
+  "hero": {
+    "badge": "LeetCode for debugging",
+    "title": "Debug like it's 2am on call.",
+    "subtitle": "LeetCode for debugging — practice root-cause diagnosis on real-world bugs, not toy algorithms."
+  },
+  "cta": {
+    "title": "Ready to find out why it broke?"
+  }
+}

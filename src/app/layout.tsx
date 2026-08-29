@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { Providers } from "./providers";
 import "./globals.css";
 import { Geist } from "next/font/google";
@@ -11,19 +13,25 @@ export const metadata: Metadata = {
   title: "Debug Arena",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
     <html
       className={cn("font-sans", geist.variable)}
-      lang="en"
+      dir={locale === "ar" ? "rtl" : "ltr"}
+      lang={locale}
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background text-foreground antialiased">
-        <Providers>{children}</Providers>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Providers>{children}</Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

@@ -1,0 +1,15 @@
+{
+  "unauthorized": "Unauthorized",
+  "forbiddenAdmin": "Forbidden: Admin access required",
+  "challengeNotFound": "Challenge not found",
+  "userNotFound": "User not found",
+  "serviceUnavailable": "Service temporarily unavailable. Please try again.",
+  "somethingWrong": "Something went wrong",
+  "validationFailed": "Validation failed",
+  "categoryNotFound": "Category not found",
+  "cannotUnlinkOnlyProvider": "Cannot unlink your only sign-in method. Set a password or add another provider first.",
+  "unknownCategorySlug": "Unknown category slug: {slug}",
+  "categorySlugExists": "Category slug \"{slug}\" already exists",
+  "cannotDeleteCategory": "Cannot delete — {count} challenges use this category",
+  "digest": "Error ID: {digest}"
+}

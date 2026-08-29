@@ -1,5 +1,9 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
+import createMiddleware from "next-intl/middleware";
+import { routing } from "@/i18n/routing";
+
+const intlMiddleware = createMiddleware(routing);
 
 const PROTECTED_PREFIXES = [
   "/challenges",
@@ -12,6 +16,10 @@ const PROTECTED_PREFIXES = [
 const AUTH_ROUTES = ["/login", "/register", "/forgot-password"];
 
 export function proxy(request: NextRequest) {
+  // Run next-intl locale handling (NEXT_LOCALE cookie / Accept-Language header)
+  // In localePrefix:'never' mode this just injects locale headers and may set default cookie
+  const intlResponse = intlMiddleware(request);
+
   const { pathname } = request.nextUrl;
   const sessionCookie = getSessionCookie(request);
 
@@ -22,27 +30,32 @@ export function proxy(request: NextRequest) {
   if (isProtected && !sessionCookie) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
+    const redirectRes = NextResponse.redirect(loginUrl);
+    // Propagate all cookies set by intl middleware (NEXT_LOCALE etc.)
+    for (const cookie of intlResponse.cookies.getAll()) {
+      redirectRes.cookies.set(cookie);
+    }
+    return redirectRes;
   }
 
   const isAuthRoute = AUTH_ROUTES.some((route) => pathname === route);
   if (isAuthRoute && sessionCookie) {
-    return NextResponse.redirect(new URL("/challenges", request.url));
+    const redirectRes = NextResponse.redirect(
+      new URL("/challenges", request.url)
+    );
+    for (const cookie of intlResponse.cookies.getAll()) {
+      redirectRes.cookies.set(cookie);
+    }
+    return redirectRes;
   }
 
-  return NextResponse.next();
+  return intlResponse;
 }
 
 export const config = {
   matcher: [
-    "/challenges/:path*",
-    "/leaderboard/:path*",
-    "/profile/:path*",
-    "/settings/:path*",
-    "/submissions/:path*",
-    "/admin/:path*",
-    "/login",
-    "/register",
-    "/forgot-password",
+    // Intentionally excludes `api` (auth endpoints guarded server-side via better-auth)
+    // and `health` (liveness probe must stay unauthenticated) plus static assets.
+    "/((?!api|_next|_vercel|health|.*\\..*).*)",
   ],
 };

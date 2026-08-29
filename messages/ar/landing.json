@@ -1,0 +1,43 @@
+{
+  "features": {
+    "realBugClasses": {
+      "title": "Real bug classes",
+      "body": "React rendering, state mutation, race conditions, memory leaks — the bugs that actually page you, not toy algorithms."
+    },
+    "explainRootCause": {
+      "title": "Explain the root cause",
+      "body": "The graded deliverable is the diagnosis, not a passing test. You prove you understood the bug, not just that you patched it."
+    },
+    "hiddenTests": {
+      "title": "Hidden tests + grading agent",
+      "body": "Your fix runs against hidden tests, then an agent grades the explanation against the canonical root cause."
+    },
+    "weakSpotAnalytics": {
+      "title": "Weak-spot analytics",
+      "body": "A per-category radar shows exactly where you keep getting paged, so practice targets your real gaps."
+    },
+    "sectionTitle": "تدرب على الأخطاء التي توقظك حقاً.",
+    "sectionSubtitle": "أربع فئات من الأخطاء، تسليم واحد مقيّم: التشخيص. اختر نقطة ضعفك وتدرب عليها."
+  },
+  "stats": {
+    "bugsDiagnosed": "bugs diagnosed",
+    "bugClasses": "bug classes",
+    "hiddenTestGrading": "hidden-test grading"
+  },
+  "socialProof": {
+    "trusted": "موثوق من المهندسين الذين يفضلون عدم استدعائهم مرتين"
+  },
+  "actions": {
+    "enterArena": "Enter Arena",
+    "startChallenge": "ابدأ التحدي",
+    "seeGrading": "اكتشف كيف يعمل التقييم"
+  },
+  "hero": {
+    "badge": "LeetCode for debugging",
+    "title": "صحح الأخطاء وكأنها الثانية صباحاً وأنت تحت الطلب.",
+    "subtitle": "ليت كود لتصحيح الأخطاء — تدرّب على تشخيص الأسباب الجذرية لأخطاء حقيقية، وليس خوارزميات بسيطة."
+  },
+  "cta": {
+    "title": "هل أنت مستعد لاكتشاف سبب العطل؟"
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "names": {
+    "backendConcurrency": "Backend Concurrency",
+    "logicInversions": "Logic Inversions",
+    "memoryLeaks": "Memory Leaks",
+    "offByOne": "Off-by-One",
+    "raceConditions": "Race Conditions",
+    "reactRendering": "React Rendering",
+    "securityFlaws": "Security Flaws",
+    "stateMutations": "State Mutations"
+  },
+  "validation": {
+    "nameMin": "Name must be at least 2 characters",
+    "nameMax": "Name must be at most 80 characters",
+    "slugLength": "Slug must be 2-50 characters",
+    "iconMax": "Icon must be at most 50 characters",
+    "descriptionMax": "Description must be at most 500 characters",
+    "sortOrder": "Sort order must be an integer 0-1000"
+  },
+  "toast": {
+    "created": "Category created",
+    "updated": "Category updated",
+    "deleted": "Category deleted"
+  },
+  "management": {
+    "subtitle": "Manage challenge categories — sorted by sort order."
+  },
+  "actions": {
+    "create": "Create category",
+    "edit": "Edit {name}",
+    "delete": "Delete {name}"
+  },
+  "filters": {
+    "label": "Filter:",
+    "byStatus": "Filter by status",
+    "all": "All categories",
+    "activeOnly": "Active only",
+    "inactiveOnly": "Inactive only"
+  },
+  "form": {
+    "name": "Name",
+    "slug": "Slug",
+    "icon": "Icon",
+    "color": "Color",
+    "sortOrder": "Sort order",
+    "slugOptional": "Slug (optional — auto-generated)",
+    "description": "Description",
+    "descriptionPlaceholder": "Short description",
+    "layersIcon": "Layers"
+  },
+  "table": {
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "empty": {
+    "noCategories": "No categories yet — create one",
+    "noMatch": "No categories matching filter."
+  },
+  "create": {
+    "subtitle": "Add a new challenge category."
+  },
+  "example": {
+    "slug": "react-rendering",
+    "color": "#3b82f6"
+  },
+  "edit": {
+    "title": "Edit category",
+    "subtitle": "Update category details."
+  },
+  "delete": {
+    "title": "Delete category",
+    "confirm": "Are you sure you want to delete \"{name}\"? This cannot be undone."
+  }
+}

@@ -1,28 +1,37 @@
 "use client";
 
-import { useLingui } from "@lingui/react";
 import { Check, Globe } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { dynamicActivate, locales } from "@/i18n/i18n";
 import { cn } from "@/lib/utils";
 
-const LANGS = Object.entries(locales) as [string, string][];
+const LANGS: Array<{ code: string; label: string }> = [
+  { code: "en", label: "English" },
+  { code: "ar", label: "العربية" },
+];
 
 export function LanguageSwitcher() {
-  const { i18n } = useLingui();
-  const active = i18n.locale;
+  const t = useTranslations("common");
+  const locale = useLocale();
+  const router = useRouter();
 
-  const current = locales[active as keyof typeof locales] ?? active;
+  const current = LANGS.find((l) => l.code === locale)?.label ?? locale;
+
+  const switchTo = (code: "en" | "ar") => {
+    document.cookie = `NEXT_LOCALE=${code}; path=/; max-age=31536000`;
+    router.refresh();
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        aria-label="Select language"
+        aria-label={t("preferences.selectLanguage")}
         className="relative inline-flex h-9 items-center gap-4 rounded-md border border-border bg-inset py-1.5 ps-7 pe-3 text-foreground text-xs transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <Globe
@@ -34,8 +43,8 @@ export function LanguageSwitcher() {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="w-40">
-        {LANGS.map(([code, label]) => {
-          const selected = code === active;
+        {LANGS.map(({ code, label }) => {
+          const selected = code === locale;
           return (
             <DropdownMenuItem
               className={cn(
@@ -43,7 +52,7 @@ export function LanguageSwitcher() {
                 selected && "bg-muted font-medium"
               )}
               key={code}
-              onClick={() => dynamicActivate(code)}
+              onClick={() => switchTo(code as "en" | "ar")}
             >
               <span>{label}</span>
               {selected && (

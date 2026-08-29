@@ -23,6 +23,7 @@ export const env = createEnv({
       .string()
       .min(1)
       .default("postgresql://postgres:postgres@localhost:5432/debug_arena"),
+    DB_SSL_VERIFY: z.string().optional(),
     GITHUB_CLIENT_ID: z.string().optional(),
     GITHUB_CLIENT_SECRET: z.string().optional(),
     GOOGLE_CLIENT_ID: z.string().optional(),

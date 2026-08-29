@@ -1,0 +1,21 @@
+{
+  "stats": {
+    "currentStreak": "Current Streak"
+  },
+  "subtitle": "Pick a bug, read the scenario, and ship a root-cause diagnosis.",
+  "empty": "No challenges match the current filters.",
+  "card": {
+    "solves": "{count} solves",
+    "time": "~30m",
+    "notAttempted": "Not attempted",
+    "review": "Review",
+    "start": "Start Debugging"
+  },
+  "filters": {
+    "allCategories": "All Categories",
+    "allLevels": "All Levels",
+    "search": "Search challenges...",
+    "selectCategory": "Select Category",
+    "selectLevel": "Select Level"
+  }
+}

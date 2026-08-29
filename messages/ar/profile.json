@@ -1,0 +1,85 @@
+{
+  "validation": {
+    "displayNameRequired": "Display name is required.",
+    "displayNameMax": "Display name must be 50 characters or fewer.",
+    "handleRequired": "Handle is required.",
+    "handleMin": "Handle must be at least 3 characters.",
+    "handleFormat": "Handle can only contain letters, numbers, and underscores.",
+    "bioMax": "Bio must be 250 characters or fewer."
+  },
+  "charts": {
+    "categoryStrength": "Category strength",
+    "solvedByDifficulty": "Solved by difficulty"
+  },
+  "danger": {
+    "deleteAccount": "Delete account",
+    "deleteDescription": "Permanently remove your account and all associated data. This cannot be undone.",
+    "confirmHandle": "To confirm, type your handle {phrase} below."
+  },
+  "form": {
+    "handleGood": "Handle looks good",
+    "noChange": "No change.",
+    "preferredColor": "Preferred avatar color",
+    "selectAvatar": "Select {id} avatar",
+    "customAvatarUrl": "Or custom avatar image URL",
+    "avatarPlaceholder": "https://...",
+    "categoryInterests": "Category interests",
+    "categoryInterestsHint": "Preferred challenge classes surfaced first in your browser.",
+    "publicProfile": "Public Profile",
+    "privateProfile": "Private Profile",
+    "publicHint": "Your stats, solved challenges, and radar charts are visible on the leaderboard.",
+    "privateHint": "Your profile is hidden from the public leaderboard.",
+    "detailsTitle": "Profile details",
+    "detailsSubtitle": "Customize your public persona, job title, avatar color, and preferences.",
+    "displayName": "اسم العرض",
+    "displayNamePlaceholder": "e.g. Alex Morgan",
+    "displayNameHint": "Public-facing name.",
+    "username": "Username / handle",
+    "usernamePlaceholder": "username",
+    "jobTitle": "Job title / Role",
+    "jobTitlePlaceholder": "e.g. Senior Frontend Engineer, Distributed Systems",
+    "bio": "Bio / tagline",
+    "bioPlaceholder": "Tell us a bit about your engineering interests or background...",
+    "bioHint": "Shown on your public profile.",
+    "fixFields": "Fix the highlighted fields to save."
+  },
+  "toast": {
+    "updated": "Profile updated",
+    "updatedSuccess": "Profile updated successfully."
+  },
+  "linked": {
+    "providerUnlinked": "Provider unlinked",
+    "title": "Connected accounts",
+    "subtitle": "Link providers to sign in faster. One stays primary for your avatar and name.",
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "unlinking": "Unlinking...",
+    "unlink": "Unlink",
+    "connect": "Connect",
+    "cannotUnlink": "Can't unlink {label} — it's your only sign-in method. Add another provider first, then retry.",
+    "unlinkHint": "Unlinking a provider only removes the connection — it never deletes your Debug Arena account or your challenge history."
+  },
+  "stats": {
+    "title": "Stats",
+    "perCategory": "Per category",
+    "solvedCount": "{solved} solved"
+  },
+  "recent": {
+    "title": "Recent submissions",
+    "empty": "No submissions yet",
+    "emptyHint": "Solve a challenge in the arena to track your debugging diagnostic history.",
+    "explore": "Explore Challenges"
+  },
+  "session": {
+    "revoked": "Session revoked",
+    "othersRevoked": "Other sessions revoked",
+    "title": "Active sessions",
+    "subtitle": "Devices signed in to your account. Revoke anything you don't recognize.",
+    "revoking": "Revoking...",
+    "revokeAll": "Revoke all other sessions",
+    "thisDevice": "This device",
+    "newLogin": "New login",
+    "revoke": "Revoke",
+    "securityHint": "New-login events are flagged here so you can spot unexpected sessions. We never notify via the same channel an attacker could control."
+  }
+}

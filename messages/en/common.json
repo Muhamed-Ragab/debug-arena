@@ -1,0 +1,67 @@
+{
+  "navigation": {
+    "challenges": "Challenges",
+    "arena": "Arena",
+    "leaderboard": "Leaderboard",
+    "profile": "Profile",
+    "results": "Results",
+    "categories": "Categories",
+    "navigation": "Navigation",
+    "adminPortal": "Admin Portal"
+  },
+  "roles": {
+    "developer": "Developer"
+  },
+  "actions": {
+    "logOut": "Log out",
+    "deleting": "Deleting...",
+    "permanentlyDelete": "Permanently delete",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "saveChanges": "Save changes",
+    "creating": "Creating...",
+    "create": "Create",
+    "delete": "Delete"
+  },
+  "offline": {
+    "title": "You are offline",
+    "retry": "Try again"
+  },
+  "status": {
+    "enabled": "Enabled",
+    "private": "Private"
+  },
+  "footer": {
+    "copyright": "© {year} Debug Arena. Diagnose, don't guess."
+  },
+  "confirm": {
+    "title": "Are you sure?"
+  },
+  "preferences": {
+    "language": "Language",
+    "selectLanguage": "Select language",
+    "selectTheme": "Select theme",
+    "theme": "Theme"
+  },
+  "code": "code",
+  "copied": "Copied",
+  "copy": "Copy",
+  "a11y": {
+    "closeNavigation": "Close navigation"
+  },
+  "settings": "Settings",
+  "ai_question_studio": "AI Question Studio",
+  "notFound": {
+    "badge": "404 // NULL_POINTER_EXCEPTION",
+    "title": "Page Not Found in the Arena",
+    "description": "The breakpoint you set led nowhere. The requested route does not exist or may have been refactored out of production.",
+    "logfile": "debugger.log",
+    "error": "Error: ROUTE_NOT_FOUND",
+    "stack1": "at resolveRoute (debug-arena://router.ts:404:12)",
+    "stack2": "at handleRequest (debug-arena://server.ts:89:4)",
+    "fix": "Suggested Fix: Navigate back to the challenge lobby.",
+    "enterChallenges": "Enter Challenges",
+    "returnHome": "Return Home"
+  }
+}

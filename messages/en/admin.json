@@ -1,0 +1,122 @@
+{
+  "generator": {
+    "failedGenerate": "Failed to generate challenge.",
+    "failedRefine": "Failed to refine challenge draft.",
+    "promptLabel": "Scenario Prompt",
+    "refine": "Refine Draft"
+  },
+  "list": {
+    "failedUpdateStatus": "Failed to update status.",
+    "failedDelete": "Failed to delete challenge.",
+    "confirmDelete": "Are you sure you want to delete this challenge?",
+    "search": "Search challenges by title or category..."
+  },
+  "filters": {
+    "allStatuses": "All Statuses",
+    "allSources": "All Sources",
+    "aiGenerated": "AI Generated",
+    "manual": "Manual",
+    "allDifficulties": "All Difficulties"
+  },
+  "toast": {
+    "draft": "Challenge status set to draft.",
+    "deleted": "Challenge deleted successfully."
+  },
+  "table": {
+    "source": "Source",
+    "difficulty": "Difficulty",
+    "challenge": "Challenge",
+    "category": "Category",
+    "submissions": "Submissions",
+    "aiAgent": "AI Agent",
+    "total": "total",
+    "solves": "solves"
+  },
+  "actions": {
+    "viewInArena": "View in Arena",
+    "unpublish": "Unpublish to Draft",
+    "publish": "Publish to Arena",
+    "deleteChallenge": "Delete Challenge"
+  },
+  "empty": {
+    "noMatch": "No challenges found matching your filters."
+  },
+  "studio": {
+    "title": "Challenge & Question Studio",
+    "subtitle": "Generate with AI or manually author debugging challenges with automated diff calculations, formatted code blocks, and Socratic guidance.",
+    "aiGenerator": "AI Question Generator",
+    "manualAuthoring": "Manual Challenge Authoring"
+  },
+  "header": {
+    "admin": "Admin"
+  },
+  "stats": {
+    "total": "Total:",
+    "aiSynthesized": "AI Synthesized:",
+    "published": "Published:",
+    "drafts": "Drafts:"
+  },
+  "management": {
+    "title": "Challenge Management ({count})"
+  },
+  "manual": {
+    "title": "Manual Challenge Authoring Studio",
+    "subtitle": "Create and configure debugging scenarios with custom multi-file code, test cases, and Socratic hints.",
+    "saveDraft": "Save Draft",
+    "createdPublished": "Challenge created and published successfully!",
+    "playInArena": "Play in Arena",
+    "titleLabel": "Challenge Title *",
+    "categoryLabel": "Category *",
+    "difficultyLabel": "Difficulty *",
+    "formatLabel": "Format",
+    "formatCode": "Code Snippet / Multi-file",
+    "formatLog": "Log Trace Only",
+    "formatUi": "UI Recording",
+    "pointsLabel": "Points",
+    "timeLabel": "Time Limit",
+    "scenarioLabel": "Scenario Markdown Description *",
+    "editMarkdown": "Edit Raw Markdown",
+    "previewMarkdown": "Preview Formatted Markdown",
+    "filesSection": "Challenge Files & Bug Injection",
+    "autoCompute": "Auto-Compute Diff & Lines",
+    "addFile": "Add File",
+    "entryFile": "Entry File",
+    "buggyCode": "Buggy Code ({name})",
+    "fixedCode": "Fixed Reference Code ({name})",
+    "buggyLines": "Buggy Lines Location (1-Indexed):",
+    "start": "Start:",
+    "end": "End:",
+    "overlapHint": "(Players get graded on whether their selected lines overlap this range)",
+    "fixExplanation": "Reference Fix Explanation",
+    "hintsSection": "Progressive Socratic Hints"
+  },
+  "form": {
+    "selectCategory": "Select category...",
+    "selectDifficulty": "Select difficulty..."
+  },
+  "canonical_root_cause_breakdown": "Canonical Root Cause Breakdown *",
+  "prevention_notes_safeguards": "Prevention Notes & Safeguards",
+  "save_challenge_draft": "Save Challenge Draft",
+  "ai_agent_generated_challenge_draft_succe": "AI Agent generated challenge draft successfully!",
+  "challenge_refined_by_ai_agent": "Challenge refined by AI Agent!",
+  "ai_challenge_synthesis_agent": "AI Challenge Synthesis Agent",
+  "synthesize_high_fidelity_debugging_scena": "Synthesize high-fidelity debugging scenarios, buggy multi-file code, reference fixes, and progressive hints.",
+  "llama_3_3_70b_vector_embedder": "Llama 3.3 70B & Vector Embedder",
+  "scenario_presets": "Scenario Presets",
+  "scenario_bug_topic_idea": "Scenario / Bug Topic Idea",
+  "custom_instructions_optional": "Custom Instructions (Optional)",
+  "synthesizing_challenge_with_ai": "Synthesizing Challenge with AI...",
+  "synthesize_challenge_draft": "Synthesize Challenge Draft",
+  "save_as_draft": "Save as Draft",
+  "challenge_is_saved_and_ready_in": "Challenge is saved and ready in the database!",
+  "buggy_code": "Buggy Code",
+  "reference_fix_diff": "Reference Fix & Diff",
+  "socratic_hints": "Socratic Hints",
+  "root_cause_prevention": "Root Cause & Prevention",
+  "verification_tests": "Verification Tests",
+  "scenario_markdown_description": "Scenario Markdown Description",
+  "fix_explanation": "Fix Explanation:",
+  "canonical_root_cause_breakdown_1": "Canonical Root Cause Breakdown",
+  "no_specific_automated_test_scripts_defin": "No specific automated test scripts defined for this challenge.",
+  "ai_agent_refinement_chat": "AI Agent Refinement Chat"
+}
