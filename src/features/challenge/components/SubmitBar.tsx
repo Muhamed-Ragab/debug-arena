@@ -1,4 +1,7 @@
+"use client";
+
 import { Send } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +24,7 @@ export function SubmitBar({
   selectedLine,
   selectedLines,
 }: Props) {
+  const t = useTranslations();
   let activeLines: number[] = [];
   if (Array.isArray(selectedLines)) {
     activeLines = selectedLines;
@@ -33,15 +37,24 @@ export function SubmitBar({
 
   const getLineSummary = () => {
     if (activeLines.length === 0) {
-      return "Select bug line(s) to submit";
+      return t("challenge.submitBar.selectLines");
     }
     if (activeLines.length === 1) {
-      return `Bug localized at Line ${activeLines[0]} · ${fileName}`;
+      return t("challenge.submitBar.singleLine", {
+        file: fileName,
+        line: activeLines[0],
+      });
     }
     if (activeLines.length <= 3) {
-      return `Bug localized at Lines ${activeLines.join(", ")} · ${fileName}`;
+      return t("challenge.submitBar.multiLines", {
+        file: fileName,
+        lines: activeLines.join(", "),
+      });
     }
-    return `${activeLines.length} lines localized · ${fileName}`;
+    return t("challenge.submitBar.countLines", {
+      count: activeLines.length,
+      file: fileName,
+    });
   };
 
   return (
@@ -54,7 +67,7 @@ export function SubmitBar({
             : "text-muted-foreground"
         )}
       >
-        {localizationError ?? getLineSummary()}
+        {localizationError ? t(localizationError as string) : getLineSummary()}
       </p>
       <Button
         className="flex w-full items-center justify-center gap-2 rounded py-2.5 font-medium text-[13px] transition-all"
@@ -64,12 +77,12 @@ export function SubmitBar({
         {isSubmitting ? (
           <>
             <span className="h-3 w-3 flex-shrink-0 animate-spin rounded-full border border-primary-foreground border-t-transparent" />
-            Running tests & AI analysis...
+            {t("challenge.submitBar.running")}
           </>
         ) : (
           <>
             <Send size={13} />
-            Submit diagnosis & fix
+            {t("challenge.submitBar.submit")}
           </>
         )}
       </Button>

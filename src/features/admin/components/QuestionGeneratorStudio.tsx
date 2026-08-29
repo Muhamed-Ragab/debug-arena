@@ -1,6 +1,5 @@
 "use client";
 
-import { useLingui } from "@lingui/react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -19,9 +18,11 @@ import {
   TestTube,
 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DiffBadge } from "@/components/shared/DiffBadge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -30,7 +31,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DIFFICULTY_LABEL } from "@/features/challenge/constants";
 import type { Difficulty } from "@/lib/domain";
+import { flattenValidationErrors } from "@/lib/safe-action/validation";
 import { cn } from "@/lib/utils";
 import {
   generateQuestionAction,
@@ -98,8 +101,7 @@ export function QuestionGeneratorStudio({
   categories,
   onChallengeSaved,
 }: QuestionGeneratorStudioProps) {
-  const { i18n } = useLingui();
-
+  const t = useTranslations();
   // Generator inputs
   const [topic, setTopic] = useState("");
   const [categorySlug, setCategorySlug] = useState(
@@ -123,9 +125,16 @@ export function QuestionGeneratorStudio({
   // Active Draft
   const [draft, setDraft] = useState<GeneratedChallengeDraft | null>(null);
 
+  const [fieldErrors, setFieldErrors] = useState<
+    Record<string, string | undefined>
+  >({});
+  const [serverError, setServerError] = useState<string | null>(null);
+
   const handleGenerate = async () => {
     setIsGenerating(true);
     setPublishedId(null);
+    setServerError(null);
+    setFieldErrors({});
     try {
       const selectedCat = categories.find((c) => c.slug === categorySlug);
       const res = await generateQuestionAction({
@@ -139,15 +148,38 @@ export function QuestionGeneratorStudio({
 
       if (res?.data?.draft) {
         setDraft(res.data.draft);
-        toast.success(
-          i18n._("AI Agent generated challenge draft successfully!")
-        );
+        toast.success(t("admin.ai_agent_generated_challenge_draft_succe"));
+      } else if (res?.validationErrors) {
+        const flat = flattenValidationErrors(res.validationErrors);
+        setFieldErrors(flat);
+        const first =
+          flat.difficulty ??
+          flat.categorySlug ??
+          flat._errors ??
+          "Validation failed";
+        setServerError(first);
+        toast.error(t("error.validationFailed"));
       } else if (res?.serverError) {
-        toast.error(res.serverError);
+        setServerError(res.serverError);
+        toast.error(t(res.serverError as string));
+        if (res.serverError.toLowerCase().includes("model")) {
+          // model decommission message already surfaced via ActionError
+        }
+        // map difficulty if serverError mentions it
+        if (res.serverError.toLowerCase().includes("difficulty")) {
+          setFieldErrors((prev) => ({
+            ...prev,
+            difficulty: res.serverError as string,
+          }));
+        }
+      } else {
+        setServerError(t("error.somethingWrong"));
+        toast.error(t("error.somethingWrong"));
       }
     } catch (err) {
       console.error(err);
-      toast.error(i18n._("Failed to generate challenge."));
+      toast.error(t("admin.generator.failedGenerate"));
+      setServerError(t("error.somethingWrong"));
     } finally {
       setIsGenerating(false);
     }
@@ -158,6 +190,8 @@ export function QuestionGeneratorStudio({
       return;
     }
     setIsRefining(true);
+    setServerError(null);
+    setFieldErrors({});
     try {
       const res = await refineQuestionAction({
         currentDraft: draft,
@@ -167,13 +201,24 @@ export function QuestionGeneratorStudio({
       if (res?.data?.draft) {
         setDraft(res.data.draft);
         setRefineInput("");
-        toast.success(i18n._("Challenge refined by AI Agent!"));
+        toast.success(t("admin.challenge_refined_by_ai_agent"));
+      } else if (res?.validationErrors) {
+        const flat = flattenValidationErrors(res.validationErrors);
+        setFieldErrors(flat);
+        const first = flat.instruction ?? flat._errors ?? "Validation failed";
+        setServerError(first);
+        toast.error(t("error.validationFailed"));
       } else if (res?.serverError) {
-        toast.error(res.serverError);
+        setServerError(res.serverError);
+        toast.error(t(res.serverError as string));
+      } else {
+        setServerError(t("error.somethingWrong"));
+        toast.error(t("error.somethingWrong"));
       }
     } catch (err) {
       console.error(err);
-      toast.error(i18n._("Failed to refine challenge draft."));
+      toast.error(t("admin.generator.failedRefine"));
+      setServerError(t("error.somethingWrong"));
     } finally {
       setIsRefining(false);
     }
@@ -184,6 +229,8 @@ export function QuestionGeneratorStudio({
       return;
     }
     setIsSaving(true);
+    setServerError(null);
+    setFieldErrors({});
     try {
       const res = await saveAdminChallengeAction({
         buggyArtifact: draft.buggyArtifact,
@@ -205,16 +252,46 @@ export function QuestionGeneratorStudio({
         setPublishedId(res.data.challengeId);
         toast.success(
           status === "published"
-            ? i18n._("Challenge published live to the arena!")
-            : i18n._("Challenge draft saved successfully.")
+            ? t("challenge.creator.published")
+            : t("challenge.creator.draftSaved")
         );
         onChallengeSaved?.();
+      } else if (res?.validationErrors) {
+        const flat = flattenValidationErrors(res.validationErrors);
+        setFieldErrors(flat);
+        const first =
+          flat.title ??
+          flat.prompt ??
+          flat.rootCauseSummary ??
+          flat.categorySlug ??
+          flat._errors ??
+          "Validation failed";
+        setServerError(first);
+        toast.error(t("error.validationFailed"));
       } else if (res?.serverError) {
-        toast.error(res.serverError);
+        setServerError(res.serverError);
+        toast.error(t(res.serverError as string));
+        const lower = res.serverError.toLowerCase();
+        if (lower.includes("category")) {
+          setFieldErrors((prev) => ({
+            ...prev,
+            categorySlug: res.serverError as string,
+          }));
+        }
+        if (lower.includes("title")) {
+          setFieldErrors((prev) => ({
+            ...prev,
+            title: res.serverError as string,
+          }));
+        }
+      } else {
+        setServerError(t("error.somethingWrong"));
+        toast.error(t("error.somethingWrong"));
       }
     } catch (err) {
       console.error(err);
-      toast.error(i18n._("Failed to save challenge."));
+      toast.error(t("challenge.creator.failedSave"));
+      setServerError(t("error.somethingWrong"));
     } finally {
       setIsSaving(false);
     }
@@ -235,27 +312,31 @@ export function QuestionGeneratorStudio({
             </div>
             <div>
               <h2 className="font-semibold text-heading text-lg">
-                {i18n._("AI Challenge Synthesis Agent")}
+                {t("admin.ai_challenge_synthesis_agent")}
               </h2>
               <p className="text-muted-foreground text-xs">
-                {i18n._(
-                  "Synthesize high-fidelity debugging scenarios, buggy multi-file code, reference fixes, and progressive hints."
-                )}
+                {t("admin.synthesize_high_fidelity_debugging_scena")}
               </p>
             </div>
           </div>
           <div className="mt-2 flex items-center gap-2 sm:mt-0">
             <span className="inline-flex items-center gap-1.5 rounded-md border border-primary/20 bg-primary/5 px-2.5 py-1 font-medium text-[11px] text-primary">
               <Cpu size={13} />
-              {i18n._("Llama 3.3 70B & Vector Embedder")}
+              {t("admin.llama_3_3_70b_vector_embedder")}
             </span>
           </div>
         </div>
 
+        {serverError ? (
+          <Alert className="mb-4" variant="destructive">
+            <AlertDescription>{t(serverError as string)}</AlertDescription>
+          </Alert>
+        ) : null}
+
         {/* Preset Prompt Chips */}
         <div className="mb-4">
           <p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
-            {i18n._("Scenario Presets")}
+            {t("admin.scenario_presets")}
           </p>
           <div className="flex flex-wrap gap-2">
             {PROMPT_PRESETS.map((preset) => (
@@ -285,7 +366,7 @@ export function QuestionGeneratorStudio({
               className="mb-1.5 block font-medium text-heading text-xs"
               htmlFor="topic-input"
             >
-              {i18n._("Scenario / Bug Topic Idea")}
+              {t("admin.scenario_bug_topic_idea")}
             </label>
             <input
               className="w-full rounded-lg border border-border bg-inset px-3.5 py-2.5 text-foreground text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
@@ -302,17 +383,25 @@ export function QuestionGeneratorStudio({
               className="mb-1.5 block font-medium text-heading text-xs"
               htmlFor="category-select"
             >
-              {i18n._("Category")}
+              {t("admin.table.category")}
             </label>
             <Select
-              onValueChange={(val) => setCategorySlug(val ?? "")}
+              onValueChange={(val) => {
+                setCategorySlug(val ?? "");
+                if (fieldErrors.categorySlug) {
+                  setFieldErrors((prev) => {
+                    const { categorySlug: _omit, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
               value={categorySlug}
             >
               <SelectTrigger
                 className="w-full rounded-lg border-border bg-inset px-3 py-2 text-foreground text-xs"
                 id="category-select"
               >
-                <SelectValue placeholder={i18n._("Select category...")} />
+                <SelectValue placeholder={t("admin.form.selectCategory")} />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((c) => (
@@ -325,28 +414,46 @@ export function QuestionGeneratorStudio({
           </div>
 
           <div className="md:col-span-3">
-            <span className="mb-1.5 block font-medium text-heading text-xs">
-              {i18n._("Difficulty")}
-            </span>
-            <div className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-inset p-1">
-              {DIFFICULTY_VALUES.map((d) => (
-                <Button
-                  className={cn(
-                    "rounded py-1.5 font-semibold text-xs uppercase tracking-wider transition-colors",
-                    difficulty === d
-                      ? "bg-primary text-white shadow-xs"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                  key={d}
-                  onClick={() => setDifficulty(d)}
-                  size="sm"
-                  type="button"
-                  variant="ghost"
-                >
-                  {d}
-                </Button>
-              ))}
-            </div>
+            <label
+              className="mb-1.5 block font-medium text-heading text-xs"
+              htmlFor="difficulty-select-studio"
+            >
+              {t("admin.table.difficulty")}
+            </label>
+            <Select
+              onValueChange={(v) => {
+                setDifficulty(v as "easy" | "medium" | "hard");
+                if (fieldErrors.difficulty) {
+                  setFieldErrors((prev) => {
+                    const { difficulty: _omit, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
+              value={difficulty}
+            >
+              <SelectTrigger
+                className="w-full rounded-lg border-border bg-inset px-3 py-2 text-foreground text-xs"
+                id="difficulty-select-studio"
+              >
+                <SelectValue placeholder={t("admin.form.selectDifficulty")} />
+              </SelectTrigger>
+              <SelectContent>
+                {DIFFICULTY_VALUES.map((d) => (
+                  <SelectItem key={d} value={d}>
+                    {DIFFICULTY_LABEL[d] ?? d}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {Boolean(fieldErrors.difficulty) && (
+              <p
+                className="mt-1.5 text-destructive text-xs"
+                id="difficulty-error-studio"
+              >
+                {t(fieldErrors.difficulty as string)}
+              </p>
+            )}
           </div>
 
           <div className="md:col-span-3">
@@ -354,7 +461,7 @@ export function QuestionGeneratorStudio({
               className="mb-1.5 block font-medium text-heading text-xs"
               htmlFor="qgs-language"
             >
-              {i18n._("Language")}
+              {t("common.preferences.language")}
             </label>
             <Select
               onValueChange={(val) => setLanguage(val ?? "typescript")}
@@ -381,7 +488,7 @@ export function QuestionGeneratorStudio({
               className="mb-1.5 block font-medium text-heading text-xs"
               htmlFor="qgs-instructions"
             >
-              {i18n._("Custom Instructions (Optional)")}
+              {t("admin.custom_instructions_optional")}
             </label>
             <input
               className="w-full rounded-lg border border-border bg-inset px-3.5 py-2.5 text-foreground text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
@@ -406,12 +513,12 @@ export function QuestionGeneratorStudio({
             {isGenerating ? (
               <>
                 <Loader2 className="animate-spin" size={16} />
-                <span>{i18n._("Synthesizing Challenge with AI...")}</span>
+                <span>{t("admin.synthesizing_challenge_with_ai")}</span>
               </>
             ) : (
               <>
                 <Sparkles size={16} />
-                <span>{i18n._("Synthesize Challenge Draft")}</span>
+                <span>{t("admin.synthesize_challenge_draft")}</span>
               </>
             )}
           </Button>
@@ -452,7 +559,7 @@ export function QuestionGeneratorStudio({
                 variant="outline"
               >
                 <Save size={14} />
-                {i18n._("Save as Draft")}
+                {t("admin.save_as_draft")}
               </Button>
               <Button
                 disabled={isSaving}
@@ -461,7 +568,7 @@ export function QuestionGeneratorStudio({
                 variant="default"
               >
                 <Play size={14} />
-                {i18n._("Publish to Arena")}
+                {t("admin.actions.publish")}
               </Button>
             </div>
           </div>
@@ -471,16 +578,14 @@ export function QuestionGeneratorStudio({
             <div className="flex items-center justify-between rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-emerald-400 text-sm">
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 size={18} />
-                <span>
-                  {i18n._("Challenge is saved and ready in the database!")}
-                </span>
+                <span>{t("admin.challenge_is_saved_and_ready_in")}</span>
               </div>
               <Link
                 className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500 px-3 py-1 font-semibold text-black text-xs transition-colors hover:bg-emerald-400"
                 href={`/challenges/${publishedId}`}
                 target="_blank"
               >
-                {i18n._("Play in Arena")} →
+                {t("admin.manual.playInArena")} →
               </Link>
             </div>
           )}
@@ -491,32 +596,32 @@ export function QuestionGeneratorStudio({
               {
                 icon: Code2,
                 id: "scenario" as const,
-                label: i18n._("Scenario Prompt"),
+                label: t("admin.generator.promptLabel"),
               },
               {
                 icon: FileCode,
                 id: "code" as const,
-                label: i18n._("Buggy Code"),
+                label: t("admin.buggy_code"),
               },
               {
                 icon: RotateCcw,
                 id: "diff" as const,
-                label: i18n._("Reference Fix & Diff"),
+                label: t("admin.reference_fix_diff"),
               },
               {
                 icon: Lightbulb,
                 id: "hints" as const,
-                label: i18n._("Socratic Hints"),
+                label: t("admin.socratic_hints"),
               },
               {
                 icon: ShieldAlert,
                 id: "analysis" as const,
-                label: i18n._("Root Cause & Prevention"),
+                label: t("admin.root_cause_prevention"),
               },
               {
                 icon: TestTube,
                 id: "tests" as const,
-                label: i18n._("Verification Tests"),
+                label: t("admin.verification_tests"),
               },
             ].map(({ id, icon: Icon, label }) => (
               <Button
@@ -545,7 +650,7 @@ export function QuestionGeneratorStudio({
                 className="font-semibold text-heading text-xs uppercase tracking-wider"
                 htmlFor="qgs-scenario"
               >
-                {i18n._("Scenario Markdown Description")}
+                {t("admin.scenario_markdown_description")}
               </label>
               <textarea
                 className="h-64 w-full rounded-lg border border-border bg-inset p-3.5 font-mono text-foreground text-sm focus:border-primary focus:outline-none"
@@ -656,7 +761,7 @@ export function QuestionGeneratorStudio({
             <div className="flex flex-col gap-4">
               <div className="rounded-lg border border-border/80 bg-inset p-3 text-muted-foreground text-xs">
                 <strong className="font-semibold text-heading">
-                  {i18n._("Fix Explanation:")}{" "}
+                  {t("admin.fix_explanation")}{" "}
                 </strong>
                 {draft?.referenceFix.explanation}
               </div>
@@ -700,7 +805,7 @@ export function QuestionGeneratorStudio({
                 >
                   <div className="mb-2 flex items-center justify-between">
                     <span className="font-semibold text-heading text-xs">
-                      {i18n._("Hint {order}", { order: hint.order })}
+                      {t("challenge.hints.title", { order: hint.order })}
                     </span>
                     <span className="rounded bg-rose-500/10 px-2 py-0.5 font-mono text-rose-400 text-xs">
                       -{hint.penaltyPoints} pts
@@ -735,7 +840,7 @@ export function QuestionGeneratorStudio({
                   className="font-semibold text-heading text-xs uppercase tracking-wider"
                   htmlFor="qgs-rootcause"
                 >
-                  {i18n._("Canonical Root Cause Breakdown")}
+                  {t("admin.canonical_root_cause_breakdown_1")}
                 </label>
                 <textarea
                   className="h-48 w-full rounded-lg border border-border bg-inset p-3 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
@@ -753,7 +858,7 @@ export function QuestionGeneratorStudio({
                   className="font-semibold text-heading text-xs uppercase tracking-wider"
                   htmlFor="qgs-prevention"
                 >
-                  {i18n._("Prevention Notes & Safeguards")}
+                  {t("admin.prevention_notes_safeguards")}
                 </label>
                 <textarea
                   className="h-48 w-full rounded-lg border border-border bg-inset p-3 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
@@ -790,9 +895,7 @@ export function QuestionGeneratorStudio({
                 ))
               ) : (
                 <div className="rounded-lg border border-border bg-inset p-6 text-center text-muted-foreground text-xs">
-                  {i18n._(
-                    "No specific automated test scripts defined for this challenge."
-                  )}
+                  {t("admin.no_specific_automated_test_scripts_defin")}
                 </div>
               )}
             </div>
@@ -802,7 +905,7 @@ export function QuestionGeneratorStudio({
           <div className="mt-4 rounded-xl border border-primary/30 bg-primary/5 p-4">
             <div className="mb-2 flex items-center gap-2 font-semibold text-primary text-xs">
               <Sparkles size={14} />
-              <span>{i18n._("AI Agent Refinement Chat")}</span>
+              <span>{t("admin.ai_agent_refinement_chat")}</span>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <input
@@ -829,7 +932,7 @@ export function QuestionGeneratorStudio({
                 ) : (
                   <Send size={14} />
                 )}
-                <span>{i18n._("Refine Draft")}</span>
+                <span>{t("admin.generator.refine")}</span>
               </Button>
             </div>
           </div>

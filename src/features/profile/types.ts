@@ -1,5 +1,53 @@
 import type { LucideIcon } from "lucide-react";
+import type * as schema from "@/db/schema";
 import type { Category } from "@/lib/domain/types";
+
+export type UserRow = typeof schema.users.$inferSelect;
+export type AccountRow = typeof schema.accounts.$inferSelect;
+export type CategoryStatRow = typeof schema.userCategoryStats.$inferSelect;
+export type CategoryRow = typeof schema.categories.$inferSelect;
+export type ProfileLinkRow = typeof schema.profileLinks.$inferSelect;
+export type SubmissionRow = typeof schema.submissions.$inferSelect;
+export type ChallengeRow = typeof schema.challenges.$inferSelect;
+export type LoginAttemptRow = typeof schema.loginAttempts.$inferSelect;
+
+export type UserWithRelations = UserRow & {
+  accounts: AccountRow[];
+  categoryStats: (CategoryStatRow & { category: CategoryRow | null })[];
+  profileLinks: ProfileLinkRow[];
+  submissions: (SubmissionRow & {
+    challenge: ChallengeRow & { category: CategoryRow | null };
+  })[];
+};
+
+export type UserForSettings = UserRow & {
+  accounts: AccountRow[];
+  loginAttempts: LoginAttemptRow[];
+};
+
+export type PublishedChallenge = ChallengeRow & {
+  category: CategoryRow | null;
+};
+
+export interface ProfileRepository {
+  deleteUser: (userId: string) => Promise<void>;
+  findByIdForSettings: (userId: string) => Promise<UserForSettings | null>;
+  findByIdWithRelations: (userId: string) => Promise<{
+    user: UserWithRelations | null;
+    publishedChallenges: PublishedChallenge[];
+  }>;
+  findCategoryStats: (
+    userId: string,
+    category: string
+  ) => Promise<CategoryStatRow | null>;
+  updateUser: (
+    userId: string,
+    data: Partial<typeof schema.users.$inferInsert>
+  ) => Promise<UserRow | null>;
+  upsertCategoryStats: (
+    data: typeof schema.userCategoryStats.$inferInsert
+  ) => Promise<CategoryStatRow | null>;
+}
 
 export interface AvatarPreset {
   color: string;

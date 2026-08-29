@@ -13,7 +13,9 @@ import {
   Lock,
   User,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,6 +29,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CATEGORY_CONFIG, CATEGORY_ORDER } from "@/lib/domain/categories";
 import type { Category } from "@/lib/domain/types";
+import { flattenValidationErrors } from "@/lib/safe-action/validation";
 import { cn } from "@/lib/utils";
 import { updateProfileAction } from "../actions";
 import { AVATAR_PRESETS } from "../constants";
@@ -37,48 +40,71 @@ const MAX_JOB = 80;
 const HANDLE_RE = /^[a-z0-9_]+$/i;
 const AT_PREFIX_REGEX = /^@/;
 
-function renderHandleStatus(error: string | null, available: boolean) {
+const CATEGORY_KEY_MAP: Record<string, string> = {
+  "Backend Concurrency": "category.names.backendConcurrency",
+  "Logic Inversions": "category.names.logicInversions",
+  "Memory Leaks": "category.names.memoryLeaks",
+  "Off-by-One": "category.names.offByOne",
+  "Race Conditions": "category.names.raceConditions",
+  "React Rendering": "category.names.reactRendering",
+  "Security Flaws": "category.names.securityFlaws",
+  "State Mutations": "category.names.stateMutations",
+};
+
+function HandleStatus({
+  available,
+  error,
+}: {
+  available: boolean;
+  error: string | null;
+}) {
+  const t = useTranslations();
   if (error) {
     return (
       <span className="flex items-center gap-1 text-[12px] text-destructive">
-        <AlertCircle size={12} /> {error}
+        <AlertCircle size={12} /> {t(error as string)}
       </span>
     );
   }
   if (available) {
     return (
       <span className="flex items-center gap-1 text-[12px] text-emerald-400">
-        <CheckCircle2 size={12} /> Handle looks good
+        <CheckCircle2 size={12} /> {t("profile.form.handleGood")}
       </span>
     );
   }
   return (
-    <span className="text-[12px] text-muted-foreground/70">No change.</span>
+    <span className="text-[12px] text-muted-foreground/70">
+      {t("profile.form.noChange")}
+    </span>
   );
 }
 
 function AvatarPickerSection({
   avatarColor,
-  setAvatarColor,
   avatarUrl,
+  avatarUrlError,
+  setAvatarColor,
   setAvatarUrl,
 }: {
   avatarColor: string;
   avatarUrl: string;
+  avatarUrlError?: string | null;
   setAvatarColor: (c: string) => void;
   setAvatarUrl: (u: string) => void;
 }) {
+  const t = useTranslations();
   return (
     <div className="mt-6">
       <p className="mb-2 flex items-center gap-1.5 font-medium text-[12px] text-muted-foreground">
-        <Camera size={13} /> Preferred avatar color
+        <Camera size={13} /> {t("profile.form.preferredColor")}
       </p>
       <div className="flex flex-wrap gap-2.5">
         {AVATAR_PRESETS.map((preset) => {
           const selected = preset.color === avatarColor;
           return (
             <Button
-              aria-label={`Select ${preset.id} avatar`}
+              aria-label={t("profile.form.selectAvatar", { id: preset.id })}
               aria-pressed={selected}
               className={cn(
                 "flex h-9 w-9 items-center justify-center rounded-full font-semibold text-[13px] text-white transition-all",
@@ -104,7 +130,7 @@ function AvatarPickerSection({
           className="mb-1.5 block font-medium text-[11px] text-muted-foreground"
           htmlFor="avatarUrl"
         >
-          Or custom avatar image URL
+          {t("profile.form.customAvatarUrl")}
         </Label>
         <div className="relative">
           <ImageIcon
@@ -115,10 +141,15 @@ function AvatarPickerSection({
             className="h-8 ps-9 pe-3 text-[12px]"
             id="avatarUrl"
             onChange={(e) => setAvatarUrl(e.target.value)}
-            placeholder="https://..."
+            placeholder={t("profile.form.avatarPlaceholder")}
             value={avatarUrl}
           />
         </div>
+        {Boolean(avatarUrlError) && (
+          <span className="mt-1 flex items-center gap-1 text-[12px] text-destructive">
+            <AlertCircle size={12} /> {t(avatarUrlError as string)}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -131,13 +162,14 @@ function CategoryInterestsSection({
   interests: Category[];
   toggleInterest: (c: Category) => void;
 }) {
+  const t = useTranslations();
   return (
     <div className="mt-6">
       <p className="mb-1 font-medium text-[12px] text-muted-foreground">
-        Category interests
+        {t("profile.form.categoryInterests")}
       </p>
       <p className="mb-2.5 text-[12px] text-muted-foreground/70">
-        Preferred challenge classes surfaced first in your browser.
+        {t("profile.form.categoryInterestsHint")}
       </p>
       <div className="flex flex-wrap gap-2">
         {CATEGORY_ORDER.map((cat) => {
@@ -169,7 +201,7 @@ function CategoryInterestsSection({
                 className="h-1.5 w-1.5 rounded-full"
                 style={{ backgroundColor: cfg.color }}
               />
-              {cfg.label}
+              {t(CATEGORY_KEY_MAP[cfg.label] ?? cfg.label)}
               {Boolean(selected) && <Check className="ms-auto" size={12} />}
             </Button>
           );
@@ -186,6 +218,7 @@ function PrivacySection({
   isPublic: boolean;
   setIsPublic: (p: boolean) => void;
 }) {
+  const t = useTranslations();
   return (
     <div className="mt-6 border-border border-t pt-4">
       <div className="flex items-center justify-between">
@@ -196,12 +229,14 @@ function PrivacySection({
             ) : (
               <Lock className="text-amber-400" size={14} />
             )}
-            {isPublic ? "Public Profile" : "Private Profile"}
+            {isPublic
+              ? t("profile.form.publicProfile")
+              : t("profile.form.privateProfile")}
           </p>
           <p className="mt-0.5 text-[12px] text-muted-foreground">
             {isPublic
-              ? "Your stats, solved challenges, and radar charts are visible on the leaderboard."
-              : "Your profile is hidden from the public leaderboard."}
+              ? t("profile.form.publicHint")
+              : t("profile.form.privateHint")}
           </p>
         </div>
         <Button
@@ -209,7 +244,7 @@ function PrivacySection({
           size="sm"
           variant={isPublic ? "default" : "outline"}
         >
-          {isPublic ? "Enabled" : "Private"}
+          {isPublic ? t("common.status.enabled") : t("common.status.private")}
         </Button>
       </div>
     </div>
@@ -230,6 +265,7 @@ interface EditProfileFormProps {
 }
 
 export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
+  const t = useTranslations();
   const [displayName, setDisplayName] = useState(
     initialProfile?.displayName || ""
   );
@@ -251,39 +287,58 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
 
   const [isSaving, setIsSaving] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<
+    Record<string, string | undefined>
+  >({});
   const [saved, setSaved] = useState(false);
 
   const nameError = useMemo(() => {
+    if (fieldErrors.displayName) {
+      return fieldErrors.displayName;
+    }
     const v = displayName.trim();
     if (v.length === 0) {
-      return "Display name is required.";
+      return t("profile.validation.displayNameRequired");
     }
     if (v.length > MAX_NAME) {
-      return `Display name must be ${MAX_NAME} characters or fewer.`;
+      return t("profile.validation.displayNameMax");
     }
     return null;
-  }, [displayName]);
+  }, [displayName, fieldErrors.displayName, t]);
 
   const handleError = useMemo(() => {
+    if (fieldErrors.username) {
+      return fieldErrors.username;
+    }
     const v = handle.trim();
     if (v.length === 0) {
-      return "Handle is required.";
+      return t("profile.validation.handleRequired");
     }
     if (v.length < 3) {
-      return "Handle must be at least 3 characters.";
+      return t("profile.validation.handleMin");
     }
     if (!HANDLE_RE.test(v)) {
-      return "Handle can only contain letters, numbers, and underscores.";
+      return t("profile.validation.handleFormat");
     }
     return null;
-  }, [handle]);
+  }, [handle, fieldErrors.username, t]);
 
   const bioError = useMemo(() => {
+    if (fieldErrors.bio) {
+      return fieldErrors.bio;
+    }
     if (bio.length > MAX_BIO) {
-      return `Bio must be ${MAX_BIO} characters or fewer.`;
+      return t("profile.validation.bioMax");
     }
     return null;
-  }, [bio]);
+  }, [bio, fieldErrors.bio, t]);
+
+  const avatarUrlError = useMemo(() => {
+    if (fieldErrors.avatarUrl) {
+      return fieldErrors.avatarUrl;
+    }
+    return null;
+  }, [fieldErrors.avatarUrl]);
 
   const handleAvailable = !handleError && handle.trim().length >= 3;
   const hasErrors = Boolean(nameError || handleError || bioError);
@@ -299,6 +354,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
     }
     setIsSaving(true);
     setServerError(null);
+    setFieldErrors({});
 
     try {
       const res = await updateProfileAction({
@@ -315,13 +371,29 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
       if (res?.data?.success) {
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
+        toast.success(t("profile.toast.updated"));
+      } else if (res?.validationErrors) {
+        const flat = flattenValidationErrors(res.validationErrors);
+        setFieldErrors(flat);
+        const first =
+          flat.displayName ??
+          flat.username ??
+          flat.bio ??
+          flat.avatarUrl ??
+          flat._errors ??
+          t("error.validationFailed");
+        setServerError(first);
+        toast.error(t("error.validationFailed"));
       } else if (res?.serverError) {
         setServerError(res.serverError);
+        toast.error(t(res.serverError as string));
+      } else {
+        setServerError(t("error.somethingWrong"));
+        toast.error(t("error.somethingWrong"));
       }
-    } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : "Failed to update profile";
-      setServerError(msg);
+    } catch {
+      setServerError(t("error.somethingWrong"));
+      toast.error(t("error.somethingWrong"));
     } finally {
       setIsSaving(false);
     }
@@ -330,11 +402,10 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
   return (
     <Card className="p-1">
       <CardHeader>
-        <CardTitle className="text-base">Profile details</CardTitle>
-        <CardDescription>
-          Customize your public persona, job title, avatar color, and
-          preferences.
-        </CardDescription>
+        <CardTitle className="text-base">
+          {t("profile.form.detailsTitle")}
+        </CardTitle>
+        <CardDescription>{t("profile.form.detailsSubtitle")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -344,7 +415,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
               className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
               htmlFor="displayName"
             >
-              Display name
+              {t("profile.form.displayName")}
             </Label>
             <div className="relative">
               <User
@@ -355,19 +426,27 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
                 className="ps-9 pe-3 text-[13px]"
                 id="displayName"
                 maxLength={MAX_NAME + 10}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="e.g. Alex Morgan"
+                onChange={(e) => {
+                  setDisplayName(e.target.value);
+                  if (fieldErrors.displayName) {
+                    setFieldErrors((prev) => {
+                      const { displayName: _omit, ...rest } = prev;
+                      return rest;
+                    });
+                  }
+                }}
+                placeholder={t("profile.form.displayNamePlaceholder")}
                 value={displayName}
               />
             </div>
             <div className="mt-1 flex items-center justify-between">
               {nameError ? (
                 <span className="flex items-center gap-1 text-[12px] text-destructive">
-                  <AlertCircle size={12} /> {nameError}
+                  <AlertCircle size={12} /> {t(nameError as string)}
                 </span>
               ) : (
                 <span className="text-[12px] text-muted-foreground/70">
-                  Public-facing name.
+                  {t("profile.form.displayNameHint")}
                 </span>
               )}
               <span className="text-[11px] text-muted-foreground/60 tabular-nums">
@@ -382,7 +461,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
               className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
               htmlFor="handle"
             >
-              Username / handle
+              {t("profile.form.username")}
             </Label>
             <div className="relative">
               <AtSign
@@ -392,13 +471,21 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
               <Input
                 className="ps-9 pe-3 font-mono text-[13px]"
                 id="handle"
-                onChange={(e) => setHandle(e.target.value)}
-                placeholder="username"
+                onChange={(e) => {
+                  setHandle(e.target.value);
+                  if (fieldErrors.username) {
+                    setFieldErrors((prev) => {
+                      const { username: _omit, ...rest } = prev;
+                      return rest;
+                    });
+                  }
+                }}
+                placeholder={t("profile.form.usernamePlaceholder")}
                 value={handle}
               />
             </div>
             <div className="mt-1 flex items-center justify-between">
-              {renderHandleStatus(handleError, handleAvailable)}
+              <HandleStatus available={handleAvailable} error={handleError} />
               <span className="text-[11px] text-muted-foreground/60">
                 @debug.arena/{handle || "…"}
               </span>
@@ -412,7 +499,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
             className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
             htmlFor="jobTitle"
           >
-            Job title / Role
+            {t("profile.form.jobTitle")}
           </Label>
           <div className="relative">
             <Briefcase
@@ -424,7 +511,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
               id="jobTitle"
               maxLength={MAX_JOB}
               onChange={(e) => setJobTitle(e.target.value)}
-              placeholder="e.g. Senior Frontend Engineer, Distributed Systems"
+              placeholder={t("profile.form.jobTitlePlaceholder")}
               value={jobTitle}
             />
           </div>
@@ -436,7 +523,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
             className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
             htmlFor="bio"
           >
-            Bio / tagline
+            {t("profile.form.bio")}
           </Label>
           <div className="relative">
             <FileText
@@ -447,8 +534,16 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
               className="resize-none ps-9 pe-3 text-[13px] leading-relaxed"
               id="bio"
               maxLength={MAX_BIO + 20}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="Tell us a bit about your engineering interests or background..."
+              onChange={(e) => {
+                setBio(e.target.value);
+                if (fieldErrors.bio) {
+                  setFieldErrors((prev) => {
+                    const { bio: _omit, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
+              placeholder={t("profile.form.bioPlaceholder")}
               rows={3}
               value={bio}
             />
@@ -456,11 +551,11 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
           <div className="mt-1 flex items-center justify-between">
             {bioError ? (
               <span className="flex items-center gap-1 text-[12px] text-destructive">
-                <AlertCircle size={12} /> {bioError}
+                <AlertCircle size={12} /> {t(bioError as string)}
               </span>
             ) : (
               <span className="text-[12px] text-muted-foreground/70">
-                Shown on your public profile.
+                {t("profile.form.bioHint")}
               </span>
             )}
             <span className="text-[11px] text-muted-foreground/60 tabular-nums">
@@ -472,8 +567,17 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
         <AvatarPickerSection
           avatarColor={avatarColor}
           avatarUrl={avatarUrl}
+          avatarUrlError={avatarUrlError}
           setAvatarColor={setAvatarColor}
-          setAvatarUrl={setAvatarUrl}
+          setAvatarUrl={(v) => {
+            setAvatarUrl(v);
+            if (fieldErrors.avatarUrl) {
+              setFieldErrors((prev) => {
+                const { avatarUrl: _omit, ...rest } = prev;
+                return rest;
+              });
+            }
+          }}
         />
 
         <CategoryInterestsSection
@@ -489,27 +593,27 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
             {saved ? <Check size={14} /> : null}
             {(() => {
               if (isSaving) {
-                return "Saving...";
+                return t("common.actions.saving");
               }
               if (saved) {
-                return "Saved";
+                return t("common.actions.saved");
               }
-              return "Save changes";
+              return t("common.actions.saveChanges");
             })()}
           </Button>
           {Boolean(saved) && (
             <span className="flex items-center gap-1 text-[12px] text-emerald-400">
-              <CheckCircle2 size={13} /> Profile updated successfully.
+              <CheckCircle2 size={13} /> {t("profile.toast.updatedSuccess")}
             </span>
           )}
           {Boolean(serverError) && (
             <span className="flex items-center gap-1 text-[12px] text-destructive">
-              <AlertCircle size={13} /> {serverError}
+              <AlertCircle size={13} /> {t(serverError as string)}
             </span>
           )}
           {Boolean(hasErrors && !serverError) && (
             <span className="text-[12px] text-muted-foreground/70">
-              Fix the highlighted fields to save.
+              {t("profile.form.fixFields")}
             </span>
           )}
         </div>

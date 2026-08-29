@@ -1,6 +1,5 @@
 "use client";
 
-import { useLingui } from "@lingui/react";
 import {
   Archive,
   Bot,
@@ -12,9 +11,18 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DiffBadge } from "@/components/shared/DiffBadge";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -35,6 +43,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Difficulty } from "@/lib/domain";
+import { flattenValidationErrors } from "@/lib/safe-action/validation";
 import {
   deleteAdminChallengeAction,
   toggleChallengeStatusAction,
@@ -50,12 +59,14 @@ export function AdminChallengeList({
   challenges: initialChallenges,
   onRefresh,
 }: AdminChallengeListProps) {
-  const { i18n } = useLingui();
+  const t = useTranslations();
   const [challenges, setChallenges] = useState(initialChallenges);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const filteredChallenges = challenges.filter((c) => {
     const matchesSearch =
@@ -87,39 +98,59 @@ export function AdminChallengeList({
         );
         toast.success(
           nextStatus === "published"
-            ? i18n._("Challenge published live to the arena!")
-            : i18n._("Challenge status set to draft.")
+            ? t("challenge.creator.published")
+            : t("admin.toast.draft")
         );
         onRefresh?.();
+      } else if (res?.validationErrors) {
+        const flat = flattenValidationErrors(res.validationErrors);
+        const msg =
+          flat.challengeId ??
+          flat.status ??
+          flat._errors ??
+          "Validation failed";
+        toast.error(t(msg as string));
       } else if (res?.serverError) {
-        toast.error(res.serverError);
+        toast.error(t(res.serverError as string));
+      } else {
+        toast.error(t("error.somethingWrong"));
       }
     } catch (err) {
       console.error(err);
-      toast.error(i18n._("Failed to update status."));
+      toast.error(t("error.somethingWrong"));
     }
   };
 
-  const handleDelete = async (challengeId: string) => {
-    if (
-      // biome-ignore lint/suspicious/noAlert: destructive admin action; native confirm dialog is acceptable here
-      !window.confirm(i18n._("Are you sure you want to delete this challenge?"))
-    ) {
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetId) {
       return;
     }
-
+    setIsDeleting(true);
     try {
-      const res = await deleteAdminChallengeAction({ challengeId });
+      const res = await deleteAdminChallengeAction({
+        challengeId: deleteTargetId,
+      });
       if (res?.data?.success) {
-        setChallenges((prev) => prev.filter((item) => item.id !== challengeId));
-        toast.success(i18n._("Challenge deleted successfully."));
+        setChallenges((prev) =>
+          prev.filter((item) => item.id !== deleteTargetId)
+        );
+        toast.success(t("admin.toast.deleted"));
         onRefresh?.();
+        setDeleteTargetId(null);
+      } else if (res?.validationErrors) {
+        const flat = flattenValidationErrors(res.validationErrors);
+        const msg = flat.challengeId ?? flat._errors ?? "Validation failed";
+        toast.error(t(msg as string));
       } else if (res?.serverError) {
-        toast.error(res.serverError);
+        toast.error(t(res.serverError as string));
+      } else {
+        toast.error(t("error.somethingWrong"));
       }
     } catch (err) {
       console.error(err);
-      toast.error(i18n._("Failed to delete challenge."));
+      toast.error(t("error.somethingWrong"));
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -141,7 +172,7 @@ export function AdminChallengeList({
       return (
         <Badge className="gap-1.5 font-medium" variant="success">
           <Globe size={11} />
-          {i18n._("Published")}
+          {t("status.published")}
         </Badge>
       );
     }
@@ -149,14 +180,14 @@ export function AdminChallengeList({
       return (
         <Badge className="gap-1.5 font-medium" variant="warning">
           <Lock size={11} />
-          {i18n._("Draft")}
+          {t("status.draft")}
         </Badge>
       );
     }
     return (
       <Badge className="gap-1.5 font-medium" variant="secondary">
         <Archive size={11} />
-        {i18n._("Archived")}
+        {t("status.archived")}
       </Badge>
     );
   };
@@ -174,7 +205,7 @@ export function AdminChallengeList({
             <Input
               className="ps-9 pe-3 text-xs"
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={i18n._("Search challenges by title or category...")}
+              placeholder={t("admin.list.search")}
               type="text"
               value={search}
             />
@@ -187,16 +218,20 @@ export function AdminChallengeList({
               value={statusFilter}
             >
               <SelectTrigger
-                aria-label={i18n._("Status")}
+                aria-label={t("category.table.status")}
                 className="h-9 min-w-36 rounded-lg border-border bg-inset px-3 text-foreground text-xs"
               >
-                <SelectValue placeholder={i18n._("All Statuses")} />
+                <SelectValue placeholder={t("admin.filters.allStatuses")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{i18n._("All Statuses")}</SelectItem>
-                <SelectItem value="published">{i18n._("Published")}</SelectItem>
-                <SelectItem value="draft">{i18n._("Draft")}</SelectItem>
-                <SelectItem value="archived">{i18n._("Archived")}</SelectItem>
+                <SelectItem value="all">
+                  {t("admin.filters.allStatuses")}
+                </SelectItem>
+                <SelectItem value="published">
+                  {t("status.published")}
+                </SelectItem>
+                <SelectItem value="draft">{t("status.draft")}</SelectItem>
+                <SelectItem value="archived">{t("status.archived")}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -206,17 +241,21 @@ export function AdminChallengeList({
               value={sourceFilter}
             >
               <SelectTrigger
-                aria-label={i18n._("Source")}
+                aria-label={t("admin.table.source")}
                 className="h-9 min-w-36 rounded-lg border-border bg-inset px-3 text-foreground text-xs"
               >
-                <SelectValue placeholder={i18n._("All Sources")} />
+                <SelectValue placeholder={t("admin.filters.allSources")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{i18n._("All Sources")}</SelectItem>
-                <SelectItem value="ai_generated">
-                  {i18n._("AI Generated")}
+                <SelectItem value="all">
+                  {t("admin.filters.allSources")}
                 </SelectItem>
-                <SelectItem value="manual">{i18n._("Manual")}</SelectItem>
+                <SelectItem value="ai_generated">
+                  {t("admin.filters.aiGenerated")}
+                </SelectItem>
+                <SelectItem value="manual">
+                  {t("admin.filters.manual")}
+                </SelectItem>
               </SelectContent>
             </Select>
 
@@ -226,18 +265,18 @@ export function AdminChallengeList({
               value={difficultyFilter}
             >
               <SelectTrigger
-                aria-label={i18n._("Difficulty")}
+                aria-label={t("admin.table.difficulty")}
                 className="h-9 min-w-36 rounded-lg border-border bg-inset px-3 text-foreground text-xs"
               >
-                <SelectValue placeholder={i18n._("All Difficulties")} />
+                <SelectValue placeholder={t("admin.filters.allDifficulties")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">
-                  {i18n._("All Difficulties")}
+                  {t("admin.filters.allDifficulties")}
                 </SelectItem>
-                <SelectItem value="easy">{i18n._("Easy")}</SelectItem>
-                <SelectItem value="medium">{i18n._("Medium")}</SelectItem>
-                <SelectItem value="hard">{i18n._("Hard")}</SelectItem>
+                <SelectItem value="easy">{t("difficulty.easy")}</SelectItem>
+                <SelectItem value="medium">{t("difficulty.medium")}</SelectItem>
+                <SelectItem value="hard">{t("difficulty.hard")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -249,18 +288,26 @@ export function AdminChallengeList({
         <Table>
           <TableHeader className="bg-inset/50">
             <TableRow>
-              <TableHead className="px-4 py-3">{i18n._("Challenge")}</TableHead>
-              <TableHead className="px-4 py-3">{i18n._("Category")}</TableHead>
               <TableHead className="px-4 py-3">
-                {i18n._("Difficulty")}
+                {t("admin.table.challenge")}
               </TableHead>
-              <TableHead className="px-4 py-3">{i18n._("Status")}</TableHead>
-              <TableHead className="px-4 py-3">{i18n._("Source")}</TableHead>
               <TableHead className="px-4 py-3">
-                {i18n._("Submissions")}
+                {t("admin.table.category")}
+              </TableHead>
+              <TableHead className="px-4 py-3">
+                {t("admin.table.difficulty")}
+              </TableHead>
+              <TableHead className="px-4 py-3">
+                {t("category.table.status")}
+              </TableHead>
+              <TableHead className="px-4 py-3">
+                {t("admin.table.source")}
+              </TableHead>
+              <TableHead className="px-4 py-3">
+                {t("admin.table.submissions")}
               </TableHead>
               <TableHead className="px-4 py-3 text-end">
-                {i18n._("Actions")}
+                {t("category.table.actions")}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -294,22 +341,22 @@ export function AdminChallengeList({
                     {c.source === "ai_generated" ? (
                       <Badge className="gap-1 font-medium" variant="default">
                         <Bot size={11} />
-                        {i18n._("AI Agent")}
+                        {t("admin.table.aiAgent")}
                       </Badge>
                     ) : (
                       <Badge className="gap-1 font-medium" variant="outline">
                         <User size={11} />
-                        {i18n._("Manual")}
+                        {t("admin.filters.manual")}
                       </Badge>
                     )}
                   </TableCell>
                   <TableCell className="px-4 py-3.5">
                     <div className="flex flex-col">
                       <span className="font-semibold text-foreground">
-                        {c.submissionsCount} {i18n._("total")}
+                        {c.submissionsCount} {t("admin.table.total")}
                       </span>
                       <span className="text-[11px] text-emerald-400">
-                        {c.solvesCount} {i18n._("solves")}
+                        {c.solvesCount} {t("admin.table.solves")}
                       </span>
                     </div>
                   </TableCell>
@@ -321,7 +368,7 @@ export function AdminChallengeList({
                             asChild
                             className="h-8 w-8 p-0"
                             size="icon"
-                            title={i18n._("View in Arena")}
+                            title={t("admin.actions.viewInArena")}
                             variant="ghost"
                           >
                             <Link href={`/challenges/${c.id}`} target="_blank">
@@ -332,7 +379,7 @@ export function AdminChallengeList({
                             className="h-8 w-8 p-0 text-amber-400 hover:bg-amber-500/10 hover:text-amber-400"
                             onClick={() => handleToggleStatus(c.id, "draft")}
                             size="icon"
-                            title={i18n._("Unpublish to Draft")}
+                            title={t("admin.actions.unpublish")}
                             variant="ghost"
                           >
                             <Lock size={15} />
@@ -343,7 +390,7 @@ export function AdminChallengeList({
                           className="h-8 w-8 p-0 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
                           onClick={() => handleToggleStatus(c.id, "published")}
                           size="icon"
-                          title={i18n._("Publish to Arena")}
+                          title={t("admin.actions.publish")}
                           variant="ghost"
                         >
                           <Globe size={15} />
@@ -351,9 +398,9 @@ export function AdminChallengeList({
                       )}
                       <Button
                         className="h-8 w-8 p-0 text-rose-400 hover:bg-rose-500/10 hover:text-rose-400"
-                        onClick={() => handleDelete(c.id)}
+                        onClick={() => setDeleteTargetId(c.id)}
                         size="icon"
-                        title={i18n._("Delete Challenge")}
+                        title={t("admin.actions.deleteChallenge")}
                         variant="ghost"
                       >
                         <Trash2 size={15} />
@@ -368,13 +415,49 @@ export function AdminChallengeList({
                   className="px-4 py-8 text-center text-muted-foreground"
                   colSpan={7}
                 >
-                  {i18n._("No challenges found matching your filters.")}
+                  {t("admin.empty.noMatch")}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </Card>
+
+      <AlertDialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTargetId(null);
+          }
+        }}
+        open={!!deleteTargetId}
+      >
+        <AlertDialogContent data-testid="confirm-delete-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("confirm.title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("admin.list.confirmDelete")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button
+              disabled={isDeleting}
+              onClick={() => setDeleteTargetId(null)}
+              variant="outline"
+            >
+              {t("actions.cancel")}
+            </Button>
+            <Button
+              disabled={isDeleting}
+              onClick={handleConfirmDelete}
+              variant="destructive"
+            >
+              {isDeleting
+                ? t("actions.deleting")
+                : t("actions.permanentlyDelete")}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

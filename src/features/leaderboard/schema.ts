@@ -9,7 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { adminRole, analyticsSchema, userRole } from "@/db/schema/roles";
 import { users } from "@/features/auth/schema";
-import { categories } from "@/features/challenge/schema";
+import { categories } from "@/features/category/schema";
 
 // --- Enums ---
 export const leaderboardPeriodEnum = pgEnum("leaderboard_period", [

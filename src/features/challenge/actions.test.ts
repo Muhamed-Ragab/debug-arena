@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { submitChallengeSchema } from "./validations";
+import { submitChallengeSchema } from "./validation";
 
 describe("submitChallengeSchema", () => {
   it("validates valid submission inputs", () => {

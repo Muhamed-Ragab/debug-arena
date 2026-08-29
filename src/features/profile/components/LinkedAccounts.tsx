@@ -1,7 +1,9 @@
 "use client";
 
 import { AlertTriangle, Check, KeyRound, Link2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { flattenValidationErrors } from "@/lib/safe-action/validation";
 import { unlinkAccountAction } from "../actions";
 import type { LinkedAccount, ProviderId } from "../types";
 
@@ -32,6 +35,7 @@ interface LinkedAccountsProps {
 export function LinkedAccounts({
   accounts: initialAccounts,
 }: LinkedAccountsProps) {
+  const t = useTranslations();
   const [accounts, setAccounts] = useState<LinkedAccount[]>(initialAccounts);
   const [blocked, setBlocked] = useState<ProviderId | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -58,12 +62,22 @@ export function LinkedAccounts({
               : a
           )
         );
+        toast.success(t("profile.linked.providerUnlinked"));
+      } else if (res?.validationErrors) {
+        const flat = flattenValidationErrors(res.validationErrors);
+        const msg = flat.providerId ?? flat._errors ?? "Validation failed";
+        setErrorMessage(msg);
+        toast.error(t("error.validationFailed"));
       } else if (res?.serverError) {
         setErrorMessage(res.serverError);
+        toast.error(t(res.serverError as string));
+      } else {
+        setErrorMessage("Something went wrong");
+        toast.error(t("error.somethingWrong"));
       }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to unlink";
-      setErrorMessage(msg);
+    } catch {
+      setErrorMessage("Something went wrong");
+      toast.error(t("error.somethingWrong"));
     } finally {
       setIsUnlinking(null);
     }
@@ -72,18 +86,17 @@ export function LinkedAccounts({
   return (
     <Card className="p-1">
       <CardHeader>
-        <CardTitle className="text-base">Connected accounts</CardTitle>
-        <CardDescription>
-          Link providers to sign in faster. One stays primary for your avatar
-          and name.
-        </CardDescription>
+        <CardTitle className="text-base">{t("profile.linked.title")}</CardTitle>
+        <CardDescription>{t("profile.linked.subtitle")}</CardDescription>
       </CardHeader>
 
       <CardContent>
         {Boolean(errorMessage) && (
           <Alert className="mb-4" variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>{errorMessage}</AlertDescription>
+            <AlertDescription>
+              {errorMessage ? t(errorMessage as string) : null}
+            </AlertDescription>
           </Alert>
         )}
 
@@ -107,21 +120,21 @@ export function LinkedAccounts({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium text-[13px] text-foreground">
-                        {account.label}
+                        {t(account.label as string)}
                       </span>
                       {Boolean(account.isPrimary && account.connected) && (
                         <Badge
                           className="gap-1 font-medium text-[11px]"
                           variant="default"
                         >
-                          <Check size={11} /> Connected
+                          <Check size={11} /> {t("profile.linked.connected")}
                         </Badge>
                       )}
                     </div>
                     <p className="mt-0.5 text-[12px] text-muted-foreground">
                       {account.connected
-                        ? (account.email ?? "Connected")
-                        : "Not connected"}
+                        ? (account.email ?? t("profile.linked.connected"))
+                        : t("profile.linked.notConnected")}
                     </p>
                   </div>
 
@@ -133,14 +146,16 @@ export function LinkedAccounts({
                         size="sm"
                         variant="destructive"
                       >
-                        {loading ? "Unlinking..." : "Unlink"}
+                        {loading
+                          ? t("profile.linked.unlinking")
+                          : t("profile.linked.unlink")}
                       </Button>
                     ) : (
                       <Button asChild size="sm" variant="default">
                         <a
                           href={`/api/auth/sign-in/social?provider=${account.provider}`}
                         >
-                          <Link2 size={13} /> Connect
+                          <Link2 size={13} /> {t("profile.linked.connect")}
                         </a>
                       </Button>
                     )}
@@ -151,9 +166,9 @@ export function LinkedAccounts({
                   <Alert className="mt-3" variant="destructive">
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>
-                      Can&apos;t unlink <strong>{account.label}</strong> —
-                      it&apos;s your only sign-in method. Add another provider
-                      first, then retry.
+                      {t("profile.linked.cannotUnlink", {
+                        label: account.label,
+                      })}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -164,10 +179,7 @@ export function LinkedAccounts({
 
         <div className="mt-5 flex items-start gap-2 rounded-md border border-border bg-inset px-3 py-2.5 text-[12px] text-muted-foreground">
           <KeyRound className="mt-0.5 shrink-0 text-primary" size={14} />
-          <span>
-            Unlinking a provider only removes the connection — it never deletes
-            your Debug Arena account or your challenge history.
-          </span>
+          <span>{t("profile.linked.unlinkHint")}</span>
         </div>
       </CardContent>
     </Card>

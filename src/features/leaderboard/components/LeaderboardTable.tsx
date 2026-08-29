@@ -1,4 +1,7 @@
+"use client";
+
 import { ChevronLeft, ChevronRight, Flame } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RankMedal } from "@/components/shared/RankMedal";
 import { Avatar } from "@/components/ui/avatar";
@@ -31,6 +34,7 @@ function getStreakColor(streak: number): string {
 }
 
 export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
+  const t = useTranslations();
   const [page, setPage] = useState(1);
 
   const totalPages = Math.max(1, Math.ceil(entries.length / pageSize));
@@ -45,11 +49,19 @@ export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="w-16">Rank</TableHead>
-            <TableHead>User</TableHead>
-            <TableHead className="text-end">Score</TableHead>
-            <TableHead className="text-end">Solved</TableHead>
-            <TableHead className="text-end">Streak</TableHead>
+            <TableHead className="w-16">
+              {t("leaderboard.table.rank")}
+            </TableHead>
+            <TableHead>{t("leaderboard.table.user")}</TableHead>
+            <TableHead className="text-end">
+              {t("leaderboard.table.score")}
+            </TableHead>
+            <TableHead className="text-end">
+              {t("leaderboard.table.solved")}
+            </TableHead>
+            <TableHead className="text-end">
+              {t("leaderboard.table.streak")}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -81,7 +93,7 @@ export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
                         className="ms-2 font-mono text-[10px]"
                         variant="default"
                       >
-                        you
+                        {t("leaderboard.table.youBadge")}
                       </Badge>
                     )}
                   </span>
@@ -99,7 +111,7 @@ export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
                   style={{ color: getStreakColor(row.streak) }}
                 >
                   {row.streak >= 7 ? <Flame size={11} /> : null}
-                  {row.streak}d
+                  {t("leaderboard.table.streakDays", { streak: row.streak })}
                 </span>
               </TableCell>
             </TableRow>
@@ -110,9 +122,11 @@ export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-between border-border border-t pt-4">
           <p className="text-muted-foreground text-xs">
-            Showing {(safePage - 1) * pageSize + 1} to{" "}
-            {Math.min(safePage * pageSize, entries.length)} of {entries.length}{" "}
-            entries
+            {t("leaderboard.table.pagination", {
+              from: (safePage - 1) * pageSize + 1,
+              to: Math.min(safePage * pageSize, entries.length),
+              total: entries.length,
+            })}
           </p>
           <div className="flex items-center gap-1">
             <Button

@@ -91,8 +91,13 @@ describe("Question Generator Agent", () => {
   describe("normalizeChallengeDraft", () => {
     it("ensures all required fields, progressive hints, and points are properly shaped", () => {
       const draft = normalizeChallengeDraft({
-        buggyArtifact: { files: [{ code: "", name: "index.ts" }] },
+        buggyArtifact: {
+          entryFile: "index.ts",
+          files: [{ code: "", name: "index.ts" }],
+          language: "typescript",
+        },
         categorySlug: "test",
+        difficulty: "easy",
         format: "code_snippet",
         hints: [],
         preventionNotes: "Prev",
@@ -137,7 +142,11 @@ describe("Question Generator Agent", () => {
 
     it("refines existing draft using LLM instructions", async () => {
       const sampleDraft = normalizeChallengeDraft({
-        buggyArtifact: { files: [{ code: "const a = 1;", name: "index.ts" }] },
+        buggyArtifact: {
+          entryFile: "index.ts",
+          files: [{ code: "const a = 1;", name: "index.ts" }],
+          language: "typescript",
+        },
         categorySlug: "react-rendering",
         difficulty: "easy",
         format: "code_snippet",

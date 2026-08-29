@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { CATEGORY_CONFIG } from "@/lib/domain/categories";
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function LeaderboardScreen({ initialEntries }: Props) {
+  const t = useTranslations();
   const { tab, setTab, categoryTab } = useLeaderboard();
 
   const filteredEntries = useMemo(() => {
@@ -34,11 +36,10 @@ export function LeaderboardScreen({ initialEntries }: Props) {
       <div className="border-border border-b bg-surface px-4 pt-4 pb-0 sm:px-8">
         <div className="mb-4">
           <h1 className="font-semibold text-2xl text-heading tracking-tight">
-            Leaderboard
+            {t("common.navigation.leaderboard")}
           </h1>
           <p className="mt-1 text-muted-foreground text-sm">
-            Top debuggers ranked by accuracy, streak, and diagnosis speed.
-            (Cached 24h)
+            {t("leaderboard.subtitle.cached")}
           </p>
         </div>
         <LeaderboardTabs setTab={setTab} tab={tab} />
@@ -64,7 +65,9 @@ export function LeaderboardScreen({ initialEntries }: Props) {
                     className="font-medium text-[12px]"
                     style={{ color: cfg?.color }}
                   >
-                    {cfg?.label} — top solvers ranked by category score
+                    {t("leaderboard.subtitle.category", {
+                      label: cfg?.label ?? categoryTab,
+                    })}
                   </span>
                 </div>
               );
@@ -73,9 +76,11 @@ export function LeaderboardScreen({ initialEntries }: Props) {
 
         {filteredEntries.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-border border-dashed py-16 text-center">
-            <p className="font-medium text-heading">No leaderboard data yet</p>
+            <p className="font-medium text-heading">
+              {t("leaderboard.empty.title")}
+            </p>
             <p className="mt-1 text-muted-foreground text-sm">
-              Solve challenges to earn a spot on the leaderboard.
+              {t("leaderboard.empty.hint")}
             </p>
           </div>
         ) : (

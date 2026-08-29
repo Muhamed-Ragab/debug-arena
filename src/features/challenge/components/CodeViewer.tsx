@@ -1,6 +1,7 @@
 "use client";
 
 import { FileCode, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import type { CategoryConfig } from "@/lib/domain/categories";
 import { tokenizeLine } from "../lib/tokenize";
@@ -24,6 +25,7 @@ export function CodeViewer({
   codeLines,
   fileName,
 }: Props) {
+  const t = useTranslations();
   let activeLines: number[] = [];
   if (Array.isArray(selectedLines)) {
     activeLines = selectedLines;
@@ -33,16 +35,18 @@ export function CodeViewer({
 
   const formatSelectionText = () => {
     if (activeLines.length === 0) {
-      return "Click lines to mark bug location (Shift+click for range)";
+      return t("challenge.codeViewer.markHint");
     }
     if (activeLines.length === 1) {
-      return `Line ${activeLines[0]} marked`;
+      return t("challenge.codeViewer.lineMarked", { line: activeLines[0] });
     }
     if (activeLines.length <= 4) {
       const sorted = [...activeLines].sort((a, b) => a - b);
-      return `Lines ${sorted.join(", ")} marked`;
+      return t("challenge.codeViewer.linesMarked", {
+        lines: sorted.join(", "),
+      });
     }
-    return `${activeLines.length} lines marked`;
+    return t("challenge.codeViewer.countMarked", { count: activeLines.length });
   };
 
   return (
@@ -64,11 +68,11 @@ export function CodeViewer({
               className="h-6 gap-1 rounded bg-white/5 px-2 py-0.5 font-mono text-[10px] text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
               onClick={onClearLines}
               size="xs"
-              title="Clear selected lines"
+              title={t("challenge.codeViewer.clearSelected")}
               type="button"
               variant="ghost"
             >
-              <X size={11} /> Clear
+              <X size={11} /> {t("challenge.codeViewer.clear")}
             </Button>
           ) : null}
         </div>

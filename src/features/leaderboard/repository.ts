@@ -3,65 +3,92 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import * as schema from "@/db/schema";
+import { OFFLINE_MESSAGE, toOfflineError } from "@/lib/offline";
+import { ConflictError } from "@/lib/safe-action/errors";
+import type {
+  LeaderboardRepository,
+  UserWithCategoryStatsAndSubmissions,
+  UserWithSubmissions,
+} from "./types";
 
-function queryAllUsersWithSubmissions() {
-  return db.query.users.findMany({
-    where: eq(schema.users.banned, false),
-    with: {
-      submissions: true,
-    },
-  });
+function handleDbError(err: unknown, context: string): never {
+  const { code } = err as { code?: string };
+  if (code === "23505") {
+    throw new ConflictError(`Unique constraint violation in ${context}`, {
+      cause: err as Error,
+    });
+  }
+  if (code === "23503") {
+    throw new ConflictError(`Foreign key violation in ${context}`, {
+      cause: err as Error,
+    });
+  }
+  console.warn(`[leaderboardRepository.${context}] DB error:`, err);
+  throw toOfflineError(err, OFFLINE_MESSAGE);
 }
 
-function queryAllWithCategoryStats() {
-  return db.query.users.findMany({
-    where: eq(schema.users.banned, false),
-    with: {
-      categoryStats: {
+export function createLeaderboardRepository(
+  dbClient: typeof db = db
+): LeaderboardRepository {
+  async function findAllUsersWithSubmissions(): Promise<UserWithSubmissions> {
+    try {
+      return (await dbClient.query.users.findMany({
+        where: eq(schema.users.banned, false),
         with: {
-          category: true,
+          submissions: true,
         },
-      },
-      submissions: true,
-    },
-  });
-}
+      })) as UserWithSubmissions;
+    } catch (err) {
+      handleDbError(err, "findAllUsersWithSubmissions");
+    }
+  }
 
-async function queryUserByIdWithRelations(userId: string) {
-  const user = await db.query.users.findFirst({
-    where: eq(schema.users.id, userId),
-    with: {
-      categoryStats: {
-        with: {
-          category: true,
-        },
-      },
-      submissions: true,
-    },
-  });
-  return user ?? null;
-}
-
-export type UserWithSubmissions = Awaited<
-  ReturnType<typeof queryAllUsersWithSubmissions>
->;
-
-export type UserWithCategoryStatsAndSubmissions = Awaited<
-  ReturnType<typeof queryAllWithCategoryStats>
->[number];
-
-export interface LeaderboardRepository {
-  findAllUsersWithSubmissions: () => Promise<UserWithSubmissions>;
-  findAllWithCategoryStats: () => Promise<
+  async function findAllWithCategoryStats(): Promise<
     UserWithCategoryStatsAndSubmissions[]
-  >;
-  findByIdWithRelations: (
+  > {
+    try {
+      return (await dbClient.query.users.findMany({
+        where: eq(schema.users.banned, false),
+        with: {
+          categoryStats: {
+            with: {
+              category: true,
+            },
+          },
+          submissions: true,
+        },
+      })) as UserWithCategoryStatsAndSubmissions[];
+    } catch (err) {
+      handleDbError(err, "findAllWithCategoryStats");
+    }
+  }
+
+  async function findByIdWithRelations(
     userId: string
-  ) => Promise<UserWithCategoryStatsAndSubmissions | null>;
+  ): Promise<UserWithCategoryStatsAndSubmissions | null> {
+    try {
+      const user = await dbClient.query.users.findFirst({
+        where: eq(schema.users.id, userId),
+        with: {
+          categoryStats: {
+            with: {
+              category: true,
+            },
+          },
+          submissions: true,
+        },
+      });
+      return (user as UserWithCategoryStatsAndSubmissions | undefined) ?? null;
+    } catch (err) {
+      handleDbError(err, "findByIdWithRelations");
+    }
+  }
+
+  return {
+    findAllUsersWithSubmissions,
+    findAllWithCategoryStats,
+    findByIdWithRelations,
+  };
 }
 
-export const leaderboardRepository: LeaderboardRepository = {
-  findAllUsersWithSubmissions: queryAllUsersWithSubmissions,
-  findAllWithCategoryStats: queryAllWithCategoryStats,
-  findByIdWithRelations: queryUserByIdWithRelations,
-};
+export const leaderboardRepository = createLeaderboardRepository();

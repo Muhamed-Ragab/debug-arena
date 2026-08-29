@@ -1,6 +1,5 @@
 "use client";
 
-import { useLingui } from "@lingui/react";
 import {
   CheckCircle2,
   FileCode,
@@ -14,9 +13,11 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { FormattedMarkdown } from "@/components/shared/FormattedMarkdown";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -25,7 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { DIFFICULTY_LABEL } from "@/features/challenge/constants";
+import { flattenValidationErrors } from "@/lib/safe-action/validation";
 import { saveAdminChallengeAction } from "../actions";
 import { DIFFICULTY_VALUES } from "../constants";
 import {
@@ -49,8 +51,7 @@ export function ManualChallengeCreator({
   categories,
   onChallengeSaved,
 }: ManualChallengeCreatorProps) {
-  const { i18n } = useLingui();
-
+  const t = useTranslations();
   // Basic Info
   const [title, setTitle] = useState("");
   const [categorySlug, setCategorySlug] = useState(
@@ -134,6 +135,10 @@ export function ManualChallengeCreator({
   // States
   const [isSaving, setIsSaving] = useState(false);
   const [publishedId, setPublishedId] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<
+    Record<string, string | undefined>
+  >({});
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const handleDifficultyChange = (d: "easy" | "medium" | "hard") => {
     setDifficulty(d);
@@ -165,7 +170,7 @@ export function ManualChallengeCreator({
   // Remove file
   const handleRemoveFile = (index: number) => {
     if (buggyFiles.length <= 1) {
-      toast.error(i18n._("Challenge must have at least one file."));
+      toast.error(t("challenge.creator.mustHaveFile"));
       return;
     }
     setBuggyFiles((prev) => prev.filter((_, i) => i !== index));
@@ -184,23 +189,23 @@ export function ManualChallengeCreator({
       const lines = detectBuggyLines(entryBuggy.code, entryFixed.code);
       setBuggyLines(lines);
       toast.success(
-        i18n._(
-          "Auto-calculated diff and detected buggy lines: [{start}, {end}]",
-          { end: lines[1], start: lines[0] }
-        )
+        t("challenge.creator.diffCalculated", {
+          end: lines[1],
+          start: lines[0],
+        })
       );
     }
   };
 
   const validateChallenge = (): string | null => {
     if (!title.trim()) {
-      return i18n._("Challenge title is required.");
+      return t("challenge.creator.titleRequired");
     }
     if (!prompt.trim()) {
-      return i18n._("Scenario prompt is required.");
+      return t("challenge.creator.promptRequired");
     }
     if (!rootCauseSummary.trim()) {
-      return i18n._("Root cause summary is required.");
+      return t("challenge.creator.rootCauseRequired");
     }
     return null;
   };
@@ -213,6 +218,8 @@ export function ManualChallengeCreator({
     }
 
     setIsSaving(true);
+    setServerError(null);
+    setFieldErrors({});
     try {
       const entryBuggy = buggyFiles.find((f) => f.isEntry) || buggyFiles[0];
       const entryFixed =
@@ -253,18 +260,51 @@ export function ManualChallengeCreator({
 
       if (res?.data?.success && res.data.challengeId) {
         setPublishedId(res.data.challengeId);
+        setServerError(null);
         toast.success(
           status === "published"
-            ? i18n._("Challenge published live to the arena!")
-            : i18n._("Challenge draft saved successfully.")
+            ? t("challenge.creator.published")
+            : t("challenge.creator.draftSaved")
         );
         onChallengeSaved?.();
+      } else if (res?.validationErrors) {
+        const flat = flattenValidationErrors(res.validationErrors);
+        setFieldErrors(flat);
+        const first =
+          flat.title ??
+          flat.prompt ??
+          flat.rootCauseSummary ??
+          flat.categorySlug ??
+          flat.difficulty ??
+          flat._errors ??
+          "Validation failed";
+        setServerError(first);
+        toast.error(t("error.validationFailed"));
       } else if (res?.serverError) {
-        toast.error(res.serverError);
+        setServerError(res.serverError);
+        toast.error(t(res.serverError as string));
+        // map known Conflict/NotFound to fieldErrors where applicable
+        const lower = res.serverError.toLowerCase();
+        if (lower.includes("category") && lower.includes("slug")) {
+          setFieldErrors((prev) => ({
+            ...prev,
+            categorySlug: res.serverError as string,
+          }));
+        }
+        if (lower.includes("title")) {
+          setFieldErrors((prev) => ({
+            ...prev,
+            title: res.serverError as string,
+          }));
+        }
+      } else {
+        setServerError(t("error.somethingWrong"));
+        toast.error(t("error.somethingWrong"));
       }
     } catch (err) {
       console.error(err);
-      toast.error(i18n._("Failed to save challenge."));
+      toast.error(t("challenge.creator.failedSave"));
+      setServerError(t("error.somethingWrong"));
     } finally {
       setIsSaving(false);
     }
@@ -282,12 +322,10 @@ export function ManualChallengeCreator({
             </div>
             <div>
               <h2 className="font-semibold text-heading text-lg">
-                {i18n._("Manual Challenge Authoring Studio")}
+                {t("admin.manual.title")}
               </h2>
               <p className="text-muted-foreground text-xs">
-                {i18n._(
-                  "Create and configure debugging scenarios with custom multi-file code, test cases, and Socratic hints."
-                )}
+                {t("admin.manual.subtitle")}
               </p>
             </div>
           </div>
@@ -300,7 +338,7 @@ export function ManualChallengeCreator({
               variant="outline"
             >
               <Save size={14} />
-              {i18n._("Save Draft")}
+              {t("admin.manual.saveDraft")}
             </Button>
             <Button
               disabled={isSaving}
@@ -309,26 +347,30 @@ export function ManualChallengeCreator({
               variant="default"
             >
               <Play size={14} />
-              {i18n._("Publish to Arena")}
+              {t("admin.actions.publish")}
             </Button>
           </div>
         </div>
+
+        {serverError ? (
+          <Alert variant="destructive">
+            <AlertDescription>{t(serverError as string)}</AlertDescription>
+          </Alert>
+        ) : null}
 
         {/* Success Banner if published */}
         {Boolean(publishedId) && (
           <div className="flex items-center justify-between rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-emerald-400 text-sm">
             <div className="flex items-center gap-2.5">
               <CheckCircle2 size={18} />
-              <span>
-                {i18n._("Challenge created and published successfully!")}
-              </span>
+              <span>{t("admin.manual.createdPublished")}</span>
             </div>
             <Link
               className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500 px-3 py-1 font-semibold text-black text-xs transition-colors hover:bg-emerald-400"
               href={`/challenges/${publishedId}`}
               target="_blank"
             >
-              {i18n._("Play in Arena")} →
+              {t("admin.manual.playInArena")} →
             </Link>
           </div>
         )}
@@ -340,16 +382,29 @@ export function ManualChallengeCreator({
               className="mb-1.5 block font-semibold text-heading text-xs"
               htmlFor="challenge-title"
             >
-              {i18n._("Challenge Title *")}
+              {t("admin.manual.titleLabel")}
             </label>
             <input
               className="w-full rounded-lg border border-border bg-inset px-3.5 py-2 text-foreground text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
               id="challenge-title"
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (fieldErrors.title) {
+                  setFieldErrors((prev) => {
+                    const { title: _omit, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
               placeholder="e.g. Race Condition in Distributed Cache Store"
               type="text"
               value={title}
             />
+            {Boolean(fieldErrors.title) && (
+              <p className="mt-1 text-destructive text-xs">
+                {t(fieldErrors.title as string)}
+              </p>
+            )}
           </div>
 
           <div className="md:col-span-3">
@@ -357,17 +412,25 @@ export function ManualChallengeCreator({
               className="mb-1.5 block font-semibold text-heading text-xs"
               htmlFor="challenge-category"
             >
-              {i18n._("Category *")}
+              {t("admin.manual.categoryLabel")}
             </label>
             <Select
-              onValueChange={(val) => setCategorySlug(val ?? "")}
+              onValueChange={(val) => {
+                setCategorySlug(val ?? "");
+                if (fieldErrors.categorySlug) {
+                  setFieldErrors((prev) => {
+                    const { categorySlug: _omit, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
               value={categorySlug}
             >
               <SelectTrigger
                 className="w-full rounded-lg border-border bg-inset px-3 py-2 text-foreground text-xs"
                 id="challenge-category"
               >
-                <SelectValue placeholder={i18n._("Select category...")} />
+                <SelectValue placeholder={t("admin.form.selectCategory")} />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((c) => (
@@ -377,34 +440,54 @@ export function ManualChallengeCreator({
                 ))}
               </SelectContent>
             </Select>
+            {Boolean(fieldErrors.categorySlug) && (
+              <p className="mt-1 text-destructive text-xs">
+                {t(fieldErrors.categorySlug as string)}
+              </p>
+            )}
           </div>
 
           <div className="md:col-span-3">
-            <span className="mb-1.5 block font-semibold text-heading text-xs">
-              {i18n._("Difficulty *")}
-            </span>
-            <fieldset
-              aria-label={i18n._("Difficulty")}
-              className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-inset p-1"
+            <label
+              className="mb-1.5 block font-semibold text-heading text-xs"
+              htmlFor="difficulty-select"
             >
-              {DIFFICULTY_VALUES.map((d) => (
-                <Button
-                  className={cn(
-                    "rounded py-1 font-semibold text-xs uppercase tracking-wider transition-colors",
-                    difficulty === d
-                      ? "bg-primary text-white shadow-xs"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                  key={d}
-                  onClick={() => handleDifficultyChange(d)}
-                  size="sm"
-                  type="button"
-                  variant="ghost"
-                >
-                  {d}
-                </Button>
-              ))}
-            </fieldset>
+              {t("admin.manual.difficultyLabel")}
+            </label>
+            <Select
+              onValueChange={(v) => {
+                handleDifficultyChange(v as "easy" | "medium" | "hard");
+                if (fieldErrors.difficulty) {
+                  setFieldErrors((prev) => {
+                    const { difficulty: _omit, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
+              value={difficulty}
+            >
+              <SelectTrigger
+                className="w-full rounded-lg border-border bg-inset px-3 py-2 text-foreground text-xs"
+                id="difficulty-select"
+              >
+                <SelectValue placeholder={t("admin.form.selectDifficulty")} />
+              </SelectTrigger>
+              <SelectContent>
+                {DIFFICULTY_VALUES.map((d) => (
+                  <SelectItem key={d} value={d}>
+                    {DIFFICULTY_LABEL[d] ?? d}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {Boolean(fieldErrors.difficulty) && (
+              <p
+                className="mt-1.5 text-destructive text-xs"
+                id="difficulty-error"
+              >
+                {t(fieldErrors.difficulty as string)}
+              </p>
+            )}
           </div>
 
           <div className="md:col-span-3">
@@ -412,7 +495,7 @@ export function ManualChallengeCreator({
               className="mb-1.5 block font-semibold text-heading text-xs"
               htmlFor="challenge-language"
             >
-              {i18n._("Language")}
+              {t("common.preferences.language")}
             </label>
             <Select
               onValueChange={(val) => setLanguage(val ?? "typescript")}
@@ -439,7 +522,7 @@ export function ManualChallengeCreator({
               className="mb-1.5 block font-semibold text-heading text-xs"
               htmlFor="challenge-format"
             >
-              {i18n._("Format")}
+              {t("admin.manual.formatLabel")}
             </label>
             <Select
               onValueChange={(val) => {
@@ -455,19 +538,17 @@ export function ManualChallengeCreator({
                 className="w-full rounded-lg border-border bg-inset px-3 py-2 text-foreground text-xs"
                 id="challenge-format"
               >
-                <SelectValue
-                  placeholder={i18n._("Code Snippet / Multi-file")}
-                />
+                <SelectValue placeholder={t("admin.manual.formatCode")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="code_snippet">
-                  {i18n._("Code Snippet / Multi-file")}
+                  {t("admin.manual.formatCode")}
                 </SelectItem>
                 <SelectItem value="log_only">
-                  {i18n._("Log Trace Only")}
+                  {t("admin.manual.formatLog")}
                 </SelectItem>
                 <SelectItem value="ui_recording">
-                  {i18n._("UI Recording")}
+                  {t("admin.manual.formatUi")}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -478,7 +559,7 @@ export function ManualChallengeCreator({
               className="mb-1.5 block font-semibold text-heading text-xs"
               htmlFor="challenge-points"
             >
-              {i18n._("Points")}
+              {t("admin.manual.pointsLabel")}
             </label>
             <input
               className="w-full rounded-lg border border-border bg-inset px-3.5 py-2 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
@@ -494,7 +575,7 @@ export function ManualChallengeCreator({
               className="mb-1.5 block font-semibold text-heading text-xs"
               htmlFor="challenge-time-limit"
             >
-              {i18n._("Time Limit")}
+              {t("admin.manual.timeLabel")}
             </label>
             <input
               className="w-full rounded-lg border border-border bg-inset px-3.5 py-2 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
@@ -510,7 +591,7 @@ export function ManualChallengeCreator({
         <div className="flex flex-col gap-2 rounded-xl border border-border bg-inset/40 p-4">
           <div className="flex items-center justify-between">
             <span className="font-semibold text-heading text-xs uppercase tracking-wider">
-              {i18n._("Scenario Markdown Description *")}
+              {t("admin.manual.scenarioLabel")}
             </span>
             <Button
               className="h-auto p-0 font-semibold text-primary text-xs hover:underline"
@@ -520,8 +601,8 @@ export function ManualChallengeCreator({
               variant="link"
             >
               {showPromptPreview
-                ? i18n._("Edit Raw Markdown")
-                : i18n._("Preview Formatted Markdown")}
+                ? t("admin.manual.editMarkdown")
+                : t("admin.manual.previewMarkdown")}
             </Button>
           </div>
 
@@ -530,12 +611,27 @@ export function ManualChallengeCreator({
               <FormattedMarkdown content={prompt} />
             </div>
           ) : (
-            <textarea
-              className="h-48 w-full rounded-lg border border-border bg-surface p-3 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
-              onChange={(e) => setPrompt(e.target.value)}
-              rows={8}
-              value={prompt}
-            />
+            <>
+              <textarea
+                className="h-48 w-full rounded-lg border border-border bg-surface p-3 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
+                onChange={(e) => {
+                  setPrompt(e.target.value);
+                  if (fieldErrors.prompt) {
+                    setFieldErrors((prev) => {
+                      const { prompt: _omit, ...rest } = prev;
+                      return rest;
+                    });
+                  }
+                }}
+                rows={8}
+                value={prompt}
+              />
+              {Boolean(fieldErrors.prompt) && (
+                <p className="text-destructive text-xs">
+                  {t(fieldErrors.prompt as string)}
+                </p>
+              )}
+            </>
           )}
         </div>
 
@@ -545,7 +641,7 @@ export function ManualChallengeCreator({
             <div className="flex items-center gap-2">
               <FileCode className="text-primary" size={16} />
               <h3 className="font-semibold text-heading text-sm">
-                {i18n._("Challenge Files & Bug Injection")}
+                {t("admin.manual.filesSection")}
               </h3>
             </div>
             <div className="flex items-center gap-2">
@@ -555,11 +651,11 @@ export function ManualChallengeCreator({
                 variant="outline"
               >
                 <RotateCcw size={13} />
-                {i18n._("Auto-Compute Diff & Lines")}
+                {t("admin.manual.autoCompute")}
               </Button>
               <Button onClick={handleAddFile} size="sm" variant="outline">
                 <Plus size={13} />
-                {i18n._("Add File")}
+                {t("admin.manual.addFile")}
               </Button>
             </div>
           </div>
@@ -597,7 +693,7 @@ export function ManualChallengeCreator({
                       }
                       type="radio"
                     />
-                    <span>{i18n._("Entry File")}</span>
+                    <span>{t("admin.manual.entryFile")}</span>
                   </label>
                 </div>
 
@@ -618,7 +714,7 @@ export function ManualChallengeCreator({
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
                   <span className="font-mono font-semibold text-[11px] text-amber-400">
-                    {i18n._("Buggy Code ({name})", { name: file.name })}
+                    {t("admin.manual.buggyCode", { name: file.name })}
                   </span>
                   <textarea
                     className="h-52 w-full rounded border border-border bg-black/80 p-3 font-mono text-amber-100 text-xs focus:border-primary focus:outline-none"
@@ -634,7 +730,7 @@ export function ManualChallengeCreator({
 
                 <div className="flex flex-col gap-1.5">
                   <span className="font-mono font-semibold text-[11px] text-emerald-400">
-                    {i18n._("Fixed Reference Code ({name})", {
+                    {t("admin.manual.fixedCode", {
                       name: file.name,
                     })}
                   </span>
@@ -656,10 +752,12 @@ export function ManualChallengeCreator({
           {/* Buggy line range config */}
           <div className="flex items-center gap-4 rounded-lg border border-border bg-inset/50 p-3 text-xs">
             <span className="font-semibold text-heading">
-              {i18n._("Buggy Lines Location (1-Indexed):")}
+              {t("admin.manual.buggyLines")}
             </span>
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">{i18n._("Start:")}</span>
+              <span className="text-muted-foreground">
+                {t("admin.manual.start")}
+              </span>
               <input
                 className="w-16 rounded border border-border bg-surface px-2 py-1 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
                 onChange={(e) =>
@@ -668,7 +766,9 @@ export function ManualChallengeCreator({
                 type="number"
                 value={buggyLines[0]}
               />
-              <span className="text-muted-foreground">{i18n._("End:")}</span>
+              <span className="text-muted-foreground">
+                {t("admin.manual.end")}
+              </span>
               <input
                 className="w-16 rounded border border-border bg-surface px-2 py-1 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
                 onChange={(e) =>
@@ -679,9 +779,7 @@ export function ManualChallengeCreator({
               />
             </div>
             <span className="text-[11px] text-muted-foreground">
-              {i18n._(
-                "(Players get graded on whether their selected lines overlap this range)"
-              )}
+              {t("admin.manual.overlapHint")}
             </span>
           </div>
 
@@ -691,7 +789,7 @@ export function ManualChallengeCreator({
               className="font-semibold text-heading text-xs"
               htmlFor="challenge-fix-explanation"
             >
-              {i18n._("Reference Fix Explanation")}
+              {t("admin.manual.fixExplanation")}
             </label>
             <input
               className="w-full rounded-lg border border-border bg-inset px-3 py-2 text-foreground text-xs focus:border-primary focus:outline-none"
@@ -709,7 +807,7 @@ export function ManualChallengeCreator({
           <div className="flex items-center gap-2">
             <Lightbulb className="text-amber-400" size={16} />
             <h3 className="font-semibold text-heading text-sm">
-              {i18n._("Progressive Socratic Hints")}
+              {t("admin.manual.hintsSection")}
             </h3>
           </div>
 
@@ -721,7 +819,7 @@ export function ManualChallengeCreator({
               >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-heading text-xs">
-                    {i18n._("Hint {order}", { order: hint.order })}
+                    {t("challenge.hints.title", { order: hint.order })}
                   </span>
                   <div className="flex items-center gap-1 font-mono text-[11px] text-rose-400">
                     <span>-</span>
@@ -764,22 +862,35 @@ export function ManualChallengeCreator({
             <div className="flex items-center gap-2">
               <ShieldAlert className="text-primary" size={16} />
               <h3 className="font-semibold text-heading text-xs uppercase tracking-wider">
-                {i18n._("Canonical Root Cause Breakdown *")}
+                {t("admin.canonical_root_cause_breakdown")}
               </h3>
             </div>
             <textarea
               className="h-32 w-full rounded-lg border border-border bg-inset p-3 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
-              onChange={(e) => setRootCauseSummary(e.target.value)}
+              onChange={(e) => {
+                setRootCauseSummary(e.target.value);
+                if (fieldErrors.rootCauseSummary) {
+                  setFieldErrors((prev) => {
+                    const { rootCauseSummary: _omit, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
               placeholder="Explain the failure mechanism, event loop or state lifecycle that triggers the bug..."
               value={rootCauseSummary}
             />
+            {Boolean(fieldErrors.rootCauseSummary) && (
+              <p className="text-destructive text-xs">
+                {t(fieldErrors.rootCauseSummary as string)}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <ShieldAlert className="text-emerald-400" size={16} />
               <h3 className="font-semibold text-heading text-xs uppercase tracking-wider">
-                {i18n._("Prevention Notes & Safeguards")}
+                {t("admin.prevention_notes_safeguards")}
               </h3>
             </div>
             <textarea
@@ -800,7 +911,7 @@ export function ManualChallengeCreator({
             variant="outline"
           >
             <Save size={15} />
-            {i18n._("Save Challenge Draft")}
+            {t("admin.save_challenge_draft")}
           </Button>
           <Button
             disabled={isSaving}
@@ -809,7 +920,7 @@ export function ManualChallengeCreator({
             variant="default"
           >
             <Play size={15} />
-            {i18n._("Publish to Arena")}
+            {t("admin.actions.publish")}
           </Button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { saveChallenge } from "./service";
+import { createAdminService } from "./service";
 
 describe("admin/service", () => {
   it("saveChallenge calls repo in order", async () => {
@@ -40,18 +40,16 @@ describe("admin/service", () => {
         return Promise.resolve();
       },
     } as unknown as never;
-    await saveChallenge(
-      {
-        categorySlug: "react-rendering",
-        difficulty: "medium",
-        hints: [{ socraticPrompt: "hint" }],
-        prompt: "prompt",
-        rootCauseSummary: "cause",
-        status: "draft",
-        title: "Test",
-      },
-      repo
-    );
+    const svc = createAdminService(repo);
+    await svc.saveChallenge({
+      categorySlug: "react-rendering",
+      difficulty: "medium",
+      hints: [{ socraticPrompt: "hint" }],
+      prompt: "prompt",
+      rootCauseSummary: "cause",
+      status: "draft",
+      title: "Test",
+    });
     expect(calls).toEqual([
       "insertChallenge",
       "insertHints",

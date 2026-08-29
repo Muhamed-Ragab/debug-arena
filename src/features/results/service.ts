@@ -214,3 +214,17 @@ export function buildResultsViewModel(
     userSolution: userSolution ?? "",
   };
 }
+
+export function createResultsService() {
+  return {
+    buildEvaluationDetails,
+    buildResultsViewModel,
+    computeSubmissionScores,
+    getDynamicAiFeedback,
+    getFixQualityDesc,
+    getPreventionNotes,
+    getRootCauseDesc,
+  };
+}
+
+export const resultsService = createResultsService();

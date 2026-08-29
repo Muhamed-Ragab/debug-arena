@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CATEGORY_CONFIG } from "@/lib/domain/categories";
 import type { Category } from "@/lib/domain/types";
@@ -36,6 +39,7 @@ function getTabClasses(active: boolean, hasCfg: boolean): string {
 }
 
 export function LeaderboardTabs({ tab, setTab }: Props) {
+  const t = useTranslations();
   return (
     <div className="flex items-center gap-1 overflow-x-auto">
       {TABS.map(({ id, label }) => {
@@ -59,7 +63,7 @@ export function LeaderboardTabs({ tab, setTab }: Props) {
             type="button"
             variant="ghost"
           >
-            {label}
+            {t(label as string)}
           </Button>
         );
       })}

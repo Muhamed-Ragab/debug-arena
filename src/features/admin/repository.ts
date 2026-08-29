@@ -3,144 +3,207 @@ import "server-only";
 import { asc, desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import * as schema from "@/db/schema";
+import { OFFLINE_MESSAGE, toOfflineError } from "@/lib/offline";
+import { ConflictError } from "@/lib/safe-action/errors";
+import type {
+  AdminChallengeDetailRow,
+  AdminChallengeRow,
+  AdminRepository,
+  CategoryRow,
+  ChallengeRow,
+} from "./types";
 
-// --- Inferred row types (no `any`, sourced from Drizzle schema) ---
-type ChallengeRow = typeof schema.challenges.$inferSelect;
-type HintRow = typeof schema.hints.$inferSelect;
-type SubmissionRow = typeof schema.submissions.$inferSelect;
-type CategoryRow = typeof schema.categories.$inferSelect;
-type ChallengeEmbeddingRow = typeof schema.challengeEmbeddings.$inferSelect;
-
-// --- Thin relation shapes (raw rows only; no business logic) ---
-type AdminChallengeRow = ChallengeRow & {
-  category: CategoryRow;
-  hints: HintRow[];
-  submissions: SubmissionRow[];
-};
-
-type AdminChallengeDetailRow = ChallengeRow & {
-  category: CategoryRow;
-  hints: HintRow[];
-  submissions: SubmissionRow[];
-};
-
-// --- Repository interface (functional, no class) ---
-export interface AdminRepository {
-  deleteChallengeCascade: (challengeId: string) => Promise<void>;
-  deleteHintsByChallengeId: (challengeId: string) => Promise<void>;
-  findCategories: () => Promise<CategoryRow[]>;
-  findChallengeById: (id: string) => Promise<AdminChallengeDetailRow | null>;
-  findChallenges: () => Promise<AdminChallengeRow[]>;
-  insertChallenge: (
-    data: typeof schema.challenges.$inferInsert
-  ) => Promise<ChallengeRow>;
-  insertHints: (hints: (typeof schema.hints.$inferInsert)[]) => Promise<void>;
-  updateChallenge: (
-    id: string,
-    data: Partial<typeof schema.challenges.$inferInsert>
-  ) => Promise<void>;
-  upsertEmbedding: (
-    challengeId: string,
-    content: string,
-    embedding: (typeof schema.challengeEmbeddings.$inferInsert)["embedding"]
-  ) => Promise<void>;
+function handleDbError(err: unknown, context: string): never {
+  const { code } = err as { code?: string };
+  if (code === "23505") {
+    throw new ConflictError(`Unique constraint violation in ${context}`, {
+      cause: err as Error,
+    });
+  }
+  if (code === "23503") {
+    throw new ConflictError(`Foreign key violation in ${context}`, {
+      cause: err as Error,
+    });
+  }
+  console.warn(`[adminRepository.${context}] DB error:`, err);
+  throw toOfflineError(err, OFFLINE_MESSAGE);
 }
 
-export const adminRepository: AdminRepository = {
-  async deleteChallengeCascade(challengeId: string) {
-    // Manual cascade order: hints -> embeddings -> submissions -> challenges.
-    // No FK cascade is configured, so ordering must be explicit.
-    await db
-      .delete(schema.hints)
-      .where(eq(schema.hints.challengeId, challengeId));
+export function createAdminRepository(
+  dbClient: typeof db = db
+): AdminRepository {
+  async function findCategories(): Promise<CategoryRow[]> {
+    try {
+      return await dbClient.query.categories.findMany({
+        orderBy: [asc(schema.categories.name)],
+      });
+    } catch (err) {
+      handleDbError(err, "findCategories");
+    }
+  }
 
-    await db
-      .delete(schema.challengeEmbeddings)
-      .where(eq(schema.challengeEmbeddings.challengeId, challengeId));
-
-    await db
-      .delete(schema.submissions)
-      .where(eq(schema.submissions.challengeId, challengeId));
-
-    await db
-      .delete(schema.challenges)
-      .where(eq(schema.challenges.id, challengeId));
-  },
-
-  async deleteHintsByChallengeId(challengeId: string) {
-    await db
-      .delete(schema.hints)
-      .where(eq(schema.hints.challengeId, challengeId));
-  },
-  async findCategories() {
-    return await db.query.categories.findMany({
-      orderBy: [asc(schema.categories.name)],
-    });
-  },
-
-  async findChallengeById(challengeId: string) {
-    const challenge = await db.query.challenges.findFirst({
-      where: eq(schema.challenges.id, challengeId),
-      with: {
-        category: true,
-        hints: {
-          orderBy: [asc(schema.hints.order)],
+  async function findChallenges(): Promise<AdminChallengeRow[]> {
+    try {
+      return await dbClient.query.challenges.findMany({
+        orderBy: [desc(schema.challenges.createdAt)],
+        with: {
+          category: true,
+          hints: {
+            orderBy: [asc(schema.hints.order)],
+          },
+          submissions: true,
         },
-        submissions: true,
-      },
-    });
+      });
+    } catch (err) {
+      handleDbError(err, "findChallenges");
+    }
+  }
 
-    return challenge ?? null;
-  },
-
-  async findChallenges() {
-    return await db.query.challenges.findMany({
-      orderBy: [desc(schema.challenges.createdAt)],
-      with: {
-        category: true,
-        hints: {
-          orderBy: [asc(schema.hints.order)],
+  async function findChallengeById(
+    challengeId: string
+  ): Promise<AdminChallengeDetailRow | null> {
+    try {
+      const challenge = await dbClient.query.challenges.findFirst({
+        where: eq(schema.challenges.id, challengeId),
+        with: {
+          category: true,
+          hints: {
+            orderBy: [asc(schema.hints.order)],
+          },
+          submissions: true,
         },
-        submissions: true,
-      },
-    });
-  },
+      });
 
-  async insertChallenge(data) {
-    const [inserted] = await db
-      .insert(schema.challenges)
-      .values(data)
-      .returning();
+      return challenge ?? null;
+    } catch (err) {
+      handleDbError(err, "findChallengeById");
+    }
+  }
 
-    return inserted;
-  },
+  async function insertChallenge(
+    data: typeof schema.challenges.$inferInsert
+  ): Promise<ChallengeRow> {
+    try {
+      const [inserted] = await dbClient
+        .insert(schema.challenges)
+        .values(data)
+        .returning();
 
-  async insertHints(hints) {
+      return inserted;
+    } catch (err) {
+      handleDbError(err, "insertChallenge");
+    }
+  }
+
+  async function updateChallenge(
+    id: string,
+    data: Partial<typeof schema.challenges.$inferInsert>
+  ): Promise<void> {
+    try {
+      await dbClient
+        .update(schema.challenges)
+        .set(data)
+        .where(eq(schema.challenges.id, id));
+    } catch (err) {
+      handleDbError(err, "updateChallenge");
+    }
+  }
+
+  async function deleteHintsByChallengeId(challengeId: string): Promise<void> {
+    try {
+      await dbClient
+        .delete(schema.hints)
+        .where(eq(schema.hints.challengeId, challengeId));
+    } catch (err) {
+      handleDbError(err, "deleteHintsByChallengeId");
+    }
+  }
+
+  async function insertHints(
+    hints: (typeof schema.hints.$inferInsert)[]
+  ): Promise<void> {
     if (hints.length === 0) {
       return;
     }
 
-    await db.insert(schema.hints).values(hints);
-  },
+    try {
+      await dbClient.insert(schema.hints).values(hints);
+    } catch (err) {
+      handleDbError(err, "insertHints");
+    }
+  }
 
-  async updateChallenge(id: string, data) {
-    await db
-      .update(schema.challenges)
-      .set(data)
-      .where(eq(schema.challenges.id, id));
-  },
+  async function upsertEmbedding(
+    challengeId: string,
+    content: string,
+    embedding: (typeof schema.challengeEmbeddings.$inferInsert)["embedding"]
+  ): Promise<void> {
+    try {
+      await dbClient
+        .delete(schema.challengeEmbeddings)
+        .where(eq(schema.challengeEmbeddings.challengeId, challengeId));
 
-  async upsertEmbedding(challengeId: string, content: string, embedding) {
-    await db
-      .delete(schema.challengeEmbeddings)
-      .where(eq(schema.challengeEmbeddings.challengeId, challengeId));
+      await dbClient.insert(schema.challengeEmbeddings).values({
+        challengeId,
+        content,
+        embedding,
+      });
+    } catch (err) {
+      handleDbError(err, "upsertEmbedding");
+    }
+  }
 
-    await db.insert(schema.challengeEmbeddings).values({
-      challengeId,
-      content,
-      embedding,
-    });
-  },
-};
+  async function deleteChallengeCascade(challengeId: string): Promise<void> {
+    try {
+      await dbClient.transaction(async (tx) => {
+        await tx
+          .delete(schema.hints)
+          .where(eq(schema.hints.challengeId, challengeId));
 
-export type { ChallengeEmbeddingRow };
+        await tx
+          .delete(schema.challengeEmbeddings)
+          .where(eq(schema.challengeEmbeddings.challengeId, challengeId));
+
+        await tx
+          .delete(schema.submissions)
+          .where(eq(schema.submissions.challengeId, challengeId));
+
+        await tx
+          .delete(schema.challenges)
+          .where(eq(schema.challenges.id, challengeId));
+      });
+    } catch (err) {
+      // Preserve ConflictError / not masked as offline
+      if (err instanceof ConflictError) {
+        throw err;
+      }
+      const { code } = err as { code?: string };
+      if (code === "23505" || code === "23503") {
+        throw new ConflictError(
+          "Constraint violation in deleteChallengeCascade",
+          {
+            cause: err,
+          }
+        );
+      }
+      console.warn("[adminRepository.deleteChallengeCascade] DB error:", err);
+      throw toOfflineError(err, OFFLINE_MESSAGE);
+    }
+  }
+
+  return {
+    deleteChallengeCascade,
+    deleteHintsByChallengeId,
+    findCategories,
+    findChallengeById,
+    findChallenges,
+    insertChallenge,
+    insertHints,
+    updateChallenge,
+    upsertEmbedding,
+  };
+}
+
+export const adminRepository = createAdminRepository();
+
+export type { ChallengeRow as ChallengeEmbeddingRow } from "./types";

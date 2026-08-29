@@ -7,7 +7,6 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { z } from "zod";
 import { adminRole, userRole } from "@/db/schema/roles";
 import { users } from "@/features/auth/schema";
 
@@ -51,24 +50,5 @@ export const profileLinks = pgTable(
   ]
 );
 
-// --- Zod Schemas ---
-export const editProfileSchema = z.object({
-  avatarUrl: z.string().url().or(z.literal("")).optional().nullable(),
-  bio: z.string().max(300).optional().nullable(),
-  displayName: z.string().min(2).max(50),
-  interests: z.array(z.string()).optional(),
-  isPublic: z.boolean().optional(),
-  jobTitle: z.string().max(100).optional().nullable(),
-  preferredColor: z.string().max(30).optional().nullable(),
-  username: z
-    .string()
-    .min(3)
-    .max(30)
-    .regex(/^[a-zA-Z0-9_]+$/, {
-      message: "Username can only contain letters, numbers, and underscores",
-    }),
-});
-
-export type EditProfileInput = z.infer<typeof editProfileSchema>;
 export type ProfileLinkSelect = typeof profileLinks.$inferSelect;
 export type ProfileLinkInsert = typeof profileLinks.$inferInsert;

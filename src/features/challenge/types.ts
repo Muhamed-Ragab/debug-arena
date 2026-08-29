@@ -1,3 +1,74 @@
+import type * as schema from "@/db/schema";
+
+export type ChallengeRow = typeof schema.challenges.$inferSelect;
+export type HintRow = typeof schema.hints.$inferSelect;
+export type SubmissionRow = typeof schema.submissions.$inferSelect;
+export type CategoryRow = typeof schema.categories.$inferSelect;
+export type UserRow = typeof schema.users.$inferSelect;
+
+export interface PublishedChallengeDTO {
+  buggyArtifact: ChallengeRow["buggyArtifact"];
+  categoryId: ChallengeRow["categoryId"];
+  categoryName: CategoryRow["name"];
+  categorySlug: CategoryRow["slug"];
+  createdAt: ChallengeRow["createdAt"];
+  difficulty: ChallengeRow["difficulty"];
+  format: ChallengeRow["format"];
+  hints: HintRow[];
+  id: ChallengeRow["id"];
+  preventionNotes: ChallengeRow["preventionNotes"];
+  prompt: ChallengeRow["prompt"];
+  referenceFix: ChallengeRow["referenceFix"];
+  rootCauseSummary: ChallengeRow["rootCauseSummary"];
+  status: ChallengeRow["status"];
+  submissions: SubmissionRow[];
+  title: ChallengeRow["title"];
+}
+
+export interface ChallengeDetailDTO {
+  buggyArtifact: ChallengeRow["buggyArtifact"];
+  categoryId: ChallengeRow["categoryId"];
+  categoryName: CategoryRow["name"];
+  categorySlug: CategoryRow["slug"];
+  createdAt: ChallengeRow["createdAt"];
+  difficulty: ChallengeRow["difficulty"];
+  format: ChallengeRow["format"];
+  hints: HintRow[];
+  id: ChallengeRow["id"];
+  preventionNotes: ChallengeRow["preventionNotes"];
+  prompt: ChallengeRow["prompt"];
+  referenceFix: ChallengeRow["referenceFix"];
+  rootCauseSummary: ChallengeRow["rootCauseSummary"];
+  status: ChallengeRow["status"];
+  title: ChallengeRow["title"];
+}
+
+export type SubmissionWithRelations = SubmissionRow & {
+  challenge: ChallengeRow & { category: CategoryRow };
+  user: UserRow;
+};
+
+export interface UserChallengeStatsData {
+  totalPublishedCount: number;
+  user: (UserRow & { submissions: SubmissionRow[] }) | null;
+}
+
+export interface ChallengeRepository {
+  findById: (id: string) => Promise<ChallengeDetailDTO | null>;
+  findChallengeByIdForDetail: (
+    id: string
+  ) => Promise<(ChallengeDetailDTO & { submissions: SubmissionRow[] }) | null>;
+  findHintsByChallengeId: (id: string) => Promise<HintRow[]>;
+  findPublished: () => Promise<PublishedChallengeDTO[]>;
+  findSubmissionById: (id: string) => Promise<SubmissionWithRelations | null>;
+  findUserChallengeStatsData: (
+    userId: string
+  ) => Promise<UserChallengeStatsData>;
+  insertSubmission: (
+    data: typeof schema.submissions.$inferInsert
+  ) => Promise<SubmissionRow>;
+}
+
 export type RightTab = "explain" | "fix" | "hints";
 
 export type DiffLineType = "ctx" | "add" | "del";

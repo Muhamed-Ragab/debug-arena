@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   Bar,
   BarChart,
@@ -11,10 +12,11 @@ import {
 import type { StrengthPoint } from "../types";
 
 export function SolvedByDifficultyChart({ data }: { data: StrengthPoint[] }) {
+  const t = useTranslations();
   return (
     <div className="rounded-lg border border-border bg-card p-5">
       <p className="mb-4 font-mono text-[11px] text-muted-foreground uppercase tracking-widest">
-        Solved by difficulty
+        {t("profile.charts.solvedByDifficulty")}
       </p>
       <ResponsiveContainer height={220} width="100%">
         <BarChart barCategoryGap="30%" barSize={16} data={data}>

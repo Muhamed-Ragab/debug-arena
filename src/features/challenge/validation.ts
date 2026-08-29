@@ -11,3 +11,7 @@ export const submitChallengeSchema = z.object({
   solutionExplanation: z.string().optional(),
   timeSpentSeconds: z.number().int().min(0).default(60),
 });
+
+export const submitChallengeOutputSchema = z
+  .object({ success: z.boolean() })
+  .passthrough();

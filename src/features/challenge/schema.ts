@@ -15,6 +15,10 @@ import {
 } from "drizzle-orm/pg-core";
 import { adminRole, EMBEDDING_DIM, userRole } from "@/db/schema/roles";
 import { users } from "@/features/auth/schema";
+import { categories } from "@/features/category/schema";
+
+// Re-export for backward compatibility
+export { categories };
 
 // --- Enums ---
 export const challengeFormatEnum = pgEnum("challenge_format", [
@@ -37,30 +41,6 @@ export const challengeSourceEnum = pgEnum("challenge_source", [
 
 export const difficultyEnum = pgEnum("difficulty", ["easy", "medium", "hard"]);
 
-// --- categories ---
-export const categories = pgTable(
-  "categories",
-  {
-    description: text("description"),
-    id: uuid("id").primaryKey().defaultRandom(),
-    name: text("name").notNull(),
-    slug: text("slug").notNull().unique(),
-  },
-  (_t) => [
-    pgPolicy("admin_all_categories", {
-      for: "all",
-      to: adminRole,
-      using: sql`true`,
-      withCheck: sql`true`,
-    }),
-    pgPolicy("user_read_categories", {
-      for: "select",
-      to: userRole,
-      using: sql`true`,
-    }),
-  ]
-);
-
 // --- challenges ---
 export const challenges = pgTable(
   "challenges",
@@ -68,7 +48,7 @@ export const challenges = pgTable(
     buggyArtifact: jsonb("buggy_artifact").notNull(),
     categoryId: uuid("category_id")
       .notNull()
-      .references(() => categories.id),
+      .references(() => categories.id, { onDelete: "restrict" }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

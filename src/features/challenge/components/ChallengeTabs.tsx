@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import type { HintItem } from "@/features/challenge/types";
 import { cn } from "@/lib/utils";
@@ -37,6 +40,11 @@ export function ChallengeTabs({
   solution,
   toggleHint,
 }: Props) {
+  const t = useTranslations();
+  // Seed tab literals for extraction
+  t("challenge.tabs.explain");
+  t("challenge.tabs.fix");
+  t("challenge.tabs.hints");
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-surface">
       <div className="flex border-border border-b">
@@ -54,7 +62,7 @@ export function ChallengeTabs({
             type="button"
             variant="ghost"
           >
-            {tab}
+            {t(tab as string)}
           </Button>
         ))}
       </div>

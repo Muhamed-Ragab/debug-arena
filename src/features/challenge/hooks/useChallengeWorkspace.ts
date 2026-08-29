@@ -276,10 +276,8 @@ export function useChallengeWorkspace(
       if (!handled) {
         setError("Failed to submit challenge. Please try again.");
       }
-    } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Failed to submit challenge";
-      setError(msg);
+    } catch {
+      setError("Something went wrong");
     } finally {
       setIsSubmitting(false);
     }

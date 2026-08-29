@@ -1,3 +1,5 @@
+"use client";
+
 import {
   AlertTriangle,
   CheckCircle2,
@@ -5,6 +7,7 @@ import {
   Sparkles,
   XCircle,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { EvaluationDetails } from "../types";
 
@@ -23,6 +26,7 @@ export function ExplanationComparison({
   aiFeedback,
   evaluationDetails,
 }: Props) {
+  const t = useTranslations();
   const isCorrect = evaluationDetails?.isCorrect;
   const needsEnhancement = evaluationDetails?.needsEnhancement;
   const enhancementSuggestions =
@@ -34,14 +38,14 @@ export function ExplanationComparison({
     <div className="space-y-4">
       <div>
         <p className="mb-3 font-mono text-[11px] text-muted-foreground uppercase tracking-widest">
-          Diagnosis & Solution comparison
+          {t("results.comparison.title")}
         </p>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-3 rounded-lg border border-border bg-card p-4">
             <div>
               <div className="mb-1.5 flex items-center justify-between">
                 <p className="font-mono text-[11px] text-muted-foreground uppercase tracking-wide">
-                  Your root cause diagnosis
+                  {t("results.comparison.yourDiagnosis")}
                 </p>
                 {isCorrect !== undefined && (
                   <span
@@ -54,11 +58,13 @@ export function ExplanationComparison({
                   >
                     {isCorrect ? (
                       <>
-                        <CheckCircle2 size={12} /> Correct Diagnosis
+                        <CheckCircle2 size={12} />{" "}
+                        {t("results.comparison.correctDiagnosis")}
                       </>
                     ) : (
                       <>
-                        <XCircle size={12} /> Incorrect Mechanism
+                        <XCircle size={12} />{" "}
+                        {t("results.comparison.incorrectMechanism")}
                       </>
                     )}
                   </span>
@@ -71,7 +77,7 @@ export function ExplanationComparison({
             {Boolean(userSolution) && (
               <div className="border-border border-t pt-3">
                 <p className="mb-1.5 font-mono text-[11px] text-muted-foreground uppercase tracking-wide">
-                  Your proposed solution
+                  {t("results.comparison.yourSolution")}
                 </p>
                 <p className="text-[13px] text-foreground leading-relaxed">
                   {userSolution}
@@ -82,7 +88,7 @@ export function ExplanationComparison({
 
           <div className="rounded-lg border border-emerald-500/30 bg-card p-4">
             <p className="mb-2.5 font-mono text-[11px] text-emerald-400 uppercase tracking-wide">
-              Canonical root cause
+              {t("results.comparison.canonicalRootCause")}
             </p>
             <p className="text-[13px] text-foreground leading-relaxed">
               {canonical}
@@ -97,18 +103,21 @@ export function ExplanationComparison({
           <div className="flex items-center gap-2">
             <Sparkles className="text-primary" size={16} />
             <p className="font-medium font-mono text-[12px] text-primary uppercase tracking-wide">
-              LLM Mentor Evaluation & Feedback
+              {t("results.comparison.mentorFeedback")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {Boolean(needsEnhancement) && (
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-0.5 font-medium text-[11px] text-amber-400">
-                <AlertTriangle size={12} /> Needs Enhancement
+                <AlertTriangle size={12} />{" "}
+                {t("results.comparison.needsEnhancement")}
               </span>
             )}
             {evaluationDetails?.alignmentPercent !== undefined && (
               <span className="rounded-full bg-primary/15 px-2 py-0.5 font-mono text-[11px] text-primary">
-                {evaluationDetails.alignmentPercent}% alignment
+                {t("results.comparison.percentAlignment", {
+                  percent: evaluationDetails.alignmentPercent,
+                })}
               </span>
             )}
           </div>
@@ -124,7 +133,7 @@ export function ExplanationComparison({
             <div className="mb-2 flex items-center gap-1.5 text-amber-400">
               <Lightbulb size={14} />
               <p className="font-medium font-mono text-[11px] uppercase tracking-wide">
-                Enhancement Recommendations
+                {t("results.comparison.recommendations")}
               </p>
             </div>
             <ul className="space-y-1.5 text-[12px] text-muted-foreground">
@@ -147,7 +156,7 @@ export function ExplanationComparison({
             {keyConcepts.length > 0 && (
               <div className="rounded-md border border-border/60 bg-card/60 p-3">
                 <p className="mb-2 font-mono text-[11px] text-emerald-400 uppercase tracking-wide">
-                  Key Concepts Identified
+                  {t("results.comparison.keyConcepts")}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {keyConcepts.map((concept) => (
@@ -164,7 +173,7 @@ export function ExplanationComparison({
             {missedMechanisms.length > 0 && (
               <div className="rounded-md border border-border/60 bg-card/60 p-3">
                 <p className="mb-2 font-mono text-[11px] text-rose-400 uppercase tracking-wide">
-                  Missed Mechanisms
+                  {t("results.comparison.missedMechanisms")}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {missedMechanisms.map((missed) => (

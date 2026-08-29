@@ -1,14 +1,25 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { getRedis } from "@/lib/redis";
 import { ActionError, authActionClient } from "@/lib/safe-action";
 import { profileRepository } from "./repository";
-import { editProfileSchema } from "./schema";
+import {
+  deleteAccountOutputSchema,
+  deleteAccountSchema,
+  editProfileOutputSchema,
+  editProfileSchema,
+  revokeAllOtherSessionsOutputSchema,
+  revokeAllOtherSessionsSchema,
+  revokeSessionOutputSchema,
+  revokeSessionSchema,
+  unlinkAccountOutputSchema,
+  unlinkAccountSchema,
+} from "./validation";
 
 export const updateProfileAction = authActionClient
   .inputSchema(editProfileSchema)
+  .outputSchema(editProfileOutputSchema)
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.user.id;
     const updated = await profileRepository.updateUser(userId, {
@@ -45,12 +56,9 @@ export const updateProfileAction = authActionClient
     };
   });
 
-const unlinkAccountSchema = z.object({
-  providerId: z.string(),
-});
-
 export const unlinkAccountAction = authActionClient
   .inputSchema(unlinkAccountSchema)
+  .outputSchema(unlinkAccountOutputSchema)
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.user.id;
     // biome-ignore lint/correctness/noUnusedVariables: providerId validated by zod schema
@@ -74,12 +82,9 @@ export const unlinkAccountAction = authActionClient
     return { success: true };
   });
 
-const revokeSessionSchema = z.object({
-  sessionId: z.string(),
-});
-
 export const revokeSessionAction = authActionClient
   .inputSchema(revokeSessionSchema)
+  .outputSchema(revokeSessionOutputSchema)
   .action(async ({ parsedInput }) => {
     const { sessionId } = parsedInput;
     try {
@@ -97,8 +102,10 @@ export const revokeSessionAction = authActionClient
     return { success: true };
   });
 
-export const revokeAllOtherSessionsAction = authActionClient.action(
-  async ({ ctx }) => {
+export const revokeAllOtherSessionsAction = authActionClient
+  .inputSchema(revokeAllOtherSessionsSchema)
+  .outputSchema(revokeAllOtherSessionsOutputSchema)
+  .action(async ({ ctx }) => {
     const userId = ctx.user.id;
     try {
       const redis = getRedis();
@@ -115,16 +122,18 @@ export const revokeAllOtherSessionsAction = authActionClient.action(
       console.warn("revalidate outside request");
     }
     return { success: true };
-  }
-);
+  });
 
-export const deleteAccountAction = authActionClient.action(async ({ ctx }) => {
-  const userId = ctx.user.id;
-  await profileRepository.deleteUser(userId);
-  try {
-    revalidatePath("/");
-  } catch {
-    console.warn("revalidate outside request");
-  }
-  return { success: true };
-});
+export const deleteAccountAction = authActionClient
+  .inputSchema(deleteAccountSchema)
+  .outputSchema(deleteAccountOutputSchema)
+  .action(async ({ ctx }) => {
+    const userId = ctx.user.id;
+    await profileRepository.deleteUser(userId);
+    try {
+      revalidatePath("/");
+    } catch {
+      console.warn("revalidate outside request");
+    }
+    return { success: true };
+  });

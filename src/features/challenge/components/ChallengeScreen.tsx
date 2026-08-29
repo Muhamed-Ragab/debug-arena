@@ -1,6 +1,7 @@
 "use client";
 
 import { GripVertical } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
@@ -42,6 +43,7 @@ export function ChallengeScreen({
   diffLines,
   scenarioParagraphs,
 }: Props) {
+  const t = useTranslations();
   const cfg =
     CATEGORY_CONFIG[challenge.category] ?? CATEGORY_CONFIG["React Rendering"];
   const ws = useChallengeWorkspace(challenge.id, onSubmit);
@@ -106,7 +108,7 @@ export function ChallengeScreen({
     >
       <TopBar
         crumbs={[
-          { label: "Challenges", to: "/challenges" },
+          { label: t("common.navigation.challenges"), to: "/challenges" },
           { label: challenge.title },
         ]}
       />
@@ -128,7 +130,7 @@ export function ChallengeScreen({
 
         {/* Left Resize Splitter Handle */}
         <div
-          aria-label="Resize left sidebar"
+          aria-label={t("challenge.a11y.resizeLeft")}
           aria-valuemax={MAX_LEFT_WIDTH}
           aria-valuemin={MIN_LEFT_WIDTH}
           aria-valuenow={leftWidth}
@@ -137,7 +139,7 @@ export function ChallengeScreen({
           onMouseDown={handleLeftMouseDown}
           role="slider"
           tabIndex={0}
-          title="Drag to resize sidebar (Double click to reset)"
+          title={t("challenge.a11y.dragSidebar")}
         >
           <div className="z-10 flex h-6 w-3 items-center justify-center rounded-full bg-card/80 text-muted-foreground opacity-0 shadow-xs transition-opacity group-hover:opacity-100">
             <GripVertical size={10} />
@@ -159,7 +161,7 @@ export function ChallengeScreen({
 
         {/* Right Resize Splitter Handle */}
         <div
-          aria-label="Resize right sidebar"
+          aria-label={t("challenge.a11y.resizeRight")}
           aria-valuemax={MAX_RIGHT_WIDTH}
           aria-valuemin={MIN_RIGHT_WIDTH}
           aria-valuenow={rightWidth}
@@ -168,7 +170,7 @@ export function ChallengeScreen({
           onMouseDown={handleRightMouseDown}
           role="slider"
           tabIndex={0}
-          title="Drag to resize tabs panel (Double click to reset)"
+          title={t("challenge.a11y.dragTabs")}
         >
           <div className="z-10 flex h-6 w-3 items-center justify-center rounded-full bg-card/80 text-muted-foreground opacity-0 shadow-xs transition-opacity group-hover:opacity-100">
             <GripVertical size={10} />
@@ -198,7 +200,7 @@ export function ChallengeScreen({
               className="border-destructive/20 border-t bg-destructive/10 px-4 py-2.5 text-destructive text-xs leading-relaxed"
               role="alert"
             >
-              {ws.error}
+              {t(ws.error as string)}
             </div>
           ) : null}
           {ws.fieldErrors?.localizationLines?.[0] ? (
@@ -206,7 +208,7 @@ export function ChallengeScreen({
               className="bg-destructive/10 px-4 py-2 text-destructive text-xs"
               role="alert"
             >
-              {ws.fieldErrors.localizationLines[0]}
+              {t(ws.fieldErrors.localizationLines[0] as string)}
             </div>
           ) : null}
           <SubmitBar

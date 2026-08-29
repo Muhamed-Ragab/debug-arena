@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -19,6 +22,7 @@ export function ExplainPanel({
   setSolution,
   solution = "",
 }: Props) {
+  const t = useTranslations();
   const rootCauseError = fieldErrors?.rootCauseExplanation?.[0];
 
   return (
@@ -28,11 +32,10 @@ export function ExplainPanel({
           className="font-medium font-mono text-[11px] text-muted-foreground uppercase tracking-wider"
           htmlFor="root-cause-input"
         >
-          1. Root Cause Diagnosis
+          {t("challenge.explainPanel.rootCauseTitle")}
         </Label>
         <p className="text-[11.5px] text-muted-foreground leading-relaxed">
-          Describe the underlying failure mechanism. What is broken and why does
-          it fail?
+          {t("challenge.explainPanel.rootCauseDescription")}
         </p>
         <Textarea
           aria-invalid={Boolean(rootCauseError)}
@@ -43,12 +46,12 @@ export function ExplainPanel({
           )}
           id="root-cause-input"
           onChange={(e) => setExplanation(e.target.value)}
-          placeholder="The bug occurs because..."
+          placeholder={t("challenge.explainPanel.rootCausePlaceholder")}
           value={explanation}
         />
         {rootCauseError ? (
           <p className="font-medium text-[12px] text-destructive" role="alert">
-            {rootCauseError}
+            {t(rootCauseError as string)}
           </p>
         ) : null}
       </div>
@@ -59,16 +62,16 @@ export function ExplainPanel({
           className="font-medium font-mono text-[11px] text-muted-foreground uppercase tracking-wider"
           htmlFor="solution-input"
         >
-          2. Proposed Solution & Fix
+          {t("challenge.explainPanel.solutionTitle")}
         </Label>
         <p className="text-[11.5px] text-muted-foreground leading-relaxed">
-          Describe how you would resolve this bug and prevent regressions.
+          {t("challenge.explainPanel.solutionDescription")}
         </p>
         <Textarea
           className="min-h-35 bg-card p-3 text-[13px] leading-relaxed"
           id="solution-input"
           onChange={(e) => setSolution?.(e.target.value)}
-          placeholder="To fix this, we should change..."
+          placeholder={t("challenge.explainPanel.solutionPlaceholder")}
           value={solution}
         />
       </div>

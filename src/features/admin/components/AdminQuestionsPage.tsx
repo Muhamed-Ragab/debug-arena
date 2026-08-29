@@ -1,8 +1,8 @@
 "use client";
 
-import { useLingui } from "@lingui/react";
 import { Bot, FilePlus, FileText, Layers, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ export function AdminQuestionsPage({
   categories,
   challenges,
 }: AdminQuestionsPageProps) {
-  const { i18n } = useLingui();
+  const t = useTranslations();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"studio" | "manual" | "list">(
     "studio"
@@ -76,16 +76,14 @@ export function AdminQuestionsPage({
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="font-bold text-2xl text-heading tracking-tight">
-                {i18n._("Challenge & Question Studio")}
+                {t("admin.studio.title")}
               </h1>
               <Badge className="font-bold text-xs uppercase" variant="default">
-                {i18n._("Admin")}
+                {t("admin.header.admin")}
               </Badge>
             </div>
             <p className="text-muted-foreground text-sm">
-              {i18n._(
-                "Generate with AI or manually author debugging challenges with automated diff calculations, formatted code blocks, and Socratic guidance."
-              )}
+              {t("admin.studio.subtitle")}
             </p>
           </div>
 
@@ -93,20 +91,22 @@ export function AdminQuestionsPage({
           <div className="flex flex-wrap items-center gap-2">
             <Badge className="gap-1.5 px-3 py-1.5 text-xs" variant="outline">
               <Layers className="text-muted-foreground" size={14} />
-              <span className="text-muted-foreground">{i18n._("Total:")}</span>
+              <span className="text-muted-foreground">
+                {t("admin.stats.total")}
+              </span>
               <span className="font-bold text-heading">{totalChallenges}</span>
             </Badge>
             <Badge className="gap-1.5 px-3 py-1.5 text-xs" variant="default">
               <Bot size={14} />
-              <span>{i18n._("AI Synthesized:")}</span>
+              <span>{t("admin.stats.aiSynthesized")}</span>
               <span className="font-bold">{aiGeneratedCount}</span>
             </Badge>
             <Badge className="gap-1.5 px-3 py-1.5 text-xs" variant="success">
-              <span>{i18n._("Published:")}</span>
+              <span>{t("admin.stats.published")}</span>
               <span className="font-bold">{publishedCount}</span>
             </Badge>
             <Badge className="gap-1.5 px-3 py-1.5 text-xs" variant="warning">
-              <span>{i18n._("Drafts:")}</span>
+              <span>{t("admin.stats.drafts")}</span>
               <span className="font-bold">{draftCount}</span>
             </Badge>
           </div>
@@ -121,7 +121,7 @@ export function AdminQuestionsPage({
             variant={activeTab === "studio" ? "default" : "ghost"}
           >
             <Sparkles size={16} />
-            {i18n._("AI Question Generator")}
+            {t("admin.studio.aiGenerator")}
           </Button>
           <Button
             className="gap-2"
@@ -130,7 +130,7 @@ export function AdminQuestionsPage({
             variant={activeTab === "manual" ? "default" : "ghost"}
           >
             <FilePlus size={16} />
-            {i18n._("Manual Challenge Authoring")}
+            {t("admin.studio.manualAuthoring")}
           </Button>
           <Button
             className="gap-2"
@@ -139,7 +139,7 @@ export function AdminQuestionsPage({
             variant={activeTab === "list" ? "default" : "ghost"}
           >
             <FileText size={16} />
-            {i18n._("Challenge Management ({count})", {
+            {t("admin.management.title", {
               count: totalChallenges,
             })}
           </Button>

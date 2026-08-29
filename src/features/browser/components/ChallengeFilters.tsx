@@ -1,6 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { type SelectOption, SimpleSelect } from "@/components/ui/select";
 import {
@@ -10,6 +11,24 @@ import {
   DIFFICULTY_ORDER,
 } from "@/lib/domain/categories";
 import type { Category, Difficulty } from "@/lib/domain/types";
+
+const CATEGORY_KEY_MAP: Record<string, string> = {
+  "Backend Concurrency": "category.names.backendConcurrency",
+  "Logic Inversions": "category.names.logicInversions",
+  "Memory Leaks": "category.names.memoryLeaks",
+  "Off-by-One": "category.names.offByOne",
+  "Race Conditions": "category.names.raceConditions",
+  "React Rendering": "category.names.reactRendering",
+  "Security Flaws": "category.names.securityFlaws",
+  "State Mutations": "category.names.stateMutations",
+};
+
+const DIFFICULTY_KEY_MAP: Record<string, string> = {
+  Easy: "difficulty.easy",
+  Expert: "difficulty.expert",
+  Hard: "difficulty.hard",
+  Medium: "difficulty.medium",
+};
 
 interface Props {
   category: Category | "all";
@@ -28,20 +47,21 @@ export function ChallengeFilters({
   difficulty,
   onDifficulty,
 }: Props) {
+  const t = useTranslations();
   const categoryOptions: SelectOption[] = [
-    { label: "All Categories", value: "all" },
+    { label: t("browser.filters.allCategories"), value: "all" },
     ...CATEGORY_ORDER.map((c) => ({
       indicatorColor: CATEGORY_CONFIG[c]?.color,
-      label: CATEGORY_CONFIG[c]?.label || c,
+      label: t(CATEGORY_KEY_MAP[c] ?? c),
       value: c,
     })),
   ];
 
   const difficultyOptions: SelectOption[] = [
-    { label: "All Levels", value: "all" },
+    { label: t("browser.filters.allLevels"), value: "all" },
     ...DIFFICULTY_ORDER.map((d) => ({
       indicatorColor: DIFFICULTY_CONFIG[d]?.color,
-      label: d,
+      label: t(DIFFICULTY_KEY_MAP[d] ?? d),
       value: d,
     })),
   ];
@@ -57,7 +77,7 @@ export function ChallengeFilters({
         <Input
           className="bg-card ps-10 pe-4"
           onChange={(e) => onSearch(e.target.value)}
-          placeholder="Search challenges..."
+          placeholder={t("browser.filters.search")}
           value={search}
         />
       </div>
@@ -68,7 +88,7 @@ export function ChallengeFilters({
           <SimpleSelect
             onValueChange={(val) => onCategory(val as Category | "all")}
             options={categoryOptions}
-            placeholder="Select Category"
+            placeholder={t("browser.filters.selectCategory")}
             value={category}
           />
         </div>
@@ -77,7 +97,7 @@ export function ChallengeFilters({
           <SimpleSelect
             onValueChange={(val) => onDifficulty(val as Difficulty | "all")}
             options={difficultyOptions}
-            placeholder="Select Level"
+            placeholder={t("browser.filters.selectLevel")}
             value={difficulty}
           />
         </div>

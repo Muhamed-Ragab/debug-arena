@@ -1,7 +1,8 @@
 import { generateText, Output } from "ai";
 import { getAIModel } from "@/lib/ai/client";
-import { AI_PRIMARY_MODEL } from "@/lib/ai/constants";
+import { AI_PRIMARY_MODEL, REQUEST_TIMEOUT_MS } from "@/lib/ai/constants";
 import { env } from "@/lib/env/env";
+import { ActionError } from "@/lib/safe-action/errors";
 import type {
   ChallengeFile,
   ChallengeHint,
@@ -58,7 +59,7 @@ function processMismatch(
 
   if (lookAheadFixed !== -1) {
     for (let k = 0; k < lookAheadFixed; k += 1) {
-      diff.push({ text: fixedLines[j], type: "add" });
+      diff.push({ line: j + 1, text: fixedLines[j], type: "add" });
       j += 1;
     }
     return [i, j];
@@ -70,7 +71,7 @@ function processMismatch(
   }
 
   if (hasFixed) {
-    diff.push({ text: fixedLines[j], type: "add" });
+    diff.push({ line: j + 1, text: fixedLines[j], type: "add" });
     j += 1;
   }
 
@@ -348,21 +349,43 @@ CRITICAL REQUIREMENTS:
 - Target Points: ${promptPoints}
 - Target Time Limit: ${promptTimeLimit}`;
 
-    const { output } = await generateText({
-      model,
-      output: Output.object({
-        schema: rawLlmChallengeSchema,
-      }),
-      prompt: userPrompt,
-      system: systemPrompt,
-      temperature: 0.4,
-    });
-
-    return normalizeChallengeDraft(
-      output,
-      params.categorySlug,
-      params.difficulty
+    const controller = new AbortController();
+    const timeout = setTimeout(
+      () => controller.abort(),
+      REQUEST_TIMEOUT_MS * 2
     );
+    try {
+      const { output } = await generateText({
+        abortSignal: controller.signal,
+        model,
+        output: Output.object({
+          schema: rawLlmChallengeSchema,
+        }),
+        prompt: userPrompt,
+        system: systemPrompt,
+        temperature: 0.4,
+      });
+      return normalizeChallengeDraft(
+        output,
+        params.categorySlug,
+        params.difficulty
+      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      // Surface model deprecation clearly instead of crashing dev
+      if (
+        msg.includes("model_not_found") ||
+        msg.includes("decommissioned") ||
+        msg.includes("does not exist")
+      ) {
+        const modelErrorMessage = `AI model "${AI_PRIMARY_MODEL}" is unavailable (decommissioned). Update src/lib/ai/constants.ts to a current Groq model. Original: ${msg}`;
+        const cause = err instanceof Error ? err : new Error(String(err));
+        throw new ActionError(modelErrorMessage, { cause });
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeout);
+    }
   };
 };
 
@@ -393,21 +416,30 @@ ADMIN REFINEMENT INSTRUCTION:
 
 Apply the instruction and output the refined challenge draft.`;
 
-    const { output } = await generateText({
-      model,
-      output: Output.object({
-        schema: rawLlmChallengeSchema,
-      }),
-      prompt: userPrompt,
-      system: systemPrompt,
-      temperature: 0.3,
-    });
-
-    return normalizeChallengeDraft(
-      output,
-      params.currentDraft.categorySlug,
-      params.currentDraft.difficulty
+    const controller = new AbortController();
+    const timeout = setTimeout(
+      () => controller.abort(),
+      REQUEST_TIMEOUT_MS * 2
     );
+    try {
+      const { output } = await generateText({
+        abortSignal: controller.signal,
+        model,
+        output: Output.object({
+          schema: rawLlmChallengeSchema,
+        }),
+        prompt: userPrompt,
+        system: systemPrompt,
+        temperature: 0.3,
+      });
+      return normalizeChallengeDraft(
+        output,
+        params.currentDraft.categorySlug,
+        params.currentDraft.difficulty
+      );
+    } finally {
+      clearTimeout(timeout);
+    }
   };
 };
 

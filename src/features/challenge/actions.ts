@@ -1,12 +1,16 @@
 "use server";
 import { authActionClient } from "@/lib/safe-action";
-import { submitChallenge } from "./service";
-import { submitChallengeSchema } from "./validations";
+import { challengeService } from "./service";
+import {
+  submitChallengeOutputSchema,
+  submitChallengeSchema,
+} from "./validation";
 
 export const submitChallengeAction = authActionClient
   .inputSchema(submitChallengeSchema)
+  .outputSchema(submitChallengeOutputSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const result = await submitChallenge({
+    const result = await challengeService.submitChallenge({
       challengeId: parsedInput.challengeId,
       hintsRevealedCount: parsedInput.hintsRevealedCount ?? 0,
       localizationLines: parsedInput.localizationLines ?? [],
@@ -16,5 +20,5 @@ export const submitChallengeAction = authActionClient
       timeSpentSeconds: parsedInput.timeSpentSeconds ?? 60,
       userId: ctx.user.id,
     });
-    return result;
+    return { ...result, success: true };
   });

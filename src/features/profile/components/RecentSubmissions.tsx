@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { CategoryTag } from "@/components/shared/CategoryTag";
 import type { RecentSubmission } from "../types";
 
@@ -17,26 +20,26 @@ export function RecentSubmissions({
 }: {
   items: (RecentSubmission & { id?: string; submittedAt?: string })[];
 }) {
+  const t = useTranslations();
   return (
     <div>
       <p className="mb-3 font-mono text-[11px] text-muted-foreground uppercase tracking-widest">
-        Recent submissions
+        {t("profile.recent.title")}
       </p>
 
       {items.length === 0 ? (
         <div className="rounded-lg border border-border bg-card/40 p-8 text-center">
           <p className="font-medium text-foreground text-sm">
-            No submissions yet
+            {t("profile.recent.empty")}
           </p>
           <p className="mt-1 text-muted-foreground text-xs">
-            Solve a challenge in the arena to track your debugging diagnostic
-            history.
+            {t("profile.recent.emptyHint")}
           </p>
           <Link
             className="mt-4 inline-flex items-center rounded-md bg-primary px-3.5 py-1.5 font-medium text-primary-foreground text-xs transition-colors hover:bg-primary/90"
             href="/challenges"
           >
-            Explore Challenges
+            {t("profile.recent.explore")}
           </Link>
         </div>
       ) : (

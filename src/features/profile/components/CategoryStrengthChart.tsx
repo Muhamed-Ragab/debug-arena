@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -11,10 +12,11 @@ import {
 import type { RadarPoint } from "../types";
 
 export function CategoryStrengthChart({ data }: { data: RadarPoint[] }) {
+  const t = useTranslations();
   return (
     <div className="rounded-lg border border-border bg-card p-5">
       <p className="mb-4 font-mono text-[11px] text-muted-foreground uppercase tracking-widest">
-        Category strength
+        {t("profile.charts.categoryStrength")}
       </p>
       <ResponsiveContainer height={220} width="100%">
         <RadarChart data={data}>

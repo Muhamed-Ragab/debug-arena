@@ -4,7 +4,7 @@
 Handles the core debugging challenge lifecycle: browsing published challenges, viewing detail with artifacts, and submitting solutions for grading via sandbox + AI evaluation.
 
 ## How it works
-`page.tsx` (challenges, challenges/[id]) → `service.ts` (`getPublishedChallengesMapped`, `getChallengeByIdMapped`, `getUserChallengeStats`, `submitChallenge` 9-step) → `repository.ts` (`findPublished`, `findById`, `findSubmissionById`, `insertSubmission`, `findHintsByChallengeId`, `findUserChallengeStatsData`) → `db` (Drizzle `challenges`, `submissions`, `hints`). Client `ChallengeScreen` ← `useChallengeWorkspace` hook ← `submitChallengeAction` (facade).
+`page.tsx` (challenges, challenges/[id]) → `service.ts` (`getPublishedChallenges`, `getChallengeById`, `getUserChallengeStats`, `submitChallenge` 9-step) → `repository.ts` (`findPublished`, `findById`, `findSubmissionById`, `insertSubmission`, `findHintsByChallengeId`, `findUserChallengeStatsData`) → `db` (Drizzle `challenges`, `submissions`, `hints`). Client `ChallengeScreen` ← `useChallengeWorkspace` hook ← `submitChallengeAction` (facade).
 
 ## File map
 | File | Role |
@@ -12,16 +12,18 @@ Handles the core debugging challenge lifecycle: browsing published challenges, v
 | `repository.ts` | Data access only, `server-only`, thin DTO mapping |
 | `service.ts` | Business, DIP via repo param, `isSolved`, `calcRatingDelta`, `DIFFICULTY_LABEL` map |
 | `constants.ts` | `SEED_CATEGORIES`, `DIFFICULTY_LABEL`, `STATUS_LABEL` |
-| `types.ts` | `RightTab`, `DiffLine`, `FileTreeNode`, `AIEvaluationResult`, `HintItem`, `SubmitChallengeInput`, `UserChallengeStats` |
+| `types.ts` | ALL types (row aliases `ChallengeRow`/`HintRow`, DTOs `PublishedChallengeDTO`, `ChallengeRepository`, `RightTab`, `DiffLine`, `SubmitChallengeInput`, `UserChallengeStats`) |
+| `validation.ts` | Zod `submitChallengeSchema` + `submitChallengeOutputSchema` (passthrough) |
+| `schema.ts` | Drizzle `challenges`, `hints`, `submissions`, `challengeEmbeddings` |
 | `utils/` | Helpers re-exported via service if >300 lines |
 | `hooks/useChallengeWorkspace.ts` | Client state, validation, calls `submitChallengeAction` |
 | `components/ChallengeScreen.tsx` | Pure presentational (resize via hook) |
-| `queries.ts` / `actions.ts` | Thin facades re-exporting service/repository |
+| `actions.ts` | Facade `authActionClient.inputSchema().outputSchema()` → `challengeService.method` |
 | `lib/grading.ts, ai-evaluator.ts, sandbox.ts, embedding.ts` | Pure vs side-effect separated |
 
 ## Data flow
 ```
-page.tsx (server) → service.getPublishedChallengesMapped() → repository.findPublished() → db.query.challenges.findMany
+page.tsx (server) → service.getPublishedChallenges() → repository.findPublished() → db.query.challenges.findMany
 page.tsx → ChallengeScreen (client, pure props) ← useChallengeWorkspace → submitChallengeAction → service.submitChallenge → repository.insertSubmission → invalidateLeaderboardCache → revalidatePath
 ```
 
@@ -38,6 +40,8 @@ page.tsx → ChallengeScreen (client, pure props) ← useChallengeWorkspace → 
 ## Conventions
 - Flat `repository.ts`/`service.ts` at feature root, no `repositories/`/`services/` folders.
 - `import "server-only"` in every repository.
-- Facades `queries.ts`/`actions.ts` re-export from `./repository`/`./service`.
+- `createXRepository(db = db)` / `createXService(repo = xRepository)` factories, no `Impl` suffix, shorthand return, singleton-only `export const xService = createXService(xRepository)` + `xService.method`.
+- `validation.ts` singular Zod-only (`*InputSchema` + `*OutputSchema` passthrough), `schema.ts` Drizzle-only, `types.ts` holds ALL types.
+- Actions chain `.inputSchema().outputSchema()` via `validation.ts`.
 - Use object maps for enum lookups (`DIFFICULTY_LABEL`), prefer `switch` for discriminant ≥3 branches.
 - See `docs/architecture.md` for layered diagram.

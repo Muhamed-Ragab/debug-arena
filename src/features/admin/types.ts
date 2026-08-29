@@ -1,3 +1,45 @@
+import type * as schema from "@/db/schema";
+
+export type ChallengeRow = typeof schema.challenges.$inferSelect;
+export type HintRow = typeof schema.hints.$inferSelect;
+export type SubmissionRow = typeof schema.submissions.$inferSelect;
+export type CategoryRow = typeof schema.categories.$inferSelect;
+export type ChallengeEmbeddingRow =
+  typeof schema.challengeEmbeddings.$inferSelect;
+
+export type AdminChallengeRow = ChallengeRow & {
+  category: CategoryRow;
+  hints: HintRow[];
+  submissions: SubmissionRow[];
+};
+
+export type AdminChallengeDetailRow = ChallengeRow & {
+  category: CategoryRow;
+  hints: HintRow[];
+  submissions: SubmissionRow[];
+};
+
+export interface AdminRepository {
+  deleteChallengeCascade: (challengeId: string) => Promise<void>;
+  deleteHintsByChallengeId: (challengeId: string) => Promise<void>;
+  findCategories: () => Promise<CategoryRow[]>;
+  findChallengeById: (id: string) => Promise<AdminChallengeDetailRow | null>;
+  findChallenges: () => Promise<AdminChallengeRow[]>;
+  insertChallenge: (
+    data: typeof schema.challenges.$inferInsert
+  ) => Promise<ChallengeRow>;
+  insertHints: (hints: (typeof schema.hints.$inferInsert)[]) => Promise<void>;
+  updateChallenge: (
+    id: string,
+    data: Partial<typeof schema.challenges.$inferInsert>
+  ) => Promise<void>;
+  upsertEmbedding: (
+    challengeId: string,
+    content: string,
+    embedding: (typeof schema.challengeEmbeddings.$inferInsert)["embedding"]
+  ) => Promise<void>;
+}
+
 export interface AdminChallengeItem {
   buggyArtifact: unknown;
   categoryId: string;
