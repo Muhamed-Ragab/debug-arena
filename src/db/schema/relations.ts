@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { accounts, loginAttempts, users } from "@/features/auth/schema";
+import { categories } from "@/features/category/schema";
 import {
-  categories,
   challengeEmbeddings,
   challenges,
   hints,

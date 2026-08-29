@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { eq } from "drizzle-orm";
-import { SEED_CATEGORIES } from "@/features/challenge/constants";
+import { eq, sql } from "drizzle-orm";
+import { SEED_CATEGORIES } from "@/features/category/constants";
 import { SEED_CHALLENGES } from "@/features/challenge/data/challenges.seed";
 import { generateDeterministicEmbedding } from "@/features/challenge/lib/embedding";
 import { auth } from "@/lib/auth";
@@ -56,29 +56,41 @@ async function seedAdmin() {
 async function main() {
   console.log("🌱 Seeding database with categories and challenges...");
 
-  // 1. Seed Categories
-  const categoryMap = new Map<string, string>();
+  // 1. Seed Categories — idempotent upsert on slug
+  const categorySeedData = SEED_CATEGORIES.map((cat) => ({
+    color: cat.color,
+    description: cat.description,
+    icon: cat.icon,
+    isActive: cat.isActive,
+    name: cat.name,
+    slug: cat.slug,
+    sortOrder: cat.sortOrder,
+  }));
 
-  for (const cat of SEED_CATEGORIES) {
-    // biome-ignore lint/performance/noAwaitInLoops: sequential category lookup
-    const existing = await db.query.categories.findFirst({
-      where: eq(schema.categories.slug, cat.slug),
+  await db
+    .insert(schema.categories)
+    .values(categorySeedData)
+    .onConflictDoUpdate({
+      set: {
+        color: sql`excluded.color`,
+        description: sql`excluded.description`,
+        icon: sql`excluded.icon`,
+        isActive: sql`excluded.is_active`,
+        name: sql`excluded.name`,
+        sortOrder: sql`excluded.sort_order`,
+      },
+      target: schema.categories.slug,
     });
 
-    if (existing) {
-      categoryMap.set(cat.slug, existing.id);
-      console.log(`  ✓ Category "${cat.name}" exists (${existing.id})`);
-    } else {
-      const [inserted] = await db
-        .insert(schema.categories)
-        .values({
-          description: cat.description,
-          name: cat.name,
-          slug: cat.slug,
-        })
-        .returning();
-      categoryMap.set(cat.slug, inserted.id);
-      console.log(`  + Inserted category "${cat.name}" (${inserted.id})`);
+  const allCategories = await db.query.categories.findMany();
+  const categoryMap = new Map<string, string>();
+  for (const cat of allCategories) {
+    categoryMap.set(cat.slug, cat.id);
+  }
+  for (const cat of SEED_CATEGORIES) {
+    const id = categoryMap.get(cat.slug);
+    if (id) {
+      console.log(`  ✓ Category "${cat.name}" upserted (${id})`);
     }
   }
 
