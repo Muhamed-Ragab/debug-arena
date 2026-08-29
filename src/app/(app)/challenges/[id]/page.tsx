@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ChallengeScreen } from "@/features/challenge/components/ChallengeScreen";
-import { getChallengeById } from "@/features/challenge/queries";
+import { challengeService } from "@/features/challenge/service";
 import type { DiffLine } from "@/features/challenge/types";
 import { getServerSession } from "@/lib/auth/session";
 import type { Category, Challenge, Difficulty } from "@/lib/domain/types";
@@ -14,7 +14,7 @@ export default async function Page({
 }) {
   const { id } = await params;
   const session = await getServerSession();
-  const dbChallenge = await getChallengeById(id);
+  const dbChallenge = await challengeService.getChallengeById(id);
 
   if (
     !dbChallenge ||

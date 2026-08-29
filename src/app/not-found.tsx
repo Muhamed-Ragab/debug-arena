@@ -1,8 +1,12 @@
+"use client";
+
 import { Bug, Home, Terminal } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { buttonVariants } from "@/components/ui/button";
 
 export default function NotFound() {
+  const t = useTranslations();
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background px-4 text-foreground selection:bg-primary/20">
       {/* Background Gradients & Grid */}
@@ -35,7 +39,7 @@ export default function NotFound() {
         {/* Error Badge */}
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-destructive/30 bg-destructive/10 px-3.5 py-1.5 font-mono text-destructive text-xs backdrop-blur-sm">
           <Bug className="animate-pulse" size={14} />
-          <span>{"404 // NULL_POINTER_EXCEPTION"}</span>
+          <span>{t("common.notFound.badge")}</span>
         </div>
 
         {/* Big Glitch-style Heading */}
@@ -43,12 +47,11 @@ export default function NotFound() {
           404
         </h1>
         <h2 className="mt-3 font-semibold text-heading text-xl sm:text-2xl">
-          Page Not Found in the Arena
+          {t("common.notFound.title")}
         </h2>
 
         <p className="mt-3 max-w-md text-muted-foreground text-sm sm:text-base">
-          The breakpoint you set led nowhere. The requested route does not exist
-          or may have been refactored out of production.
+          {t("common.notFound.description")}
         </p>
 
         {/* Terminal / Code Card */}
@@ -61,22 +64,22 @@ export default function NotFound() {
             </div>
             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <Terminal size={12} />
-              <span>debugger.log</span>
+              <span>{t("common.notFound.logfile")}</span>
             </div>
           </div>
           <div className="space-y-1.5 p-4 text-[13px]">
             <p className="text-destructive">
-              <span className="text-muted-foreground">&gt;</span> Error:
-              ROUTE_NOT_FOUND
+              <span className="text-muted-foreground">&gt;</span>{" "}
+              {t("common.notFound.error")}
             </p>
             <p className="text-muted-foreground text-xs">
-              &nbsp;&nbsp;at resolveRoute (debug-arena://router.ts:404:12)
+              {t("common.notFound.stack1")}
             </p>
             <p className="text-muted-foreground text-xs">
-              &nbsp;&nbsp;at handleRequest (debug-arena://server.ts:89:4)
+              {t("common.notFound.stack2")}
             </p>
             <p className="pt-1 text-emerald-500 text-xs">
-              💡 Suggested Fix: Navigate back to the challenge lobby.
+              {t("common.notFound.fix")}
             </p>
           </div>
         </div>
@@ -88,14 +91,14 @@ export default function NotFound() {
             href="/challenges"
           >
             <Bug size={16} />
-            <span>Enter Challenges</span>
+            <span>{t("common.notFound.enterChallenges")}</span>
           </Link>
           <Link
             className={buttonVariants({ size: "default", variant: "outline" })}
             href="/"
           >
             <Home size={16} />
-            <span>Return Home</span>
+            <span>{t("common.notFound.returnHome")}</span>
           </Link>
         </div>
       </div>

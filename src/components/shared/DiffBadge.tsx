@@ -1,6 +1,10 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { DIFFICULTY_CONFIG, type Difficulty } from "@/lib/domain";
 
 export function DiffBadge({ difficulty }: { difficulty: Difficulty }) {
+  const t = useTranslations();
   const c = DIFFICULTY_CONFIG[difficulty];
   return (
     <span
@@ -15,7 +19,7 @@ export function DiffBadge({ difficulty }: { difficulty: Difficulty }) {
         className="h-1.5 w-1.5 rounded-full"
         style={{ backgroundColor: c.color }}
       />
-      {difficulty}
+      {t(difficulty as string)}
     </span>
   );
 }

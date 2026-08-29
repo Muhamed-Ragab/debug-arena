@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { ProfileSettingsPage } from "@/features/profile/ProfileSettingsPage";
-import { getUserSettingsData } from "@/features/profile/queries";
+import { profileService } from "@/features/profile/service";
 import { getServerSession } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +11,9 @@ export default async function Page() {
     redirect("/login");
   }
 
-  const settingsData = await getUserSettingsData(session.user.id);
+  const settingsData = await profileService.getUserSettingsData(
+    session.user.id
+  );
 
   return (
     <ProfileSettingsPage

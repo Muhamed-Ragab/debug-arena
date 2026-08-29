@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
-import { getSubmissionById } from "@/features/challenge/queries";
+import { challengeService } from "@/features/challenge/service";
 import { ResultsScreen } from "@/features/results/components/ResultsScreen";
-import { buildResultsViewModel } from "@/features/results/service";
+import { resultsService } from "@/features/results/service";
 import { getServerSession } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
@@ -16,14 +16,14 @@ export default async function SubmissionResultsPage({
     redirect("/login");
   }
   const { id } = await params;
-  const submission = await getSubmissionById(id);
+  const submission = await challengeService.getSubmissionById(id);
   if (!submission) {
     notFound();
   }
   if (submission.userId !== session.user.id && session.user.role !== "admin") {
     notFound();
   }
-  const vm = buildResultsViewModel(submission);
+  const vm = resultsService.buildResultsViewModel(submission);
   return (
     <ResultsScreen
       aiFeedback={vm.aiFeedback}

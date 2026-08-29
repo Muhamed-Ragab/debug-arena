@@ -1,8 +1,8 @@
 "use client";
 
-import { useLingui } from "@lingui/react";
 import {
   Bug,
+  FolderTree,
   LayoutGrid,
   Settings,
   Sparkles,
@@ -13,6 +13,7 @@ import {
 import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/preferences/LanguageSwitcher";
 import { ThemeToggle } from "@/components/preferences/ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -42,7 +43,7 @@ export function Sidebar({
   open?: boolean;
   onClose?: () => void;
 }) {
-  const { i18n } = useLingui();
+  const t = useTranslations();
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user as { role?: string } | undefined;
@@ -53,10 +54,18 @@ export function Sidebar({
     label: string;
     icon: typeof LayoutGrid;
   }> = [
-    { icon: LayoutGrid, label: i18n._("Challenges"), to: "/challenges" },
-    { icon: Trophy, label: i18n._("Leaderboard"), to: "/leaderboard" },
-    { icon: User, label: i18n._("Profile"), to: "/profile" },
-    { icon: Settings, label: i18n._("Settings"), to: "/settings" },
+    {
+      icon: LayoutGrid,
+      label: t("common.navigation.challenges"),
+      to: "/challenges",
+    },
+    {
+      icon: Trophy,
+      label: t("common.navigation.leaderboard"),
+      to: "/leaderboard",
+    },
+    { icon: User, label: t("common.navigation.profile"), to: "/profile" },
+    { icon: Settings, label: t("common.settings"), to: "/settings" },
   ];
 
   const ADMIN_NAV: Array<{
@@ -66,8 +75,13 @@ export function Sidebar({
   }> = [
     {
       icon: Sparkles,
-      label: i18n._("AI Question Studio"),
+      label: t("common.ai_question_studio"),
       to: "/admin/questions" as Route,
+    },
+    {
+      icon: FolderTree,
+      label: t("common.navigation.categories"),
+      to: "/admin/categories" as Route,
     },
   ];
 
@@ -97,7 +111,7 @@ export function Sidebar({
 
       <div className="px-3 pt-2">
         <p className="px-3 pb-2 font-medium text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
-          {i18n._("Navigation")}
+          {t("common.navigation.navigation")}
         </p>
         <nav className="flex flex-col gap-1">
           {NAV.map(({ to, label, icon: Icon }) => {
@@ -130,7 +144,7 @@ export function Sidebar({
         {Boolean(isAdmin) && (
           <div className="mt-6">
             <p className="px-3 pb-2 font-medium text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
-              {i18n._("Admin Portal")}
+              {t("common.navigation.adminPortal")}
             </p>
             <nav className="flex flex-col gap-1">
               {ADMIN_NAV.map(({ to, label, icon: Icon }) => {
@@ -167,13 +181,13 @@ export function Sidebar({
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="font-medium text-muted-foreground text-sm">
-              {i18n._("Theme")}
+              {t("common.preferences.theme")}
             </span>
             <ThemeToggle />
           </div>
           <div className="flex items-center justify-between">
             <span className="font-medium text-muted-foreground text-sm">
-              {i18n._("Language")}
+              {t("common.preferences.language")}
             </span>
             <LanguageSwitcher />
           </div>
