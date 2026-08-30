@@ -2,7 +2,7 @@
 
 import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import type { EvaluationDetails, ScorePart } from "@/features/results/types";
@@ -37,7 +37,7 @@ export function ResultsScreen({
   evaluationDetails,
   preventionNotes,
 }: Props) {
-  const t = useTranslations();
+  const t = useExtracted();
   const router = useRouter();
   const handleNext = onNext ?? (() => router.push("/challenges"));
 
@@ -48,15 +48,15 @@ export function ResultsScreen({
     <div className="flex h-full w-full flex-col">
       <TopBar
         crumbs={[
-          { label: t("common.navigation.challenges"), to: "/challenges" },
-          { label: t("common.navigation.results") },
+          { label: t("Challenges"), to: "/challenges" },
+          { label: t("Results") },
         ]}
       />
       <div className="flex flex-1 flex-col overflow-y-auto">
         <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-y-2 border-border border-b bg-surface/90 px-4 pt-7 pb-5 backdrop-blur-md sm:px-8">
           <div className="min-w-0">
             <p className="mb-0.5 font-mono text-[11px] text-muted-foreground uppercase tracking-widest">
-              {t("common.navigation.results")}
+              {t("Results")}
             </p>
             <h1 className="font-semibold text-[15px] text-heading">
               {challengeTitle}
@@ -64,7 +64,7 @@ export function ResultsScreen({
           </div>
           <div className="text-end">
             <p className="mb-0.5 font-mono text-[11px] text-muted-foreground">
-              {t("results.summary.totalScore")}
+              {t("Total score")}
             </p>
             <p className="font-mono font-semibold text-2xl text-heading tabular-nums">
               {calculatedTotal}
@@ -89,10 +89,12 @@ export function ResultsScreen({
 
           <div className="flex flex-wrap items-center justify-between gap-3 pb-8">
             <p className="text-[12px] text-muted-foreground">
-              {t("results.summary.completeMessage", { score: calculatedTotal })}
+              {t("Challenge complete · +{score} pts added to your profile", {
+                score: String(calculatedTotal),
+              })}
             </p>
             <Button className="flex items-center gap-2" onClick={handleNext}>
-              {t("results.actions.backToChallenges")} <ChevronRight size={14} />
+              {t("Back to challenges")} <ChevronRight size={14} />
             </Button>
           </div>
         </div>

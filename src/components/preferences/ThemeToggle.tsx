@@ -1,55 +1,56 @@
 "use client";
 
 import { Check, Monitor, Moon, Sun } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
+import { useTheme } from "next-themes";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useTheme } from "@/contexts/ThemeContext";
-import type { Theme } from "@/contexts/types";
 import { cn } from "@/lib/utils";
 
 const THEMES = [
-  { Icon: Monitor, key: "system", label: "System", value: "system" },
-  { Icon: Sun, key: "light", label: "Light", value: "light" },
-  { Icon: Moon, key: "dark", label: "Dark", value: "dark" },
+  { Icon: Monitor, key: "system", value: "system" },
+  { Icon: Sun, key: "light", value: "light" },
+  { Icon: Moon, key: "dark", value: "dark" },
 ] as const;
 
-const _THEME_KEY_MAP: Record<string, string> = {
-  Dark: "common.theme.dark",
-  Light: "common.theme.light",
-  System: "common.theme.system",
-};
-
 export function ThemeToggle() {
-  const t = useTranslations();
+  const t = useExtracted();
+  const themeLabels: Record<string, string> = {
+    light: t("Light"),
+    dark: t("Dark"),
+    system: t("System"),
+  };
+  function getThemeLabel(key: string): string {
+    return themeLabels[key] ?? key;
+  }
   const { theme, setTheme } = useTheme();
 
-  const currentTheme = THEMES.find((t) => t.value === theme) || THEMES[0];
+  const resolvedTheme = theme ?? "system";
+  const currentTheme =
+    THEMES.find((v) => v.value === resolvedTheme) || THEMES[0];
   const CurrentIcon = currentTheme.Icon;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        aria-label={t("common.preferences.selectTheme")}
+        aria-label={t("Select theme")}
         className="relative inline-flex h-9 items-center gap-4 rounded-md border border-border bg-inset py-1.5 ps-7 pe-3 text-foreground text-xs transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <CurrentIcon
           aria-hidden
-          className="absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+          className="absolute inset-s-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
           size={14}
         />
-        <span className="truncate">
-          {t(`common.theme.${currentTheme.key}`)}
-        </span>
+        <span className="truncate">{getThemeLabel(currentTheme.key)}</span>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="w-32">
-        {THEMES.map(({ value, label, Icon, key }) => {
-          const selected = value === theme;
+        {THEMES.map(({ value, key, Icon }) => {
+          const selected = value === resolvedTheme;
           return (
             <DropdownMenuItem
               className={cn(
@@ -57,11 +58,11 @@ export function ThemeToggle() {
                 selected && "bg-muted font-medium"
               )}
               key={value}
-              onClick={() => setTheme(value as Theme)}
+              onClick={() => setTheme(value)}
             >
               <div className="flex items-center gap-2">
                 <Icon aria-hidden className="text-muted-foreground" size={14} />
-                <span>{t(`common.theme.${key}`)}</span>
+                <span>{getThemeLabel(key)}</span>
               </div>
               {selected && <Check className="text-primary" size={14} />}
             </DropdownMenuItem>

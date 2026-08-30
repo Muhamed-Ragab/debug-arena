@@ -28,7 +28,7 @@ export function normalizeConnectionString(url: string): string {
   } catch {
     return url.replace(
       /sslmode=(require|prefer|verify-ca)/,
-      "sslmode=verify-full",
+      "sslmode=verify-full"
     );
   }
 }
@@ -42,7 +42,7 @@ export const pool =
     max: 10,
   });
 
-pool.on("error", err => {
+pool.on("error", (err) => {
   console.warn("[DB] pool error (connection lost, will retry):", err.message);
 });
 

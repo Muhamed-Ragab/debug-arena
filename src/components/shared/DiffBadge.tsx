@@ -1,10 +1,28 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { DIFFICULTY_CONFIG, type Difficulty } from "@/lib/domain";
 
+function getDifficultyLabel(
+  difficulty: Difficulty,
+  t: ReturnType<typeof useExtracted>
+): string {
+  switch (difficulty) {
+    case "Easy":
+      return t("Easy");
+    case "Medium":
+      return t("Medium");
+    case "Hard":
+      return t("Hard");
+    case "Expert":
+      return t("Expert");
+    default:
+      return difficulty;
+  }
+}
+
 export function DiffBadge({ difficulty }: { difficulty: Difficulty }) {
-  const t = useTranslations();
+  const t = useExtracted();
   const c = DIFFICULTY_CONFIG[difficulty];
   return (
     <span
@@ -19,7 +37,7 @@ export function DiffBadge({ difficulty }: { difficulty: Difficulty }) {
         className="h-1.5 w-1.5 rounded-full"
         style={{ backgroundColor: c.color }}
       />
-      {t(difficulty as string)}
+      {getDifficultyLabel(difficulty, t)}
     </span>
   );
 }

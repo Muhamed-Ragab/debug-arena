@@ -1,6 +1,7 @@
 "use client";
 
 import { Flame, Trophy } from "lucide-react";
+import { useExtracted } from "next-intl";
 import { TopBar } from "@/components/layout/TopBar";
 import { Avatar } from "@/components/ui/avatar";
 import type { UserProfileData } from "@/features/profile/types";
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function ProfileScreen({ data }: Props) {
+  const t = useExtracted();
   const {
     profile,
     profileStats,
@@ -25,7 +27,7 @@ export function ProfileScreen({ data }: Props) {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <TopBar crumbs={[{ label: "Arena" }, { label: "Profile" }]} />
+      <TopBar crumbs={[{ label: t("Arena") }, { label: t("Profile") }]} />
 
       <div className="flex flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
         {/* Left column: User Identity and Stats */}

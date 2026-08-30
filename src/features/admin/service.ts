@@ -19,7 +19,7 @@ export function createAdminService(repo: AdminRepository = adminRepository) {
       .findCategories()
       .then((cats) => cats.find((c) => c.slug === input.categorySlug));
     if (!category) {
-      throw new NotFoundError(`Unknown category slug: ${input.categorySlug}`);
+      throw new NotFoundError("error.unknownCategorySlug");
     }
     const embedding = generateDeterministicEmbedding(input.rootCauseSummary);
     let challengeId = input.id ?? null;
@@ -118,15 +118,26 @@ export function createAdminService(repo: AdminRepository = adminRepository) {
     return await repo.findChallengeById(challengeId);
   }
 
+  async function getAdminUsers() {
+    return await repo.findAllUsers();
+  }
+
+  async function toggleUserBan(userId: string, banned: boolean) {
+    await repo.updateUserBanStatus(userId, banned);
+    return { banned, success: true, userId };
+  }
+
   return {
     deleteChallengeCascade,
     generateQuestionDraft,
     getAdminCategories,
     getAdminChallengeById,
     getAdminChallenges,
+    getAdminUsers,
     refineQuestionDraft,
     saveChallenge,
     toggleStatus,
+    toggleUserBan,
   };
 }
 

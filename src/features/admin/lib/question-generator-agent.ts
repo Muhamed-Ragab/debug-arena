@@ -161,8 +161,9 @@ function resolveDiffLines(
   buggyEntry?: ChallengeFile,
   fixedEntry?: ChallengeFile
 ): DiffLine[] {
-  if (parsed.referenceFix.diff && parsed.referenceFix.diff.length > 0) {
-    return parsed.referenceFix.diff;
+  const diff = parsed.referenceFix?.diff;
+  if (diff !== null && diff !== undefined && diff.length > 0) {
+    return diff;
   }
   if (buggyEntry && fixedEntry) {
     return computeUnifiedDiff(buggyEntry.code, fixedEntry.code);
@@ -176,7 +177,7 @@ function resolveBuggyLines(
   fixedEntry?: ChallengeFile
 ): [number, number] {
   const specified = parsed.buggyArtifact.buggyLines;
-  if (specified && specified[0] > 0 && specified[1] >= specified[0]) {
+  if (specified !== null && specified[0] > 0 && specified[1] >= specified[0]) {
     return specified;
   }
   if (buggyEntry && fixedEntry) {
@@ -235,34 +236,162 @@ function getTimeLimitByDifficulty(diff: "easy" | "medium" | "hard"): string {
   return "20 min";
 }
 
+function coerceRawInput(raw: unknown): unknown {
+  if (raw === null || raw === undefined || typeof raw !== "object") {
+    return raw;
+  }
+  const obj = raw as Record<string, unknown>;
+  const copy: Record<string, unknown> = { ...obj };
+
+  if (
+    copy.buggyArtifact !== null &&
+    copy.buggyArtifact !== undefined &&
+    typeof copy.buggyArtifact === "object"
+  ) {
+    const ba = copy.buggyArtifact as Record<string, unknown>;
+    const baCopy: Record<string, unknown> = { ...ba };
+    if (baCopy.buggyLines === undefined) {
+      baCopy.buggyLines = null;
+    }
+    if (baCopy.points === undefined) {
+      baCopy.points = null;
+    }
+    if (baCopy.timeLimit === undefined) {
+      baCopy.timeLimit = null;
+    }
+    if (Array.isArray(baCopy.files)) {
+      baCopy.files = (baCopy.files as unknown[]).map((file) => {
+        if (file !== null && file !== undefined && typeof file === "object") {
+          const fileObj = file as Record<string, unknown>;
+          if (fileObj.isEntry === undefined) {
+            return { ...fileObj, isEntry: false };
+          }
+          return fileObj;
+        }
+        return file;
+      });
+    }
+    copy.buggyArtifact = baCopy;
+  }
+
+  if (copy.categorySlug === undefined) {
+    copy.categorySlug = null;
+  }
+  if (copy.hiddenTests === undefined) {
+    copy.hiddenTests = null;
+  }
+  if (copy.hints === undefined) {
+    copy.hints = null;
+  }
+  if (copy.preventionNotes === undefined) {
+    copy.preventionNotes = null;
+  }
+  if (copy.rootCauseSummary === undefined) {
+    copy.rootCauseSummary = null;
+  }
+  if (copy.referenceFix === undefined) {
+    copy.referenceFix = null;
+  } else if (
+    copy.referenceFix !== null &&
+    typeof copy.referenceFix === "object"
+  ) {
+    const rf = copy.referenceFix as Record<string, unknown>;
+    const rfCopy: Record<string, unknown> = { ...rf };
+    if (rfCopy.diff === undefined) {
+      rfCopy.diff = null;
+    }
+    if (rfCopy.explanation === undefined) {
+      rfCopy.explanation = null;
+    }
+    if (rfCopy.files === undefined) {
+      rfCopy.files = null;
+    }
+    copy.referenceFix = rfCopy;
+  }
+
+  return copy;
+}
+
 /**
  * Normalizes and validates the challenge draft.
+ * Lenient: fills defaults for preventionNotes, rootCauseSummary and referenceFix
+ * when LLM omits them so Groq json_schema strict validation never fails end-to-end.
  */
 export function normalizeChallengeDraft(
   raw: unknown,
   fallbackCategory = "react-rendering",
   fallbackDifficulty: "easy" | "medium" | "hard" = "medium"
 ): GeneratedChallengeDraft {
-  const parsed = rawLlmChallengeSchema.parse(raw);
+  const coerced = coerceRawInput(raw);
+  const parsed = rawLlmChallengeSchema.parse(coerced);
   const targetDifficulty = parsed.difficulty || fallbackDifficulty;
-  const entryFileName = resolveEntryFile(parsed);
+  const entryFileName = resolveEntryFile(
+    parsed as unknown as RawParsedChallenge
+  );
 
   const buggyEntry =
     parsed.buggyArtifact.files.find((f) => f.name === entryFileName) ||
     parsed.buggyArtifact.files[0];
-  const fixedEntry =
-    parsed.referenceFix.files.find((f) => f.name === entryFileName) ||
-    parsed.referenceFix.files[0];
 
-  const computedDiff = resolveDiffLines(parsed, buggyEntry, fixedEntry);
-  const buggyLines = resolveBuggyLines(parsed, buggyEntry, fixedEntry);
-  const hints = resolveHints(parsed.hints);
+  // Lenient fallback for referenceFix when LLM omitted it (the reported bug)
+  const rawReferenceFix = parsed.referenceFix as
+    | RawParsedChallenge["referenceFix"]
+    | null
+    | undefined;
+  const safeReferenceFix: RawParsedChallenge["referenceFix"] =
+    rawReferenceFix ?? {
+      diff: null,
+      explanation: "Fixed root cause bug.",
+      files: parsed.buggyArtifact.files.map((f) => ({
+        code: f.code,
+        name: f.name,
+      })),
+    };
+  // If LLM omitted files or explanation, fill from buggy artifact
+  if (!safeReferenceFix.files || safeReferenceFix.files.length === 0) {
+    safeReferenceFix.files = parsed.buggyArtifact.files.map((f) => ({
+      code: f.code,
+      name: f.name,
+    }));
+  }
+  if (!safeReferenceFix.explanation) {
+    safeReferenceFix.explanation = "Fixed root cause bug.";
+  }
+  if (safeReferenceFix.diff === undefined) {
+    safeReferenceFix.diff = null;
+  }
+
+  const fixedEntry =
+    safeReferenceFix.files.find((f) => f.name === entryFileName) ||
+    safeReferenceFix.files[0];
+
+  const parsedForDiff = {
+    ...parsed,
+    referenceFix: safeReferenceFix,
+  } as unknown as RawParsedChallenge;
+
+  const computedDiff = resolveDiffLines(parsedForDiff, buggyEntry, fixedEntry);
+  const buggyLines = resolveBuggyLines(parsedForDiff, buggyEntry, fixedEntry);
+  const hints = resolveHints(
+    (parsed.hints as RawParsedChallenge["hints"]) ?? null
+  );
 
   const points =
     parsed.buggyArtifact.points ?? getPointsByDifficulty(targetDifficulty);
   const timeLimit =
     parsed.buggyArtifact.timeLimit ??
     getTimeLimitByDifficulty(targetDifficulty);
+
+  const preventionNotes =
+    (parsed.preventionNotes as string | null | undefined) ||
+    "Apply strict code reviews and type safety.";
+  const rootCauseSummary =
+    (parsed.rootCauseSummary as string | null | undefined) ||
+    `Root cause is a ${targetDifficulty} ${parsed.buggyArtifact.language || "typescript"} bug in ${entryFileName} that breaks expected behavior; see reference fix explanation.`;
+  const categorySlug =
+    (parsed.categorySlug as string | null | undefined) || fallbackCategory;
+  const hiddenTests =
+    (parsed.hiddenTests as RawParsedChallenge["hiddenTests"]) || [];
 
   return {
     buggyArtifact: {
@@ -276,22 +405,47 @@ export function normalizeChallengeDraft(
       points,
       timeLimit,
     },
-    categorySlug: parsed.categorySlug || fallbackCategory,
+    categorySlug,
     difficulty: targetDifficulty,
     format: parsed.format || "code_snippet",
-    hiddenTests: parsed.hiddenTests || [],
+    hiddenTests: hiddenTests || [],
     hints,
-    preventionNotes:
-      parsed.preventionNotes || "Apply strict code reviews and type safety.",
+    preventionNotes,
     prompt: parsed.prompt,
     referenceFix: {
       diff: computedDiff,
-      explanation: parsed.referenceFix.explanation || "Fixed root cause bug.",
-      files: parsed.referenceFix.files,
+      explanation: safeReferenceFix.explanation || "Fixed root cause bug.",
+      files: safeReferenceFix.files,
     },
-    rootCauseSummary: parsed.rootCauseSummary,
+    rootCauseSummary,
     title: parsed.title,
   };
+}
+
+function handleLlmError(err: unknown): never {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (
+    msg.includes("model_not_found") ||
+    msg.includes("decommissioned") ||
+    msg.includes("does not exist")
+  ) {
+    const modelErrorMessage = `AI model "${AI_PRIMARY_MODEL}" is unavailable (decommissioned). Update src/lib/ai/constants.ts to a current Groq model. Original: ${msg}`;
+    const cause = err instanceof Error ? err : new Error(String(err));
+    throw new ActionError(modelErrorMessage, { cause });
+  }
+  if (
+    msg.includes("isEntry") ||
+    msg.includes("invalid JSON schema") ||
+    msg.includes("response_format") ||
+    msg.includes("json_schema")
+  ) {
+    const cause = err instanceof Error ? err : new Error(String(err));
+    throw new ActionError(
+      `LLM JSON schema validation failed for "${AI_PRIMARY_MODEL}": ${msg}. Check src/features/admin/validation.ts strict compliance (required must include all properties).`,
+      { cause }
+    );
+  }
+  throw err as Error;
 }
 
 /**
@@ -337,17 +491,43 @@ Your mission is to generate a realistic, educational, and high-quality coding de
 CRITICAL REQUIREMENTS:
 1. The bug must be realistic (e.g. stale closure, race condition, off-by-one, memory leak, unhandled promise, N+1 query, mutation, improper cleanup).
 2. The code must be clean, syntactically valid ${language}, and modern.
-3. The buggy code and reference fix MUST have a clear, precise root cause bug.`;
+3. The buggy code and reference fix MUST have a clear, precise root cause bug.
+4. You MUST output ALL required top-level keys: title, categorySlug, difficulty, format, prompt, buggyArtifact, referenceFix, rootCauseSummary, preventionNotes, hints, hiddenTests. Omitting preventionNotes, referenceFix or rootCauseSummary causes schema validation failure.
+5. buggyArtifact must contain entryFile, files (each with name, code, isEntry), language, points, timeLimit, buggyLines.
+6. referenceFix must contain files (same names as buggyArtifact, with corrected code), explanation (1-3 sentences), diff (array or null to auto-compute).
+7. rootCauseSummary: 1-2 sentences concise explanation of the exact bug cause.
+8. preventionNotes: 1-2 sentences on how to prevent this class of bug.
+9. hints: exactly 3 socratic hints each with order, penaltyPoints, socraticPrompt.
+10. hiddenTests: 1-3 vitest tests that validate the fix imports from entry file.
+
+OUTPUT SHAPE EXAMPLE (keys must be present, adapt values to the requested topic):
+{
+  "title": "Stale Closure in WebSocket Listener",
+  "categorySlug": "react-rendering",
+  "difficulty": "easy",
+  "format": "code_snippet",
+  "prompt": "A React component connects to a WebSocket... Identify and fix the issue.",
+  "buggyArtifact": { "entryFile": "Chat.tsx", "language": "typescript", "points": 100, "timeLimit": "15 min", "buggyLines": [19,19], "files": [{"name":"Chat.tsx","code":"...","isEntry":true}] },
+  "referenceFix": { "explanation": "Fixed stale closure by using functional updater setMessages(prev => [...prev, data])", "files": [{"name":"Chat.tsx","code":"..."}], "diff": null },
+  "rootCauseSummary": "Stale closure over initial messages state due to empty dependency array",
+  "preventionNotes": "Use functional state updater when new state depends on previous value inside stable callbacks",
+  "hints": [{"order":1,"penaltyPoints":5,"socraticPrompt":"What value does messages hold inside the callback?"},{"order":2,"penaltyPoints":5,"socraticPrompt":"How can you update state based on previous value without stale variable?"},{"order":3,"penaltyPoints":5,"socraticPrompt":"What change to the updater ensures latest state with empty deps?"}],
+  "hiddenTests": [{"name":"multiple-messages","description":"Component should render all received messages.","testCode":"...vitest..."}]
+}
+Ensure preventionNotes, rootCauseSummary and referenceFix are always populated with meaningful content.`;
 
     const userPrompt = `Generate a debugging challenge with the following parameters:
-- Category: ${categoryName}
+- Category: ${categoryName} (slug: ${params.categorySlug || "react-rendering"})
 - Difficulty: ${difficulty}
 - Language: ${language}
 - Bug Pattern: ${bugPattern}
 - Specific Scenario / Topic: ${topic}
 - Additional Admin Instructions: ${params.additionalInstructions || "None"}
 - Target Points: ${promptPoints}
-- Target Time Limit: ${promptTimeLimit}`;
+- Target Time Limit: ${promptTimeLimit}
+
+You MUST respond with a JSON object containing ALL keys: title, categorySlug, difficulty, format, prompt, buggyArtifact, referenceFix, rootCauseSummary, preventionNotes, hints, hiddenTests.
+Pay special attention to populate preventionNotes (1-2 sentences), rootCauseSummary (1-2 sentences), and referenceFix (files + explanation + diff). Those three are required and were missing in prior failures.`;
 
     const controller = new AbortController();
     const timeout = setTimeout(
@@ -371,18 +551,7 @@ CRITICAL REQUIREMENTS:
         params.difficulty
       );
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      // Surface model deprecation clearly instead of crashing dev
-      if (
-        msg.includes("model_not_found") ||
-        msg.includes("decommissioned") ||
-        msg.includes("does not exist")
-      ) {
-        const modelErrorMessage = `AI model "${AI_PRIMARY_MODEL}" is unavailable (decommissioned). Update src/lib/ai/constants.ts to a current Groq model. Original: ${msg}`;
-        const cause = err instanceof Error ? err : new Error(String(err));
-        throw new ActionError(modelErrorMessage, { cause });
-      }
-      throw err;
+      handleLlmError(err);
     } finally {
       clearTimeout(timeout);
     }
@@ -406,7 +575,9 @@ export const getRefinerStrategy = (apiKey?: string): RefinerStrategy => {
   return async (params) => {
     const systemPrompt = `You are a Principal Software Engineer and Educational Challenge Architect.
 You are helping an admin refine and polish an existing debugging challenge for Debug Arena.
-Preserve the existing structure and schema, but apply the requested refinements cleanly.`;
+Preserve the existing structure and schema, but apply the requested refinements cleanly.
+CRITICAL: You MUST output ALL required top-level keys: title, categorySlug, difficulty, format, prompt, buggyArtifact, referenceFix, rootCauseSummary, preventionNotes, hints, hiddenTests.
+Never omit preventionNotes, referenceFix or rootCauseSummary. referenceFix must contain files, explanation and diff. Hints must be exactly 3 entries.`;
 
     const userPrompt = `Here is the current challenge draft:
 ${JSON.stringify(params.currentDraft, null, 2)}
@@ -414,7 +585,8 @@ ${JSON.stringify(params.currentDraft, null, 2)}
 ADMIN REFINEMENT INSTRUCTION:
 "${params.instruction}"
 
-Apply the instruction and output the refined challenge draft.`;
+Apply the instruction and output the refined challenge draft as a JSON object containing ALL keys: title, categorySlug, difficulty, format, prompt, buggyArtifact, referenceFix, rootCauseSummary, preventionNotes, hints, hiddenTests.
+Ensure preventionNotes, rootCauseSummary and referenceFix are always populated.`;
 
     const controller = new AbortController();
     const timeout = setTimeout(
@@ -437,6 +609,8 @@ Apply the instruction and output the refined challenge draft.`;
         params.currentDraft.categorySlug,
         params.currentDraft.difficulty
       );
+    } catch (err) {
+      handleLlmError(err);
     } finally {
       clearTimeout(timeout);
     }

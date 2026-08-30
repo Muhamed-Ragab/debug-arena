@@ -1,11 +1,12 @@
 "use client";
 
 import { Send } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface Props {
+  disabled?: boolean;
   fieldErrors?: {
     localizationLines?: string[];
   } | null;
@@ -23,8 +24,9 @@ export function SubmitBar({
   onSubmit,
   selectedLine,
   selectedLines,
+  disabled = false,
 }: Props) {
-  const t = useTranslations();
+  const t = useExtracted();
   let activeLines: number[] = [];
   if (Array.isArray(selectedLines)) {
     activeLines = selectedLines;
@@ -33,26 +35,26 @@ export function SubmitBar({
   }
 
   const localizationError = fieldErrors?.localizationLines?.[0];
-  const disabled = isSubmitting;
+  const isDisabled = isSubmitting || disabled;
 
   const getLineSummary = () => {
     if (activeLines.length === 0) {
-      return t("challenge.submitBar.selectLines");
+      return t("Select bug line(s) to submit");
     }
     if (activeLines.length === 1) {
-      return t("challenge.submitBar.singleLine", {
+      return t("Bug localized at Line {line} · {file}", {
         file: fileName,
-        line: activeLines[0],
+        line: String(activeLines[0]),
       });
     }
     if (activeLines.length <= 3) {
-      return t("challenge.submitBar.multiLines", {
+      return t("Bug localized at Lines {lines} · {file}", {
         file: fileName,
         lines: activeLines.join(", "),
       });
     }
-    return t("challenge.submitBar.countLines", {
-      count: activeLines.length,
+    return t("{count} lines localized · {file}", {
+      count: String(activeLines.length),
       file: fileName,
     });
   };
@@ -67,22 +69,22 @@ export function SubmitBar({
             : "text-muted-foreground"
         )}
       >
-        {localizationError ? t(localizationError as string) : getLineSummary()}
+        {localizationError ? localizationError : getLineSummary()}
       </p>
       <Button
         className="flex w-full items-center justify-center gap-2 rounded py-2.5 font-medium text-[13px] transition-all"
-        disabled={disabled}
+        disabled={isDisabled}
         onClick={onSubmit}
       >
         {isSubmitting ? (
           <>
             <span className="h-3 w-3 flex-shrink-0 animate-spin rounded-full border border-primary-foreground border-t-transparent" />
-            {t("challenge.submitBar.running")}
+            {t("Running tests & AI analysis...")}
           </>
         ) : (
           <>
             <Send size={13} />
-            {t("challenge.submitBar.submit")}
+            {t("Submit diagnosis & fix")}
           </>
         )}
       </Button>

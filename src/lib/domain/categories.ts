@@ -38,7 +38,7 @@ export const CATEGORY_CONFIG: Record<Category, CategoryMeta> = {
     color: "#f59e0b",
     dim: "rgba(245, 158, 11, 0.15)",
     Icon: Cpu,
-    label: "Backend Concurrency",
+    label: "category.names.backendConcurrency",
   },
   "Logic Inversions": {
     bg: "rgba(139, 92, 246, 0.1)",
@@ -46,7 +46,7 @@ export const CATEGORY_CONFIG: Record<Category, CategoryMeta> = {
     color: "#8b5cf6",
     dim: "rgba(139, 92, 246, 0.15)",
     Icon: Bug,
-    label: "Logic Inversions",
+    label: "category.names.logicInversions",
   },
   "Memory Leaks": {
     bg: "rgba(236, 72, 153, 0.1)",
@@ -54,7 +54,7 @@ export const CATEGORY_CONFIG: Record<Category, CategoryMeta> = {
     color: "#ec4899",
     dim: "rgba(236, 72, 153, 0.15)",
     Icon: MemoryStick,
-    label: "Memory Leaks",
+    label: "category.names.memoryLeaks",
   },
   "Off-by-One": {
     bg: "rgba(59, 130, 246, 0.1)",
@@ -62,7 +62,7 @@ export const CATEGORY_CONFIG: Record<Category, CategoryMeta> = {
     color: "#3b82f6",
     dim: "rgba(59, 130, 246, 0.15)",
     Icon: AlertTriangle,
-    label: "Off-by-One",
+    label: "category.names.offByOne",
   },
   "Race Conditions": {
     bg: "rgba(245, 158, 11, 0.1)",
@@ -70,7 +70,7 @@ export const CATEGORY_CONFIG: Record<Category, CategoryMeta> = {
     color: "#f59e0b",
     dim: "rgba(245, 158, 11, 0.15)",
     Icon: RefreshCw,
-    label: "Race Conditions",
+    label: "category.names.raceConditions",
   },
   "React Rendering": {
     bg: "rgba(59, 130, 246, 0.1)",
@@ -78,7 +78,7 @@ export const CATEGORY_CONFIG: Record<Category, CategoryMeta> = {
     color: "#3b82f6",
     dim: "rgba(59, 130, 246, 0.15)",
     Icon: Zap,
-    label: "React Rendering",
+    label: "category.names.reactRendering",
   },
   "Security Flaws": {
     bg: "rgba(239, 68, 68, 0.1)",
@@ -86,7 +86,7 @@ export const CATEGORY_CONFIG: Record<Category, CategoryMeta> = {
     color: "#ef4444",
     dim: "rgba(239, 68, 68, 0.15)",
     Icon: Lock,
-    label: "Security Flaws",
+    label: "category.names.securityFlaws",
   },
   "State Mutations": {
     bg: "rgba(16, 185, 129, 0.1)",
@@ -94,7 +94,7 @@ export const CATEGORY_CONFIG: Record<Category, CategoryMeta> = {
     color: "#10b981",
     dim: "rgba(16, 185, 129, 0.15)",
     Icon: Database,
-    label: "State Mutations",
+    label: "category.names.stateMutations",
   },
 };
 
@@ -142,3 +142,21 @@ export const DIFFICULTY_ORDER: Difficulty[] = [
   "Hard",
   "Expert",
 ];
+
+export const CATEGORY_LABEL_KEY_MAP: Record<Category, string> = {
+  "Backend Concurrency": "category.names.backendConcurrency",
+  "Logic Inversions": "category.names.logicInversions",
+  "Memory Leaks": "category.names.memoryLeaks",
+  "Off-by-One": "category.names.offByOne",
+  "Race Conditions": "category.names.raceConditions",
+  "React Rendering": "category.names.reactRendering",
+  "Security Flaws": "category.names.securityFlaws",
+  "State Mutations": "category.names.stateMutations",
+};
+
+export const DIFFICULTY_LABEL_KEY_MAP: Record<Difficulty, string> = {
+  Easy: "difficulty.easy",
+  Expert: "difficulty.expert",
+  Hard: "difficulty.hard",
+  Medium: "difficulty.medium",
+};

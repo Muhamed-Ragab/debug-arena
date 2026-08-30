@@ -39,29 +39,22 @@ vi.mock("next/navigation", async () => {
 // Mock next-intl client hooks to provide translations without provider
 vi.mock("next-intl", async () => {
   const actual = await vi.importActual<typeof import("next-intl")>("next-intl");
-  const messages = await import("../../messages/en.json").then(
-    (m) => m.default
-  );
-  // Flatten helper for lookup
   function lookup(key: string, vars?: Record<string, unknown>): string {
-    const parts = key.split(".");
-    let cur: unknown = messages;
-    for (const p of parts) {
-      if (
-        cur &&
-        typeof cur === "object" &&
-        p in (cur as Record<string, unknown>)
-      ) {
-        cur = (cur as Record<string, unknown>)[p];
-      } else {
-        cur = undefined;
-        break;
-      }
-    }
-    let str = typeof cur === "string" ? cur : key;
+    let str = key;
     if (vars) {
       for (const [k, v] of Object.entries(vars)) {
         str = str.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
+      }
+    }
+    return str;
+  }
+  function extractLookup(
+    msg: string | { message: string },
+    vars?: Record<string, unknown>
+  ): string {
+    let str = typeof msg === "string" ? msg : msg.message;
+    if (vars) {
+      for (const [k, v] of Object.entries(vars)) {
         str = str.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
       }
     }
@@ -77,6 +70,15 @@ vi.mock("next-intl", async () => {
         const fullKey = namespace ? `${namespace}.${key}` : key;
         return lookup(fullKey, vars);
       },
+    useExtracted:
+      () =>
+      (
+        msg: string | { message: string; description?: string },
+        vars?: Record<string, unknown>
+      ) => {
+        const raw = typeof msg === "string" ? msg : msg.message;
+        return extractLookup(raw, vars);
+      },
   };
 });
 
@@ -89,33 +91,11 @@ vi.mock("next-intl/server", async () => {
   return {
     ...actual,
     getLocale: vi.fn(async () => "en"),
-    getMessages: vi.fn(async () => {
-      const common = await import("../../messages/en/common.json").then(
-        (m) => m.default
-      );
-      return { common };
-    }),
+    getMessages: vi.fn(async () => ({})),
     getTranslations: vi.fn(async (ns?: string) => {
-      const msgs = await import("../../messages/en.json").then(
-        (m) => m.default
-      );
       function lookup(key: string, vars?: Record<string, unknown>) {
         const fullKey = ns ? `${ns}.${key}` : key;
-        const parts = fullKey.split(".");
-        let cur: unknown = msgs;
-        for (const p of parts) {
-          if (
-            cur &&
-            typeof cur === "object" &&
-            p in (cur as Record<string, unknown>)
-          ) {
-            cur = (cur as Record<string, unknown>)[p];
-          } else {
-            cur = undefined;
-            break;
-          }
-        }
-        let str = typeof cur === "string" ? cur : fullKey;
+        let str = fullKey;
         if (vars) {
           for (const [k, v] of Object.entries(vars)) {
             str = str.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
@@ -124,6 +104,20 @@ vi.mock("next-intl/server", async () => {
         return str;
       }
       return (key: string, vars?: Record<string, unknown>) => lookup(key, vars);
+    }),
+    getExtracted: vi.fn(async () => {
+      return (
+        msg: string | { message: string; description?: string },
+        vars?: Record<string, unknown>
+      ) => {
+        let str = typeof msg === "string" ? msg : msg.message;
+        if (vars) {
+          for (const [k, v] of Object.entries(vars)) {
+            str = str.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
+          }
+        }
+        return str;
+      };
     }),
   };
 });

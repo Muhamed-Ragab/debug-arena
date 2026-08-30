@@ -22,6 +22,7 @@ export type AdminChallengeDetailRow = ChallengeRow & {
 export interface AdminRepository {
   deleteChallengeCascade: (challengeId: string) => Promise<void>;
   deleteHintsByChallengeId: (challengeId: string) => Promise<void>;
+  findAllUsers: () => Promise<(typeof schema.users.$inferSelect)[]>;
   findCategories: () => Promise<CategoryRow[]>;
   findChallengeById: (id: string) => Promise<AdminChallengeDetailRow | null>;
   findChallenges: () => Promise<AdminChallengeRow[]>;
@@ -33,6 +34,7 @@ export interface AdminRepository {
     id: string,
     data: Partial<typeof schema.challenges.$inferInsert>
   ) => Promise<void>;
+  updateUserBanStatus: (userId: string, banned: boolean) => Promise<void>;
   upsertEmbedding: (
     challengeId: string,
     content: string,

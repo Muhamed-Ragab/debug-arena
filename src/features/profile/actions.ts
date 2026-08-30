@@ -34,7 +34,7 @@ export const updateProfileAction = authActionClient
       username: parsedInput.username,
     } as never);
     if (!updated) {
-      throw new ActionError("User not found");
+      throw new ActionError("error.userNotFound");
     }
     try {
       revalidatePath("/profile");
@@ -69,9 +69,7 @@ export const unlinkAccountAction = authActionClient
       (a) => (a as unknown as { password?: string }).password
     );
     if (userAccounts.length <= 1 && !hasPassword) {
-      throw new ActionError(
-        "Cannot unlink your only sign-in method. Set a password or add another provider first."
-      );
+      throw new ActionError("error.cannotUnlinkOnlyProvider");
     }
 
     try {

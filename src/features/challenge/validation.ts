@@ -5,9 +5,7 @@ export const submitChallengeSchema = z.object({
   hintsRevealedCount: z.number().int().min(0).default(0),
   localizationLines: z.array(z.number().int().positive()).default([]),
   proposedFixCode: z.string().optional(),
-  rootCauseExplanation: z
-    .string()
-    .min(5, "Root cause explanation must be at least 5 characters"),
+  rootCauseExplanation: z.string().min(5, "validation.rootCauseMin"),
   solutionExplanation: z.string().optional(),
   timeSpentSeconds: z.number().int().min(0).default(60),
 });

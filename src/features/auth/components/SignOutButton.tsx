@@ -3,7 +3,7 @@
 import { LogOut } from "lucide-react";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { authClient } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,7 @@ export function SignOutButton({
   variant = "ghost",
   ...props
 }: SignOutButtonProps) {
-  const t = useTranslations();
+  const t = useExtracted();
   const router = useRouter();
 
   return (
@@ -41,7 +41,7 @@ export function SignOutButton({
       {...props}
     >
       {Boolean(showIcon) && <LogOut size={16} />}
-      {children ?? <span>{t("common.actions.logOut")}</span>}
+      {children ?? <span>{t("Log out")}</span>}
     </Button>
   );
 }

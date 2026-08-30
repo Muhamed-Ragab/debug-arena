@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronRight, Clock } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { CategoryTag } from "@/components/shared/CategoryTag";
 import { DiffBadge } from "@/components/shared/DiffBadge";
 import { FormattedMarkdown } from "@/components/shared/FormattedMarkdown";
@@ -28,7 +28,7 @@ export function ChallengeScenario({
   scenarioParagraphs,
   className,
 }: Props) {
-  const t = useTranslations();
+  const t = useExtracted();
   const scenarioContent = scenarioParagraphs.join("\n\n");
   const fileNode = challenge.filePath ?? challenge.title;
 
@@ -49,11 +49,10 @@ export function ChallengeScenario({
         </h2>
         <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
           <span className="flex items-center gap-1">
-            <Clock size={10} />{" "}
-            {challenge.timeLimit ?? t("challenge.meta.timeLimit")}
+            <Clock size={10} /> {challenge.timeLimit ?? t("30 min")}
           </span>
           <span className="font-mono">
-            {t("challenge.meta.pointsMax", { points: challenge.points ?? 200 })}
+            {t("{points} pts max", { points: String(challenge.points ?? 200) })}
           </span>
         </div>
       </div>
@@ -70,7 +69,7 @@ export function ChallengeScenario({
             variant="ghost"
           >
             {treeOpen ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
-            {t("challenge.meta.relevantFiles")}
+            {t("Relevant files")}
           </Button>
           {Boolean(treeOpen) && <FileTree cfg={cfg} fileName={fileNode} />}
         </div>

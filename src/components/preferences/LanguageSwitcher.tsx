@@ -2,7 +2,7 @@
 
 import { Check, Globe } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useExtracted, useLocale } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,13 +11,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-const LANGS: Array<{ code: string; label: string }> = [
+const LANGS: Array<{ code: "en" | "ar"; label: string }> = [
   { code: "en", label: "English" },
   { code: "ar", label: "العربية" },
 ];
 
 export function LanguageSwitcher() {
-  const t = useTranslations("common");
+  const t = useExtracted();
   const locale = useLocale();
   const router = useRouter();
 
@@ -31,7 +31,7 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        aria-label={t("preferences.selectLanguage")}
+        aria-label={t("Select language")}
         className="relative inline-flex h-9 items-center gap-4 rounded-md border border-border bg-inset py-1.5 ps-7 pe-3 text-foreground text-xs transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <Globe
@@ -52,7 +52,7 @@ export function LanguageSwitcher() {
                 selected && "bg-muted font-medium"
               )}
               key={code}
-              onClick={() => switchTo(code as "en" | "ar")}
+              onClick={() => switchTo(code)}
             >
               <span>{label}</span>
               {selected && (

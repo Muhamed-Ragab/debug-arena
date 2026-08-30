@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { CATEGORY_CONFIG } from "@/lib/domain/categories";
 import type { CategoryStat, ProfileStat } from "../types";
 
@@ -9,24 +9,39 @@ interface Props {
   stats: ProfileStat[];
 }
 
-const CATEGORY_KEY_MAP: Record<string, string> = {
-  "Backend Concurrency": "category.names.backendConcurrency",
-  "Logic Inversions": "category.names.logicInversions",
-  "Memory Leaks": "category.names.memoryLeaks",
-  "Off-by-One": "category.names.offByOne",
-  "Race Conditions": "category.names.raceConditions",
-  "React Rendering": "category.names.reactRendering",
-  "Security Flaws": "category.names.securityFlaws",
-  "State Mutations": "category.names.stateMutations",
-};
+function getCategoryLabel(
+  category: string,
+  t: ReturnType<typeof useExtracted>
+): string {
+  switch (category) {
+    case "Backend Concurrency":
+      return t("Backend Concurrency");
+    case "Logic Inversions":
+      return t("Logic Inversions");
+    case "Memory Leaks":
+      return t("Memory Leaks");
+    case "Off-by-One":
+      return t("Off-by-One");
+    case "Race Conditions":
+      return t("Race Conditions");
+    case "React Rendering":
+      return t("React Rendering");
+    case "Security Flaws":
+      return t("Security Flaws");
+    case "State Mutations":
+      return t("State Mutations");
+    default:
+      return category;
+  }
+}
 
 export function ProfileStats({ stats, categoryStats }: Props) {
-  const t = useTranslations();
+  const t = useExtracted();
   return (
     <div className="space-y-4 p-5">
       <div>
         <p className="mb-2 font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
-          {t("profile.stats.title")}
+          {t("Stats")}
         </p>
         <div className="space-y-2.5">
           {stats.map(({ label, value, Icon, iconColor }) => (
@@ -46,7 +61,7 @@ export function ProfileStats({ stats, categoryStats }: Props) {
 
       <div className="border-border border-t pt-2">
         <p className="mb-2.5 font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
-          {t("profile.stats.perCategory")}
+          {t("Per category")}
         </p>
         {categoryStats.map(({ category, score, solved }) => {
           const cfg = CATEGORY_CONFIG[category];
@@ -54,17 +69,13 @@ export function ProfileStats({ stats, categoryStats }: Props) {
             <div className="mb-3" key={category}>
               <div className="mb-1 flex items-center justify-between">
                 <span className="text-[11.5px] text-muted-foreground">
-                  {t(
-                    CATEGORY_KEY_MAP[cfg?.label ?? category] ??
-                      cfg?.label ??
-                      category
-                  )}
+                  {getCategoryLabel(cfg?.label ?? category, t)}
                 </span>
                 <span
                   className="font-mono text-[11px]"
                   style={{ color: cfg?.color }}
                 >
-                  {t("profile.stats.solvedCount", { solved })}
+                  {t("{solved} solved", { solved: String(solved) })}
                 </span>
               </div>
               <div className="h-[3px] overflow-hidden rounded-full bg-white/[0.06]">

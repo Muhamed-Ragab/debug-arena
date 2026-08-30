@@ -10,7 +10,7 @@ import {
   Smartphone,
   Tablet,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +41,7 @@ interface SessionManagerProps {
 export function SessionManager({
   sessions: initialSessions,
 }: SessionManagerProps) {
-  const t = useTranslations();
+  const t = useExtracted();
   const [sessions, setSessions] = useState<SessionData[]>(initialSessions);
   const [isRevoking, setIsRevoking] = useState<string | null>(null);
 
@@ -54,25 +54,19 @@ export function SessionManager({
       const res = await revokeSessionAction({ sessionId: id });
       if (res?.validationErrors) {
         const flat = flattenValidationErrors(res.validationErrors);
-        toast.error(
-          t(
-            (flat.sessionId ??
-              flat._errors ??
-              "error.validationFailed") as string
-          )
-        );
+        toast.error(flat.sessionId ?? flat._errors ?? "Validation failed");
         return;
       }
       if (res?.serverError) {
-        toast.error(t(res.serverError as string));
+        toast.error(res.serverError);
         return;
       }
       if (res?.data?.success) {
         setSessions((prev) => prev.filter((s) => s.id !== id));
-        toast.success(t("profile.session.revoked"));
+        toast.success(t("Session revoked"));
       }
     } catch {
-      toast.error(t("error.somethingWrong"));
+      toast.error(t("Something went wrong"));
     } finally {
       setIsRevoking(null);
     }
@@ -84,19 +78,19 @@ export function SessionManager({
       const res = await revokeAllOtherSessionsAction({});
       if (res?.validationErrors) {
         const flat = flattenValidationErrors(res.validationErrors);
-        toast.error(t((flat._errors ?? "error.validationFailed") as string));
+        toast.error(flat._errors ?? "Validation failed");
         return;
       }
       if (res?.serverError) {
-        toast.error(t(res.serverError as string));
+        toast.error(res.serverError);
         return;
       }
       if (res?.data?.success) {
         setSessions((prev) => prev.filter((s) => s.current));
-        toast.success(t("profile.session.othersRevoked"));
+        toast.success(t("Other sessions revoked"));
       }
     } catch {
-      toast.error(t("error.somethingWrong"));
+      toast.error(t("Something went wrong"));
     } finally {
       setIsRevoking(null);
     }
@@ -109,12 +103,14 @@ export function SessionManager({
           <div>
             <div className="flex items-center gap-3">
               <CardTitle className="text-base">
-                {t("profile.session.title")}
+                {t("Active sessions")}
               </CardTitle>
               <SignOutButton />
             </div>
             <CardDescription className="mt-1">
-              {t("profile.session.subtitle")}
+              {t(
+                "Devices signed in to your account. Revoke anything you don't recognize."
+              )}
             </CardDescription>
           </div>
           <Button
@@ -125,8 +121,8 @@ export function SessionManager({
           >
             <LogOut size={14} />
             {isRevoking === "all"
-              ? t("profile.session.revoking")
-              : t("profile.session.revokeAll")}
+              ? t("Revoking...")
+              : t("Revoke all other sessions")}
           </Button>
         </div>
       </CardHeader>
@@ -159,7 +155,7 @@ export function SessionManager({
                         className="gap-1 font-medium text-[11px]"
                         variant="success"
                       >
-                        <Check size={11} /> {t("profile.session.thisDevice")}
+                        <Check size={11} /> {t("This device")}
                       </Badge>
                     )}
                     {Boolean(s.newLogin) && (
@@ -167,8 +163,7 @@ export function SessionManager({
                         className="gap-1 font-medium text-[11px]"
                         variant="warning"
                       >
-                        <AlertTriangle size={11} />{" "}
-                        {t("profile.session.newLogin")}
+                        <AlertTriangle size={11} /> {t("New login")}
                       </Badge>
                     )}
                   </div>
@@ -192,9 +187,7 @@ export function SessionManager({
                     size="sm"
                     variant="destructive"
                   >
-                    {loading
-                      ? t("profile.session.revoking")
-                      : t("profile.session.revoke")}
+                    {loading ? t("Revoking...") : t("Revoke")}
                   </Button>
                 )}
               </li>
@@ -204,7 +197,11 @@ export function SessionManager({
 
         <div className="mt-5 flex items-start gap-2 rounded-md border border-border bg-inset px-3 py-2.5 text-[12px] text-muted-foreground">
           <ShieldAlert className="mt-0.5 shrink-0 text-primary" size={14} />
-          <span>{t("profile.session.securityHint")}</span>
+          <span>
+            {t(
+              "New-login events are flagged here so you can spot unexpected sessions. We never notify via the same channel an attacker could control."
+            )}
+          </span>
         </div>
       </CardContent>
     </Card>

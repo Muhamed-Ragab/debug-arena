@@ -3,7 +3,6 @@ import { ActionError, ConflictError } from "@/lib/safe-action";
 import { createCategoryService, slugify } from "./service";
 import type { CategoryRepository } from "./types";
 
-const ALREADY_EXISTS_REGEX = /already exists/;
 const UUID_1 = "550e8400-e29b-41d4-a716-446655440001";
 const UUID_2 = "550e8400-e29b-41d4-a716-446655440002";
 const UUID_OTHER = "550e8400-e29b-41d4-a716-446655440099";
@@ -107,7 +106,7 @@ describe("category/service", () => {
         return false;
       }
       return (
-        err.message.includes("already exists") &&
+        err.message === "error.categorySlugExists" &&
         err.code === "CONFLICT" &&
         err.status === 409
       );
@@ -173,7 +172,7 @@ describe("category/service", () => {
     }
     expect(err).toBeInstanceOf(ConflictError);
     expect(err).toBeInstanceOf(ActionError);
-    expect((err as Error).message).toMatch(ALREADY_EXISTS_REGEX);
+    expect((err as Error).message).toBe("error.categorySlugExists");
     expect((err as ConflictError).code).toBe("CONFLICT");
     expect((err as ConflictError).status).toBe(409);
     expect(repo.update).not.toHaveBeenCalled();
@@ -200,8 +199,7 @@ describe("category/service", () => {
     await expect(svc.deleteCategory(UUID_1)).rejects.toSatisfy(
       (err: unknown) =>
         err instanceof ConflictError &&
-        err.message.includes("challenges use") &&
-        err.message.includes("3") &&
+        (err as Error).message === "error.cannotDeleteCategory" &&
         (err as ConflictError).code === "CONFLICT"
     );
     expect(repo.deleteById).not.toHaveBeenCalled();

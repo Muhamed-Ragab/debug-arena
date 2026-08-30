@@ -1,0 +1,2277 @@
+msgid ""
+msgstr ""
+"Language: en\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @eloqnt/format-po\n"
+"X-Message-Key: msgctxt\n"
+
+#: src/app/(admin)/admin/analytics/page.tsx
+msgctxt "7TIhsI"
+msgid "Analytics & Statistics"
+msgstr "Analytics & Statistics"
+
+#: src/app/(admin)/admin/analytics/page.tsx
+#: src/features/analytics/components/AnalyticsOverview.tsx
+msgctxt "ZQ_zPz"
+msgid "No data available yet."
+msgstr "No data available yet."
+
+#: src/app/(admin)/admin/analytics/page.tsx
+msgctxt "ZGmpss"
+msgid "Platform usage, challenge performance, and community insights. Admins excluded."
+msgstr "Platform usage, challenge performance, and community insights. Admins excluded."
+
+#: src/app/(admin)/admin/health/page.tsx
+#: src/features/admin/components/HealthPanel.tsx
+#: src/i18n/extraction.test.tsx
+msgctxt "jcaJuY"
+msgid "System Health"
+msgstr "System Health"
+
+#: src/app/(admin)/admin/health/page.tsx
+#: src/features/admin/components/HealthPanel.tsx
+msgctxt "r_y0ID"
+msgid "Live status of database and Redis services."
+msgstr "Live status of database and Redis services."
+
+#: src/app/(admin)/admin/page.tsx
+msgctxt "3Vr8ps"
+msgid "Admin Dashboard"
+msgstr "Admin Dashboard"
+
+#: src/app/(admin)/admin/page.tsx
+msgctxt "32NKgG"
+msgid "Overview of platform health, content, and community."
+msgstr "Overview of platform health, content, and community."
+
+#: src/app/(admin)/admin/page.tsx
+#: src/features/analytics/components/AnalyticsOverview.tsx
+msgctxt "_VwiLT"
+msgid "Total Users"
+msgstr "Total Users"
+
+#: src/app/(admin)/admin/page.tsx
+msgctxt "U9LIX5"
+msgid "Total Challenges"
+msgstr "Total Challenges"
+
+#: src/app/(admin)/admin/page.tsx
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/analytics/components/AnalyticsOverview.tsx
+msgctxt "w7tf2z"
+msgid "Published"
+msgstr "Published"
+
+#: src/app/(admin)/admin/page.tsx
+#: src/features/analytics/components/AnalyticsOverview.tsx
+msgctxt "2atspc"
+msgid "Drafts"
+msgstr "Drafts"
+
+#: src/app/(admin)/admin/page.tsx
+msgctxt "-C7FAR"
+msgid "Solve Rate"
+msgstr "Solve Rate"
+
+#: src/app/(admin)/admin/page.tsx
+msgctxt "PaKsDc"
+msgid "Total Submissions"
+msgstr "Total Submissions"
+
+#: src/app/(admin)/admin/page.tsx
+msgctxt "WbxsbH"
+msgid "Quick Links"
+msgstr "Quick Links"
+
+#: src/app/(admin)/admin/page.tsx
+#: src/components/layout/AdminSidebar.tsx
+#: src/components/layout/Sidebar.tsx
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "VKb1MS"
+msgid "Categories"
+msgstr "Categories"
+
+#: src/app/(admin)/admin/page.tsx
+#: src/components/layout/AdminSidebar.tsx
+msgctxt "GZJpDf"
+msgid "Analytics"
+msgstr "Analytics"
+
+#: src/app/(admin)/admin/page.tsx
+#: src/components/layout/AdminSidebar.tsx
+msgctxt "kbtuy3"
+msgid "Health Check"
+msgstr "Health Check"
+
+#: src/app/(admin)/admin/page.tsx
+#: src/components/layout/AdminSidebar.tsx
+msgctxt "YDMrKK"
+msgid "Users"
+msgstr "Users"
+
+#: src/app/(admin)/admin/page.tsx
+msgctxt "KzQrt6"
+msgid "Recent Submissions"
+msgstr "Recent Submissions"
+
+#: src/app/(admin)/admin/page.tsx
+msgctxt "QB07Ok"
+msgid "No recent submissions."
+msgstr "No recent submissions."
+
+#: src/app/(admin)/admin/users/page.tsx
+msgctxt "J_X6rJ"
+msgid "User Management"
+msgstr "User Management"
+
+#: src/app/(admin)/admin/users/page.tsx
+msgctxt "M3fHPr"
+msgid "Manage community members. Admins are excluded from gameplay ranking."
+msgstr "Manage community members. Admins are excluded from gameplay ranking."
+
+#: src/app/(admin)/admin/users/users-client.tsx
+msgctxt "xerM7K"
+msgid "Banned"
+msgstr "Banned"
+
+#: src/app/(admin)/admin/users/users-client.tsx
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "3a5wL8"
+msgid "Active"
+msgstr "Active"
+
+#: src/app/(admin)/admin/users/users-client.tsx
+msgctxt "pFpTIl"
+msgid "Search by name or email..."
+msgstr "Search by name or email..."
+
+#: src/app/(admin)/admin/users/users-client.tsx
+msgctxt "BXFXnH"
+msgid "No users found."
+msgstr "No users found."
+
+#: src/app/(admin)/admin/users/users-client.tsx
+msgctxt "6U4eIn"
+msgid "Unban"
+msgstr "Unban"
+
+#: src/app/(admin)/admin/users/users-client.tsx
+msgctxt "XtUrMc"
+msgid "Ban"
+msgstr "Ban"
+
+#: src/app/(app)/challenges/error.tsx
+#: src/app/error.tsx
+#: src/components/shared/offline-banner.tsx
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+#: src/features/category/components/CategoryManagement.tsx
+#: src/features/profile/components/EditProfileForm.tsx
+#: src/features/profile/components/LinkedAccounts.tsx
+#: src/features/profile/components/SessionManager.tsx
+msgctxt "JqiqNj"
+msgid "Something went wrong"
+msgstr "Something went wrong"
+
+#: src/app/(app)/challenges/error.tsx
+#: src/app/error.tsx
+#: src/components/shared/offline-banner.tsx
+msgctxt "q5KjVi"
+msgid "Service temporarily unavailable. Please try again."
+msgstr "Service temporarily unavailable. Please try again."
+
+#: src/app/(app)/challenges/error.tsx
+#: src/app/error.tsx
+msgctxt "PWOCUB"
+msgid "Error ID: {digest}"
+msgstr "Error ID: {digest}"
+
+#: src/app/not-found.tsx
+msgctxt "CxbWUG"
+msgid "404 // NULL_POINTER_EXCEPTION"
+msgstr "404 // NULL_POINTER_EXCEPTION"
+
+#: src/app/not-found.tsx
+msgctxt "QCs2YF"
+msgid "Page Not Found in the Arena"
+msgstr "Page Not Found in the Arena"
+
+#: src/app/not-found.tsx
+msgctxt "YeeC8V"
+msgid "The breakpoint you set led nowhere. The requested route does not exist or may have been refactored out of production."
+msgstr "The breakpoint you set led nowhere. The requested route does not exist or may have been refactored out of production."
+
+#: src/app/not-found.tsx
+msgctxt "BM1nej"
+msgid "debugger.log"
+msgstr "debugger.log"
+
+#: src/app/not-found.tsx
+msgctxt "pCDj9h"
+msgid "Error: ROUTE_NOT_FOUND"
+msgstr "Error: ROUTE_NOT_FOUND"
+
+#: src/app/not-found.tsx
+msgctxt "G0AiVi"
+msgid "at resolveRoute (debug-arena://router.ts:404:12)"
+msgstr "at resolveRoute (debug-arena://router.ts:404:12)"
+
+#: src/app/not-found.tsx
+msgctxt "2AyxG8"
+msgid "at handleRequest (debug-arena://server.ts:89:4)"
+msgstr "at handleRequest (debug-arena://server.ts:89:4)"
+
+#: src/app/not-found.tsx
+msgctxt "JlraE6"
+msgid "Suggested Fix: Navigate back to the challenge lobby."
+msgstr "Suggested Fix: Navigate back to the challenge lobby."
+
+#: src/app/not-found.tsx
+msgctxt "0X9wjp"
+msgid "Enter Challenges"
+msgstr "Enter Challenges"
+
+#: src/app/not-found.tsx
+msgctxt "jT4ZPw"
+msgid "Return Home"
+msgstr "Return Home"
+
+#: src/components/layout/AdminShell.tsx
+#: src/components/layout/AppShell.tsx
+msgctxt "SRsuWF"
+msgid "Close navigation"
+msgstr "Close navigation"
+
+#: src/components/layout/AdminSidebar.tsx
+msgctxt "hzSNj4"
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: src/components/layout/AdminSidebar.tsx
+#: src/components/layout/Sidebar.tsx
+msgctxt "3dQSAN"
+msgid "AI Question Studio"
+msgstr "AI Question Studio"
+
+#: src/components/layout/AdminSidebar.tsx
+#: src/components/layout/Sidebar.tsx
+msgctxt "crL6uF"
+msgid "Admin Portal"
+msgstr "Admin Portal"
+
+#: src/components/layout/AdminSidebar.tsx
+#: src/components/layout/Sidebar.tsx
+msgctxt "Pe0ogR"
+msgid "Theme"
+msgstr "Theme"
+
+#: src/components/layout/AdminSidebar.tsx
+#: src/components/layout/Sidebar.tsx
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "y1Z3or"
+msgid "Language"
+msgstr "Language"
+
+#: src/components/layout/Sidebar.tsx
+#: src/features/browser/components/ChallengeBrowser.tsx
+#: src/features/challenge/components/ChallengeScreen.tsx
+#: src/features/results/components/ResultsScreen.tsx
+msgctxt "___zLu"
+msgid "Challenges"
+msgstr "Challenges"
+
+#: src/components/layout/Sidebar.tsx
+#: src/features/leaderboard/components/LeaderboardScreen.tsx
+msgctxt "6it6mU"
+msgid "Leaderboard"
+msgstr "Leaderboard"
+
+#: src/components/layout/Sidebar.tsx
+#: src/features/profile/components/ProfileScreen.tsx
+#: src/features/profile/ProfilePage.tsx
+msgctxt "itPgxd"
+msgid "Profile"
+msgstr "Profile"
+
+#: src/components/layout/Sidebar.tsx
+#: src/features/profile/ProfileSettingsPage.tsx
+msgctxt "D3idYv"
+msgid "Settings"
+msgstr "Settings"
+
+#: src/components/layout/Sidebar.tsx
+msgctxt "fBg-7V"
+msgid "Navigation"
+msgstr "Navigation"
+
+#: src/components/layout/TopBar.tsx
+msgctxt "yZJxVS"
+msgid "Developer"
+msgstr "Developer"
+
+#: src/components/layout/TopBar.tsx
+#: src/features/auth/components/SignOutButton.tsx
+msgctxt "PlBReU"
+msgid "Log out"
+msgstr "Log out"
+
+#: src/components/preferences/LanguageSwitcher.tsx
+msgctxt "eVlu1R"
+msgid "Select language"
+msgstr "Select language"
+
+#: src/components/preferences/ThemeToggle.tsx
+msgctxt "3cc4Ct"
+msgid "Light"
+msgstr "Light"
+
+#: src/components/preferences/ThemeToggle.tsx
+msgctxt "tOdNiY"
+msgid "Dark"
+msgstr "Dark"
+
+#: src/components/preferences/ThemeToggle.tsx
+msgctxt "-CwN9C"
+msgid "System"
+msgstr "System"
+
+#: src/components/preferences/ThemeToggle.tsx
+msgctxt "qJ010K"
+msgid "Select theme"
+msgstr "Select theme"
+
+#: src/components/shared/FormattedMarkdown.tsx
+msgctxt "tl6nvu"
+msgid "code"
+msgstr "code"
+
+#: src/components/shared/FormattedMarkdown.tsx
+msgctxt "p556q3"
+msgid "Copied"
+msgstr "Copied"
+
+#: src/components/shared/FormattedMarkdown.tsx
+msgctxt "4l6vz1"
+msgid "Copy"
+msgstr "Copy"
+
+#: src/components/shared/offline-banner.tsx
+msgctxt "vS1TVs"
+msgid "You are offline"
+msgstr "You are offline"
+
+#: src/components/shared/offline-banner.tsx
+msgctxt "FazwRl"
+msgid "Try again"
+msgstr "Try again"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "zSMvde"
+msgid "Challenge published live to the arena!"
+msgstr "Challenge published live to the arena!"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "6ScFHC"
+msgid "Challenge status set to draft."
+msgstr "Challenge status set to draft."
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "-x7sJS"
+msgid "Challenge deleted successfully."
+msgstr "Challenge deleted successfully."
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "W6nwjo"
+msgid "Draft"
+msgstr "Draft"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/analytics/components/AnalyticsOverview.tsx
+msgctxt "0HT-Ib"
+msgid "Archived"
+msgstr "Archived"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "IowmXh"
+msgid "Search challenges by title or category..."
+msgstr "Search challenges by title or category..."
+
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "tzMNF3"
+msgid "Status"
+msgstr "Status"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "tADQQm"
+msgid "All Statuses"
+msgstr "All Statuses"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "aH4De2"
+msgid "Source"
+msgstr "Source"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "l9m_zb"
+msgid "All Sources"
+msgstr "All Sources"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "zbbPZ0"
+msgid "AI Generated"
+msgstr "AI Generated"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "M59JhX"
+msgid "Manual"
+msgstr "Manual"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "rGmxAI"
+msgid "Difficulty"
+msgstr "Difficulty"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "0utl4c"
+msgid "All Difficulties"
+msgstr "All Difficulties"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "6n4LpX"
+msgid "Easy"
+msgstr "Easy"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "ovJ26C"
+msgid "Medium"
+msgstr "Medium"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "n8uxry"
+msgid "Hard"
+msgstr "Hard"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "9MidH4"
+msgid "Challenge"
+msgstr "Challenge"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "ccXLVi"
+msgid "Category"
+msgstr "Category"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "d6avGo"
+msgid "Submissions"
+msgstr "Submissions"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "wL7VAE"
+msgid "Actions"
+msgstr "Actions"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "I6xRGN"
+msgid "AI Agent"
+msgstr "AI Agent"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "aTf36y"
+msgid "total"
+msgstr "total"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "a5ah9q"
+msgid "solves"
+msgstr "solves"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "s7wrV3"
+msgid "View in Arena"
+msgstr "View in Arena"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "wQ2pu5"
+msgid "Unpublish to Draft"
+msgstr "Unpublish to Draft"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "m-A5UM"
+msgid "Publish to Arena"
+msgstr "Publish to Arena"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "RSXGEV"
+msgid "Delete Challenge"
+msgstr "Delete Challenge"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "SqPD8G"
+msgid "No challenges found matching your filters."
+msgstr "No challenges found matching your filters."
+
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "2oCaym"
+msgid "Are you sure?"
+msgstr "Are you sure?"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "45wceM"
+msgid "Are you sure you want to delete this challenge?"
+msgstr "Are you sure you want to delete this challenge?"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/category/components/CategoryManagement.tsx
+#: src/features/profile/components/DangerZone.tsx
+msgctxt "47FYwb"
+msgid "Cancel"
+msgstr "Cancel"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/category/components/CategoryManagement.tsx
+#: src/features/profile/components/DangerZone.tsx
+msgctxt "noZdV2"
+msgid "Deleting..."
+msgstr "Deleting..."
+
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/profile/components/DangerZone.tsx
+msgctxt "XHIajl"
+msgid "Permanently delete"
+msgstr "Permanently delete"
+
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgctxt "-tFs1L"
+msgid "Challenge & Question Studio"
+msgstr "Challenge & Question Studio"
+
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgctxt "iHN12u"
+msgid "Admin"
+msgstr "Admin"
+
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgctxt "O3Rz9a"
+msgid "Generate with AI or manually author debugging challenges with automated diff calculations, formatted code blocks, and Socratic guidance."
+msgstr "Generate with AI or manually author debugging challenges with automated diff calculations, formatted code blocks, and Socratic guidance."
+
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgctxt "q4EmsW"
+msgid "Total:"
+msgstr "Total:"
+
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgctxt "7g4LRD"
+msgid "AI Synthesized:"
+msgstr "AI Synthesized:"
+
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgctxt "7iDdU4"
+msgid "Published:"
+msgstr "Published:"
+
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgctxt "DYW4FV"
+msgid "Drafts:"
+msgstr "Drafts:"
+
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgctxt "TmtZAw"
+msgid "AI Question Generator"
+msgstr "AI Question Generator"
+
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgctxt "eesOPI"
+msgid "Manual Challenge Authoring"
+msgstr "Manual Challenge Authoring"
+
+#: src/features/admin/components/AdminQuestionsPage.tsx
+msgctxt "5wldWM"
+msgid "Challenge Management ({count})"
+msgstr "Challenge Management ({count})"
+
+#: src/features/admin/components/HealthPanel.tsx
+msgctxt "o9y8_n"
+msgid "Refreshing..."
+msgstr "Refreshing..."
+
+#: src/features/admin/components/HealthPanel.tsx
+msgctxt "rELDbB"
+msgid "Refresh"
+msgstr "Refresh"
+
+#: src/features/admin/components/HealthPanel.tsx
+msgctxt "Dnob31"
+msgid "Operational"
+msgstr "Operational"
+
+#: src/features/admin/components/HealthPanel.tsx
+msgctxt "VQDmmK"
+msgid "Degraded"
+msgstr "Degraded"
+
+#: src/features/admin/components/HealthPanel.tsx
+msgctxt "jjTzIr"
+msgid "Database"
+msgstr "Database"
+
+#: src/features/admin/components/HealthPanel.tsx
+msgctxt "2n9biM"
+msgid "Latency"
+msgstr "Latency"
+
+#: src/features/admin/components/HealthPanel.tsx
+msgctxt "jQY7K7"
+msgid "Redis"
+msgstr "Redis"
+
+#: src/features/admin/components/HealthPanel.tsx
+msgctxt "u81G9-"
+msgid "Uptime"
+msgstr "Uptime"
+
+#: src/features/admin/components/HealthPanel.tsx
+msgctxt "gycNgQ"
+msgid "Checked at"
+msgstr "Checked at"
+
+#: src/features/admin/components/HealthPanel.tsx
+msgctxt "HVo3Z9"
+msgid "Auto-refresh every 30s"
+msgstr "Auto-refresh every 30s"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "2K3pd2"
+msgid "Challenge must have at least one file."
+msgstr "Challenge must have at least one file."
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "AwxDZN"
+msgid "Auto-calculated diff and detected buggy lines: [{start}, {end}]"
+msgstr "Auto-calculated diff and detected buggy lines: [{start}, {end}]"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "fdTk7H"
+msgid "Challenge title is required."
+msgstr "Challenge title is required."
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "C7lFbk"
+msgid "Scenario prompt is required."
+msgstr "Scenario prompt is required."
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "z6LCcq"
+msgid "Root cause summary is required."
+msgstr "Root cause summary is required."
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "WmBbOu"
+msgid "Challenge draft saved successfully."
+msgstr "Challenge draft saved successfully."
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+#: src/features/category/components/CategoryManagement.tsx
+#: src/features/profile/components/EditProfileForm.tsx
+#: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "cT0yxo"
+msgid "Validation failed"
+msgstr "Validation failed"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "iNMYvh"
+msgid "Failed to save challenge."
+msgstr "Failed to save challenge."
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "aGsEY3"
+msgid "Manual Challenge Authoring Studio"
+msgstr "Manual Challenge Authoring Studio"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "sOqJG0"
+msgid "Create and configure debugging scenarios with custom multi-file code, test cases, and Socratic hints."
+msgstr "Create and configure debugging scenarios with custom multi-file code, test cases, and Socratic hints."
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "YH2E7O"
+msgid "Save Draft"
+msgstr "Save Draft"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "0mw5ER"
+msgid "Challenge created and published successfully!"
+msgstr "Challenge created and published successfully!"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "Ft1Xfb"
+msgid "Play in Arena"
+msgstr "Play in Arena"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "oHQuOE"
+msgid "Challenge Title *"
+msgstr "Challenge Title *"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "hYSRRp"
+msgid "Category *"
+msgstr "Category *"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "eZy16U"
+msgid "Select category..."
+msgstr "Select category..."
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "uvGIUd"
+msgid "Difficulty *"
+msgstr "Difficulty *"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "c8rNZE"
+msgid "Select difficulty..."
+msgstr "Select difficulty..."
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "zQLEfz"
+msgid "Format"
+msgstr "Format"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "qC_BxW"
+msgid "Code Snippet / Multi-file"
+msgstr "Code Snippet / Multi-file"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "3Xb8cA"
+msgid "Log Trace Only"
+msgstr "Log Trace Only"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "pbvZY7"
+msgid "UI Recording"
+msgstr "UI Recording"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "P0PLlQ"
+msgid "Points"
+msgstr "Points"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "IoBx6M"
+msgid "Time Limit"
+msgstr "Time Limit"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "hTHvxx"
+msgid "Scenario Markdown Description *"
+msgstr "Scenario Markdown Description *"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "fa0_a_"
+msgid "Edit Raw Markdown"
+msgstr "Edit Raw Markdown"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "G7oKL1"
+msgid "Preview Formatted Markdown"
+msgstr "Preview Formatted Markdown"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "eFBGp-"
+msgid "Challenge Files & Bug Injection"
+msgstr "Challenge Files & Bug Injection"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "LuMycs"
+msgid "Auto-Compute Diff & Lines"
+msgstr "Auto-Compute Diff & Lines"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "fc2iho"
+msgid "Add File"
+msgstr "Add File"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "dqIHO5"
+msgid "Entry File"
+msgstr "Entry File"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "Z4xjOI"
+msgid "Buggy Code ({name})"
+msgstr "Buggy Code ({name})"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "LPCXh-"
+msgid "Fixed Reference Code ({name})"
+msgstr "Fixed Reference Code ({name})"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "81Gn8v"
+msgid "Buggy Lines Location (1-Indexed):"
+msgstr "Buggy Lines Location (1-Indexed):"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "xP3hmB"
+msgid "Start:"
+msgstr "Start:"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "XYQZwE"
+msgid "End:"
+msgstr "End:"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "5z6Yl7"
+msgid "(Players get graded on whether their selected lines overlap this range)"
+msgstr "(Players get graded on whether their selected lines overlap this range)"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "V7CqvG"
+msgid "Reference Fix Explanation"
+msgstr "Reference Fix Explanation"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "rqcXTG"
+msgid "Progressive Socratic Hints"
+msgstr "Progressive Socratic Hints"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+#: src/features/challenge/components/HintsPanel.tsx
+msgctxt "P5-DZv"
+msgid "Hint {order}"
+msgstr "Hint {order}"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "01qqoA"
+msgid "Canonical Root Cause Breakdown *"
+msgstr "Canonical Root Cause Breakdown *"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "njurlR"
+msgid "Prevention Notes & Safeguards"
+msgstr "Prevention Notes & Safeguards"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "rbOe9R"
+msgid "Save Challenge Draft"
+msgstr "Save Challenge Draft"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "8FAr1Z"
+msgid "AI Agent generated challenge draft successfully!"
+msgstr "AI Agent generated challenge draft successfully!"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "4bLLXD"
+msgid "Failed to generate challenge."
+msgstr "Failed to generate challenge."
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "VXpxut"
+msgid "Challenge refined by AI Agent!"
+msgstr "Challenge refined by AI Agent!"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "UZThoe"
+msgid "Failed to refine challenge draft."
+msgstr "Failed to refine challenge draft."
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "DHYyf-"
+msgid "AI Challenge Synthesis Agent"
+msgstr "AI Challenge Synthesis Agent"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "oCQtO6"
+msgid "Synthesize high-fidelity debugging scenarios, buggy multi-file code, reference fixes, and progressive hints."
+msgstr "Synthesize high-fidelity debugging scenarios, buggy multi-file code, reference fixes, and progressive hints."
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "WQjks0"
+msgid "Llama 3.3 70B & Vector Embedder"
+msgstr "Llama 3.3 70B & Vector Embedder"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "ySqbxP"
+msgid "Scenario Presets"
+msgstr "Scenario Presets"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "D3kwck"
+msgid "Scenario / Bug Topic Idea"
+msgstr "Scenario / Bug Topic Idea"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "JCQ4GG"
+msgid "Custom Instructions (Optional)"
+msgstr "Custom Instructions (Optional)"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "y8VKxi"
+msgid "Synthesizing Challenge with AI..."
+msgstr "Synthesizing Challenge with AI..."
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "Lnhipk"
+msgid "Synthesize Challenge Draft"
+msgstr "Synthesize Challenge Draft"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "E048_V"
+msgid "Save as Draft"
+msgstr "Save as Draft"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "QhqEOH"
+msgid "Challenge is saved and ready in the database!"
+msgstr "Challenge is saved and ready in the database!"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "c3nIfh"
+msgid "Scenario Prompt"
+msgstr "Scenario Prompt"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "zL7n72"
+msgid "Buggy Code"
+msgstr "Buggy Code"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "hSeQ9m"
+msgid "Reference Fix & Diff"
+msgstr "Reference Fix & Diff"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "Oi5f_r"
+msgid "Socratic Hints"
+msgstr "Socratic Hints"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "CoUREt"
+msgid "Root Cause & Prevention"
+msgstr "Root Cause & Prevention"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "wGTA5l"
+msgid "Verification Tests"
+msgstr "Verification Tests"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "9FnBQk"
+msgid "Scenario Markdown Description"
+msgstr "Scenario Markdown Description"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "iskvS8"
+msgid "Fix Explanation:"
+msgstr "Fix Explanation:"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "XCpI7D"
+msgid "Canonical Root Cause Breakdown"
+msgstr "Canonical Root Cause Breakdown"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "yWen2r"
+msgid "No specific automated test scripts defined for this challenge."
+msgstr "No specific automated test scripts defined for this challenge."
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "iJZ_lK"
+msgid "AI Agent Refinement Chat"
+msgstr "AI Agent Refinement Chat"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "UtjyCi"
+msgid "Refine Draft"
+msgstr "Refine Draft"
+
+#: src/features/analytics/components/AnalyticsOverview.tsx
+msgctxt "4DGgIJ"
+msgid "Challenges by Status"
+msgstr "Challenges by Status"
+
+#: src/features/analytics/components/AnalyticsOverview.tsx
+msgctxt "-AaqxM"
+msgid "Overall Solve Rate"
+msgstr "Overall Solve Rate"
+
+#: src/features/analytics/components/AnalyticsOverview.tsx
+msgctxt "or07A5"
+msgid "Top Categories by Attempts"
+msgstr "Top Categories by Attempts"
+
+#: src/features/analytics/components/AnalyticsOverview.tsx
+msgctxt "9cnZEA"
+msgid "Submissions (Last 30 Days)"
+msgstr "Submissions (Last 30 Days)"
+
+#: src/features/analytics/components/AnalyticsOverview.tsx
+msgctxt "6-FnP-"
+msgid "Avg Score per Category"
+msgstr "Avg Score per Category"
+
+#: src/features/auth/ForgotPasswordPage.tsx
+msgctxt "p-kmJg"
+msgid "Reset your password"
+msgstr "Reset your password"
+
+#: src/features/auth/ForgotPasswordPage.tsx
+msgctxt "GYw-Xd"
+msgid "Enter your email and we'll send a reset link."
+msgstr "Enter your email and we'll send a reset link."
+
+#: src/features/auth/ForgotPasswordPage.tsx
+#: src/features/auth/LoginPage.tsx
+#: src/features/auth/RegisterPage.tsx
+msgctxt "sy-pv5"
+msgid "Email"
+msgstr "Email"
+
+#: src/features/auth/ForgotPasswordPage.tsx
+msgctxt "DkQ5Q8"
+msgid "Send reset link"
+msgstr "Send reset link"
+
+#: src/features/auth/ForgotPasswordPage.tsx
+msgctxt "DFWVax"
+msgid "If that account exists, a reset link is on its way."
+msgstr "If that account exists, a reset link is on its way."
+
+#: src/features/auth/ForgotPasswordPage.tsx
+msgctxt "aDRlcz"
+msgid "Remembered it?"
+msgstr "Remembered it?"
+
+#: src/features/auth/ForgotPasswordPage.tsx
+msgctxt "7tSUe8"
+msgid "Back to login"
+msgstr "Back to login"
+
+#: src/features/auth/LoginPage.tsx
+msgctxt "UKxoV8"
+msgid "Welcome back"
+msgstr "Welcome back"
+
+#: src/features/auth/LoginPage.tsx
+msgctxt "pc0-8E"
+msgid "Log in to keep diagnosing."
+msgstr "Log in to keep diagnosing."
+
+#: src/features/auth/LoginPage.tsx
+#: src/features/auth/RegisterPage.tsx
+msgctxt "Ntjkqd"
+msgid "or"
+msgstr "or"
+
+#: src/features/auth/LoginPage.tsx
+#: src/features/auth/RegisterPage.tsx
+msgctxt "5sg7KC"
+msgid "Password"
+msgstr "Password"
+
+#: src/features/auth/LoginPage.tsx
+msgctxt "V_JHlm"
+msgid "Forgot password?"
+msgstr "Forgot password?"
+
+#: src/features/auth/LoginPage.tsx
+#: src/features/auth/RegisterPage.tsx
+#: src/features/landing/LandingPage.tsx
+msgctxt "odXlk8"
+msgid "Log in"
+msgstr "Log in"
+
+#: src/features/auth/LoginPage.tsx
+msgctxt "ivmaje"
+msgid "New here?"
+msgstr "New here?"
+
+#: src/features/auth/LoginPage.tsx
+msgctxt "0vL5u1"
+msgid "Create an account"
+msgstr "Create an account"
+
+#: src/features/auth/RegisterPage.tsx
+msgctxt "yEH80I"
+msgid "Create your arena"
+msgstr "Create your arena"
+
+#: src/features/auth/RegisterPage.tsx
+msgctxt "PBDQqF"
+msgid "Start diagnosing real-world bugs."
+msgstr "Start diagnosing real-world bugs."
+
+#: src/features/auth/RegisterPage.tsx
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "dOQCL8"
+msgid "Display name"
+msgstr "Display name"
+
+#: src/features/auth/RegisterPage.tsx
+msgctxt "huqKGl"
+msgid "Create account"
+msgstr "Create account"
+
+#: src/features/auth/RegisterPage.tsx
+msgctxt "Ma9M_f"
+msgid "By creating an account you agree to the terms. We'll never page you at 2am."
+msgstr "By creating an account you agree to the terms. We'll never page you at 2am."
+
+#: src/features/auth/RegisterPage.tsx
+msgctxt "uCk8r-"
+msgid "Already have an account?"
+msgstr "Already have an account?"
+
+#: src/features/browser/components/ChallengeBrowser.tsx
+#: src/features/leaderboard/components/LeaderboardScreen.tsx
+#: src/features/profile/components/ProfileScreen.tsx
+#: src/features/profile/ProfilePage.tsx
+#: src/features/profile/ProfileSettingsPage.tsx
+msgctxt "rTuUcF"
+msgid "Arena"
+msgstr "Arena"
+
+#: src/features/browser/components/ChallengeBrowser.tsx
+msgctxt "1qSXoX"
+msgid "Pick a bug, read the scenario, and ship a root-cause diagnosis."
+msgstr "Pick a bug, read the scenario, and ship a root-cause diagnosis."
+
+#: src/features/browser/components/ChallengeBrowser.tsx
+msgctxt "OXU75U"
+msgid "No challenges match the current filters."
+msgstr "No challenges match the current filters."
+
+#: src/features/browser/components/ChallengeCard.tsx
+msgctxt "Idq4oc"
+msgid "{count} solves"
+msgstr "{count} solves"
+
+#: src/features/browser/components/ChallengeCard.tsx
+msgctxt "c3XvPF"
+msgid "~30m"
+msgstr "~30m"
+
+#: src/features/browser/components/ChallengeCard.tsx
+#: src/features/leaderboard/components/LeaderboardTable.tsx
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+msgctxt "oIdbxt"
+msgid "Solved"
+msgstr "Solved"
+
+#: src/features/browser/components/ChallengeCard.tsx
+msgctxt "FzL1V-"
+msgid "Not attempted"
+msgstr "Not attempted"
+
+#: src/features/browser/components/ChallengeCard.tsx
+msgctxt "R-J5ox"
+msgid "Review"
+msgstr "Review"
+
+#: src/features/browser/components/ChallengeCard.tsx
+msgctxt "wJe4sn"
+msgid "Start Debugging"
+msgstr "Start Debugging"
+
+#: src/features/browser/components/ChallengeFilters.tsx
+msgctxt "1X6HtI"
+msgid "All Categories"
+msgstr "All Categories"
+
+#: src/features/browser/components/ChallengeFilters.tsx
+msgctxt "TPMb0i"
+msgid "All Levels"
+msgstr "All Levels"
+
+#: src/features/browser/components/ChallengeFilters.tsx
+msgctxt "jaItCA"
+msgid "Search challenges..."
+msgstr "Search challenges..."
+
+#: src/features/browser/components/ChallengeFilters.tsx
+msgctxt "IkXLzZ"
+msgid "Select Category"
+msgstr "Select Category"
+
+#: src/features/browser/components/ChallengeFilters.tsx
+msgctxt "jDnU4W"
+msgid "Select Level"
+msgstr "Select Level"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "suk_ol"
+msgid "Name must be at least 2 characters"
+msgstr "Name must be at least 2 characters"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "XLVIaa"
+msgid "Name must be at most 80 characters"
+msgstr "Name must be at most 80 characters"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "5Rrlj9"
+msgid "Slug must be 2-50 characters"
+msgstr "Slug must be 2-50 characters"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "aovPgT"
+msgid "Slug must contain only lowercase letters, numbers and hyphens"
+msgstr "Slug must contain only lowercase letters, numbers and hyphens"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "OTI-A0"
+msgid "Invalid hex color (e.g. #3b82f6)"
+msgstr "Invalid hex color (e.g. #3b82f6)"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "qsyNcs"
+msgid "Icon must be at most 50 characters"
+msgstr "Icon must be at most 50 characters"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "qGfXVQ"
+msgid "Description must be at most 500 characters"
+msgstr "Description must be at most 500 characters"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "WL6IS1"
+msgid "Sort order must be an integer 0-1000"
+msgstr "Sort order must be an integer 0-1000"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "xl7Fag"
+msgid "Category created"
+msgstr "Category created"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "H4Lcuk"
+msgid "Category updated"
+msgstr "Category updated"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "HvJPcU"
+msgid "Category deleted"
+msgstr "Category deleted"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "JkZxbb"
+msgid "Manage challenge categories — sorted by sort order."
+msgstr "Manage challenge categories — sorted by sort order."
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "ZROXxK"
+msgid "Create category"
+msgstr "Create category"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "Kozkyc"
+msgid "Filter:"
+msgstr "Filter:"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "pTf0SE"
+msgid "Filter by status"
+msgstr "Filter by status"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "9g2jKz"
+msgid "All categories"
+msgstr "All categories"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "q1kiTC"
+msgid "Active only"
+msgstr "Active only"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "PCQhDD"
+msgid "Inactive only"
+msgstr "Inactive only"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "HAlOn1"
+msgid "Name"
+msgstr "Name"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "IoDlcd"
+msgid "Slug"
+msgstr "Slug"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "kk4TVW"
+msgid "Icon"
+msgstr "Icon"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "uMhpKe"
+msgid "Color"
+msgstr "Color"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "3LXmOC"
+msgid "Sort order"
+msgstr "Sort order"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "6Tps09"
+msgid "Inactive"
+msgstr "Inactive"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "s3IOQQ"
+msgid "Edit {name}"
+msgstr "Edit {name}"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "JpsXCp"
+msgid "Delete {name}"
+msgstr "Delete {name}"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "VuuMkj"
+msgid "No categories yet — create one"
+msgstr "No categories yet — create one"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "LWGsgA"
+msgid "No categories matching filter."
+msgstr "No categories matching filter."
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "L2AzSY"
+msgid "Add a new challenge category."
+msgstr "Add a new challenge category."
+
+#: src/features/category/components/CategoryManagement.tsx
+#: src/features/landing/LandingPage.tsx
+msgctxt "Uf9F0z"
+msgid "React Rendering"
+msgstr "React Rendering"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "nadL5l"
+msgid "Slug (optional — auto-generated)"
+msgstr "Slug (optional — auto-generated)"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "drUlh0"
+msgid "react-rendering"
+msgstr "react-rendering"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "Q8Qw5B"
+msgid "Description"
+msgstr "Description"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "L811wN"
+msgid "Short description"
+msgstr "Short description"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "Kau-zp"
+msgid "Layers"
+msgstr "Layers"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "DSXrNt"
+msgid "#3b82f6"
+msgstr "#3b82f6"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "mRL9Vh"
+msgid "Creating..."
+msgstr "Creating..."
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "VzzYJk"
+msgid "Create"
+msgstr "Create"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "1mQAJl"
+msgid "Edit category"
+msgstr "Edit category"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "AiLZx6"
+msgid "Update category details."
+msgstr "Update category details."
+
+#: src/features/category/components/CategoryManagement.tsx
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "TiR_Hq"
+msgid "Saving..."
+msgstr "Saving..."
+
+#: src/features/category/components/CategoryManagement.tsx
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "X0ha1a"
+msgid "Save changes"
+msgstr "Save changes"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "2goucs"
+msgid "Delete category"
+msgstr "Delete category"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "e08FA7"
+msgid "Are you sure you want to delete \"{name}\"? This cannot be undone."
+msgstr "Are you sure you want to delete \"{name}\"? This cannot be undone."
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "K3r6DQ"
+msgid "Delete"
+msgstr "Delete"
+
+#: src/features/challenge/components/AdminReadOnlyBanner.tsx
+msgctxt "eLvBmG"
+msgid "Read-only mode"
+msgstr "Read-only mode"
+
+#: src/features/challenge/components/AdminReadOnlyBanner.tsx
+#: src/features/challenge/components/ChallengeScreen.tsx
+msgctxt "UIxI8Q"
+msgid "Admins can browse challenges in read-only mode. Submissions are disabled for admin accounts."
+msgstr "Admins can browse challenges in read-only mode. Submissions are disabled for admin accounts."
+
+#: src/features/challenge/components/ChallengeScenario.tsx
+msgctxt "z-jvO3"
+msgid "30 min"
+msgstr "30 min"
+
+#: src/features/challenge/components/ChallengeScenario.tsx
+msgctxt "KMiotH"
+msgid "{points} pts max"
+msgstr "{points} pts max"
+
+#: src/features/challenge/components/ChallengeScenario.tsx
+msgctxt "e2Z3Y3"
+msgid "Relevant files"
+msgstr "Relevant files"
+
+#: src/features/challenge/components/ChallengeScreen.tsx
+msgctxt "ITBJJN"
+msgid "Resize left sidebar"
+msgstr "Resize left sidebar"
+
+#: src/features/challenge/components/ChallengeScreen.tsx
+msgctxt "QhfLqy"
+msgid "Drag to resize sidebar (Double click to reset)"
+msgstr "Drag to resize sidebar (Double click to reset)"
+
+#: src/features/challenge/components/ChallengeScreen.tsx
+msgctxt "PTsAhZ"
+msgid "Resize right sidebar"
+msgstr "Resize right sidebar"
+
+#: src/features/challenge/components/ChallengeScreen.tsx
+msgctxt "7Q0LGS"
+msgid "Drag to resize tabs panel (Double click to reset)"
+msgstr "Drag to resize tabs panel (Double click to reset)"
+
+#: src/features/challenge/components/CodeViewer.tsx
+msgctxt "kzxB_l"
+msgid "Click lines to mark bug location (Shift+click for range)"
+msgstr "Click lines to mark bug location (Shift+click for range)"
+
+#: src/features/challenge/components/CodeViewer.tsx
+msgctxt "pIzRwp"
+msgid "Line {line} marked"
+msgstr "Line {line} marked"
+
+#: src/features/challenge/components/CodeViewer.tsx
+msgctxt "8e61hj"
+msgid "Lines {lines} marked"
+msgstr "Lines {lines} marked"
+
+#: src/features/challenge/components/CodeViewer.tsx
+msgctxt "cbHqcr"
+msgid "{count} lines marked"
+msgstr "{count} lines marked"
+
+#: src/features/challenge/components/CodeViewer.tsx
+msgctxt "8ZkH8q"
+msgid "Clear selected lines"
+msgstr "Clear selected lines"
+
+#: src/features/challenge/components/CodeViewer.tsx
+msgctxt "_GCoTA"
+msgid "Clear"
+msgstr "Clear"
+
+#: src/features/challenge/components/ExplainPanel.tsx
+msgctxt "mH_-ow"
+msgid "1. Root Cause Diagnosis"
+msgstr "1. Root Cause Diagnosis"
+
+#: src/features/challenge/components/ExplainPanel.tsx
+msgctxt "ZbG9Fk"
+msgid "Describe the underlying failure mechanism. What is broken and why does it fail?"
+msgstr "Describe the underlying failure mechanism. What is broken and why does it fail?"
+
+#: src/features/challenge/components/ExplainPanel.tsx
+msgctxt "N6mCpM"
+msgid "The bug occurs because..."
+msgstr "The bug occurs because..."
+
+#: src/features/challenge/components/ExplainPanel.tsx
+msgctxt "X3jLxL"
+msgid "2. Proposed Solution & Fix"
+msgstr "2. Proposed Solution & Fix"
+
+#: src/features/challenge/components/ExplainPanel.tsx
+msgctxt "IlCqHJ"
+msgid "Describe how you would resolve this bug and prevent regressions."
+msgstr "Describe how you would resolve this bug and prevent regressions."
+
+#: src/features/challenge/components/ExplainPanel.tsx
+msgctxt "oJJaRV"
+msgid "To fix this, we should change..."
+msgstr "To fix this, we should change..."
+
+#: src/features/challenge/components/FixPanel.tsx
+msgctxt "9wvvC1"
+msgid "Canonical fix. Your score reflects how closely your diagnosis and solution match this approach."
+msgstr "Canonical fix. Your score reflects how closely your diagnosis and solution match this approach."
+
+#: src/features/challenge/components/HintsPanel.tsx
+msgctxt "Abf5MD"
+msgid "No hints are available for this challenge."
+msgstr "No hints are available for this challenge."
+
+#: src/features/challenge/components/HintsPanel.tsx
+msgctxt "e4Xi4A"
+msgid "Each revealed hint reduces your maximum score for this challenge."
+msgstr "Each revealed hint reduces your maximum score for this challenge."
+
+#: src/features/challenge/components/HintsPanel.tsx
+msgctxt "c5Sva1"
+msgid "Reveal (−{cost} pts)"
+msgstr "Reveal (−{cost} pts)"
+
+#: src/features/challenge/components/SubmitBar.tsx
+msgctxt "ftFXoR"
+msgid "Select bug line(s) to submit"
+msgstr "Select bug line(s) to submit"
+
+#: src/features/challenge/components/SubmitBar.tsx
+msgctxt "gpvtKC"
+msgid "Bug localized at Line {line} · {file}"
+msgstr "Bug localized at Line {line} · {file}"
+
+#: src/features/challenge/components/SubmitBar.tsx
+msgctxt "wiqv7i"
+msgid "Bug localized at Lines {lines} · {file}"
+msgstr "Bug localized at Lines {lines} · {file}"
+
+#: src/features/challenge/components/SubmitBar.tsx
+msgctxt "CMltkR"
+msgid "{count} lines localized · {file}"
+msgstr "{count} lines localized · {file}"
+
+#: src/features/challenge/components/SubmitBar.tsx
+msgctxt "SoL-Rz"
+msgid "Running tests & AI analysis..."
+msgstr "Running tests & AI analysis..."
+
+#: src/features/challenge/components/SubmitBar.tsx
+msgctxt "0uM-ku"
+msgid "Submit diagnosis & fix"
+msgstr "Submit diagnosis & fix"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "cBWQ4Y"
+msgid "React rendering, state mutation, race conditions, memory leaks — the bugs that actually page you, not toy algorithms."
+msgstr "React rendering, state mutation, race conditions, memory leaks — the bugs that actually page you, not toy algorithms."
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "5RnUdi"
+msgid "Real bug classes"
+msgstr "Real bug classes"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "O01qi6"
+msgid "The graded deliverable is the diagnosis, not a passing test. You prove you understood the bug, not just that you patched it."
+msgstr "The graded deliverable is the diagnosis, not a passing test. You prove you understood the bug, not just that you patched it."
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "o7e6Yg"
+msgid "Explain the root cause"
+msgstr "Explain the root cause"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "5iCxhw"
+msgid "Your fix runs against hidden tests, then an agent grades the explanation against the canonical root cause."
+msgstr "Your fix runs against hidden tests, then an agent grades the explanation against the canonical root cause."
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "TCmXBU"
+msgid "Hidden tests + grading agent"
+msgstr "Hidden tests + grading agent"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "rpGwVI"
+msgid "A per-category radar shows exactly where you keep getting paged, so practice targets your real gaps."
+msgstr "A per-category radar shows exactly where you keep getting paged, so practice targets your real gaps."
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "o9rLbO"
+msgid "Weak-spot analytics"
+msgstr "Weak-spot analytics"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "r7yXqR"
+msgid "Backend Concurrency"
+msgstr "Backend Concurrency"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "y3C3I7"
+msgid "Logic Inversions"
+msgstr "Logic Inversions"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "tQvh_V"
+msgid "Memory Leaks"
+msgstr "Memory Leaks"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "teorsS"
+msgid "Off-by-One"
+msgstr "Off-by-One"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "h-2R9E"
+msgid "Race Conditions"
+msgstr "Race Conditions"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "lotqPu"
+msgid "Security Flaws"
+msgstr "Security Flaws"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "lzXWx4"
+msgid "State Mutations"
+msgstr "State Mutations"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "Zk6Cyu"
+msgid "bugs diagnosed"
+msgstr "bugs diagnosed"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "IikfNW"
+msgid "bug classes"
+msgstr "bug classes"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "dUG66Z"
+msgid "hidden-test grading"
+msgstr "hidden-test grading"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "E76W3q"
+msgid "Trusted by engineers who would rather not get paged twice"
+msgstr "Trusted by engineers who would rather not get paged twice"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "9UFZ7j"
+msgid "Enter Arena"
+msgstr "Enter Arena"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "8HJxXG"
+msgid "Sign up"
+msgstr "Sign up"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "gq50Cb"
+msgid "LeetCode for debugging"
+msgstr "LeetCode for debugging"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "aYn-WE"
+msgid "Debug like it's 2am on call."
+msgstr "Debug like it's 2am on call."
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "u1sU2G"
+msgid "LeetCode for debugging — practice root-cause diagnosis on real-world bugs, not toy algorithms."
+msgstr "LeetCode for debugging — practice root-cause diagnosis on real-world bugs, not toy algorithms."
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "yzN5E-"
+msgid "Start a challenge"
+msgstr "Start a challenge"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "SnsZ82"
+msgid "See how grading works"
+msgstr "See how grading works"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "OhI7cw"
+msgid "Practice the bugs that actually page you."
+msgstr "Practice the bugs that actually page you."
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "OmJqZm"
+msgid "Four bug classes, one graded deliverable: the diagnosis. Pick your weak spot and train it."
+msgstr "Four bug classes, one graded deliverable: the diagnosis. Pick your weak spot and train it."
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "uaBZEj"
+msgid "Ready to find out why it broke?"
+msgstr "Ready to find out why it broke?"
+
+#: src/features/landing/LandingPage.tsx
+msgctxt "DSjPsF"
+msgid "© {year} Debug Arena. Diagnose, don't guess."
+msgstr "© {year} Debug Arena. Diagnose, don't guess."
+
+#: src/features/leaderboard/components/LeaderboardScreen.tsx
+msgctxt "t7ctDQ"
+msgid "Top debuggers ranked by accuracy, streak, and diagnosis speed. (Cached 24h)"
+msgstr "Top debuggers ranked by accuracy, streak, and diagnosis speed. (Cached 24h)"
+
+#: src/features/leaderboard/components/LeaderboardScreen.tsx
+msgctxt "VHcSfy"
+msgid "{label} — top solvers ranked by category score"
+msgstr "{label} — top solvers ranked by category score"
+
+#: src/features/leaderboard/components/LeaderboardScreen.tsx
+msgctxt "UeR5oQ"
+msgid "No leaderboard data yet"
+msgstr "No leaderboard data yet"
+
+#: src/features/leaderboard/components/LeaderboardScreen.tsx
+msgctxt "WryefL"
+msgid "Solve challenges to earn a spot on the leaderboard."
+msgstr "Solve challenges to earn a spot on the leaderboard."
+
+#: src/features/leaderboard/components/LeaderboardTable.tsx
+msgctxt "VP5-CR"
+msgid "Rank"
+msgstr "Rank"
+
+#: src/features/leaderboard/components/LeaderboardTable.tsx
+msgctxt "EwRIOm"
+msgid "User"
+msgstr "User"
+
+#: src/features/leaderboard/components/LeaderboardTable.tsx
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+msgctxt "oLkLww"
+msgid "Score"
+msgstr "Score"
+
+#: src/features/leaderboard/components/LeaderboardTable.tsx
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+msgctxt "xLCZAR"
+msgid "Streak"
+msgstr "Streak"
+
+#: src/features/leaderboard/components/LeaderboardTable.tsx
+msgctxt "Jjrc4P"
+msgid "you"
+msgstr "you"
+
+#: src/features/leaderboard/components/LeaderboardTable.tsx
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+msgctxt "UPb-AB"
+msgid "{streak}d"
+msgstr "{streak}d"
+
+#: src/features/leaderboard/components/LeaderboardTable.tsx
+msgctxt "awioES"
+msgid "Showing {from} to {to} of {total} entries"
+msgstr "Showing {from} to {to} of {total} entries"
+
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+msgctxt "PY-B7t"
+msgid "{solved} solved · avg {avg}"
+msgstr "{solved} solved · avg {avg}"
+
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+msgctxt "VytfwM"
+msgid "Strongest"
+msgstr "Strongest"
+
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+msgctxt "k8IuYt"
+msgid "No top solvers yet"
+msgstr "No top solvers yet"
+
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+msgctxt "XRkzE5"
+msgid "Be the first to climb the podium."
+msgstr "Be the first to climb the podium."
+
+#: src/features/profile/components/CategoryStrengthChart.tsx
+msgctxt "dEXPDy"
+msgid "Category strength"
+msgstr "Category strength"
+
+#: src/features/profile/components/DangerZone.tsx
+msgctxt "wyxJrL"
+msgid "Delete account"
+msgstr "Delete account"
+
+#: src/features/profile/components/DangerZone.tsx
+msgctxt "Xsawqr"
+msgid "Permanently remove your account and all associated data. This cannot be undone."
+msgstr "Permanently remove your account and all associated data. This cannot be undone."
+
+#: src/features/profile/components/DangerZone.tsx
+msgctxt "XEuSLT"
+msgid "To confirm, type your handle {phrase} below."
+msgstr "To confirm, type your handle {phrase} below."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "ecUDvl"
+msgid "Handle looks good"
+msgstr "Handle looks good"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "rwZMOO"
+msgid "No change."
+msgstr "No change."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "lWNLL-"
+msgid "Preferred avatar color"
+msgstr "Preferred avatar color"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "_f9alH"
+msgid "Select {id} avatar"
+msgstr "Select {id} avatar"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "2kXFDU"
+msgid "Or custom avatar image URL"
+msgstr "Or custom avatar image URL"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "L1Ggqg"
+msgid "https://..."
+msgstr "https://..."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "HA5WvI"
+msgid "Category interests"
+msgstr "Category interests"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "WwLHiH"
+msgid "Preferred challenge classes surfaced first in your browser."
+msgstr "Preferred challenge classes surfaced first in your browser."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "k2mx_R"
+msgid "Public Profile"
+msgstr "Public Profile"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "4zsii4"
+msgid "Private Profile"
+msgstr "Private Profile"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "3TRAyC"
+msgid "Your stats, solved challenges, and radar charts are visible on the leaderboard."
+msgstr "Your stats, solved challenges, and radar charts are visible on the leaderboard."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "9rHb3d"
+msgid "Your profile is hidden from the public leaderboard."
+msgstr "Your profile is hidden from the public leaderboard."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "V52jNn"
+msgid "Enabled"
+msgstr "Enabled"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "viXE32"
+msgid "Private"
+msgstr "Private"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "SRR0mD"
+msgid "Display name is required."
+msgstr "Display name is required."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "pFdozT"
+msgid "Display name must be 50 characters or fewer."
+msgstr "Display name must be 50 characters or fewer."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "gCh_Qg"
+msgid "Handle is required."
+msgstr "Handle is required."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "d-bGK3"
+msgid "Handle must be at least 3 characters."
+msgstr "Handle must be at least 3 characters."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "XAFuu7"
+msgid "Handle can only contain letters, numbers, and underscores."
+msgstr "Handle can only contain letters, numbers, and underscores."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "6FnVkF"
+msgid "Bio must be 250 characters or fewer."
+msgstr "Bio must be 250 characters or fewer."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "B5_YE0"
+msgid "Profile updated"
+msgstr "Profile updated"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "om9PhQ"
+msgid "Profile details"
+msgstr "Profile details"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "VT-Evo"
+msgid "Customize your public persona, job title, avatar color, and preferences."
+msgstr "Customize your public persona, job title, avatar color, and preferences."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "8oV24V"
+msgid "e.g. Alex Morgan"
+msgstr "e.g. Alex Morgan"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "yIy4U6"
+msgid "Public-facing name."
+msgstr "Public-facing name."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "zBwBRS"
+msgid "Username / handle"
+msgstr "Username / handle"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "Be4XD0"
+msgid "username"
+msgstr "username"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "9NJgc0"
+msgid "Job title / Role"
+msgstr "Job title / Role"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "-5SlfH"
+msgid "e.g. Senior Frontend Engineer, Distributed Systems"
+msgstr "e.g. Senior Frontend Engineer, Distributed Systems"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "T-Cgen"
+msgid "Bio / tagline"
+msgstr "Bio / tagline"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "T1l15O"
+msgid "Tell us a bit about your engineering interests or background..."
+msgstr "Tell us a bit about your engineering interests or background..."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "H1fCso"
+msgid "Shown on your public profile."
+msgstr "Shown on your public profile."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "fsB_4p"
+msgid "Saved"
+msgstr "Saved"
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "nLf2ID"
+msgid "Profile updated successfully."
+msgstr "Profile updated successfully."
+
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "GZ1b49"
+msgid "Fix the highlighted fields to save."
+msgstr "Fix the highlighted fields to save."
+
+#: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "g89BvK"
+msgid "Provider unlinked"
+msgstr "Provider unlinked"
+
+#: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "-pwUpZ"
+msgid "Connected accounts"
+msgstr "Connected accounts"
+
+#: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "oxT36m"
+msgid "Link providers to sign in faster. One stays primary for your avatar and name."
+msgstr "Link providers to sign in faster. One stays primary for your avatar and name."
+
+#: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "IvjoDS"
+msgid "Connected"
+msgstr "Connected"
+
+#: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "PuU15u"
+msgid "Not connected"
+msgstr "Not connected"
+
+#: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "6F4qGT"
+msgid "Unlinking..."
+msgstr "Unlinking..."
+
+#: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "4PKxPs"
+msgid "Unlink"
+msgstr "Unlink"
+
+#: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "-vVZ_G"
+msgid "Connect"
+msgstr "Connect"
+
+#: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "ZPN8QN"
+msgid "Can't unlink {label} — it's your only sign-in method. Add another provider first, then retry."
+msgstr "Can't unlink {label} — it's your only sign-in method. Add another provider first, then retry."
+
+#: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "9fvgCl"
+msgid "Unlinking a provider only removes the connection — it never deletes your Debug Arena account or your challenge history."
+msgstr "Unlinking a provider only removes the connection — it never deletes your Debug Arena account or your challenge history."
+
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "U86B6w"
+msgid "Stats"
+msgstr "Stats"
+
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "i1v0cW"
+msgid "Per category"
+msgstr "Per category"
+
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "c3xRlS"
+msgid "{solved} solved"
+msgstr "{solved} solved"
+
+#: src/features/profile/components/RecentSubmissions.tsx
+msgctxt "SOjGr_"
+msgid "Recent submissions"
+msgstr "Recent submissions"
+
+#: src/features/profile/components/RecentSubmissions.tsx
+msgctxt "f_5yeb"
+msgid "No submissions yet"
+msgstr "No submissions yet"
+
+#: src/features/profile/components/RecentSubmissions.tsx
+msgctxt "J73PQz"
+msgid "Solve a challenge in the arena to track your debugging diagnostic history."
+msgstr "Solve a challenge in the arena to track your debugging diagnostic history."
+
+#: src/features/profile/components/RecentSubmissions.tsx
+msgctxt "IRvphZ"
+msgid "Explore Challenges"
+msgstr "Explore Challenges"
+
+#: src/features/profile/components/SessionManager.tsx
+msgctxt "XGj-o0"
+msgid "Session revoked"
+msgstr "Session revoked"
+
+#: src/features/profile/components/SessionManager.tsx
+msgctxt "fny8Jj"
+msgid "Other sessions revoked"
+msgstr "Other sessions revoked"
+
+#: src/features/profile/components/SessionManager.tsx
+msgctxt "jg6O5D"
+msgid "Active sessions"
+msgstr "Active sessions"
+
+#: src/features/profile/components/SessionManager.tsx
+msgctxt "ujK5v5"
+msgid "Devices signed in to your account. Revoke anything you don't recognize."
+msgstr "Devices signed in to your account. Revoke anything you don't recognize."
+
+#: src/features/profile/components/SessionManager.tsx
+msgctxt "_LhA3z"
+msgid "Revoking..."
+msgstr "Revoking..."
+
+#: src/features/profile/components/SessionManager.tsx
+msgctxt "yDCCDi"
+msgid "Revoke all other sessions"
+msgstr "Revoke all other sessions"
+
+#: src/features/profile/components/SessionManager.tsx
+msgctxt "wPwDM0"
+msgid "This device"
+msgstr "This device"
+
+#: src/features/profile/components/SessionManager.tsx
+msgctxt "ReRDYT"
+msgid "New login"
+msgstr "New login"
+
+#: src/features/profile/components/SessionManager.tsx
+msgctxt "tnRDuU"
+msgid "Revoke"
+msgstr "Revoke"
+
+#: src/features/profile/components/SessionManager.tsx
+msgctxt "1IAZFv"
+msgid "New-login events are flagged here so you can spot unexpected sessions. We never notify via the same channel an attacker could control."
+msgstr "New-login events are flagged here so you can spot unexpected sessions. We never notify via the same channel an attacker could control."
+
+#: src/features/profile/components/SolvedByDifficultyChart.tsx
+msgctxt "dRDf_t"
+msgid "Solved by difficulty"
+msgstr "Solved by difficulty"
+
+#: src/features/results/components/ExplanationComparison.tsx
+msgctxt "MB7815"
+msgid "Diagnosis & Solution comparison"
+msgstr "Diagnosis & Solution comparison"
+
+#: src/features/results/components/ExplanationComparison.tsx
+msgctxt "B-T0od"
+msgid "Your root cause diagnosis"
+msgstr "Your root cause diagnosis"
+
+#: src/features/results/components/ExplanationComparison.tsx
+msgctxt "RdCtss"
+msgid "Correct Diagnosis"
+msgstr "Correct Diagnosis"
+
+#: src/features/results/components/ExplanationComparison.tsx
+msgctxt "OSdCeC"
+msgid "Incorrect Mechanism"
+msgstr "Incorrect Mechanism"
+
+#: src/features/results/components/ExplanationComparison.tsx
+msgctxt "PJ059p"
+msgid "Your proposed solution"
+msgstr "Your proposed solution"
+
+#: src/features/results/components/ExplanationComparison.tsx
+msgctxt "lyQ7lr"
+msgid "Canonical root cause"
+msgstr "Canonical root cause"
+
+#: src/features/results/components/ExplanationComparison.tsx
+msgctxt "i3uw_i"
+msgid "LLM Mentor Evaluation & Feedback"
+msgstr "LLM Mentor Evaluation & Feedback"
+
+#: src/features/results/components/ExplanationComparison.tsx
+msgctxt "wH6mmu"
+msgid "Needs Enhancement"
+msgstr "Needs Enhancement"
+
+#: src/features/results/components/ExplanationComparison.tsx
+msgctxt "_sa7Tz"
+msgid "{percent}% alignment"
+msgstr "{percent}% alignment"
+
+#: src/features/results/components/ExplanationComparison.tsx
+msgctxt "sGFtX_"
+msgid "Enhancement Recommendations"
+msgstr "Enhancement Recommendations"
+
+#: src/features/results/components/ExplanationComparison.tsx
+msgctxt "iBqk5U"
+msgid "Key Concepts Identified"
+msgstr "Key Concepts Identified"
+
+#: src/features/results/components/ExplanationComparison.tsx
+msgctxt "F9b_fI"
+msgid "Missed Mechanisms"
+msgstr "Missed Mechanisms"
+
+#: src/features/results/components/Prevention.tsx
+msgctxt "Cg0YIF"
+msgid "How to prevent this"
+msgstr "How to prevent this"
+
+#: src/features/results/components/ResultsScreen.tsx
+msgctxt "yaMHMB"
+msgid "Results"
+msgstr "Results"
+
+#: src/features/results/components/ResultsScreen.tsx
+msgctxt "me6E3h"
+msgid "Total score"
+msgstr "Total score"
+
+#: src/features/results/components/ResultsScreen.tsx
+msgctxt "WizM8y"
+msgid "Challenge complete · +{score} pts added to your profile"
+msgstr "Challenge complete · +{score} pts added to your profile"
+
+#: src/features/results/components/ResultsScreen.tsx
+msgctxt "aUO9i9"
+msgid "Back to challenges"
+msgstr "Back to challenges"
+
+#: src/features/results/components/ScoreBreakdown.tsx
+msgctxt "6tMax-"
+msgid "Score breakdown"
+msgstr "Score breakdown"
+
+#: src/i18n/extraction.test.tsx
+msgctxt "tBFOH1"
+msgid "Hello, {name}!"
+msgstr "Hello, {name}!"
+
+#: src/i18n/extraction.test.tsx
+msgctxt "88Bq3c"
+msgid "Welcome, {name}!"
+msgstr "Welcome, {name}!"
+
+#. Advance to next slide
+#: src/i18n/extraction.test.tsx
+msgctxt "gAnLDP"
+msgid "Right"
+msgstr "Right"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Button } from "@/components/ui/button";
 import type { HintItem } from "@/features/challenge/types";
 import { cn } from "@/lib/utils";
@@ -40,11 +40,22 @@ export function ChallengeTabs({
   solution,
   toggleHint,
 }: Props) {
-  const t = useTranslations();
-  // Seed tab literals for extraction
-  t("challenge.tabs.explain");
-  t("challenge.tabs.fix");
-  t("challenge.tabs.hints");
+  const t = useExtracted();
+  function getTabLabel(
+    tab: RightTab,
+    t: ReturnType<typeof useExtracted>
+  ): string {
+    switch (tab) {
+      case "explain":
+        return t("explain");
+      case "fix":
+        return t("fix");
+      case "hints":
+        return t("hints");
+      default:
+        return tab;
+    }
+  }
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-surface">
       <div className="flex border-border border-b">
@@ -62,7 +73,7 @@ export function ChallengeTabs({
             type="button"
             variant="ghost"
           >
-            {t(tab as string)}
+            {getTabLabel(tab, t)}
           </Button>
         ))}
       </div>

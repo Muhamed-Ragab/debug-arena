@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import * as schema from "@/db/schema";
 import { OFFLINE_MESSAGE, toOfflineError } from "@/lib/offline";
@@ -33,7 +33,10 @@ export function createLeaderboardRepository(
   async function findAllUsersWithSubmissions(): Promise<UserWithSubmissions> {
     try {
       return (await dbClient.query.users.findMany({
-        where: eq(schema.users.banned, false),
+        where: and(
+          eq(schema.users.banned, false),
+          eq(schema.users.role, "user")
+        ),
         with: {
           submissions: true,
         },
@@ -48,7 +51,10 @@ export function createLeaderboardRepository(
   > {
     try {
       return (await dbClient.query.users.findMany({
-        where: eq(schema.users.banned, false),
+        where: and(
+          eq(schema.users.banned, false),
+          eq(schema.users.role, "user")
+        ),
         with: {
           categoryStats: {
             with: {

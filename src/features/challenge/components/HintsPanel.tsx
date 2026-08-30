@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, Lock } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,11 +14,11 @@ interface Props {
 }
 
 export function HintsPanel({ hintsOpen, toggleHint, hints }: Props) {
-  const t = useTranslations();
+  const t = useExtracted();
   if (hints.length === 0) {
     return (
       <p className="text-[12px] text-muted-foreground leading-relaxed">
-        {t("challenge.hints.empty")}
+        {t("No hints are available for this challenge.")}
       </p>
     );
   }
@@ -26,7 +26,7 @@ export function HintsPanel({ hintsOpen, toggleHint, hints }: Props) {
   return (
     <div className="space-y-2.5">
       <p className="mb-4 text-[11.5px] text-muted-foreground leading-relaxed">
-        {t("challenge.hints.costHint")}
+        {t("Each revealed hint reduces your maximum score for this challenge.")}
       </p>
       {hints.map((hint, i) => {
         const open = hintsOpen.includes(i);
@@ -55,14 +55,14 @@ export function HintsPanel({ hintsOpen, toggleHint, hints }: Props) {
                   open ? "font-medium text-foreground" : "text-muted-foreground"
                 }
               >
-                {t("challenge.hints.title", { order: hint.order })}
+                {t("Hint {order}", { order: String(hint.order) })}
               </span>
               {!open && (
                 <Badge
                   className="ms-auto font-mono text-[11px]"
                   variant="warning"
                 >
-                  {t("challenge.hints.reveal", { cost })}
+                  {t("Reveal (−{cost} pts)", { cost: String(cost) })}
                 </Badge>
               )}
             </Button>

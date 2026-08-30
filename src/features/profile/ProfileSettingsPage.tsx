@@ -1,6 +1,7 @@
 "use client";
 
 import { Link2, MonitorSmartphone, ShieldAlert, User } from "lucide-react";
+import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
@@ -55,11 +56,12 @@ export function ProfileSettingsPage({
   initialAccounts,
   initialSessions,
 }: ProfileSettingsPageProps) {
+  const t = useExtracted();
   const [active, setActive] = useState<SectionId>("profile");
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <TopBar crumbs={[{ label: "Arena" }, { label: "Settings" }]} />
+      <TopBar crumbs={[{ label: t("Arena") }, { label: t("Settings") }]} />
 
       <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
         {/* Section nav */}

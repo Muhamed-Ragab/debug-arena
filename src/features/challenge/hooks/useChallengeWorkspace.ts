@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useSession } from "@/lib/auth/client";
 import { submitChallengeAction } from "../actions";
 import type { RightTab } from "../types";
 
@@ -89,7 +90,7 @@ function getFirstValidationMessage(fe: FieldErrors): string {
   if (fe._errors && fe._errors.length > 0) {
     return fe._errors[0];
   }
-  return "Validation failed. Please check your inputs.";
+  return "challenge.workspace.validationFailed";
 }
 
 export function useChallengeWorkspace(
@@ -97,6 +98,7 @@ export function useChallengeWorkspace(
   onSubmitted?: (submissionId: string) => void
 ): ChallengeWorkspace {
   const router = useRouter();
+  const { data: session } = useSession();
   const [selectedLines, setSelectedLines] = useState<number[]>([]);
   const [lastClickedLine, setLastClickedLine] = useState<number | null>(null);
   const [rightTab, setRightTab] = useState<RightTab>("explain");
@@ -168,21 +170,15 @@ export function useChallengeWorkspace(
     const next: FieldErrors = {};
     let hasError = false;
     if (selectedLines.length === 0) {
-      next.localizationLines = [
-        "Select at least one buggy line in the code viewer",
-      ];
+      next.localizationLines = ["challenge.workspace.selectBugLine"];
       hasError = true;
     }
     const trimmed = explanation.trim();
     if (!trimmed) {
-      next.rootCauseExplanation = [
-        "Please write an explanation of the root cause before submitting.",
-      ];
+      next.rootCauseExplanation = ["challenge.workspace.explainRequired"];
       hasError = true;
     } else if (trimmed.length < 5) {
-      next.rootCauseExplanation = [
-        "Root cause explanation must be at least 5 characters",
-      ];
+      next.rootCauseExplanation = ["validation.rootCauseMin"];
       hasError = true;
     }
     return hasError ? next : null;
@@ -195,7 +191,7 @@ export function useChallengeWorkspace(
     if (fe.rootCauseExplanation && fe.rootCauseExplanation.length > 0) {
       return fe.rootCauseExplanation[0];
     }
-    return "Please fix validation errors";
+    return "challenge.workspace.fixValidationErrors";
   };
 
   const handleMockSubmit = () => {
@@ -250,6 +246,11 @@ export function useChallengeWorkspace(
     if (isSubmitting) {
       return;
     }
+    const role = (session?.user as { role?: string } | undefined)?.role;
+    if (role === "admin") {
+      setError("error.forbiddenAdminSubmit");
+      return;
+    }
     const clientErrors = buildClientFieldErrors();
     if (clientErrors) {
       setFieldErrors(clientErrors);
@@ -274,10 +275,10 @@ export function useChallengeWorkspace(
       });
       const handled = handleServerResponse(response);
       if (!handled) {
-        setError("Failed to submit challenge. Please try again.");
+        setError("challenge.workspace.failedSubmit");
       }
     } catch {
-      setError("Something went wrong");
+      setError("error.somethingWrong");
     } finally {
       setIsSubmitting(false);
     }

@@ -36,9 +36,9 @@ export default async function ChallengesPage() {
         <ChallengeBrowser
           initialChallenges={[]}
           stats={[
-            { label: "Solved", value: "0 / 0" },
-            { label: "Current Streak", value: "0 days" },
-            { label: "Rank", value: "#--" },
+            { label: "browser.stats.solved", value: "0 / 0" },
+            { label: "browser.stats.currentStreak", value: "0 days" },
+            { label: "browser.stats.rank", value: "#--" },
           ]}
         />
       </div>
@@ -79,9 +79,9 @@ export default async function ChallengesPage() {
   });
 
   const statsProps = [
-    { label: "Solved", value: userStats.solvedRatio },
-    { label: "Current Streak", value: userStats.streak },
-    { label: "Rank", value: userStats.rank },
+    { label: "browser.stats.solved", value: userStats.solvedRatio },
+    { label: "browser.stats.currentStreak", value: userStats.streak },
+    { label: "browser.stats.rank", value: userStats.rank },
   ];
 
   return (

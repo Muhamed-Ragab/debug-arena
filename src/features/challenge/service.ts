@@ -238,7 +238,7 @@ export function createChallengeService(
   ) {
     const challenge = await deps.challengeRepo.findById(input.challengeId);
     if (!challenge) {
-      throw new NotFoundError("Challenge not found");
+      throw new NotFoundError("error.challengeNotFound");
     }
     const buggyArtifact = challenge.buggyArtifact as {
       buggyLines?: [number, number];

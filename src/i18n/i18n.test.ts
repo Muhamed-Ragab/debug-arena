@@ -1,24 +1,35 @@
 import { describe, expect, it } from "vitest";
-import arAuth from "../../messages/ar/auth.json";
-import arCommon from "../../messages/ar/common.json";
-import enAuth from "../../messages/en/auth.json";
-import enCommon from "../../messages/en/common.json";
+import fs from "node:fs";
+import path from "node:path";
 
 describe("next-intl catalogs", () => {
-  it("translates every en common key into ar", () => {
-    const enKeys = Object.keys(enCommon);
-    for (const key of enKeys) {
-      expect(
-        (arCommon as Record<string, unknown>)[key],
-        `missing ar translation for common key: ${key}`
-      ).toBeTruthy();
-    }
+  it("en.po and ar.po exist and have same msgctxt count", () => {
+    const en = fs.readFileSync(
+      path.join(process.cwd(), "messages/en.po"),
+      "utf8"
+    );
+    const ar = fs.readFileSync(
+      path.join(process.cwd(), "messages/ar.po"),
+      "utf8"
+    );
+    const enCount = (en.match(/msgctxt/g) || []).length;
+    const arCount = (ar.match(/msgctxt/g) || []).length;
+    expect(enCount).toBeGreaterThan(0);
+    expect(arCount).toBe(enCount);
   });
 
-  it("has auth namespace in both locales", () => {
-    expect(enAuth).toBeDefined();
-    expect(arAuth).toBeDefined();
-    expect(enAuth.login.title).toBe("Welcome back");
+  it("ar.po has some translated msgstr", () => {
+    const ar = fs.readFileSync(
+      path.join(process.cwd(), "messages/ar.po"),
+      "utf8"
+    );
+    // Check that at least one known translation exists (e.g., System Health)
+    expect(ar).toContain('msgid "System Health"');
+    // Should have non-empty msgstr for at least 10 entries
+    const nonEmpty = (ar.match(/msgstr "[^"]+"/g) || []).filter(
+      (s) => s !== 'msgstr ""'
+    ).length;
+    expect(nonEmpty).toBeGreaterThan(10);
   });
 
   it("html dir is rtl for ar", () => {

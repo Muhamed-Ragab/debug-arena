@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Bug,
   FolderTree,
   LayoutGrid,
   Settings,
@@ -13,28 +12,14 @@ import {
 import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { LanguageSwitcher } from "@/components/preferences/LanguageSwitcher";
 import { ThemeToggle } from "@/components/preferences/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/features/auth/components/SignOutButton";
 import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
-
-export function Logo({ compact = false }: { compact?: boolean }) {
-  return (
-    <Link className="flex items-center gap-2.5" href="/challenges">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-        <Bug className="text-primary-foreground" size={18} />
-      </div>
-      {!compact && (
-        <span className="font-semibold text-[15px] text-heading tracking-tight">
-          Debug Arena
-        </span>
-      )}
-    </Link>
-  );
-}
+import { Logo } from "./Logo";
 
 export function Sidebar({
   open,
@@ -43,7 +28,7 @@ export function Sidebar({
   open?: boolean;
   onClose?: () => void;
 }) {
-  const t = useTranslations();
+  const t = useExtracted();
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user as { role?: string } | undefined;
@@ -56,16 +41,16 @@ export function Sidebar({
   }> = [
     {
       icon: LayoutGrid,
-      label: t("common.navigation.challenges"),
+      label: t("Challenges"),
       to: "/challenges",
     },
     {
       icon: Trophy,
-      label: t("common.navigation.leaderboard"),
+      label: t("Leaderboard"),
       to: "/leaderboard",
     },
-    { icon: User, label: t("common.navigation.profile"), to: "/profile" },
-    { icon: Settings, label: t("common.settings"), to: "/settings" },
+    { icon: User, label: t("Profile"), to: "/profile" },
+    { icon: Settings, label: t("Settings"), to: "/settings" },
   ];
 
   const ADMIN_NAV: Array<{
@@ -75,12 +60,12 @@ export function Sidebar({
   }> = [
     {
       icon: Sparkles,
-      label: t("common.ai_question_studio"),
+      label: t("AI Question Studio"),
       to: "/admin/questions" as Route,
     },
     {
       icon: FolderTree,
-      label: t("common.navigation.categories"),
+      label: t("Categories"),
       to: "/admin/categories" as Route,
     },
   ];
@@ -111,7 +96,7 @@ export function Sidebar({
 
       <div className="px-3 pt-2">
         <p className="px-3 pb-2 font-medium text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
-          {t("common.navigation.navigation")}
+          {t("Navigation")}
         </p>
         <nav className="flex flex-col gap-1">
           {NAV.map(({ to, label, icon: Icon }) => {
@@ -144,7 +129,7 @@ export function Sidebar({
         {Boolean(isAdmin) && (
           <div className="mt-6">
             <p className="px-3 pb-2 font-medium text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
-              {t("common.navigation.adminPortal")}
+              {t("Admin Portal")}
             </p>
             <nav className="flex flex-col gap-1">
               {ADMIN_NAV.map(({ to, label, icon: Icon }) => {
@@ -181,13 +166,13 @@ export function Sidebar({
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="font-medium text-muted-foreground text-sm">
-              {t("common.preferences.theme")}
+              {t("Theme")}
             </span>
             <ThemeToggle />
           </div>
           <div className="flex items-center justify-between">
             <span className="font-medium text-muted-foreground text-sm">
-              {t("common.preferences.language")}
+              {t("Language")}
             </span>
             <LanguageSwitcher />
           </div>

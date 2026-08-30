@@ -1,25 +1,6 @@
 import { getRequestConfig } from "next-intl/server";
 import { routing } from "./routing";
 
-// Load all namespaces for the locale and merge into single messages object
-// Each JSON file corresponds to a namespace top-level key
-const namespaces = [
-  "common",
-  "auth",
-  "landing",
-  "challenge",
-  "browser",
-  "admin",
-  "profile",
-  "results",
-  "leaderboard",
-  "category",
-  "error",
-  "difficulty",
-  "status",
-  "validation",
-] as const;
-
 export default getRequestConfig(async ({ locale }) => {
   if (
     !(
@@ -30,20 +11,11 @@ export default getRequestConfig(async ({ locale }) => {
     locale = routing.defaultLocale;
   }
 
-  const messages: Record<string, unknown> = {};
-
-  for (const ns of namespaces) {
-    try {
-      const mod = await import(`../../messages/${locale}/${ns}.json`);
-      messages[ns] = mod.default ?? mod;
-    } catch {
-      // Fallback to en if locale file missing
-      if (locale !== "en") {
-        const fallback = await import(`../../messages/en/${ns}.json`);
-        messages[ns] = fallback.default ?? fallback;
-      }
-    }
+  try {
+    const messages = (await import(`../../messages/${locale}.po`)).default;
+    return { locale, messages };
+  } catch {
+    const messages = (await import(`../../messages/en.po`)).default;
+    return { locale: routing.defaultLocale, messages };
   }
-
-  return { locale, messages };
 });

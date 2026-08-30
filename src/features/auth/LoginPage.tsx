@@ -1,11 +1,12 @@
 "use client";
 
 import { ArrowRight, AtSign, GitBranch, Lock, Mail } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { type FormEvent, useState } from "react";
-import { Logo } from "@/components/layout/Sidebar";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useExtracted } from "next-intl";
+import { type FormEvent, useEffect, useState } from "react";
+import { Logo } from "@/components/layout/Logo";
 import { LanguageSwitcher } from "@/components/preferences/LanguageSwitcher";
 import { ThemeToggle } from "@/components/preferences/ThemeToggle";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -17,13 +18,35 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { authClient } from "@/lib/auth/client";
 
+function getSafeCallbackUrl(callbackUrl: string | null): string | null {
+  if (!callbackUrl) {
+    return null;
+  }
+  if (!callbackUrl.startsWith("/") || callbackUrl.startsWith("//")) {
+    return null;
+  }
+  return callbackUrl;
+}
+
 export function LoginPage() {
-  const t = useTranslations();
+  const t = useExtracted();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"));
+  const { data: session, isPending } = authClient.useSession();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const lastMethod = authClient.getLastUsedLoginMethod();
+
+  useEffect(() => {
+    if (isPending || !session) {
+      return;
+    }
+    const role = (session.user as { role?: string } | undefined)?.role;
+    const target = callbackUrl ?? (role === "admin" ? "/admin" : "/challenges");
+    router.replace(target as Route);
+  }, [session, isPending, callbackUrl, router]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -45,7 +68,18 @@ export function LoginPage() {
         }
         return;
       }
-      router.push("/challenges");
+      try {
+        const sessionRes = await authClient.getSession();
+        const sessionRole = (
+          sessionRes.data?.user as { role?: string } | undefined
+        )?.role;
+        const target =
+          callbackUrl ?? (sessionRole === "admin" ? "/admin" : "/challenges");
+        router.push(target as Route);
+        router.refresh();
+      } catch {
+        router.push((callbackUrl ?? "/challenges") as Route);
+      }
     } catch {
       setError("An unexpected error occurred.");
     } finally {
@@ -67,10 +101,10 @@ export function LoginPage() {
         <Card className="w-full max-w-md p-2 shadow-2xl shadow-black/30">
           <CardHeader className="space-y-1.5 text-center">
             <h1 className="font-semibold text-2xl text-heading tracking-tight">
-              {t("auth.login.title")}
+              {t("Welcome back")}
             </h1>
             <p className="text-muted-foreground text-sm">
-              {t("auth.login.subtitle")}
+              {t("Log in to keep diagnosing.")}
             </p>
           </CardHeader>
 
@@ -79,7 +113,10 @@ export function LoginPage() {
               <Button
                 className="relative"
                 onClick={() => {
-                  authClient.signIn.social({ provider: "github" });
+                  authClient.signIn.social({
+                    callbackURL: callbackUrl ?? "/challenges",
+                    provider: "github",
+                  });
                 }}
                 size="md"
                 variant={
@@ -99,7 +136,10 @@ export function LoginPage() {
               <Button
                 className="relative"
                 onClick={() => {
-                  authClient.signIn.social({ provider: "google" });
+                  authClient.signIn.social({
+                    callbackURL: callbackUrl ?? "/challenges",
+                    provider: "google",
+                  });
                 }}
                 size="md"
                 variant={
@@ -120,13 +160,13 @@ export function LoginPage() {
 
             <div className="my-4 flex items-center gap-3 text-[11px] text-muted-foreground uppercase tracking-[0.14em]">
               <Separator className="flex-1" />
-              {t("auth.form.or")}
+              {t("or")}
               <Separator className="flex-1" />
             </div>
 
             <form className="space-y-4" noValidate onSubmit={handleSubmit}>
               <div className="space-y-1.5">
-                <Label htmlFor="email">{t("auth.form.email")}</Label>
+                <Label htmlFor="email">{t("Email")}</Label>
                 <div className="relative">
                   <AtSign
                     className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -145,12 +185,12 @@ export function LoginPage() {
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">{t("auth.form.password")}</Label>
+                  <Label htmlFor="password">{t("Password")}</Label>
                   <Link
                     className="text-muted-foreground text-xs transition-colors hover:text-primary"
                     href="/forgot-password"
                   >
-                    {t("auth.login.forgot")}
+                    {t("Forgot password?")}
                   </Link>
                 </div>
                 <div className="relative">
@@ -182,7 +222,7 @@ export function LoginPage() {
                 type="submit"
                 variant="default"
               >
-                {loading ? "Logging in..." : t("auth.actions.logIn")}
+                {loading ? "Logging in..." : t("Log in")}
                 <ArrowRight size={16} />
                 {lastMethod === "email" && (
                   <Badge className="ms-2" variant="secondary">
@@ -193,12 +233,12 @@ export function LoginPage() {
             </form>
 
             <p className="mt-4 text-center text-muted-foreground text-sm">
-              {t("auth.login.newHere")}{" "}
+              {t("New here?")}{" "}
               <Link
                 className="font-medium text-primary hover:underline"
                 href="/register"
               >
-                {t("auth.login.createAccount")}
+                {t("Create an account")}
               </Link>
             </p>
           </CardContent>

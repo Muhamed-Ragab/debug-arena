@@ -1,7 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { type SelectOption, SimpleSelect } from "@/components/ui/select";
 import {
@@ -11,24 +11,6 @@ import {
   DIFFICULTY_ORDER,
 } from "@/lib/domain/categories";
 import type { Category, Difficulty } from "@/lib/domain/types";
-
-const CATEGORY_KEY_MAP: Record<string, string> = {
-  "Backend Concurrency": "category.names.backendConcurrency",
-  "Logic Inversions": "category.names.logicInversions",
-  "Memory Leaks": "category.names.memoryLeaks",
-  "Off-by-One": "category.names.offByOne",
-  "Race Conditions": "category.names.raceConditions",
-  "React Rendering": "category.names.reactRendering",
-  "Security Flaws": "category.names.securityFlaws",
-  "State Mutations": "category.names.stateMutations",
-};
-
-const DIFFICULTY_KEY_MAP: Record<string, string> = {
-  Easy: "difficulty.easy",
-  Expert: "difficulty.expert",
-  Hard: "difficulty.hard",
-  Medium: "difficulty.medium",
-};
 
 interface Props {
   category: Category | "all";
@@ -47,21 +29,66 @@ export function ChallengeFilters({
   difficulty,
   onDifficulty,
 }: Props) {
-  const t = useTranslations();
+  const t = useExtracted();
+
+  function getCategoryLabel(
+    categoryVal: Category,
+    tFn: ReturnType<typeof useExtracted>
+  ): string {
+    switch (categoryVal) {
+      case "Backend Concurrency":
+        return tFn("Backend Concurrency");
+      case "Logic Inversions":
+        return tFn("Logic Inversions");
+      case "Memory Leaks":
+        return tFn("Memory Leaks");
+      case "Off-by-One":
+        return tFn("Off-by-One");
+      case "Race Conditions":
+        return tFn("Race Conditions");
+      case "React Rendering":
+        return tFn("React Rendering");
+      case "Security Flaws":
+        return tFn("Security Flaws");
+      case "State Mutations":
+        return tFn("State Mutations");
+      default:
+        return categoryVal;
+    }
+  }
+
+  function getDifficultyLabel(
+    difficultyVal: Difficulty,
+    tFn: ReturnType<typeof useExtracted>
+  ): string {
+    switch (difficultyVal) {
+      case "Easy":
+        return tFn("Easy");
+      case "Medium":
+        return tFn("Medium");
+      case "Hard":
+        return tFn("Hard");
+      case "Expert":
+        return tFn("Expert");
+      default:
+        return difficultyVal;
+    }
+  }
+
   const categoryOptions: SelectOption[] = [
-    { label: t("browser.filters.allCategories"), value: "all" },
+    { label: t("All Categories"), value: "all" },
     ...CATEGORY_ORDER.map((c) => ({
       indicatorColor: CATEGORY_CONFIG[c]?.color,
-      label: t(CATEGORY_KEY_MAP[c] ?? c),
+      label: getCategoryLabel(c, t),
       value: c,
     })),
   ];
 
   const difficultyOptions: SelectOption[] = [
-    { label: t("browser.filters.allLevels"), value: "all" },
+    { label: t("All Levels"), value: "all" },
     ...DIFFICULTY_ORDER.map((d) => ({
       indicatorColor: DIFFICULTY_CONFIG[d]?.color,
-      label: t(DIFFICULTY_KEY_MAP[d] ?? d),
+      label: getDifficultyLabel(d, t),
       value: d,
     })),
   ];
@@ -77,7 +104,7 @@ export function ChallengeFilters({
         <Input
           className="bg-card ps-10 pe-4"
           onChange={(e) => onSearch(e.target.value)}
-          placeholder={t("browser.filters.search")}
+          placeholder={t("Search challenges...")}
           value={search}
         />
       </div>
@@ -88,7 +115,7 @@ export function ChallengeFilters({
           <SimpleSelect
             onValueChange={(val) => onCategory(val as Category | "all")}
             options={categoryOptions}
-            placeholder={t("browser.filters.selectCategory")}
+            placeholder={t("Select Category")}
             value={category}
           />
         </div>
@@ -97,7 +124,7 @@ export function ChallengeFilters({
           <SimpleSelect
             onValueChange={(val) => onDifficulty(val as Difficulty | "all")}
             options={difficultyOptions}
-            placeholder={t("browser.filters.selectLevel")}
+            placeholder={t("Select Level")}
             value={difficulty}
           />
         </div>

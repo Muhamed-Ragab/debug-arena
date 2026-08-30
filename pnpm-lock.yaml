@@ -62,6 +62,9 @@ importers:
       next-safe-action:
         specifier: ^8.6.1
         version: 8.6.1(next@16.3.3(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      next-themes:
+        specifier: ^0.4.6
+        version: 0.4.6(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       pg:
         specifier: ^8.16.0
         version: 8.23.0
@@ -96,6 +99,9 @@ importers:
       '@biomejs/biome':
         specifier: 2.5.10
         version: 2.5.10
+      '@eloqnt/cli':
+        specifier: ^0.6.27
+        version: 0.6.27(@swc/helpers@0.5.23)
       '@tailwindcss/postcss':
         specifier: ^4.2.2
         version: 4.3.3
@@ -1110,6 +1116,10 @@ packages:
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
 
+  '@eloqnt/cli@0.6.27':
+    resolution: {integrity: sha512-l07h81D1TXvwKjFtkp4H2QNlC1yWuqY0dHifECETwtAxBYz1XSqBBdFlAECGqelWeMOsZ1EdzIz4/wFwJ1vATA==}
+    hasBin: true
+
   '@eloqnt/config@0.0.2':
     resolution: {integrity: sha512-xz86UU1TJQPSzb0XJ3PkoyDlv3wdIiHfuu2wD/8m9ponHx0uSasYRDj4S+dpwQkIQaPYibN1oRr5HBll2GQkog==}
 
@@ -1118,6 +1128,12 @@ packages:
 
   '@eloqnt/format-po@0.0.3':
     resolution: {integrity: sha512-4r36qEd7KJFV+IMKUv5czNXbGVys8ahxlQKWoUDV20eGl4Oxr+YZ2O5IEQU09S+d7FvPJ1USnyc/wtCLNCo1Ng==}
+
+  '@eloqnt/format-po@0.0.5':
+    resolution: {integrity: sha512-jLJLHzWsJP59UK1BMFklc5S+i4keAdzDR7+7bT+OHrUseT/Nsh5KmsgCd8UA0D9Xy2wZLy7MK1dqdJ3XVytKRg==}
+
+  '@eloqnt/sdk@0.6.25':
+    resolution: {integrity: sha512-VggRn6aIth2kIE6w4E8LLYAOvsHvm0h6z7P11JbTJEMaxQzv6iSjR//JAFqnaDiSZXjtwtPn3Ojv2Nl+lZ/vvg==}
 
   '@emnapi/runtime@1.11.3':
     resolution: {integrity: sha512-Xz4Tpyki7XyrpbUK1jR1AhdAdaXyhhY4lZ3neLodmhpuWfy2PAQN5B46sAiU4liOXGLkHypn/qU+jvfWSCYYLA==}
@@ -4160,6 +4176,9 @@ packages:
     resolution: {integrity: sha512-rNjApaLzuwaOTjCiT8lSDdGN1APCiqkChLMJxJPWLunPAt5fy8xgU9/jNOchV84wfIxrA0lRQB7oCT8jrn/wrQ==}
     engines: {node: '>=6.0'}
 
+  citty@0.1.6:
+    resolution: {integrity: sha512-tskPPKEs8D2KPafUypv2gxwJP8h/OaJmC82QQGGDQcHvXX43xF2VDACcJVmZ0EuSxkpO9Kc4MlrA3q0+FG58AQ==}
+
   citty@0.2.2:
     resolution: {integrity: sha512-+6vJA3L98yv+IdfKGZHBNiGW5KHn22e/JwID0Strsz8h4S/csAu/OuICwxrg44k5MRiZHWIo8XXuJgQTriRP4w==}
 
@@ -4278,6 +4297,10 @@ packages:
 
   confbox@0.1.8:
     resolution: {integrity: sha512-RMtmw0iFkeR4YV+fUOSucriAQNb9g8zFR52MWCtl+cCZOFRNL6zeB395vPzFhEjjn4fMxXudmELnl/KF/WrK6w==}
+
+  consola@3.4.2:
+    resolution: {integrity: sha512-5IKcdX0nnYavi6G7TtOhwkYzyjfJlatbjMjuLSfE2kYT5pMDOilZ4OvMhi637CcDICTmz3wARPoyhqyX1Y+XvA==}
+    engines: {node: ^14.18.0 || >=16.10.0}
 
   content-disposition@1.1.0:
     resolution: {integrity: sha512-5jRCH9Z/+DRP7rkvY83B+yGIGX96OYdJmzngqnw2SBSxqCFPd0w2km3s5iawpGX8krnwSGmF0FW5Nhr0Hfai3g==}
@@ -5836,6 +5859,12 @@ packages:
       react: '>= 18.2.0'
       react-dom: '>= 18.2.0'
 
+  next-themes@0.4.6:
+    resolution: {integrity: sha512-pZvgD5L0IEvX5/9GWyHMf3m8BKiVQwsCMHfoFosXtXBMnaS0ZnIJ9ST4b4NqLVKDEm8QBxoNNGNaBv2JNF6XNA==}
+    peerDependencies:
+      react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
+      react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
+
   next@16.3.3:
     resolution: {integrity: sha512-tuRTx1nQ/yVw83cwJBo9F+njGUgMn3UHQycreWHB8XsStvvAh1AthbI8/4IpKnFaF58F+iSiHejYOlMQ/eq83g==}
     engines: {node: '>=20.9.0'}
@@ -7377,6 +7406,13 @@ snapshots:
       '@vercel/oidc': 3.2.0
       zod: 3.25.76
 
+  '@ai-sdk/gateway@4.0.67(zod@4.4.3)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.8
+      '@ai-sdk/provider-utils': 5.0.32(zod@4.4.3)
+      '@vercel/oidc': 3.2.0
+      zod: 4.4.3
+
   '@ai-sdk/groq@4.0.33(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 4.0.8
@@ -7400,6 +7436,15 @@ snapshots:
       eventsource-parser: 3.1.1
       undici: 7.29.0
       zod: 3.25.76
+
+  '@ai-sdk/provider-utils@5.0.32(zod@4.4.3)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.8
+      '@standard-schema/spec': 1.1.0
+      '@workflow/serde': 4.1.0
+      eventsource-parser: 3.1.1
+      undici: 7.29.0
+      zod: 4.4.3
 
   '@ai-sdk/provider@4.0.8':
     dependencies:
@@ -8429,6 +8474,16 @@ snapshots:
 
   '@drizzle-team/brocli@0.10.2': {}
 
+  '@eloqnt/cli@0.6.27(@swc/helpers@0.5.23)':
+    dependencies:
+      '@clack/prompts': 1.7.0
+      '@eloqnt/sdk': 0.6.25(@swc/helpers@0.5.23)
+      citty: 0.1.6
+      open: 11.0.1
+      picocolors: 1.1.1
+    transitivePeerDependencies:
+      - '@swc/helpers'
+
   '@eloqnt/config@0.0.2': {}
 
   '@eloqnt/format-json@0.0.3':
@@ -8439,6 +8494,28 @@ snapshots:
     dependencies:
       '@eloqnt/config': 0.0.2
       po-parser: 2.2.0
+
+  '@eloqnt/format-po@0.0.5':
+    dependencies:
+      '@eloqnt/config': 0.0.2
+      po-parser: 2.2.0
+
+  '@eloqnt/sdk@0.6.25(@swc/helpers@0.5.23)':
+    dependencies:
+      '@eloqnt/config': 0.0.2
+      '@eloqnt/format-json': 0.0.3
+      '@eloqnt/format-po': 0.0.5
+      '@formatjs/icu-messageformat-parser': 3.5.17
+      '@swc/core': 1.16.1(@swc/helpers@0.5.23)
+      ai: 7.0.83(zod@4.4.3)
+      jiti: 2.7.0
+      magic-string: 0.30.21
+      next-intl-swc-plugin-extractor: 4.14.1
+      tinyglobby: 0.2.17
+      yaml: 2.9.0
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - '@swc/helpers'
 
   '@emnapi/runtime@1.11.3':
     dependencies:
@@ -10288,7 +10365,7 @@ snapshots:
       '@usebruno/js': 0.50.0(debug@4.4.3)
       '@usebruno/lang': 0.38.0
       '@usebruno/requests': 0.19.0
-      aws4-axios: 3.4.0(axios@1.16.0)
+      aws4-axios: 3.4.0(axios@1.16.0(debug@4.4.3))
       axios: 1.16.0(debug@4.4.3)
       axios-ntlm: 1.4.6(debug@4.4.3)
       chai: 4.5.0
@@ -10688,6 +10765,13 @@ snapshots:
       '@ai-sdk/provider-utils': 5.0.32(zod@3.25.76)
       zod: 3.25.76
 
+  ai@7.0.83(zod@4.4.3):
+    dependencies:
+      '@ai-sdk/gateway': 4.0.67(zod@4.4.3)
+      '@ai-sdk/provider': 4.0.8
+      '@ai-sdk/provider-utils': 5.0.32(zod@4.4.3)
+      zod: 4.4.3
+
   ajv-formats@2.1.1(ajv@8.20.0):
     optionalDependencies:
       ajv: 8.20.0
@@ -10791,7 +10875,7 @@ snapshots:
       postcss: 8.5.26
       postcss-value-parser: 4.2.0
 
-  aws4-axios@3.4.0(axios@1.16.0):
+  aws4-axios@3.4.0(axios@1.16.0(debug@4.4.3)):
     dependencies:
       '@aws-sdk/client-sts': 3.1118.0
       aws4: 1.13.2
@@ -11084,6 +11168,10 @@ snapshots:
 
   chrome-trace-event@1.0.4: {}
 
+  citty@0.1.6:
+    dependencies:
+      consola: 3.4.2
+
   citty@0.2.2: {}
 
   class-variance-authority@0.7.1:
@@ -11193,6 +11281,8 @@ snapshots:
       semver: 7.8.5
 
   confbox@0.1.8: {}
+
+  consola@3.4.2: {}
 
   content-disposition@1.1.0: {}
 
@@ -12661,6 +12751,11 @@ snapshots:
   next-safe-action@8.6.1(next@16.3.3(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       next: 16.3.3(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+
+  next-themes@0.4.6(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+    dependencies:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
 

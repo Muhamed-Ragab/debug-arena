@@ -18,7 +18,7 @@ import {
   TestTube,
 } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DiffBadge } from "@/components/shared/DiffBadge";
@@ -101,7 +101,7 @@ export function QuestionGeneratorStudio({
   categories,
   onChallengeSaved,
 }: QuestionGeneratorStudioProps) {
-  const t = useTranslations();
+  const t = useExtracted();
   // Generator inputs
   const [topic, setTopic] = useState("");
   const [categorySlug, setCategorySlug] = useState(
@@ -148,7 +148,7 @@ export function QuestionGeneratorStudio({
 
       if (res?.data?.draft) {
         setDraft(res.data.draft);
-        toast.success(t("admin.ai_agent_generated_challenge_draft_succe"));
+        toast.success(t("AI Agent generated challenge draft successfully!"));
       } else if (res?.validationErrors) {
         const flat = flattenValidationErrors(res.validationErrors);
         setFieldErrors(flat);
@@ -158,10 +158,10 @@ export function QuestionGeneratorStudio({
           flat._errors ??
           "Validation failed";
         setServerError(first);
-        toast.error(t("error.validationFailed"));
+        toast.error(t("Validation failed"));
       } else if (res?.serverError) {
         setServerError(res.serverError);
-        toast.error(t(res.serverError as string));
+        toast.error(res.serverError);
         if (res.serverError.toLowerCase().includes("model")) {
           // model decommission message already surfaced via ActionError
         }
@@ -173,13 +173,13 @@ export function QuestionGeneratorStudio({
           }));
         }
       } else {
-        setServerError(t("error.somethingWrong"));
-        toast.error(t("error.somethingWrong"));
+        setServerError(t("Something went wrong"));
+        toast.error(t("Something went wrong"));
       }
     } catch (err) {
       console.error(err);
-      toast.error(t("admin.generator.failedGenerate"));
-      setServerError(t("error.somethingWrong"));
+      toast.error(t("Failed to generate challenge."));
+      setServerError(t("Something went wrong"));
     } finally {
       setIsGenerating(false);
     }
@@ -201,24 +201,24 @@ export function QuestionGeneratorStudio({
       if (res?.data?.draft) {
         setDraft(res.data.draft);
         setRefineInput("");
-        toast.success(t("admin.challenge_refined_by_ai_agent"));
+        toast.success(t("Challenge refined by AI Agent!"));
       } else if (res?.validationErrors) {
         const flat = flattenValidationErrors(res.validationErrors);
         setFieldErrors(flat);
         const first = flat.instruction ?? flat._errors ?? "Validation failed";
         setServerError(first);
-        toast.error(t("error.validationFailed"));
+        toast.error(t("Validation failed"));
       } else if (res?.serverError) {
         setServerError(res.serverError);
-        toast.error(t(res.serverError as string));
+        toast.error(res.serverError);
       } else {
-        setServerError(t("error.somethingWrong"));
-        toast.error(t("error.somethingWrong"));
+        setServerError(t("Something went wrong"));
+        toast.error(t("Something went wrong"));
       }
     } catch (err) {
       console.error(err);
-      toast.error(t("admin.generator.failedRefine"));
-      setServerError(t("error.somethingWrong"));
+      toast.error(t("Failed to refine challenge draft."));
+      setServerError(t("Something went wrong"));
     } finally {
       setIsRefining(false);
     }
@@ -252,8 +252,8 @@ export function QuestionGeneratorStudio({
         setPublishedId(res.data.challengeId);
         toast.success(
           status === "published"
-            ? t("challenge.creator.published")
-            : t("challenge.creator.draftSaved")
+            ? t("Challenge published live to the arena!")
+            : t("Challenge draft saved successfully.")
         );
         onChallengeSaved?.();
       } else if (res?.validationErrors) {
@@ -267,10 +267,10 @@ export function QuestionGeneratorStudio({
           flat._errors ??
           "Validation failed";
         setServerError(first);
-        toast.error(t("error.validationFailed"));
+        toast.error(t("Validation failed"));
       } else if (res?.serverError) {
         setServerError(res.serverError);
-        toast.error(t(res.serverError as string));
+        toast.error(res.serverError);
         const lower = res.serverError.toLowerCase();
         if (lower.includes("category")) {
           setFieldErrors((prev) => ({
@@ -285,13 +285,13 @@ export function QuestionGeneratorStudio({
           }));
         }
       } else {
-        setServerError(t("error.somethingWrong"));
-        toast.error(t("error.somethingWrong"));
+        setServerError(t("Something went wrong"));
+        toast.error(t("Something went wrong"));
       }
     } catch (err) {
       console.error(err);
-      toast.error(t("challenge.creator.failedSave"));
-      setServerError(t("error.somethingWrong"));
+      toast.error(t("Failed to save challenge."));
+      setServerError(t("Something went wrong"));
     } finally {
       setIsSaving(false);
     }
@@ -312,31 +312,33 @@ export function QuestionGeneratorStudio({
             </div>
             <div>
               <h2 className="font-semibold text-heading text-lg">
-                {t("admin.ai_challenge_synthesis_agent")}
+                {t("AI Challenge Synthesis Agent")}
               </h2>
               <p className="text-muted-foreground text-xs">
-                {t("admin.synthesize_high_fidelity_debugging_scena")}
+                {t(
+                  "Synthesize high-fidelity debugging scenarios, buggy multi-file code, reference fixes, and progressive hints."
+                )}
               </p>
             </div>
           </div>
           <div className="mt-2 flex items-center gap-2 sm:mt-0">
             <span className="inline-flex items-center gap-1.5 rounded-md border border-primary/20 bg-primary/5 px-2.5 py-1 font-medium text-[11px] text-primary">
               <Cpu size={13} />
-              {t("admin.llama_3_3_70b_vector_embedder")}
+              {t("Llama 3.3 70B & Vector Embedder")}
             </span>
           </div>
         </div>
 
         {serverError ? (
           <Alert className="mb-4" variant="destructive">
-            <AlertDescription>{t(serverError as string)}</AlertDescription>
+            <AlertDescription>{serverError}</AlertDescription>
           </Alert>
         ) : null}
 
         {/* Preset Prompt Chips */}
         <div className="mb-4">
           <p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
-            {t("admin.scenario_presets")}
+            {t("Scenario Presets")}
           </p>
           <div className="flex flex-wrap gap-2">
             {PROMPT_PRESETS.map((preset) => (
@@ -366,7 +368,7 @@ export function QuestionGeneratorStudio({
               className="mb-1.5 block font-medium text-heading text-xs"
               htmlFor="topic-input"
             >
-              {t("admin.scenario_bug_topic_idea")}
+              {t("Scenario / Bug Topic Idea")}
             </label>
             <input
               className="w-full rounded-lg border border-border bg-inset px-3.5 py-2.5 text-foreground text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
@@ -383,7 +385,7 @@ export function QuestionGeneratorStudio({
               className="mb-1.5 block font-medium text-heading text-xs"
               htmlFor="category-select"
             >
-              {t("admin.table.category")}
+              {t("Category")}
             </label>
             <Select
               onValueChange={(val) => {
@@ -401,7 +403,7 @@ export function QuestionGeneratorStudio({
                 className="w-full rounded-lg border-border bg-inset px-3 py-2 text-foreground text-xs"
                 id="category-select"
               >
-                <SelectValue placeholder={t("admin.form.selectCategory")} />
+                <SelectValue placeholder={t("Select category...")} />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((c) => (
@@ -418,7 +420,7 @@ export function QuestionGeneratorStudio({
               className="mb-1.5 block font-medium text-heading text-xs"
               htmlFor="difficulty-select-studio"
             >
-              {t("admin.table.difficulty")}
+              {t("Difficulty")}
             </label>
             <Select
               onValueChange={(v) => {
@@ -436,7 +438,7 @@ export function QuestionGeneratorStudio({
                 className="w-full rounded-lg border-border bg-inset px-3 py-2 text-foreground text-xs"
                 id="difficulty-select-studio"
               >
-                <SelectValue placeholder={t("admin.form.selectDifficulty")} />
+                <SelectValue placeholder={t("Select difficulty...")} />
               </SelectTrigger>
               <SelectContent>
                 {DIFFICULTY_VALUES.map((d) => (
@@ -451,7 +453,7 @@ export function QuestionGeneratorStudio({
                 className="mt-1.5 text-destructive text-xs"
                 id="difficulty-error-studio"
               >
-                {t(fieldErrors.difficulty as string)}
+                {fieldErrors.difficulty}
               </p>
             )}
           </div>
@@ -461,7 +463,7 @@ export function QuestionGeneratorStudio({
               className="mb-1.5 block font-medium text-heading text-xs"
               htmlFor="qgs-language"
             >
-              {t("common.preferences.language")}
+              {t("Language")}
             </label>
             <Select
               onValueChange={(val) => setLanguage(val ?? "typescript")}
@@ -488,7 +490,7 @@ export function QuestionGeneratorStudio({
               className="mb-1.5 block font-medium text-heading text-xs"
               htmlFor="qgs-instructions"
             >
-              {t("admin.custom_instructions_optional")}
+              {t("Custom Instructions (Optional)")}
             </label>
             <input
               className="w-full rounded-lg border border-border bg-inset px-3.5 py-2.5 text-foreground text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
@@ -513,12 +515,12 @@ export function QuestionGeneratorStudio({
             {isGenerating ? (
               <>
                 <Loader2 className="animate-spin" size={16} />
-                <span>{t("admin.synthesizing_challenge_with_ai")}</span>
+                <span>{t("Synthesizing Challenge with AI...")}</span>
               </>
             ) : (
               <>
                 <Sparkles size={16} />
-                <span>{t("admin.synthesize_challenge_draft")}</span>
+                <span>{t("Synthesize Challenge Draft")}</span>
               </>
             )}
           </Button>
@@ -559,7 +561,7 @@ export function QuestionGeneratorStudio({
                 variant="outline"
               >
                 <Save size={14} />
-                {t("admin.save_as_draft")}
+                {t("Save as Draft")}
               </Button>
               <Button
                 disabled={isSaving}
@@ -568,7 +570,7 @@ export function QuestionGeneratorStudio({
                 variant="default"
               >
                 <Play size={14} />
-                {t("admin.actions.publish")}
+                {t("Publish to Arena")}
               </Button>
             </div>
           </div>
@@ -578,14 +580,16 @@ export function QuestionGeneratorStudio({
             <div className="flex items-center justify-between rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-emerald-400 text-sm">
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 size={18} />
-                <span>{t("admin.challenge_is_saved_and_ready_in")}</span>
+                <span>
+                  {t("Challenge is saved and ready in the database!")}
+                </span>
               </div>
               <Link
                 className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500 px-3 py-1 font-semibold text-black text-xs transition-colors hover:bg-emerald-400"
                 href={`/challenges/${publishedId}`}
                 target="_blank"
               >
-                {t("admin.manual.playInArena")} →
+                {t("Play in Arena")} →
               </Link>
             </div>
           )}
@@ -596,32 +600,32 @@ export function QuestionGeneratorStudio({
               {
                 icon: Code2,
                 id: "scenario" as const,
-                label: t("admin.generator.promptLabel"),
+                label: t("Scenario Prompt"),
               },
               {
                 icon: FileCode,
                 id: "code" as const,
-                label: t("admin.buggy_code"),
+                label: t("Buggy Code"),
               },
               {
                 icon: RotateCcw,
                 id: "diff" as const,
-                label: t("admin.reference_fix_diff"),
+                label: t("Reference Fix & Diff"),
               },
               {
                 icon: Lightbulb,
                 id: "hints" as const,
-                label: t("admin.socratic_hints"),
+                label: t("Socratic Hints"),
               },
               {
                 icon: ShieldAlert,
                 id: "analysis" as const,
-                label: t("admin.root_cause_prevention"),
+                label: t("Root Cause & Prevention"),
               },
               {
                 icon: TestTube,
                 id: "tests" as const,
-                label: t("admin.verification_tests"),
+                label: t("Verification Tests"),
               },
             ].map(({ id, icon: Icon, label }) => (
               <Button
@@ -650,7 +654,7 @@ export function QuestionGeneratorStudio({
                 className="font-semibold text-heading text-xs uppercase tracking-wider"
                 htmlFor="qgs-scenario"
               >
-                {t("admin.scenario_markdown_description")}
+                {t("Scenario Markdown Description")}
               </label>
               <textarea
                 className="h-64 w-full rounded-lg border border-border bg-inset p-3.5 font-mono text-foreground text-sm focus:border-primary focus:outline-none"
@@ -761,7 +765,7 @@ export function QuestionGeneratorStudio({
             <div className="flex flex-col gap-4">
               <div className="rounded-lg border border-border/80 bg-inset p-3 text-muted-foreground text-xs">
                 <strong className="font-semibold text-heading">
-                  {t("admin.fix_explanation")}{" "}
+                  {t("Fix Explanation:")}{" "}
                 </strong>
                 {draft?.referenceFix.explanation}
               </div>
@@ -805,7 +809,7 @@ export function QuestionGeneratorStudio({
                 >
                   <div className="mb-2 flex items-center justify-between">
                     <span className="font-semibold text-heading text-xs">
-                      {t("challenge.hints.title", { order: hint.order })}
+                      {t("Hint {order}", { order: String(hint.order) })}
                     </span>
                     <span className="rounded bg-rose-500/10 px-2 py-0.5 font-mono text-rose-400 text-xs">
                       -{hint.penaltyPoints} pts
@@ -840,7 +844,7 @@ export function QuestionGeneratorStudio({
                   className="font-semibold text-heading text-xs uppercase tracking-wider"
                   htmlFor="qgs-rootcause"
                 >
-                  {t("admin.canonical_root_cause_breakdown_1")}
+                  {t("Canonical Root Cause Breakdown")}
                 </label>
                 <textarea
                   className="h-48 w-full rounded-lg border border-border bg-inset p-3 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
@@ -858,7 +862,7 @@ export function QuestionGeneratorStudio({
                   className="font-semibold text-heading text-xs uppercase tracking-wider"
                   htmlFor="qgs-prevention"
                 >
-                  {t("admin.prevention_notes_safeguards")}
+                  {t("Prevention Notes & Safeguards")}
                 </label>
                 <textarea
                   className="h-48 w-full rounded-lg border border-border bg-inset p-3 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
@@ -895,7 +899,9 @@ export function QuestionGeneratorStudio({
                 ))
               ) : (
                 <div className="rounded-lg border border-border bg-inset p-6 text-center text-muted-foreground text-xs">
-                  {t("admin.no_specific_automated_test_scripts_defin")}
+                  {t(
+                    "No specific automated test scripts defined for this challenge."
+                  )}
                 </div>
               )}
             </div>
@@ -905,7 +911,7 @@ export function QuestionGeneratorStudio({
           <div className="mt-4 rounded-xl border border-primary/30 bg-primary/5 p-4">
             <div className="mb-2 flex items-center gap-2 font-semibold text-primary text-xs">
               <Sparkles size={14} />
-              <span>{t("admin.ai_agent_refinement_chat")}</span>
+              <span>{t("AI Agent Refinement Chat")}</span>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <input
@@ -932,7 +938,7 @@ export function QuestionGeneratorStudio({
                 ) : (
                   <Send size={14} />
                 )}
-                <span>{t("admin.generator.refine")}</span>
+                <span>{t("Refine Draft")}</span>
               </Button>
             </div>
           </div>

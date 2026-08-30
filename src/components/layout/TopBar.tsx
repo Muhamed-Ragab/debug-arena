@@ -2,11 +2,11 @@
 
 import type { Route } from "next";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
 import { SignOutButton } from "@/features/auth/components/SignOutButton";
 import { useSession } from "@/lib/auth/client";
-import { Logo } from "./Sidebar";
+import { Logo } from "./Logo";
 
 export interface Crumb {
   label: string;
@@ -19,45 +19,42 @@ interface TopBarProps {
 }
 
 export function TopBar({ crumbs, right }: TopBarProps) {
-  const t = useTranslations();
+  const t = useExtracted();
   const { data: session } = useSession();
 
   const user = session?.user;
 
   const userName = user?.displayName || user?.name || "Developer";
-  const userJobTitle = user?.jobTitle || t("common.roles.developer");
+  const userJobTitle = user?.jobTitle || t("Developer");
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-border border-b bg-surface px-6">
       <div className="flex items-center gap-4">
         <Logo />
         <nav className="flex items-center gap-2 text-sm">
-          {crumbs.map((c, i) => {
-            const translatedLabel = t(c.label as string);
-            return (
-              <span className="flex items-center gap-2" key={c.to ?? c.label}>
-                {i > 0 && <span className="text-muted-foreground">/</span>}
-                {c.to ? (
-                  <Link
-                    className="text-muted-foreground transition-colors hover:text-foreground"
-                    href={c.to}
-                  >
-                    {translatedLabel}
-                  </Link>
-                ) : (
-                  <span
-                    className={
-                      i === crumbs.length - 1
-                        ? "font-medium text-heading"
-                        : "text-muted-foreground"
-                    }
-                  >
-                    {translatedLabel}
-                  </span>
-                )}
-              </span>
-            );
-          })}
+          {crumbs.map((c, i) => (
+            <span className="flex items-center gap-2" key={c.to ?? c.label}>
+              {i > 0 && <span className="text-muted-foreground">/</span>}
+              {c.to ? (
+                <Link
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                  href={c.to}
+                >
+                  {c.label}
+                </Link>
+              ) : (
+                <span
+                  className={
+                    i === crumbs.length - 1
+                      ? "font-medium text-heading"
+                      : "text-muted-foreground"
+                  }
+                >
+                  {c.label}
+                </span>
+              )}
+            </span>
+          ))}
         </nav>
       </div>
       <div className="flex items-center gap-3">
@@ -79,12 +76,12 @@ export function TopBar({ crumbs, right }: TopBarProps) {
         </Link>
         <div className="h-4 w-px bg-border" />
         <SignOutButton
-          aria-label={t("common.actions.logOut")}
+          aria-label={t("Log out")}
           className="h-8 w-8 p-0"
           size="icon"
-          title={t("common.actions.logOut")}
+          title={t("Log out")}
         >
-          <span className="sr-only">{t("common.actions.logOut")}</span>
+          <span className="sr-only">{t("Log out")}</span>
         </SignOutButton>
       </div>
     </header>

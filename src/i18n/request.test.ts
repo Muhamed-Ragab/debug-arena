@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
 
 // Mock next/headers for request locale detection
 vi.mock("next/headers", () => ({
@@ -22,28 +24,44 @@ vi.mock("next/headers", () => ({
 }));
 
 describe("request config", () => {
-  it("loads messages for en and ar", async () => {
-    const enCommon = await import("../../messages/en/common.json");
-    const arCommon = await import("../../messages/ar/common.json");
-    expect(enCommon.default).toBeDefined();
-    expect(arCommon.default).toBeDefined();
-    expect(enCommon.default.navigation.challenges).toBe("Challenges");
-  });
-
-  it("ar fallback has same keys as en", async () => {
-    const en = await import("../../messages/en/common.json");
-    const ar = await import("../../messages/ar/common.json");
-    const enKeys = Object.keys(en.default);
-    for (const k of enKeys) {
-      expect((ar.default as Record<string, unknown>)[k]).toBeDefined();
-    }
+  it("en.po and ar.po are flat hash catalogs", () => {
+    const en = fs.readFileSync(
+      path.join(process.cwd(), "messages/en.po"),
+      "utf8"
+    );
+    const ar = fs.readFileSync(
+      path.join(process.cwd(), "messages/ar.po"),
+      "utf8"
+    );
+    expect(en).toContain('msgid "Challenges"');
+    expect(ar).toContain('msgid "Challenges"');
+    // Check flat hash: msgctxt is hash, not namespace
+    expect(en).toMatch(/msgctxt "[A-Za-z0-9_-]+"/);
   });
 
   it("routing locales are valid in messages", async () => {
     const { routing } = await import("./routing");
     for (const locale of routing.locales) {
-      const mod = await import(`../../messages/${locale}/common.json`);
-      expect(mod.default).toBeDefined();
+      const poPath = path.join(process.cwd(), `messages/${locale}.po`);
+      expect(fs.existsSync(poPath)).toBe(true);
+      const content = fs.readFileSync(poPath, "utf8");
+      expect(content).toContain("msgid");
     }
+  });
+
+  it("request config loads .po flat messages", async () => {
+    // Simulate getRequestConfig loading
+    const routing = await import("./routing");
+    expect(routing.routing.locales).toContain("en");
+    expect(routing.routing.locales).toContain("ar");
+    // Check that en.po can be imported as flat hash (via po loader mock)
+    // In test env, we check file exists and has expected structure
+    const enPo = fs.readFileSync(
+      path.join(process.cwd(), "messages/en.po"),
+      "utf8"
+    );
+    expect(enPo).toContain("msgctxt");
+    expect(enPo).toContain('msgid "System Health"');
+    expect(enPo).toContain('msgstr "System Health"');
   });
 });

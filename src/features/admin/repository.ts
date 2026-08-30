@@ -1,6 +1,6 @@
 import "server-only";
 
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import * as schema from "@/db/schema";
 import { OFFLINE_MESSAGE, toOfflineError } from "@/lib/offline";
@@ -191,15 +191,42 @@ export function createAdminRepository(
     }
   }
 
+  async function findAllUsers(): Promise<(typeof schema.users.$inferSelect)[]> {
+    try {
+      return await dbClient.query.users.findMany({
+        orderBy: [desc(schema.users.createdAt)],
+        where: and(eq(schema.users.role, "user")),
+      });
+    } catch (err) {
+      handleDbError(err, "findAllUsers");
+    }
+  }
+
+  async function updateUserBanStatus(
+    userId: string,
+    banned: boolean
+  ): Promise<void> {
+    try {
+      await dbClient
+        .update(schema.users)
+        .set({ banned })
+        .where(eq(schema.users.id, userId));
+    } catch (err) {
+      handleDbError(err, "updateUserBanStatus");
+    }
+  }
+
   return {
     deleteChallengeCascade,
     deleteHintsByChallengeId,
+    findAllUsers,
     findCategories,
     findChallengeById,
     findChallenges,
     insertChallenge,
     insertHints,
     updateChallenge,
+    updateUserBanStatus,
     upsertEmbedding,
   };
 }

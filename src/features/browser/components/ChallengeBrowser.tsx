@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
@@ -25,8 +25,24 @@ export function ChallengeBrowser({
   initialChallenges: Challenge[];
   stats: ChallengeBrowserStat[];
 }) {
-  const t = useTranslations();
+  const t = useExtracted();
   const [page, setPage] = useState(1);
+
+  function getStatLabel(
+    key: string,
+    tFn: ReturnType<typeof useExtracted>
+  ): string {
+    switch (key) {
+      case "browser.stats.solved":
+        return tFn("Solved");
+      case "browser.stats.currentStreak":
+        return tFn("Current Streak");
+      case "browser.stats.rank":
+        return tFn("Rank");
+      default:
+        return key;
+    }
+  }
 
   const {
     query,
@@ -47,15 +63,17 @@ export function ChallengeBrowser({
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <TopBar crumbs={[{ label: "Arena" }, { label: "Challenges" }]} />
+      <TopBar crumbs={[{ label: t("Arena") }, { label: t("Challenges") }]} />
 
       <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
         <div className="mb-6">
           <h1 className="font-semibold text-2xl text-heading tracking-tight">
-            {t("common.navigation.challenges")}
+            {t("Challenges")}
           </h1>
           <p className="mt-1 text-muted-foreground text-sm">
-            {t("browser.subtitle")}
+            {t(
+              "Pick a bug, read the scenario, and ship a root-cause diagnosis."
+            )}
           </p>
         </div>
 
@@ -63,7 +81,7 @@ export function ChallengeBrowser({
           {stats.map((s) => (
             <Card className="p-4" key={s.label}>
               <p className="font-medium text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
-                {t(s.label as string)}
+                {getStatLabel(s.label, t)}
               </p>
               <p className="mt-1 font-semibold text-heading text-xl">
                 {s.value}
@@ -97,7 +115,7 @@ export function ChallengeBrowser({
 
         {pageItems.length === 0 && (
           <div className="flex h-40 items-center justify-center text-muted-foreground text-sm">
-            {t("browser.empty")}
+            {t("No challenges match the current filters.")}
           </div>
         )}
 

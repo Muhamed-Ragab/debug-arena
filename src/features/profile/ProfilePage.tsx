@@ -1,5 +1,6 @@
 "use client";
 
+import { useExtracted } from "next-intl";
 import { TopBar } from "@/components/layout/TopBar";
 import type { UserProfileData } from "@/features/profile/types";
 import { ProfileScreen } from "./components/ProfileScreen";
@@ -9,10 +10,11 @@ interface Props {
 }
 
 export function ProfilePage({ data }: Props) {
+  const t = useExtracted();
   if (!data) {
     return (
       <div className="flex h-full flex-col overflow-hidden">
-        <TopBar crumbs={[{ label: "Arena" }, { label: "Profile" }]} />
+        <TopBar crumbs={[{ label: t("Arena") }, { label: t("Profile") }]} />
         <div className="flex flex-1 items-center justify-center">
           <p className="text-muted-foreground text-sm">
             Profile data is unavailable.

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { AdminReadOnlyBanner } from "@/features/challenge/components/AdminReadOnlyBanner";
 import { ChallengeScreen } from "@/features/challenge/components/ChallengeScreen";
 import { challengeService } from "@/features/challenge/service";
 import type { DiffLine } from "@/features/challenge/types";
@@ -18,7 +19,8 @@ export default async function Page({
 
   if (
     !dbChallenge ||
-    (dbChallenge.status !== "published" && session?.user?.role !== "admin")
+    (dbChallenge.status !== "published" &&
+      (session?.user as { role?: string })?.role !== "admin")
   ) {
     notFound();
   }
@@ -58,14 +60,26 @@ export default async function Page({
     ? dbChallenge.prompt.split("\n\n").filter(Boolean)
     : undefined;
 
+  const isAdmin = (session?.user as { role?: string })?.role === "admin";
+
   return (
-    <ChallengeScreen
-      challenge={challenge}
-      codeLines={codeLines}
-      diffLines={referenceFix.diff}
-      fileName={fileName}
-      hints={dbChallenge.hints}
-      scenarioParagraphs={scenarioParagraphs}
-    />
+    <div className="flex h-full w-full flex-col">
+      {isAdmin ? (
+        <div className="shrink-0 p-3">
+          <AdminReadOnlyBanner />
+        </div>
+      ) : null}
+      <div className="min-h-0 flex-1">
+        <ChallengeScreen
+          challenge={challenge}
+          codeLines={codeLines}
+          diffLines={referenceFix.diff}
+          fileName={fileName}
+          hints={dbChallenge.hints}
+          isReadOnly={isAdmin}
+          scenarioParagraphs={scenarioParagraphs}
+        />
+      </div>
+    </div>
   );
 }

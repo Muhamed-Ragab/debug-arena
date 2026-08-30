@@ -13,7 +13,7 @@ export const editProfileSchema = z.object({
     .min(3)
     .max(30)
     .regex(/^[a-zA-Z0-9_]+$/, {
-      message: "Username can only contain letters, numbers, and underscores",
+      message: "validation.usernameFormat",
     }),
 });
 

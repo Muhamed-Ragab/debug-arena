@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createCategorySchema = z.object({
   color: z
     .string()
-    .regex(/^#[0-9a-fA-F]{6}$/, "Invalid hex color (e.g. #3b82f6)")
+    .regex(/^#[0-9a-fA-F]{6}$/, "validation.invalidHexColor")
     .nullable()
     .optional(),
   description: z.string().max(500).nullable().optional(),
@@ -14,10 +14,7 @@ export const createCategorySchema = z.object({
     .string()
     .min(2)
     .max(50)
-    .regex(
-      /^[a-z0-9-]+$/,
-      "Slug must contain only lowercase letters, numbers and hyphens"
-    )
+    .regex(/^[a-z0-9-]+$/, "validation.slugFormat")
     .optional(),
   sortOrder: z.coerce.number().int().min(0).max(1000).default(0),
 });

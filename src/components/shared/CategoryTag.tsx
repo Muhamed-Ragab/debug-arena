@@ -1,10 +1,36 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { CATEGORY_CONFIG, type Category } from "@/lib/domain";
 
+function getCategoryLabel(
+  category: Category,
+  t: ReturnType<typeof useExtracted>
+): string {
+  switch (category) {
+    case "Backend Concurrency":
+      return t("Backend Concurrency");
+    case "Logic Inversions":
+      return t("Logic Inversions");
+    case "Memory Leaks":
+      return t("Memory Leaks");
+    case "Off-by-One":
+      return t("Off-by-One");
+    case "Race Conditions":
+      return t("Race Conditions");
+    case "React Rendering":
+      return t("React Rendering");
+    case "Security Flaws":
+      return t("Security Flaws");
+    case "State Mutations":
+      return t("State Mutations");
+    default:
+      return category;
+  }
+}
+
 export function CategoryTag({ category }: { category: Category }) {
-  const t = useTranslations();
+  const t = useExtracted();
   const cfg = CATEGORY_CONFIG[category] ?? {
     bg: "rgba(107, 114, 128, 0.1)",
     border: "rgba(107, 114, 128, 0.25)",
@@ -24,7 +50,7 @@ export function CategoryTag({ category }: { category: Category }) {
         className="h-1.5 w-1.5 rounded-full"
         style={{ backgroundColor: cfg.color }}
       />
-      {t(cfg.label as string)}
+      {getCategoryLabel(category, t)}
     </span>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { FileCode, X } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Button } from "@/components/ui/button";
 import type { CategoryConfig } from "@/lib/domain/categories";
 import { tokenizeLine } from "../lib/tokenize";
@@ -25,7 +25,7 @@ export function CodeViewer({
   codeLines,
   fileName,
 }: Props) {
-  const t = useTranslations();
+  const t = useExtracted();
   let activeLines: number[] = [];
   if (Array.isArray(selectedLines)) {
     activeLines = selectedLines;
@@ -35,18 +35,18 @@ export function CodeViewer({
 
   const formatSelectionText = () => {
     if (activeLines.length === 0) {
-      return t("challenge.codeViewer.markHint");
+      return t("Click lines to mark bug location (Shift+click for range)");
     }
     if (activeLines.length === 1) {
-      return t("challenge.codeViewer.lineMarked", { line: activeLines[0] });
+      return t("Line {line} marked", { line: String(activeLines[0]) });
     }
     if (activeLines.length <= 4) {
       const sorted = [...activeLines].sort((a, b) => a - b);
-      return t("challenge.codeViewer.linesMarked", {
+      return t("Lines {lines} marked", {
         lines: sorted.join(", "),
       });
     }
-    return t("challenge.codeViewer.countMarked", { count: activeLines.length });
+    return t("{count} lines marked", { count: String(activeLines.length) });
   };
 
   return (
@@ -68,11 +68,11 @@ export function CodeViewer({
               className="h-6 gap-1 rounded bg-white/5 px-2 py-0.5 font-mono text-[10px] text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
               onClick={onClearLines}
               size="xs"
-              title={t("challenge.codeViewer.clearSelected")}
+              title={t("Clear selected lines")}
               type="button"
               variant="ghost"
             >
-              <X size={11} /> {t("challenge.codeViewer.clear")}
+              <X size={11} /> {t("Clear")}
             </Button>
           ) : null}
         </div>

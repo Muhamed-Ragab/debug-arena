@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CATEGORY_CONFIG } from "@/lib/domain/categories";
 import type { Category } from "@/lib/domain/types";
@@ -39,10 +39,33 @@ function getTabClasses(active: boolean, hasCfg: boolean): string {
 }
 
 export function LeaderboardTabs({ tab, setTab }: Props) {
-  const t = useTranslations();
+  const t = useExtracted();
+
+  function getTabLabel(
+    id: LeaderboardTab,
+    tFn: ReturnType<typeof useExtracted>
+  ): string {
+    switch (id) {
+      case "week":
+        return tFn("This week");
+      case "alltime":
+        return tFn("All time");
+      case "State Mutations":
+        return tFn("State Mutations");
+      case "Race Conditions":
+        return tFn("Race Conditions");
+      case "Security Flaws":
+        return tFn("Security Flaws");
+      case "Memory Leaks":
+        return tFn("Memory Leaks");
+      default:
+        return id;
+    }
+  }
+
   return (
     <div className="flex items-center gap-1 overflow-x-auto">
-      {TABS.map(({ id, label }) => {
+      {TABS.map(({ id }) => {
         const active = tab === id;
         const isCat = CATEGORY_TABS.includes(id as Category);
         const cfg = isCat ? CATEGORY_CONFIG[id as Category] : null;
@@ -63,7 +86,7 @@ export function LeaderboardTabs({ tab, setTab }: Props) {
             type="button"
             variant="ghost"
           >
-            {t(label as string)}
+            {getTabLabel(id, t)}
           </Button>
         );
       })}

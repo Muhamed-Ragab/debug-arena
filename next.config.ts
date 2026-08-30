@@ -17,6 +17,18 @@ const nextConfig: NextConfig = {
   },
 };
 
-const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+const withNextIntl = createNextIntlPlugin({
+  requestConfig: "./src/i18n/request.ts",
+  experimental: {
+    extract: true,
+    messages: {
+      path: "./messages",
+      format: "po",
+      locales: "infer",
+      sourceLocale: "en",
+    },
+    srcPath: "./src",
+  },
+});
 
 export default withNextIntl(nextConfig);

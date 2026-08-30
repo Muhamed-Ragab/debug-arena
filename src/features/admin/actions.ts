@@ -1,7 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { adminActionClient } from "@/lib/safe-action";
+import { headers } from "next/headers";
+import { invalidateLeaderboardCache } from "@/features/leaderboard/cache";
+import { auth } from "@/lib/auth";
+import { ActionError, adminActionClient } from "@/lib/safe-action";
 import { adminService } from "./service";
 import {
   deleteChallengeOutputSchema,
@@ -14,6 +17,8 @@ import {
   saveChallengeSchema,
   toggleStatusOutputSchema,
   toggleStatusSchema,
+  toggleUserBanOutputSchema,
+  toggleUserBanSchema,
 } from "./validation";
 
 export const generateQuestionAction = adminActionClient
@@ -79,4 +84,39 @@ export const deleteAdminChallengeAction = adminActionClient
     revalidatePath("/challenges");
     revalidatePath("/admin/questions");
     return result;
+  });
+
+export const toggleUserBanAction = adminActionClient
+  .inputSchema(toggleUserBanSchema)
+  .outputSchema(toggleUserBanOutputSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    if (parsedInput.userId === ctx.user.id) {
+      throw new ActionError("error.cannotBanSelf");
+    }
+    const requestHeaders = await headers();
+    if (parsedInput.banned) {
+      await auth.api.banUser({
+        body: {
+          banExpiresIn: parsedInput.banExpiresIn,
+          banReason: parsedInput.banReason ?? "Admin ban",
+          userId: parsedInput.userId,
+        },
+        headers: requestHeaders,
+      });
+    } else {
+      await auth.api.unbanUser({
+        body: {
+          userId: parsedInput.userId,
+        },
+        headers: requestHeaders,
+      });
+    }
+    await invalidateLeaderboardCache();
+    revalidatePath("/admin/users");
+    revalidatePath("/leaderboard");
+    return {
+      banned: parsedInput.banned,
+      success: true,
+      userId: parsedInput.userId,
+    };
   });

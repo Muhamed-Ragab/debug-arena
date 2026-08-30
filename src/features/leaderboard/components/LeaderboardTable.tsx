@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Flame } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { RankMedal } from "@/components/shared/RankMedal";
 import { Avatar } from "@/components/ui/avatar";
@@ -34,7 +34,7 @@ function getStreakColor(streak: number): string {
 }
 
 export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
-  const t = useTranslations();
+  const t = useExtracted();
   const [page, setPage] = useState(1);
 
   const totalPages = Math.max(1, Math.ceil(entries.length / pageSize));
@@ -49,19 +49,11 @@ export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="w-16">
-              {t("leaderboard.table.rank")}
-            </TableHead>
-            <TableHead>{t("leaderboard.table.user")}</TableHead>
-            <TableHead className="text-end">
-              {t("leaderboard.table.score")}
-            </TableHead>
-            <TableHead className="text-end">
-              {t("leaderboard.table.solved")}
-            </TableHead>
-            <TableHead className="text-end">
-              {t("leaderboard.table.streak")}
-            </TableHead>
+            <TableHead className="w-16">{t("Rank")}</TableHead>
+            <TableHead>{t("User")}</TableHead>
+            <TableHead className="text-end">{t("Score")}</TableHead>
+            <TableHead className="text-end">{t("Solved")}</TableHead>
+            <TableHead className="text-end">{t("Streak")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -93,7 +85,7 @@ export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
                         className="ms-2 font-mono text-[10px]"
                         variant="default"
                       >
-                        {t("leaderboard.table.youBadge")}
+                        {t("you")}
                       </Badge>
                     )}
                   </span>
@@ -111,7 +103,7 @@ export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
                   style={{ color: getStreakColor(row.streak) }}
                 >
                   {row.streak >= 7 ? <Flame size={11} /> : null}
-                  {t("leaderboard.table.streakDays", { streak: row.streak })}
+                  {t("{streak}d", { streak: String(row.streak) })}
                 </span>
               </TableCell>
             </TableRow>
@@ -122,10 +114,10 @@ export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-between border-border border-t pt-4">
           <p className="text-muted-foreground text-xs">
-            {t("leaderboard.table.pagination", {
-              from: (safePage - 1) * pageSize + 1,
-              to: Math.min(safePage * pageSize, entries.length),
-              total: entries.length,
+            {t("Showing {from} to {to} of {total} entries", {
+              from: String((safePage - 1) * pageSize + 1),
+              to: String(Math.min(safePage * pageSize, entries.length)),
+              total: String(entries.length),
             })}
           </p>
           <div className="flex items-center gap-1">

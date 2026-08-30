@@ -8,7 +8,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { CategoryTag } from "@/components/shared/CategoryTag";
 import { DiffBadge } from "@/components/shared/DiffBadge";
 import { formatSolves } from "@/features/challenge/lib/format";
@@ -16,7 +16,7 @@ import { CATEGORY_CONFIG } from "@/lib/domain/categories";
 import type { Challenge } from "@/lib/domain/types";
 
 export function ChallengeCard({ challenge }: { challenge: Challenge }) {
-  const t = useTranslations();
+  const t = useExtracted();
   const accent =
     CATEGORY_CONFIG[challenge.category]?.dim ?? "rgba(99,102,241,0.15)";
 
@@ -42,13 +42,13 @@ export function ChallengeCard({ challenge }: { challenge: Challenge }) {
       <div className="mt-4 flex items-center gap-4 text-muted-foreground text-xs">
         <span className="flex items-center gap-1.5">
           <Users size={13} />
-          {t("browser.card.solves", {
+          {t("{count} solves", {
             count: formatSolves(challenge.solves ?? 0),
           })}
         </span>
         <span className="flex items-center gap-1.5">
           <Clock size={13} />
-          {challenge.time ?? t("browser.card.time")}
+          {challenge.time ?? t("~30m")}
         </span>
       </div>
 
@@ -56,20 +56,18 @@ export function ChallengeCard({ challenge }: { challenge: Challenge }) {
         {challenge.solved ? (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 font-medium text-emerald-400 text-xs">
             <CheckCircle2 size={13} />
-            {t("leaderboard.table.solved")}
+            {t("Solved")}
           </span>
         ) : (
           <span className="text-muted-foreground text-xs">
-            {t("browser.card.notAttempted")}
+            {t("Not attempted")}
           </span>
         )}
         <Link
           className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 font-medium text-primary-foreground text-xs transition-opacity hover:opacity-90"
           href={`/challenges/${challenge.id}`}
         >
-          {challenge.solved
-            ? t("browser.card.review")
-            : t("browser.card.start")}
+          {challenge.solved ? t("Review") : t("Start Debugging")}
           <ArrowRight size={13} />
         </Link>
       </div>

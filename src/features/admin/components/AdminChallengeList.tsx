@@ -11,7 +11,7 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DiffBadge } from "@/components/shared/DiffBadge";
@@ -59,7 +59,7 @@ export function AdminChallengeList({
   challenges: initialChallenges,
   onRefresh,
 }: AdminChallengeListProps) {
-  const t = useTranslations();
+  const t = useExtracted();
   const [challenges, setChallenges] = useState(initialChallenges);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -98,8 +98,8 @@ export function AdminChallengeList({
         );
         toast.success(
           nextStatus === "published"
-            ? t("challenge.creator.published")
-            : t("admin.toast.draft")
+            ? t("Challenge published live to the arena!")
+            : t("Challenge status set to draft.")
         );
         onRefresh?.();
       } else if (res?.validationErrors) {
@@ -109,15 +109,15 @@ export function AdminChallengeList({
           flat.status ??
           flat._errors ??
           "Validation failed";
-        toast.error(t(msg as string));
+        toast.error(msg);
       } else if (res?.serverError) {
-        toast.error(t(res.serverError as string));
+        toast.error(res.serverError);
       } else {
-        toast.error(t("error.somethingWrong"));
+        toast.error(t("Something went wrong"));
       }
     } catch (err) {
       console.error(err);
-      toast.error(t("error.somethingWrong"));
+      toast.error(t("Something went wrong"));
     }
   };
 
@@ -134,21 +134,21 @@ export function AdminChallengeList({
         setChallenges((prev) =>
           prev.filter((item) => item.id !== deleteTargetId)
         );
-        toast.success(t("admin.toast.deleted"));
+        toast.success(t("Challenge deleted successfully."));
         onRefresh?.();
         setDeleteTargetId(null);
       } else if (res?.validationErrors) {
         const flat = flattenValidationErrors(res.validationErrors);
         const msg = flat.challengeId ?? flat._errors ?? "Validation failed";
-        toast.error(t(msg as string));
+        toast.error(msg);
       } else if (res?.serverError) {
-        toast.error(t(res.serverError as string));
+        toast.error(res.serverError);
       } else {
-        toast.error(t("error.somethingWrong"));
+        toast.error(t("Something went wrong"));
       }
     } catch (err) {
       console.error(err);
-      toast.error(t("error.somethingWrong"));
+      toast.error(t("Something went wrong"));
     } finally {
       setIsDeleting(false);
     }
@@ -172,7 +172,7 @@ export function AdminChallengeList({
       return (
         <Badge className="gap-1.5 font-medium" variant="success">
           <Globe size={11} />
-          {t("status.published")}
+          {t("Published")}
         </Badge>
       );
     }
@@ -180,14 +180,14 @@ export function AdminChallengeList({
       return (
         <Badge className="gap-1.5 font-medium" variant="warning">
           <Lock size={11} />
-          {t("status.draft")}
+          {t("Draft")}
         </Badge>
       );
     }
     return (
       <Badge className="gap-1.5 font-medium" variant="secondary">
         <Archive size={11} />
-        {t("status.archived")}
+        {t("Archived")}
       </Badge>
     );
   };
@@ -205,7 +205,7 @@ export function AdminChallengeList({
             <Input
               className="ps-9 pe-3 text-xs"
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={t("admin.list.search")}
+              placeholder={t("Search challenges by title or category...")}
               type="text"
               value={search}
             />
@@ -218,20 +218,16 @@ export function AdminChallengeList({
               value={statusFilter}
             >
               <SelectTrigger
-                aria-label={t("category.table.status")}
+                aria-label={t("Status")}
                 className="h-9 min-w-36 rounded-lg border-border bg-inset px-3 text-foreground text-xs"
               >
-                <SelectValue placeholder={t("admin.filters.allStatuses")} />
+                <SelectValue placeholder={t("All Statuses")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">
-                  {t("admin.filters.allStatuses")}
-                </SelectItem>
-                <SelectItem value="published">
-                  {t("status.published")}
-                </SelectItem>
-                <SelectItem value="draft">{t("status.draft")}</SelectItem>
-                <SelectItem value="archived">{t("status.archived")}</SelectItem>
+                <SelectItem value="all">{t("All Statuses")}</SelectItem>
+                <SelectItem value="published">{t("Published")}</SelectItem>
+                <SelectItem value="draft">{t("Draft")}</SelectItem>
+                <SelectItem value="archived">{t("Archived")}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -241,21 +237,17 @@ export function AdminChallengeList({
               value={sourceFilter}
             >
               <SelectTrigger
-                aria-label={t("admin.table.source")}
+                aria-label={t("Source")}
                 className="h-9 min-w-36 rounded-lg border-border bg-inset px-3 text-foreground text-xs"
               >
-                <SelectValue placeholder={t("admin.filters.allSources")} />
+                <SelectValue placeholder={t("All Sources")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">
-                  {t("admin.filters.allSources")}
-                </SelectItem>
+                <SelectItem value="all">{t("All Sources")}</SelectItem>
                 <SelectItem value="ai_generated">
-                  {t("admin.filters.aiGenerated")}
+                  {t("AI Generated")}
                 </SelectItem>
-                <SelectItem value="manual">
-                  {t("admin.filters.manual")}
-                </SelectItem>
+                <SelectItem value="manual">{t("Manual")}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -265,18 +257,16 @@ export function AdminChallengeList({
               value={difficultyFilter}
             >
               <SelectTrigger
-                aria-label={t("admin.table.difficulty")}
+                aria-label={t("Difficulty")}
                 className="h-9 min-w-36 rounded-lg border-border bg-inset px-3 text-foreground text-xs"
               >
-                <SelectValue placeholder={t("admin.filters.allDifficulties")} />
+                <SelectValue placeholder={t("All Difficulties")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">
-                  {t("admin.filters.allDifficulties")}
-                </SelectItem>
-                <SelectItem value="easy">{t("difficulty.easy")}</SelectItem>
-                <SelectItem value="medium">{t("difficulty.medium")}</SelectItem>
-                <SelectItem value="hard">{t("difficulty.hard")}</SelectItem>
+                <SelectItem value="all">{t("All Difficulties")}</SelectItem>
+                <SelectItem value="easy">{t("Easy")}</SelectItem>
+                <SelectItem value="medium">{t("Medium")}</SelectItem>
+                <SelectItem value="hard">{t("Hard")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -288,26 +278,14 @@ export function AdminChallengeList({
         <Table>
           <TableHeader className="bg-inset/50">
             <TableRow>
-              <TableHead className="px-4 py-3">
-                {t("admin.table.challenge")}
-              </TableHead>
-              <TableHead className="px-4 py-3">
-                {t("admin.table.category")}
-              </TableHead>
-              <TableHead className="px-4 py-3">
-                {t("admin.table.difficulty")}
-              </TableHead>
-              <TableHead className="px-4 py-3">
-                {t("category.table.status")}
-              </TableHead>
-              <TableHead className="px-4 py-3">
-                {t("admin.table.source")}
-              </TableHead>
-              <TableHead className="px-4 py-3">
-                {t("admin.table.submissions")}
-              </TableHead>
+              <TableHead className="px-4 py-3">{t("Challenge")}</TableHead>
+              <TableHead className="px-4 py-3">{t("Category")}</TableHead>
+              <TableHead className="px-4 py-3">{t("Difficulty")}</TableHead>
+              <TableHead className="px-4 py-3">{t("Status")}</TableHead>
+              <TableHead className="px-4 py-3">{t("Source")}</TableHead>
+              <TableHead className="px-4 py-3">{t("Submissions")}</TableHead>
               <TableHead className="px-4 py-3 text-end">
-                {t("category.table.actions")}
+                {t("Actions")}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -341,22 +319,22 @@ export function AdminChallengeList({
                     {c.source === "ai_generated" ? (
                       <Badge className="gap-1 font-medium" variant="default">
                         <Bot size={11} />
-                        {t("admin.table.aiAgent")}
+                        {t("AI Agent")}
                       </Badge>
                     ) : (
                       <Badge className="gap-1 font-medium" variant="outline">
                         <User size={11} />
-                        {t("admin.filters.manual")}
+                        {t("Manual")}
                       </Badge>
                     )}
                   </TableCell>
                   <TableCell className="px-4 py-3.5">
                     <div className="flex flex-col">
                       <span className="font-semibold text-foreground">
-                        {c.submissionsCount} {t("admin.table.total")}
+                        {c.submissionsCount} {t("total")}
                       </span>
                       <span className="text-[11px] text-emerald-400">
-                        {c.solvesCount} {t("admin.table.solves")}
+                        {c.solvesCount} {t("solves")}
                       </span>
                     </div>
                   </TableCell>
@@ -368,7 +346,7 @@ export function AdminChallengeList({
                             asChild
                             className="h-8 w-8 p-0"
                             size="icon"
-                            title={t("admin.actions.viewInArena")}
+                            title={t("View in Arena")}
                             variant="ghost"
                           >
                             <Link href={`/challenges/${c.id}`} target="_blank">
@@ -379,7 +357,7 @@ export function AdminChallengeList({
                             className="h-8 w-8 p-0 text-amber-400 hover:bg-amber-500/10 hover:text-amber-400"
                             onClick={() => handleToggleStatus(c.id, "draft")}
                             size="icon"
-                            title={t("admin.actions.unpublish")}
+                            title={t("Unpublish to Draft")}
                             variant="ghost"
                           >
                             <Lock size={15} />
@@ -390,7 +368,7 @@ export function AdminChallengeList({
                           className="h-8 w-8 p-0 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
                           onClick={() => handleToggleStatus(c.id, "published")}
                           size="icon"
-                          title={t("admin.actions.publish")}
+                          title={t("Publish to Arena")}
                           variant="ghost"
                         >
                           <Globe size={15} />
@@ -400,7 +378,7 @@ export function AdminChallengeList({
                         className="h-8 w-8 p-0 text-rose-400 hover:bg-rose-500/10 hover:text-rose-400"
                         onClick={() => setDeleteTargetId(c.id)}
                         size="icon"
-                        title={t("admin.actions.deleteChallenge")}
+                        title={t("Delete Challenge")}
                         variant="ghost"
                       >
                         <Trash2 size={15} />
@@ -415,7 +393,7 @@ export function AdminChallengeList({
                   className="px-4 py-8 text-center text-muted-foreground"
                   colSpan={7}
                 >
-                  {t("admin.empty.noMatch")}
+                  {t("No challenges found matching your filters.")}
                 </TableCell>
               </TableRow>
             )}
@@ -433,9 +411,9 @@ export function AdminChallengeList({
       >
         <AlertDialogContent data-testid="confirm-delete-dialog">
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("confirm.title")}</AlertDialogTitle>
+            <AlertDialogTitle>{t("Are you sure?")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("admin.list.confirmDelete")}
+              {t("Are you sure you want to delete this challenge?")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -444,16 +422,14 @@ export function AdminChallengeList({
               onClick={() => setDeleteTargetId(null)}
               variant="outline"
             >
-              {t("actions.cancel")}
+              {t("Cancel")}
             </Button>
             <Button
               disabled={isDeleting}
               onClick={handleConfirmDelete}
               variant="destructive"
             >
-              {isDeleting
-                ? t("actions.deleting")
-                : t("actions.permanentlyDelete")}
+              {isDeleting ? t("Deleting...") : t("Permanently delete")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

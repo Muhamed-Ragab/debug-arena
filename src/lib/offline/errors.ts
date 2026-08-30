@@ -15,7 +15,7 @@ const MAX_CAUSE_DEPTH = 4;
 
 function isOfflineMessage(message: string): boolean {
   return /fetch failed|getaddrinfo|enotfound|econnrefused|econnreset|etimedout|maxretriesperrequest|maxretries|connection terminated|read econnreset/i.test(
-    message,
+    message
   );
 }
 
@@ -81,7 +81,7 @@ export function isOfflineError(err: unknown): boolean {
 
 export function toOfflineError(
   err: unknown,
-  fallbackMsg?: string,
+  fallbackMsg?: string
 ): OfflineError {
   const offline = isOfflineCause(err);
   let message: string;

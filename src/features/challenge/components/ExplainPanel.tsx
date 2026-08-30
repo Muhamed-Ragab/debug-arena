@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,7 @@ export function ExplainPanel({
   setSolution,
   solution = "",
 }: Props) {
-  const t = useTranslations();
+  const t = useExtracted();
   const rootCauseError = fieldErrors?.rootCauseExplanation?.[0];
 
   return (
@@ -32,10 +32,12 @@ export function ExplainPanel({
           className="font-medium font-mono text-[11px] text-muted-foreground uppercase tracking-wider"
           htmlFor="root-cause-input"
         >
-          {t("challenge.explainPanel.rootCauseTitle")}
+          {t("1. Root Cause Diagnosis")}
         </Label>
         <p className="text-[11.5px] text-muted-foreground leading-relaxed">
-          {t("challenge.explainPanel.rootCauseDescription")}
+          {t(
+            "Describe the underlying failure mechanism. What is broken and why does it fail?"
+          )}
         </p>
         <Textarea
           aria-invalid={Boolean(rootCauseError)}
@@ -46,12 +48,12 @@ export function ExplainPanel({
           )}
           id="root-cause-input"
           onChange={(e) => setExplanation(e.target.value)}
-          placeholder={t("challenge.explainPanel.rootCausePlaceholder")}
+          placeholder={t("The bug occurs because...")}
           value={explanation}
         />
         {rootCauseError ? (
           <p className="font-medium text-[12px] text-destructive" role="alert">
-            {t(rootCauseError as string)}
+            {rootCauseError}
           </p>
         ) : null}
       </div>
@@ -62,16 +64,18 @@ export function ExplainPanel({
           className="font-medium font-mono text-[11px] text-muted-foreground uppercase tracking-wider"
           htmlFor="solution-input"
         >
-          {t("challenge.explainPanel.solutionTitle")}
+          {t("2. Proposed Solution & Fix")}
         </Label>
         <p className="text-[11.5px] text-muted-foreground leading-relaxed">
-          {t("challenge.explainPanel.solutionDescription")}
+          {t(
+            "Describe how you would resolve this bug and prevent regressions."
+          )}
         </p>
         <Textarea
           className="min-h-35 bg-card p-3 text-[13px] leading-relaxed"
           id="solution-input"
           onChange={(e) => setSolution?.(e.target.value)}
-          placeholder={t("challenge.explainPanel.solutionPlaceholder")}
+          placeholder={t("To fix this, we should change...")}
           value={solution}
         />
       </div>

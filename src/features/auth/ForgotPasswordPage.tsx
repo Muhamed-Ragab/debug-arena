@@ -2,9 +2,9 @@
 
 import { ArrowRight, AtSign } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { type FormEvent, useState } from "react";
-import { Logo } from "@/components/layout/Sidebar";
+import { Logo } from "@/components/layout/Logo";
 import { LanguageSwitcher } from "@/components/preferences/LanguageSwitcher";
 import { ThemeToggle } from "@/components/preferences/ThemeToggle";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth/client";
 
 export function ForgotPasswordPage() {
-  const t = useTranslations();
+  const t = useExtracted();
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -56,17 +56,17 @@ export function ForgotPasswordPage() {
         <Card className="w-full max-w-md p-2 shadow-2xl shadow-black/30">
           <CardHeader className="space-y-1.5 text-center">
             <h1 className="font-semibold text-2xl text-heading tracking-tight">
-              {t("auth.forgot.title")}
+              {t("Reset your password")}
             </h1>
             <p className="text-muted-foreground text-sm">
-              {t("auth.forgot.subtitle")}
+              {t("Enter your email and we'll send a reset link.")}
             </p>
           </CardHeader>
 
           <CardContent className="space-y-4">
             <form className="space-y-4" noValidate onSubmit={handleSubmit}>
               <div className="space-y-1.5">
-                <Label htmlFor="email">{t("auth.form.email")}</Label>
+                <Label htmlFor="email">{t("Email")}</Label>
                 <div className="relative">
                   <AtSign
                     className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -89,7 +89,7 @@ export function ForgotPasswordPage() {
                 size="lg"
                 type="submit"
               >
-                {loading ? "Sending link..." : t("auth.forgot.submit")}
+                {loading ? "Sending link..." : t("Send reset link")}
                 <ArrowRight size={16} />
               </Button>
 
@@ -99,7 +99,7 @@ export function ForgotPasswordPage() {
                   variant="default"
                 >
                   <AlertDescription>
-                    {t("auth.forgot.success")}
+                    {t("If that account exists, a reset link is on its way.")}
                   </AlertDescription>
                 </Alert>
               )}
@@ -111,12 +111,12 @@ export function ForgotPasswordPage() {
             </form>
 
             <p className="mt-4 text-center text-muted-foreground text-sm">
-              {t("auth.forgot.remembered")}{" "}
+              {t("Remembered it?")}{" "}
               <Link
                 className="font-medium text-primary hover:underline"
                 href="/login"
               >
-                {t("auth.forgot.backToLogin")}
+                {t("Back to login")}
               </Link>
             </p>
           </CardContent>

@@ -1,61 +1,119 @@
 import { z } from "zod";
 
 export const rawLlmChallengeSchema = z.object({
-  buggyArtifact: z.object({
-    buggyLines: z.tuple([z.number(), z.number()]).optional(),
-    entryFile: z.string(),
-    files: z.array(
-      z.object({
-        code: z.string(),
-        isEntry: z.boolean().optional(),
-        name: z.string(),
-      })
-    ),
-    language: z.string(),
-    points: z.number().optional(),
-    timeLimit: z.string().optional(),
-  }),
-  categorySlug: z.string().optional(),
-  difficulty: z.enum(["easy", "medium", "hard"]),
-  format: z.enum(["code_snippet", "log_only", "ui_recording"]),
+  buggyArtifact: z
+    .object({
+      buggyLines: z
+        .tuple([z.number(), z.number()])
+        .nullable()
+        .describe(
+          "Inclusive 1-indexed line range of the bug in the entry file, or null to auto-detect"
+        ),
+      entryFile: z
+        .string()
+        .describe("Entry file name, e.g. Chat.tsx or index.ts"),
+      files: z
+        .array(
+          z.object({
+            code: z.string().describe("Full file content, syntactically valid"),
+            isEntry: z
+              .boolean()
+              .describe(
+                "true for entry file, false otherwise; exactly one file should be true"
+              ),
+            name: z.string().describe("File name with extension"),
+          })
+        )
+        .describe("All challenge files for the buggy artifact"),
+      language: z.string().describe("Programming language, e.g. typescript"),
+      points: z
+        .number()
+        .nullable()
+        .describe("Points for difficulty: 100 easy, 200 medium, 300 hard"),
+      timeLimit: z
+        .string()
+        .nullable()
+        .describe("Time limit string like '15 min', '20 min', '30 min'"),
+    })
+    .describe("Buggy artifact containing files and metadata"),
+  categorySlug: z
+    .string()
+    .nullable()
+    .describe("Category slug, e.g. react-rendering"),
+  difficulty: z.enum(["easy", "medium", "hard"]).describe("Difficulty level"),
+  format: z
+    .enum(["code_snippet", "log_only", "ui_recording"])
+    .describe("Challenge format, usually code_snippet"),
   hiddenTests: z
     .array(
       z.object({
-        description: z.string(),
-        name: z.string(),
-        testCode: z.string(),
+        description: z.string().describe("What the test verifies"),
+        name: z.string().describe("Short test identifier, kebab-case"),
+        testCode: z
+          .string()
+          .describe("Vitest test code importing from entry file"),
       })
     )
-    .optional(),
-  hints: z.array(
-    z.object({
-      order: z.number(),
-      penaltyPoints: z.number(),
-      socraticPrompt: z.string(),
-    })
-  ),
-  preventionNotes: z.string(),
-  prompt: z.string(),
-  referenceFix: z.object({
-    diff: z
-      .array(
-        z.object({
-          line: z.number(),
-          text: z.string(),
-          type: z.enum(["ctx", "add", "del"]),
-        })
-      )
-      .optional(),
-    explanation: z.string(),
-    files: z.array(
+    .nullable()
+    .describe("Hidden tests that validate the fix"),
+  hints: z
+    .array(
       z.object({
-        code: z.string(),
-        name: z.string(),
+        order: z.number().describe("1-indexed order"),
+        penaltyPoints: z.number().describe("Penalty points for this hint"),
+        socraticPrompt: z
+          .string()
+          .describe("Socratic question guiding toward root cause"),
       })
+    )
+    .nullable()
+    .describe("Exactly 3 socratic hints in increasing specificity"),
+  preventionNotes: z
+    .string()
+    .nullable()
+    .describe(
+      "Brief prevention guidance, 1-2 sentences on how to avoid the bug in production"
     ),
-  }),
-  rootCauseSummary: z.string(),
-  title: z.string(),
+  prompt: z
+    .string()
+    .describe(
+      "Challenge prompt for the developer: describes symptom and asks to fix the bug"
+    ),
+  referenceFix: z
+    .object({
+      diff: z
+        .array(
+          z.object({
+            line: z.number().describe("1-indexed line number in fixed file"),
+            text: z.string().describe("Line content"),
+            type: z
+              .enum(["ctx", "add", "del"])
+              .describe("ctx=context, add, del"),
+          })
+        )
+        .nullable()
+        .describe("Unified diff lines, or null to auto-compute"),
+      explanation: z
+        .string()
+        .describe("1-3 sentence explanation of what was fixed and why"),
+      files: z
+        .array(
+          z.object({
+            code: z.string().describe("Full fixed file content, valid syntax"),
+            name: z.string().describe("File name matching buggy artifact"),
+          })
+        )
+        .describe("All fixed files, same names as buggy artifact"),
+    })
+    .nullable()
+    .describe("Reference fix with corrected files and explanation"),
+  rootCauseSummary: z
+    .string()
+    .nullable()
+    .describe(
+      "Concise 1-2 sentence root cause summary, e.g. stale closure over initial state"
+    ),
+  title: z.string().describe("Short, descriptive challenge title"),
 });
 
 export type RawParsedChallenge = z.infer<typeof rawLlmChallengeSchema>;
@@ -184,6 +242,13 @@ export const deleteChallengeSchema = z.object({
   challengeId: z.string().uuid(),
 });
 
+export const toggleUserBanSchema = z.object({
+  banExpiresIn: z.number().int().positive().optional(),
+  banned: z.boolean(),
+  banReason: z.string().max(500).optional(),
+  userId: z.string().uuid(),
+});
+
 export const generateQuestionOutputSchema = z
   .object({ success: z.boolean() })
   .passthrough();
@@ -201,5 +266,9 @@ export const toggleStatusOutputSchema = z
   .passthrough();
 
 export const deleteChallengeOutputSchema = z
+  .object({ success: z.boolean() })
+  .passthrough();
+
+export const toggleUserBanOutputSchema = z
   .object({ success: z.boolean() })
   .passthrough();

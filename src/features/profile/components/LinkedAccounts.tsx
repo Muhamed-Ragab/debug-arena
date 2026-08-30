@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, Check, KeyRound, Link2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -35,7 +35,7 @@ interface LinkedAccountsProps {
 export function LinkedAccounts({
   accounts: initialAccounts,
 }: LinkedAccountsProps) {
-  const t = useTranslations();
+  const t = useExtracted();
   const [accounts, setAccounts] = useState<LinkedAccount[]>(initialAccounts);
   const [blocked, setBlocked] = useState<ProviderId | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -62,22 +62,22 @@ export function LinkedAccounts({
               : a
           )
         );
-        toast.success(t("profile.linked.providerUnlinked"));
+        toast.success(t("Provider unlinked"));
       } else if (res?.validationErrors) {
         const flat = flattenValidationErrors(res.validationErrors);
         const msg = flat.providerId ?? flat._errors ?? "Validation failed";
         setErrorMessage(msg);
-        toast.error(t("error.validationFailed"));
+        toast.error(t("Validation failed"));
       } else if (res?.serverError) {
         setErrorMessage(res.serverError);
-        toast.error(t(res.serverError as string));
+        toast.error(res.serverError);
       } else {
         setErrorMessage("Something went wrong");
-        toast.error(t("error.somethingWrong"));
+        toast.error(t("Something went wrong"));
       }
     } catch {
       setErrorMessage("Something went wrong");
-      toast.error(t("error.somethingWrong"));
+      toast.error(t("Something went wrong"));
     } finally {
       setIsUnlinking(null);
     }
@@ -86,8 +86,12 @@ export function LinkedAccounts({
   return (
     <Card className="p-1">
       <CardHeader>
-        <CardTitle className="text-base">{t("profile.linked.title")}</CardTitle>
-        <CardDescription>{t("profile.linked.subtitle")}</CardDescription>
+        <CardTitle className="text-base">{t("Connected accounts")}</CardTitle>
+        <CardDescription>
+          {t(
+            "Link providers to sign in faster. One stays primary for your avatar and name."
+          )}
+        </CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -95,7 +99,7 @@ export function LinkedAccounts({
           <Alert className="mb-4" variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              {errorMessage ? t(errorMessage as string) : null}
+              {errorMessage ? errorMessage : null}
             </AlertDescription>
           </Alert>
         )}
@@ -120,21 +124,21 @@ export function LinkedAccounts({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium text-[13px] text-foreground">
-                        {t(account.label as string)}
+                        {account.label}
                       </span>
                       {Boolean(account.isPrimary && account.connected) && (
                         <Badge
                           className="gap-1 font-medium text-[11px]"
                           variant="default"
                         >
-                          <Check size={11} /> {t("profile.linked.connected")}
+                          <Check size={11} /> {t("Connected")}
                         </Badge>
                       )}
                     </div>
                     <p className="mt-0.5 text-[12px] text-muted-foreground">
                       {account.connected
-                        ? (account.email ?? t("profile.linked.connected"))
-                        : t("profile.linked.notConnected")}
+                        ? (account.email ?? t("Connected"))
+                        : t("Not connected")}
                     </p>
                   </div>
 
@@ -146,16 +150,14 @@ export function LinkedAccounts({
                         size="sm"
                         variant="destructive"
                       >
-                        {loading
-                          ? t("profile.linked.unlinking")
-                          : t("profile.linked.unlink")}
+                        {loading ? t("Unlinking...") : t("Unlink")}
                       </Button>
                     ) : (
                       <Button asChild size="sm" variant="default">
                         <a
                           href={`/api/auth/sign-in/social?provider=${account.provider}`}
                         >
-                          <Link2 size={13} /> {t("profile.linked.connect")}
+                          <Link2 size={13} /> {t("Connect")}
                         </a>
                       </Button>
                     )}
@@ -166,9 +168,12 @@ export function LinkedAccounts({
                   <Alert className="mt-3" variant="destructive">
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>
-                      {t("profile.linked.cannotUnlink", {
-                        label: account.label,
-                      })}
+                      {t(
+                        "Can't unlink {label} — it's your only sign-in method. Add another provider first, then retry.",
+                        {
+                          label: account.label,
+                        }
+                      )}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -179,7 +184,11 @@ export function LinkedAccounts({
 
         <div className="mt-5 flex items-start gap-2 rounded-md border border-border bg-inset px-3 py-2.5 text-[12px] text-muted-foreground">
           <KeyRound className="mt-0.5 shrink-0 text-primary" size={14} />
-          <span>{t("profile.linked.unlinkHint")}</span>
+          <span>
+            {t(
+              "Unlinking a provider only removes the connection — it never deletes your Debug Arena account or your challenge history."
+            )}
+          </span>
         </div>
       </CardContent>
     </Card>

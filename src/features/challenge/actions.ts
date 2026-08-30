@@ -1,5 +1,5 @@
 "use server";
-import { authActionClient } from "@/lib/safe-action";
+import { ActionError, authActionClient } from "@/lib/safe-action";
 import { challengeService } from "./service";
 import {
   submitChallengeOutputSchema,
@@ -10,6 +10,10 @@ export const submitChallengeAction = authActionClient
   .inputSchema(submitChallengeSchema)
   .outputSchema(submitChallengeOutputSchema)
   .action(async ({ parsedInput, ctx }) => {
+    const role = (ctx.user as { role?: string }).role;
+    if (role === "admin") {
+      throw new ActionError("error.forbiddenAdminSubmit");
+    }
     const result = await challengeService.submitChallenge({
       challengeId: parsedInput.challengeId,
       hintsRevealedCount: parsedInput.hintsRevealedCount ?? 0,

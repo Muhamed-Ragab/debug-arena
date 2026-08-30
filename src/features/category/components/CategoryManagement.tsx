@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -83,7 +83,7 @@ function toFormState(cat: CategoryDTO): FormState {
 export function CategoryManagement({
   categories: initialCategories,
 }: CategoryManagementProps) {
-  const t = useTranslations();
+  const t = useExtracted();
   const [categories, setCategories] = useState<CategoryDTO[]>(
     [...initialCategories].sort((a, b) => a.sortOrder - b.sortOrder)
   );
@@ -121,25 +121,27 @@ export function CategoryManagement({
   function validateForm(form: FormState): Record<string, string> {
     const errs: Record<string, string> = {};
     if (!form.name || form.name.length < 2) {
-      errs.name = t("category.validation.nameMin");
+      errs.name = t("Name must be at least 2 characters");
     } else if (form.name.length > 80) {
-      errs.name = t("category.validation.nameMax");
+      errs.name = t("Name must be at most 80 characters");
     }
     if (form.slug) {
       if (form.slug.length < 2 || form.slug.length > 50) {
-        errs.slug = t("category.validation.slugLength");
+        errs.slug = t("Slug must be 2-50 characters");
       } else if (!/^[a-z0-9-]+$/.test(form.slug)) {
-        errs.slug = t("validation.slugFormat");
+        errs.slug = t(
+          "Slug must contain only lowercase letters, numbers and hyphens"
+        );
       }
     }
     if (form.color && !/^#[0-9a-fA-F]{6}$/.test(form.color)) {
-      errs.color = t("validation.invalidHexColor");
+      errs.color = t("Invalid hex color (e.g. #3b82f6)");
     }
     if (form.icon && form.icon.length > 50) {
-      errs.icon = t("category.validation.iconMax");
+      errs.icon = t("Icon must be at most 50 characters");
     }
     if (form.description && form.description.length > 500) {
-      errs.description = t("category.validation.descriptionMax");
+      errs.description = t("Description must be at most 500 characters");
     }
     const order = Number(form.sortOrder);
     if (
@@ -148,7 +150,7 @@ export function CategoryManagement({
       order < 0 ||
       order > 1000
     ) {
-      errs.sortOrder = t("category.validation.sortOrder");
+      errs.sortOrder = t("Sort order must be an integer 0-1000");
     }
     return errs;
   }
@@ -178,16 +180,16 @@ export function CategoryManagement({
         setCategories((prev) =>
           [...prev, newCat].sort((a, b) => a.sortOrder - b.sortOrder)
         );
-        toast.success(t("category.toast.created"));
+        toast.success(t("Category created"));
         setCreateOpen(false);
         setCreateForm(EMPTY_FORM);
       } else if (res?.validationErrors) {
         const flat = flattenValidationErrors(res.validationErrors);
         setCreateErrors(flat);
-        toast.error(t("error.validationFailed"));
+        toast.error(t("Validation failed"));
       } else if ((res as { serverError?: string }).serverError) {
         const msg = (res as { serverError?: string }).serverError as string;
-        toast.error(t(msg as string));
+        toast.error(msg);
         if (
           msg.toLowerCase().includes("already exists") ||
           msg.includes("409")
@@ -195,7 +197,7 @@ export function CategoryManagement({
           setCreateErrors((prev) => ({ ...prev, slug: msg }));
         }
       } else {
-        toast.error(t("error.somethingWrong"));
+        toast.error(t("Something went wrong"));
       }
     });
   }
@@ -259,21 +261,21 @@ export function CategoryManagement({
             .map((c) => (c.id === updated.id ? updated : c))
             .sort((a, b) => a.sortOrder - b.sortOrder)
         );
-        toast.success(t("category.toast.updated"));
+        toast.success(t("Category updated"));
         setEditOpen(false);
         setEditing(null);
       } else if (res?.validationErrors) {
         const flat = flattenValidationErrors(res.validationErrors);
         setEditErrors(flat);
-        toast.error(t("error.validationFailed"));
+        toast.error(t("Validation failed"));
       } else if ((res as { serverError?: string }).serverError) {
         const msg = (res as { serverError?: string }).serverError as string;
-        toast.error(t(msg as string));
+        toast.error(msg);
         if (msg.toLowerCase().includes("already exists")) {
           setEditErrors((prev) => ({ ...prev, slug: msg }));
         }
       } else {
-        toast.error(t("error.somethingWrong"));
+        toast.error(t("Something went wrong"));
       }
     });
   }
@@ -287,14 +289,14 @@ export function CategoryManagement({
       const res = await deleteCategoryAction({ id: deleting.id });
       if (res?.data?.success) {
         setCategories((prev) => prev.filter((c) => c.id !== deleting.id));
-        toast.success(t("category.toast.deleted"));
+        toast.success(t("Category deleted"));
         setDeleteOpen(false);
         setDeleting(null);
       } else if (res?.validationErrors) {
         const flat = flattenValidationErrors(res.validationErrors);
         // delete validation is just id uuid — map to Alert
         setDeleteError(flat._errors ?? flat.id ?? "Validation failed");
-        toast.error(t("error.validationFailed"));
+        toast.error(t("Validation failed"));
       } else if (res?.serverError) {
         const msg = res.serverError;
         if (
@@ -304,9 +306,9 @@ export function CategoryManagement({
         ) {
           setDeleteError(msg);
         }
-        toast.error(t(msg as string));
+        toast.error(msg);
       } else {
-        toast.error(t("error.somethingWrong"));
+        toast.error(t("Something went wrong"));
       }
     });
   }
@@ -330,10 +332,10 @@ export function CategoryManagement({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-bold text-2xl text-heading tracking-tight">
-            {t("common.navigation.categories")}
+            {t("Categories")}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {t("category.management.subtitle")}
+            {t("Manage challenge categories — sorted by sort order.")}
           </p>
         </div>
         <Button
@@ -344,7 +346,7 @@ export function CategoryManagement({
           }}
         >
           <Plus size={16} />
-          {t("category.actions.create")}
+          {t("Create category")}
         </Button>
       </div>
 
@@ -352,26 +354,22 @@ export function CategoryManagement({
       <Card className="bg-surface/70 p-4">
         <div className="flex items-center gap-3">
           <span className="font-medium text-muted-foreground text-xs">
-            {t("category.filters.label")}
+            {t("Filter:")}
           </span>
           <Select
             onValueChange={(v) => setFilter(v as FilterValue)}
             value={filter}
           >
             <SelectTrigger
-              aria-label={t("category.filters.byStatus")}
+              aria-label={t("Filter by status")}
               className="h-9 min-w-36 rounded-lg border-border bg-inset px-3 text-foreground text-xs"
             >
-              <SelectValue placeholder={t("category.filters.all")} />
+              <SelectValue placeholder={t("All categories")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("category.filters.all")}</SelectItem>
-              <SelectItem value="active">
-                {t("category.filters.activeOnly")}
-              </SelectItem>
-              <SelectItem value="inactive">
-                {t("category.filters.inactiveOnly")}
-              </SelectItem>
+              <SelectItem value="all">{t("All categories")}</SelectItem>
+              <SelectItem value="active">{t("Active only")}</SelectItem>
+              <SelectItem value="inactive">{t("Inactive only")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -382,26 +380,14 @@ export function CategoryManagement({
         <Table>
           <TableHeader className="bg-inset/50">
             <TableRow>
-              <TableHead className="px-4 py-3">
-                {t("category.form.name")}
-              </TableHead>
-              <TableHead className="px-4 py-3">
-                {t("category.form.slug")}
-              </TableHead>
-              <TableHead className="px-4 py-3">
-                {t("category.form.icon")}
-              </TableHead>
-              <TableHead className="px-4 py-3">
-                {t("category.form.color")}
-              </TableHead>
-              <TableHead className="px-4 py-3">
-                {t("category.form.sortOrder")}
-              </TableHead>
-              <TableHead className="px-4 py-3">
-                {t("category.table.status")}
-              </TableHead>
+              <TableHead className="px-4 py-3">{t("Name")}</TableHead>
+              <TableHead className="px-4 py-3">{t("Slug")}</TableHead>
+              <TableHead className="px-4 py-3">{t("Icon")}</TableHead>
+              <TableHead className="px-4 py-3">{t("Color")}</TableHead>
+              <TableHead className="px-4 py-3">{t("Sort order")}</TableHead>
+              <TableHead className="px-4 py-3">{t("Status")}</TableHead>
               <TableHead className="px-4 py-3 text-end">
-                {t("category.table.actions")}
+                {t("Actions")}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -442,19 +428,15 @@ export function CategoryManagement({
                   </TableCell>
                   <TableCell className="px-4 py-3.5">
                     {cat.isActive ? (
-                      <Badge variant="success">
-                        {t("category.status.active")}
-                      </Badge>
+                      <Badge variant="success">{t("Active")}</Badge>
                     ) : (
-                      <Badge variant="secondary">
-                        {t("category.status.inactive")}
-                      </Badge>
+                      <Badge variant="secondary">{t("Inactive")}</Badge>
                     )}
                   </TableCell>
                   <TableCell className="px-4 py-3.5 text-end">
                     <div className="flex items-center justify-end gap-1.5">
                       <Button
-                        aria-label={t("category.actions.edit", {
+                        aria-label={t("Edit {name}", {
                           name: cat.name,
                         })}
                         className="h-8 w-8 p-0"
@@ -465,7 +447,7 @@ export function CategoryManagement({
                         <Pencil size={15} />
                       </Button>
                       <Button
-                        aria-label={t("category.actions.delete", {
+                        aria-label={t("Delete {name}", {
                           name: cat.name,
                         })}
                         className="h-8 w-8 p-0 text-rose-400 hover:bg-rose-500/10 hover:text-rose-400"
@@ -487,7 +469,7 @@ export function CategoryManagement({
                 >
                   {categories.length === 0 ? (
                     <span className="flex flex-col items-center gap-3">
-                      <span>{t("category.empty.noCategories")}</span>
+                      <span>{t("No categories yet — create one")}</span>
                       <Button
                         onClick={() => {
                           setCreateForm(EMPTY_FORM);
@@ -497,11 +479,11 @@ export function CategoryManagement({
                         size="sm"
                       >
                         <Plus size={14} />
-                        {t("category.actions.create")}
+                        {t("Create category")}
                       </Button>
                     </span>
                   ) : (
-                    t("category.empty.noMatch")
+                    t("No categories matching filter.")
                   )}
                 </TableCell>
               </TableRow>
@@ -514,102 +496,98 @@ export function CategoryManagement({
       <Dialog onOpenChange={setCreateOpen} open={createOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("category.actions.create")}</DialogTitle>
+            <DialogTitle>{t("Create category")}</DialogTitle>
             <DialogDescription>
-              {t("category.create.subtitle")}
+              {t("Add a new challenge category.")}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="create-name">{t("category.form.name")}</Label>
+              <Label htmlFor="create-name">{t("Name")}</Label>
               <Input
                 id="create-name"
                 onChange={(e) =>
                   setCreateForm((p) => ({ ...p, name: e.target.value }))
                 }
-                placeholder={t("category.names.reactRendering")}
+                placeholder={t("React Rendering")}
                 value={createForm.name}
               />
               {Boolean(createErrors.name) && (
                 <span className="text-destructive text-xs">
-                  {t(createErrors.name as string)}
+                  {createErrors.name}
                 </span>
               )}
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="create-slug">
-                {t("category.form.slugOptional")}
+                {t("Slug (optional — auto-generated)")}
               </Label>
               <Input
                 id="create-slug"
                 onChange={(e) =>
                   setCreateForm((p) => ({ ...p, slug: e.target.value }))
                 }
-                placeholder={t("category.example.slug")}
+                placeholder={t("react-rendering")}
                 value={createForm.slug}
               />
               {Boolean(createErrors.slug) && (
                 <span className="text-destructive text-xs">
-                  {t(createErrors.slug as string)}
+                  {createErrors.slug}
                 </span>
               )}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="create-description">
-                {t("category.form.description")}
-              </Label>
+              <Label htmlFor="create-description">{t("Description")}</Label>
               <Input
                 id="create-description"
                 onChange={(e) =>
                   setCreateForm((p) => ({ ...p, description: e.target.value }))
                 }
-                placeholder={t("category.form.descriptionPlaceholder")}
+                placeholder={t("Short description")}
                 value={createForm.description}
               />
               {Boolean(createErrors.description) && (
                 <span className="text-destructive text-xs">
-                  {t(createErrors.description as string)}
+                  {createErrors.description}
                 </span>
               )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="create-icon">{t("category.form.icon")}</Label>
+                <Label htmlFor="create-icon">{t("Icon")}</Label>
                 <Input
                   id="create-icon"
                   onChange={(e) =>
                     setCreateForm((p) => ({ ...p, icon: e.target.value }))
                   }
-                  placeholder={t("category.form.layersIcon")}
+                  placeholder={t("Layers")}
                   value={createForm.icon}
                 />
                 {Boolean(createErrors.icon) && (
                   <span className="text-destructive text-xs">
-                    {t(createErrors.icon as string)}
+                    {createErrors.icon}
                   </span>
                 )}
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="create-color">{t("category.form.color")}</Label>
+                <Label htmlFor="create-color">{t("Color")}</Label>
                 <Input
                   id="create-color"
                   onChange={(e) =>
                     setCreateForm((p) => ({ ...p, color: e.target.value }))
                   }
-                  placeholder={t("category.example.color")}
+                  placeholder={t("#3b82f6")}
                   value={createForm.color}
                 />
                 {Boolean(createErrors.color) && (
                   <span className="text-destructive text-xs">
-                    {t(createErrors.color as string)}
+                    {createErrors.color}
                   </span>
                 )}
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="create-sortOrder">
-                {t("category.form.sortOrder")}
-              </Label>
+              <Label htmlFor="create-sortOrder">{t("Sort order")}</Label>
               <Input
                 id="create-sortOrder"
                 onChange={(e) =>
@@ -620,13 +598,13 @@ export function CategoryManagement({
               />
               {Boolean(createErrors.sortOrder) && (
                 <span className="text-destructive text-xs">
-                  {t(createErrors.sortOrder as string)}
+                  {createErrors.sortOrder}
                 </span>
               )}
             </div>
             <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-inset/50 px-3 py-2.5">
               <Label className="cursor-pointer" htmlFor="create-isActive">
-                {t("category.status.active")}
+                {t("Active")}
               </Label>
               <Switch
                 checked={createForm.isActive}
@@ -639,12 +617,10 @@ export function CategoryManagement({
           </div>
           <DialogFooter>
             <Button onClick={() => setCreateOpen(false)} variant="outline">
-              {t("common.actions.cancel")}
+              {t("Cancel")}
             </Button>
             <Button disabled={isPending} onClick={handleCreate}>
-              {isPending
-                ? t("common.actions.creating")
-                : t("common.actions.create")}
+              {isPending ? t("Creating...") : t("Create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -654,12 +630,14 @@ export function CategoryManagement({
       <Dialog onOpenChange={setEditOpen} open={editOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("category.edit.title")}</DialogTitle>
-            <DialogDescription>{t("category.edit.subtitle")}</DialogDescription>
+            <DialogTitle>{t("Edit category")}</DialogTitle>
+            <DialogDescription>
+              {t("Update category details.")}
+            </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="edit-name">{t("category.form.name")}</Label>
+              <Label htmlFor="edit-name">{t("Name")}</Label>
               <Input
                 id="edit-name"
                 onChange={(e) =>
@@ -669,12 +647,12 @@ export function CategoryManagement({
               />
               {Boolean(editErrors.name) && (
                 <span className="text-destructive text-xs">
-                  {t(editErrors.name as string)}
+                  {editErrors.name}
                 </span>
               )}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="edit-slug">{t("category.form.slug")}</Label>
+              <Label htmlFor="edit-slug">{t("Slug")}</Label>
               <Input
                 id="edit-slug"
                 onChange={(e) =>
@@ -684,14 +662,12 @@ export function CategoryManagement({
               />
               {Boolean(editErrors.slug) && (
                 <span className="text-destructive text-xs">
-                  {t(editErrors.slug as string)}
+                  {editErrors.slug}
                 </span>
               )}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="edit-description">
-                {t("category.form.description")}
-              </Label>
+              <Label htmlFor="edit-description">{t("Description")}</Label>
               <Input
                 id="edit-description"
                 onChange={(e) =>
@@ -701,13 +677,13 @@ export function CategoryManagement({
               />
               {Boolean(editErrors.description) && (
                 <span className="text-destructive text-xs">
-                  {t(editErrors.description as string)}
+                  {editErrors.description}
                 </span>
               )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="edit-icon">{t("category.form.icon")}</Label>
+                <Label htmlFor="edit-icon">{t("Icon")}</Label>
                 <Input
                   id="edit-icon"
                   onChange={(e) =>
@@ -717,12 +693,12 @@ export function CategoryManagement({
                 />
                 {Boolean(editErrors.icon) && (
                   <span className="text-destructive text-xs">
-                    {t(editErrors.icon as string)}
+                    {editErrors.icon}
                   </span>
                 )}
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="edit-color">{t("category.form.color")}</Label>
+                <Label htmlFor="edit-color">{t("Color")}</Label>
                 <Input
                   id="edit-color"
                   onChange={(e) =>
@@ -732,15 +708,13 @@ export function CategoryManagement({
                 />
                 {Boolean(editErrors.color) && (
                   <span className="text-destructive text-xs">
-                    {t(editErrors.color as string)}
+                    {editErrors.color}
                   </span>
                 )}
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="edit-sortOrder">
-                {t("category.form.sortOrder")}
-              </Label>
+              <Label htmlFor="edit-sortOrder">{t("Sort order")}</Label>
               <Input
                 id="edit-sortOrder"
                 onChange={(e) =>
@@ -751,13 +725,13 @@ export function CategoryManagement({
               />
               {Boolean(editErrors.sortOrder) && (
                 <span className="text-destructive text-xs">
-                  {t(editErrors.sortOrder as string)}
+                  {editErrors.sortOrder}
                 </span>
               )}
             </div>
             <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-inset/50 px-3 py-2.5">
               <Label className="cursor-pointer" htmlFor="edit-isActive">
-                {t("category.status.active")}
+                {t("Active")}
               </Label>
               <Switch
                 checked={editForm.isActive}
@@ -770,12 +744,10 @@ export function CategoryManagement({
           </div>
           <DialogFooter>
             <Button onClick={() => setEditOpen(false)} variant="outline">
-              {t("common.actions.cancel")}
+              {t("Cancel")}
             </Button>
             <Button disabled={isPending} onClick={handleEdit}>
-              {isPending
-                ? t("common.actions.saving")
-                : t("common.actions.saveChanges")}
+              {isPending ? t("Saving...") : t("Save changes")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -785,32 +757,35 @@ export function CategoryManagement({
       <Dialog onOpenChange={setDeleteOpen} open={deleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("category.delete.title")}</DialogTitle>
+            <DialogTitle>{t("Delete category")}</DialogTitle>
             <DialogDescription>
               {deleting
-                ? t("category.delete.confirm", { name: deleting.name })
-                : t("common.confirm.title")}
+                ? t(
+                    'Are you sure you want to delete "{name}"? This cannot be undone.',
+                    {
+                      name: deleting.name,
+                    }
+                  )
+                : t("Are you sure?")}
             </DialogDescription>
           </DialogHeader>
           {Boolean(deleteError) && (
             <Alert variant="destructive">
               <AlertDescription>
-                {deleteError ? t(deleteError as string) : null}
+                {deleteError ? deleteError : null}
               </AlertDescription>
             </Alert>
           )}
           <DialogFooter>
             <Button onClick={() => setDeleteOpen(false)} variant="outline">
-              {t("common.actions.cancel")}
+              {t("Cancel")}
             </Button>
             <Button
               disabled={isPending}
               onClick={handleDelete}
               variant="destructive"
             >
-              {isPending
-                ? t("common.actions.deleting")
-                : t("common.actions.delete")}
+              {isPending ? t("Deleting...") : t("Delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

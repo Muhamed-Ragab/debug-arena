@@ -4,11 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useSession } from "@/lib/auth/client";
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
-
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = useSession();
   const router = useRouter();
 
@@ -16,12 +12,12 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     if (!(isPending || session)) {
       router.replace("/login");
     }
-  }, [session, isPending, router]);
+  }, [isPending, session, router]);
 
   if (isPending) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="flex h-screen w-screen items-center justify-center bg-background text-foreground">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     );
   }

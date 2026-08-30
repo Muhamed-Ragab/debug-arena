@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import type { ScorePart } from "../types";
 
 function getScoreColor(pct: number): string {
@@ -14,11 +14,11 @@ function getScoreColor(pct: number): string {
 }
 
 export function ScoreBreakdown({ parts }: { parts: ScorePart[] }) {
-  const t = useTranslations();
+  const t = useExtracted();
   return (
     <div>
       <p className="mb-3 font-mono text-[11px] text-muted-foreground uppercase tracking-widest">
-        {t("results.scoreBreakdown.title")}
+        {t("Score breakdown")}
       </p>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {parts.map((part) => {
@@ -30,7 +30,7 @@ export function ScoreBreakdown({ parts }: { parts: ScorePart[] }) {
               key={part.label}
             >
               <p className="mb-2 font-mono text-[11px] text-muted-foreground uppercase tracking-wide">
-                {t(part.label as string)}
+                {part.label}
               </p>
               <p
                 className="font-mono font-semibold text-2xl tabular-nums"
@@ -53,7 +53,7 @@ export function ScoreBreakdown({ parts }: { parts: ScorePart[] }) {
                 />
               </div>
               <p className="mt-2 text-[11px] text-muted-foreground leading-snug">
-                {t(part.desc as string)}
+                {part.desc}
               </p>
             </div>
           );
