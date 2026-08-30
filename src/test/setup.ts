@@ -64,12 +64,6 @@ vi.mock("next-intl", async () => {
     ...actual,
     NextIntlClientProvider: ({ children }: { children: React.ReactNode }) =>
       children,
-    useLocale: () => "en",
-    useTranslations:
-      (namespace?: string) => (key: string, vars?: Record<string, unknown>) => {
-        const fullKey = namespace ? `${namespace}.${key}` : key;
-        return lookup(fullKey, vars);
-      },
     useExtracted:
       () =>
       (
@@ -78,6 +72,12 @@ vi.mock("next-intl", async () => {
       ) => {
         const raw = typeof msg === "string" ? msg : msg.message;
         return extractLookup(raw, vars);
+      },
+    useLocale: () => "en",
+    useTranslations:
+      (namespace?: string) => (key: string, vars?: Record<string, unknown>) => {
+        const fullKey = namespace ? `${namespace}.${key}` : key;
+        return lookup(fullKey, vars);
       },
   };
 });
@@ -90,6 +90,21 @@ vi.mock("next-intl/server", async () => {
     );
   return {
     ...actual,
+    getExtracted: vi.fn(
+      async () =>
+        (
+          msg: string | { message: string; description?: string },
+          vars?: Record<string, unknown>
+        ) => {
+          let str = typeof msg === "string" ? msg : msg.message;
+          if (vars) {
+            for (const [k, v] of Object.entries(vars)) {
+              str = str.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
+            }
+          }
+          return str;
+        }
+    ),
     getLocale: vi.fn(async () => "en"),
     getMessages: vi.fn(async () => ({})),
     getTranslations: vi.fn(async (ns?: string) => {
@@ -104,20 +119,6 @@ vi.mock("next-intl/server", async () => {
         return str;
       }
       return (key: string, vars?: Record<string, unknown>) => lookup(key, vars);
-    }),
-    getExtracted: vi.fn(async () => {
-      return (
-        msg: string | { message: string; description?: string },
-        vars?: Record<string, unknown>
-      ) => {
-        let str = typeof msg === "string" ? msg : msg.message;
-        if (vars) {
-          for (const [k, v] of Object.entries(vars)) {
-            str = str.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
-          }
-        }
-        return str;
-      };
     }),
   };
 });

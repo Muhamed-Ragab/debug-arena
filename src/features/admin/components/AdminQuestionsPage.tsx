@@ -21,11 +21,15 @@ interface CategoryItem {
 interface AdminQuestionsPageProps {
   categories: CategoryItem[];
   challenges: AdminChallengeItem[];
+  initialChallenges?: AdminChallengeItem[];
+  initialTotal?: number;
 }
 
 export function AdminQuestionsPage({
   categories,
   challenges,
+  initialChallenges,
+  initialTotal,
 }: AdminQuestionsPageProps) {
   const t = useExtracted();
   const router = useRouter();
@@ -33,7 +37,7 @@ export function AdminQuestionsPage({
     "studio"
   );
 
-  const totalChallenges = challenges.length;
+  const totalChallenges = initialTotal ?? challenges.length;
   const aiGeneratedCount = challenges.filter(
     (c) => c.source === "ai_generated"
   ).length;
@@ -64,7 +68,11 @@ export function AdminQuestionsPage({
       );
     }
     return (
-      <AdminChallengeList challenges={challenges} onRefresh={handleRefresh} />
+      <AdminChallengeList
+        initialChallenges={initialChallenges ?? challenges}
+        initialTotal={initialTotal ?? challenges.length}
+        onRefresh={handleRefresh}
+      />
     );
   };
 

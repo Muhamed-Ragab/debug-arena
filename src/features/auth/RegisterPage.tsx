@@ -43,7 +43,7 @@ export function RegisterPage() {
     if (isPending || !session) {
       return;
     }
-    const role = (session.user as { role?: string } | undefined)?.role;
+    const role = session.user.role;
     const target = callbackUrl ?? (role === "admin" ? "/admin" : "/challenges");
     router.replace(target as Route);
   }, [session, isPending, callbackUrl, router]);
@@ -71,9 +71,7 @@ export function RegisterPage() {
       }
       try {
         const sessionRes = await authClient.getSession();
-        const sessionRole = (
-          sessionRes.data?.user as { role?: string } | undefined
-        )?.role;
+        const sessionRole = sessionRes.data?.user?.role;
         const target =
           callbackUrl ?? (sessionRole === "admin" ? "/admin" : "/challenges");
         router.push(target as Route);
@@ -129,7 +127,7 @@ export function RegisterPage() {
                 <GitBranch size={16} />
                 GitHub
                 {lastMethod === "github" && (
-                  <Badge className="absolute -end-2 -top-2 text-[10px]">
+                  <Badge className="absolute -inset-e-2 -top-2 text-[10px]">
                     Last used
                   </Badge>
                 )}
@@ -152,7 +150,7 @@ export function RegisterPage() {
                 <Mail size={16} />
                 Google
                 {lastMethod === "google" && (
-                  <Badge className="absolute -end-2 -top-2 text-[10px]">
+                  <Badge className="absolute -inset-e-2 -top-2 text-[10px]">
                     Last used
                   </Badge>
                 )}
@@ -170,7 +168,7 @@ export function RegisterPage() {
                 <Label htmlFor="name">{t("Display name")}</Label>
                 <div className="relative">
                   <User
-                    className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    className="pointer-events-none absolute inset-s-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                     size={15}
                   />
                   <Input
@@ -188,7 +186,7 @@ export function RegisterPage() {
                 <Label htmlFor="email">{t("Email")}</Label>
                 <div className="relative">
                   <AtSign
-                    className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    className="pointer-events-none absolute inset-s-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                     size={15}
                   />
                   <Input
@@ -206,7 +204,7 @@ export function RegisterPage() {
                 <Label htmlFor="password">{t("Password")}</Label>
                 <div className="relative">
                   <Lock
-                    className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    className="pointer-events-none absolute inset-s-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                     size={15}
                   />
                   <Input

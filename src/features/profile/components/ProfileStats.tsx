@@ -9,34 +9,32 @@ interface Props {
   stats: ProfileStat[];
 }
 
-function getCategoryLabel(
-  category: string,
-  t: ReturnType<typeof useExtracted>
-): string {
-  switch (category) {
-    case "Backend Concurrency":
-      return t("Backend Concurrency");
-    case "Logic Inversions":
-      return t("Logic Inversions");
-    case "Memory Leaks":
-      return t("Memory Leaks");
-    case "Off-by-One":
-      return t("Off-by-One");
-    case "Race Conditions":
-      return t("Race Conditions");
-    case "React Rendering":
-      return t("React Rendering");
-    case "Security Flaws":
-      return t("Security Flaws");
-    case "State Mutations":
-      return t("State Mutations");
-    default:
-      return category;
-  }
-}
-
 export function ProfileStats({ stats, categoryStats }: Props) {
   const t = useExtracted();
+
+  const getCategoryLabel = (category: string): string => {
+    switch (category) {
+      case "Backend Concurrency":
+        return t("Backend Concurrency");
+      case "Logic Inversions":
+        return t("Logic Inversions");
+      case "Memory Leaks":
+        return t("Memory Leaks");
+      case "Off-by-One":
+        return t("Off-by-One");
+      case "Race Conditions":
+        return t("Race Conditions");
+      case "React Rendering":
+        return t("React Rendering");
+      case "Security Flaws":
+        return t("Security Flaws");
+      case "State Mutations":
+        return t("State Mutations");
+      default:
+        return category;
+    }
+  };
+
   return (
     <div className="space-y-4 p-5">
       <div>
@@ -69,7 +67,7 @@ export function ProfileStats({ stats, categoryStats }: Props) {
             <div className="mb-3" key={category}>
               <div className="mb-1 flex items-center justify-between">
                 <span className="text-[11.5px] text-muted-foreground">
-                  {getCategoryLabel(cfg?.label ?? category, t)}
+                  {getCategoryLabel(cfg?.label ?? category)}
                 </span>
                 <span
                   className="font-mono text-[11px]"

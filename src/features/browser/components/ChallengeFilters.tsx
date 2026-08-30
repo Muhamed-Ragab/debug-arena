@@ -31,55 +31,49 @@ export function ChallengeFilters({
 }: Props) {
   const t = useExtracted();
 
-  function getCategoryLabel(
-    categoryVal: Category,
-    tFn: ReturnType<typeof useExtracted>
-  ): string {
+  const getCategoryLabel = (categoryVal: Category): string => {
     switch (categoryVal) {
       case "Backend Concurrency":
-        return tFn("Backend Concurrency");
+        return t("Backend Concurrency");
       case "Logic Inversions":
-        return tFn("Logic Inversions");
+        return t("Logic Inversions");
       case "Memory Leaks":
-        return tFn("Memory Leaks");
+        return t("Memory Leaks");
       case "Off-by-One":
-        return tFn("Off-by-One");
+        return t("Off-by-One");
       case "Race Conditions":
-        return tFn("Race Conditions");
+        return t("Race Conditions");
       case "React Rendering":
-        return tFn("React Rendering");
+        return t("React Rendering");
       case "Security Flaws":
-        return tFn("Security Flaws");
+        return t("Security Flaws");
       case "State Mutations":
-        return tFn("State Mutations");
+        return t("State Mutations");
       default:
         return categoryVal;
     }
-  }
+  };
 
-  function getDifficultyLabel(
-    difficultyVal: Difficulty,
-    tFn: ReturnType<typeof useExtracted>
-  ): string {
+  const getDifficultyLabel = (difficultyVal: Difficulty): string => {
     switch (difficultyVal) {
       case "Easy":
-        return tFn("Easy");
+        return t("Easy");
       case "Medium":
-        return tFn("Medium");
+        return t("Medium");
       case "Hard":
-        return tFn("Hard");
+        return t("Hard");
       case "Expert":
-        return tFn("Expert");
+        return t("Expert");
       default:
         return difficultyVal;
     }
-  }
+  };
 
   const categoryOptions: SelectOption[] = [
     { label: t("All Categories"), value: "all" },
     ...CATEGORY_ORDER.map((c) => ({
       indicatorColor: CATEGORY_CONFIG[c]?.color,
-      label: getCategoryLabel(c, t),
+      label: getCategoryLabel(c),
       value: c,
     })),
   ];
@@ -88,7 +82,7 @@ export function ChallengeFilters({
     { label: t("All Levels"), value: "all" },
     ...DIFFICULTY_ORDER.map((d) => ({
       indicatorColor: DIFFICULTY_CONFIG[d]?.color,
-      label: getDifficultyLabel(d, t),
+      label: getDifficultyLabel(d),
       value: d,
     })),
   ];

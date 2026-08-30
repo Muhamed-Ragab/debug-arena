@@ -7,11 +7,15 @@ import {
   CartesianGrid,
   Line,
   LineChart,
-  ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
+import type { ChartConfig } from "@/components/ui/chart";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import type { AnalyticsOverview as AnalyticsOverviewData } from "../types";
 
 interface Props {
@@ -34,6 +38,18 @@ export function AnalyticsOverview({ data }: Props) {
   const published = statusMap.get("published") ?? 0;
   const draft = statusMap.get("draft") ?? 0;
   const archived = statusMap.get("archived") ?? 0;
+
+  const submissionsConfig = {
+    count: { color: "var(--chart-1)", label: t("Submissions") },
+  } satisfies ChartConfig;
+
+  const avgScoreConfig = {
+    avgScore: { color: "var(--chart-1)", label: t("Avg Score") },
+  } satisfies ChartConfig;
+
+  const statusConfig = {
+    count: { color: "var(--chart-1)", label: t("Challenges") },
+  } satisfies ChartConfig;
 
   return (
     <div className="flex flex-col gap-6">
@@ -90,26 +106,34 @@ export function AnalyticsOverview({ data }: Props) {
               {t("No data available yet.")}
             </p>
           ) : (
-            <div className="mt-4 h-64 w-full">
-              <ResponsiveContainer height="100%" width="100%">
-                <LineChart data={submissionsByDay}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="date"
-                    fontSize={11}
-                    tickFormatter={(v: string) => v.slice(5)}
-                  />
-                  <YAxis allowDecimals={false} fontSize={11} />
-                  <Tooltip />
-                  <Line
-                    dataKey="count"
-                    dot={false}
-                    stroke="hsl(var(--primary))"
-                    type="monotone"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <ChartContainer
+              className="mt-4 h-64 w-full"
+              config={submissionsConfig}
+            >
+              <LineChart accessibilityLayer data={submissionsByDay}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  axisLine={false}
+                  dataKey="date"
+                  tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                  tickFormatter={(v: string) => v.slice(5)}
+                  tickLine={false}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  axisLine={false}
+                  tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                  tickLine={false}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Line
+                  dataKey="count"
+                  dot={false}
+                  stroke="var(--color-count)"
+                  type="monotone"
+                />
+              </LineChart>
+            </ChartContainer>
           )}
         </div>
 
@@ -122,21 +146,33 @@ export function AnalyticsOverview({ data }: Props) {
               {t("No data available yet.")}
             </p>
           ) : (
-            <div className="mt-4 h-64 w-full">
-              <ResponsiveContainer height="100%" width="100%">
-                <BarChart data={avgScorePerCategory}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="categoryName" fontSize={11} interval={0} />
-                  <YAxis domain={[0, 100]} fontSize={11} />
-                  <Tooltip />
-                  <Bar
-                    dataKey="avgScore"
-                    fill="hsl(var(--primary))"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <ChartContainer
+              className="mt-4 h-64 w-full"
+              config={avgScoreConfig}
+            >
+              <BarChart accessibilityLayer data={avgScorePerCategory}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  axisLine={false}
+                  dataKey="categoryName"
+                  interval={0}
+                  tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                  tickLine={false}
+                />
+                <YAxis
+                  axisLine={false}
+                  domain={[0, 100]}
+                  tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                  tickLine={false}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar
+                  dataKey="avgScore"
+                  fill="var(--color-avgScore)"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ChartContainer>
           )}
         </div>
       </div>
@@ -178,26 +214,36 @@ export function AnalyticsOverview({ data }: Props) {
               {t("No data available yet.")}
             </p>
           ) : (
-            <div className="mt-4 h-48 w-full">
-              <ResponsiveContainer height="100%" width="100%">
-                <BarChart data={challengesByStatus} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis allowDecimals={false} type="number" />
-                  <YAxis
-                    dataKey="status"
-                    fontSize={12}
-                    type="category"
-                    width={80}
-                  />
-                  <Tooltip />
-                  <Bar
-                    dataKey="count"
-                    fill="hsl(var(--primary))"
-                    radius={[0, 4, 4, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <ChartContainer className="mt-4 h-48 w-full" config={statusConfig}>
+              <BarChart
+                accessibilityLayer
+                data={challengesByStatus}
+                layout="vertical"
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  allowDecimals={false}
+                  axisLine={false}
+                  tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                  tickLine={false}
+                  type="number"
+                />
+                <YAxis
+                  axisLine={false}
+                  dataKey="status"
+                  tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+                  tickLine={false}
+                  type="category"
+                  width={80}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar
+                  dataKey="count"
+                  fill="var(--color-count)"
+                  radius={[0, 4, 4, 0]}
+                />
+              </BarChart>
+            </ChartContainer>
           )}
         </div>
       </div>

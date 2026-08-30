@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, desc, eq } from "drizzle-orm";
+import { type SQL, and, asc, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { db } from "@/db/client";
 import * as schema from "@/db/schema";
 import { OFFLINE_MESSAGE, toOfflineError } from "@/lib/offline";
@@ -11,6 +11,7 @@ import type {
   AdminRepository,
   CategoryRow,
   ChallengeRow,
+  FindChallengesPaginatedOpts,
 } from "./types";
 
 function handleDbError(err: unknown, context: string): never {
@@ -56,6 +57,107 @@ export function createAdminRepository(
       });
     } catch (err) {
       handleDbError(err, "findChallenges");
+    }
+  }
+
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: paginated query needs branching for search/category lookup and filters
+  function escapeLike(input: string): string {
+    return input.replace(/[%_\\]/g, "\\$&");
+  }
+
+  async function findChallengesPaginated(
+    opts: FindChallengesPaginatedOpts
+  ): Promise<{ rows: AdminChallengeRow[]; total: number }> {
+    try {
+      const {
+        page,
+        pageSize,
+        search,
+        status,
+        source,
+        difficulty,
+        sortBy,
+        sortOrder,
+      } = opts;
+      const trimmedSearch = search.trim();
+      const conditions: SQL[] = [];
+
+      if (status !== "all") {
+        conditions.push(eq(schema.challenges.status, status));
+      }
+      if (source !== "all") {
+        conditions.push(eq(schema.challenges.source, source));
+      }
+      if (difficulty !== "all") {
+        conditions.push(eq(schema.challenges.difficulty, difficulty));
+      }
+
+      if (trimmedSearch) {
+        const escaped = escapeLike(trimmedSearch);
+        const pattern = `%${escaped}%`;
+        let categoryIds: string[] = [];
+        try {
+          const matchingCategories = await dbClient.query.categories.findMany({
+            columns: { id: true },
+            where: ilike(schema.categories.name, pattern),
+          });
+          categoryIds = matchingCategories.map((c) => c.id);
+        } catch (err) {
+          console.warn(
+            "[adminRepository.findChallengesPaginated] category lookup failed, falling back to title-only search:",
+            err
+          );
+          categoryIds = [];
+        }
+        const searchCondition =
+          categoryIds.length > 0
+            ? or(
+                ilike(schema.challenges.title, pattern),
+                inArray(schema.challenges.categoryId, categoryIds)
+              )
+            : ilike(schema.challenges.title, pattern);
+        if (searchCondition) {
+          conditions.push(searchCondition);
+        }
+      }
+
+      const whereClause =
+        conditions.length > 0 ? and(...conditions) : undefined;
+
+      const countResult = await dbClient
+        .select({ cnt: count() })
+        .from(schema.challenges)
+        .where(whereClause);
+      const total = Number(countResult[0]?.cnt ?? 0);
+
+      const orderBy: SQL[] =
+        sortBy === "title"
+          ? sortOrder === "asc"
+            ? [asc(schema.challenges.title)]
+            : [desc(schema.challenges.title)]
+          : sortOrder === "asc"
+            ? [asc(schema.challenges.createdAt)]
+            : [desc(schema.challenges.createdAt)];
+
+      const offset = (page - 1) * pageSize;
+
+      const rows = await dbClient.query.challenges.findMany({
+        limit: pageSize,
+        offset,
+        orderBy,
+        where: whereClause,
+        with: {
+          category: true,
+          hints: {
+            orderBy: [asc(schema.hints.order)],
+          },
+          submissions: true,
+        },
+      });
+
+      return { rows, total };
+    } catch (err) {
+      handleDbError(err, "findChallengesPaginated");
     }
   }
 
@@ -223,6 +325,7 @@ export function createAdminRepository(
     findCategories,
     findChallengeById,
     findChallenges,
+    findChallengesPaginated,
     insertChallenge,
     insertHints,
     updateChallenge,

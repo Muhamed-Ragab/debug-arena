@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
+import { describe, expect, it, vi } from "vitest";
 
 // Mock next/headers for request locale detection
 vi.mock("next/headers", () => ({

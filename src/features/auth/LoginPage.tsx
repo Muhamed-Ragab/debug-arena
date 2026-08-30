@@ -43,7 +43,7 @@ export function LoginPage() {
     if (isPending || !session) {
       return;
     }
-    const role = (session.user as { role?: string } | undefined)?.role;
+    const role = session.user.role;
     const target = callbackUrl ?? (role === "admin" ? "/admin" : "/challenges");
     router.replace(target as Route);
   }, [session, isPending, callbackUrl, router]);
@@ -70,9 +70,7 @@ export function LoginPage() {
       }
       try {
         const sessionRes = await authClient.getSession();
-        const sessionRole = (
-          sessionRes.data?.user as { role?: string } | undefined
-        )?.role;
+        const sessionRole = sessionRes.data?.user?.role;
         const target =
           callbackUrl ?? (sessionRole === "admin" ? "/admin" : "/challenges");
         router.push(target as Route);
@@ -128,7 +126,7 @@ export function LoginPage() {
                 <GitBranch size={16} />
                 GitHub
                 {lastMethod === "github" && (
-                  <Badge className="absolute -end-2 -top-2 text-[10px]">
+                  <Badge className="absolute -inset-e-2 -top-2 text-[10px]">
                     Last used
                   </Badge>
                 )}
@@ -151,7 +149,7 @@ export function LoginPage() {
                 <Mail size={16} />
                 Google
                 {lastMethod === "google" && (
-                  <Badge className="absolute -end-2 -top-2 text-[10px]">
+                  <Badge className="absolute -inset-e-2 -top-2 text-[10px]">
                     Last used
                   </Badge>
                 )}
@@ -169,7 +167,7 @@ export function LoginPage() {
                 <Label htmlFor="email">{t("Email")}</Label>
                 <div className="relative">
                   <AtSign
-                    className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    className="pointer-events-none absolute inset-s-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                     size={15}
                   />
                   <Input
@@ -195,7 +193,7 @@ export function LoginPage() {
                 </div>
                 <div className="relative">
                   <Lock
-                    className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    className="pointer-events-none absolute inset-s-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                     size={15}
                   />
                   <Input

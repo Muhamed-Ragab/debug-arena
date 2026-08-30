@@ -128,7 +128,10 @@ export function LoadingFallback({
       <div
         aria-busy="true"
         aria-label={title}
-        className={cn("flex w-full flex-col items-center text-center", className)}
+        className={cn(
+          "flex w-full flex-col items-center text-center",
+          className
+        )}
         role="status"
       >
         {/* spinner badge */}

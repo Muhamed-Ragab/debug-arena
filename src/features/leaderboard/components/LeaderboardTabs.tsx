@@ -41,27 +41,24 @@ function getTabClasses(active: boolean, hasCfg: boolean): string {
 export function LeaderboardTabs({ tab, setTab }: Props) {
   const t = useExtracted();
 
-  function getTabLabel(
-    id: LeaderboardTab,
-    tFn: ReturnType<typeof useExtracted>
-  ): string {
+  const getTabLabel = (id: LeaderboardTab): string => {
     switch (id) {
       case "week":
-        return tFn("This week");
+        return t("This week");
       case "alltime":
-        return tFn("All time");
+        return t("All time");
       case "State Mutations":
-        return tFn("State Mutations");
+        return t("State Mutations");
       case "Race Conditions":
-        return tFn("Race Conditions");
+        return t("Race Conditions");
       case "Security Flaws":
-        return tFn("Security Flaws");
+        return t("Security Flaws");
       case "Memory Leaks":
-        return tFn("Memory Leaks");
+        return t("Memory Leaks");
       default:
         return id;
     }
-  }
+  };
 
   return (
     <div className="flex items-center gap-1 overflow-x-auto">
@@ -86,7 +83,7 @@ export function LeaderboardTabs({ tab, setTab }: Props) {
             type="button"
             variant="ghost"
           >
-            {getTabLabel(id, t)}
+            {getTabLabel(id)}
           </Button>
         );
       })}

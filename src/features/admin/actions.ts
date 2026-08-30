@@ -11,6 +11,8 @@ import {
   deleteChallengeSchema,
   generateQuestionOutputSchema,
   generateQuestionSchema,
+  listAdminChallengesOutputSchema,
+  listAdminChallengesQuerySchema,
   refineQuestionOutputSchema,
   refineQuestionSchema,
   saveChallengeOutputSchema,
@@ -84,6 +86,14 @@ export const deleteAdminChallengeAction = adminActionClient
     revalidatePath("/challenges");
     revalidatePath("/admin/questions");
     return result;
+  });
+
+export const listAdminChallengesAction = adminActionClient
+  .inputSchema(listAdminChallengesQuerySchema)
+  .outputSchema(listAdminChallengesOutputSchema)
+  .action(async ({ parsedInput }) => {
+    const result = await adminService.getAdminChallengesPaginated(parsedInput);
+    return { success: true, ...result };
   });
 
 export const toggleUserBanAction = adminActionClient

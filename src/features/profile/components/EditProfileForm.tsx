@@ -42,32 +42,6 @@ const MAX_JOB = 80;
 const HANDLE_RE = /^[a-z0-9_]+$/i;
 const AT_PREFIX_REGEX = /^@/;
 
-function getCategoryLabel(
-  category: string,
-  t: ReturnType<typeof useExtracted>
-): string {
-  switch (category) {
-    case "Backend Concurrency":
-      return t("Backend Concurrency");
-    case "Logic Inversions":
-      return t("Logic Inversions");
-    case "Memory Leaks":
-      return t("Memory Leaks");
-    case "Off-by-One":
-      return t("Off-by-One");
-    case "Race Conditions":
-      return t("Race Conditions");
-    case "React Rendering":
-      return t("React Rendering");
-    case "Security Flaws":
-      return t("Security Flaws");
-    case "State Mutations":
-      return t("State Mutations");
-    default:
-      return category;
-  }
-}
-
 function HandleStatus({
   available,
   error,
@@ -180,6 +154,30 @@ function CategoryInterestsSection({
   toggleInterest: (c: Category) => void;
 }) {
   const t = useExtracted();
+
+  const getCategoryLabel = (category: string): string => {
+    switch (category) {
+      case "Backend Concurrency":
+        return t("Backend Concurrency");
+      case "Logic Inversions":
+        return t("Logic Inversions");
+      case "Memory Leaks":
+        return t("Memory Leaks");
+      case "Off-by-One":
+        return t("Off-by-One");
+      case "Race Conditions":
+        return t("Race Conditions");
+      case "React Rendering":
+        return t("React Rendering");
+      case "Security Flaws":
+        return t("Security Flaws");
+      case "State Mutations":
+        return t("State Mutations");
+      default:
+        return category;
+    }
+  };
+
   return (
     <div className="mt-6">
       <p className="mb-1 font-medium text-[12px] text-muted-foreground">
@@ -218,7 +216,7 @@ function CategoryInterestsSection({
                 className="h-1.5 w-1.5 rounded-full"
                 style={{ backgroundColor: cfg.color }}
               />
-              {getCategoryLabel(cfg.label, t)}
+              {getCategoryLabel(cfg.label)}
               {Boolean(selected) && <Check className="ms-auto" size={12} />}
             </Button>
           );

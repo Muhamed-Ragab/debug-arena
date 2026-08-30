@@ -78,7 +78,7 @@ export function CodeViewer({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-2">
+      <div className="flex-1 overflow-auto py-2">
         <table
           className="w-full border-collapse"
           style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}
@@ -106,7 +106,7 @@ export function CodeViewer({
                   >
                     {n}
                   </td>
-                  <td className="py-[2.5px] ps-2 pe-6 text-[12.5px] transition-colors">
+                  <td className="py-[2.5px] ps-2 pe-6 text-[12.5px] transition-colors whitespace-pre">
                     {tokens.map((t) => (
                       <span
                         key={t.id}

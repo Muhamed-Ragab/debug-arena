@@ -276,6 +276,7 @@ msgid "Language"
 msgstr "Language"
 
 #: src/components/layout/Sidebar.tsx
+#: src/features/analytics/components/AnalyticsOverview.tsx
 #: src/features/browser/components/ChallengeBrowser.tsx
 #: src/features/challenge/components/ChallengeScreen.tsx
 #: src/features/results/components/ResultsScreen.tsx
@@ -324,14 +325,14 @@ msgid "Select language"
 msgstr "Select language"
 
 #: src/components/preferences/ThemeToggle.tsx
-msgctxt "3cc4Ct"
-msgid "Light"
-msgstr "Light"
-
-#: src/components/preferences/ThemeToggle.tsx
 msgctxt "tOdNiY"
 msgid "Dark"
 msgstr "Dark"
+
+#: src/components/preferences/ThemeToggle.tsx
+msgctxt "3cc4Ct"
+msgid "Light"
+msgstr "Light"
 
 #: src/components/preferences/ThemeToggle.tsx
 msgctxt "-CwN9C"
@@ -342,6 +343,130 @@ msgstr "System"
 msgctxt "qJ010K"
 msgid "Select theme"
 msgstr "Select theme"
+
+#: src/components/shared/CategoryTag.tsx
+#: src/features/browser/components/ChallengeFilters.tsx
+#: src/features/landing/LandingPage.tsx
+#: src/features/leaderboard/components/LeaderboardScreen.tsx
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+#: src/features/profile/components/EditProfileForm.tsx
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "r7yXqR"
+msgid "Backend Concurrency"
+msgstr "Backend Concurrency"
+
+#: src/components/shared/CategoryTag.tsx
+#: src/features/browser/components/ChallengeFilters.tsx
+#: src/features/landing/LandingPage.tsx
+#: src/features/leaderboard/components/LeaderboardScreen.tsx
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+#: src/features/profile/components/EditProfileForm.tsx
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "y3C3I7"
+msgid "Logic Inversions"
+msgstr "Logic Inversions"
+
+#: src/components/shared/CategoryTag.tsx
+#: src/features/browser/components/ChallengeFilters.tsx
+#: src/features/landing/LandingPage.tsx
+#: src/features/leaderboard/components/LeaderboardScreen.tsx
+#: src/features/leaderboard/components/LeaderboardTabs.tsx
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+#: src/features/profile/components/EditProfileForm.tsx
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "tQvh_V"
+msgid "Memory Leaks"
+msgstr "Memory Leaks"
+
+#: src/components/shared/CategoryTag.tsx
+#: src/features/browser/components/ChallengeFilters.tsx
+#: src/features/landing/LandingPage.tsx
+#: src/features/leaderboard/components/LeaderboardScreen.tsx
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+#: src/features/profile/components/EditProfileForm.tsx
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "teorsS"
+msgid "Off-by-One"
+msgstr "Off-by-One"
+
+#: src/components/shared/CategoryTag.tsx
+#: src/features/browser/components/ChallengeFilters.tsx
+#: src/features/landing/LandingPage.tsx
+#: src/features/leaderboard/components/LeaderboardScreen.tsx
+#: src/features/leaderboard/components/LeaderboardTabs.tsx
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+#: src/features/profile/components/EditProfileForm.tsx
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "h-2R9E"
+msgid "Race Conditions"
+msgstr "Race Conditions"
+
+#: src/components/shared/CategoryTag.tsx
+#: src/features/browser/components/ChallengeFilters.tsx
+#: src/features/category/components/CategoryManagement.tsx
+#: src/features/landing/LandingPage.tsx
+#: src/features/leaderboard/components/LeaderboardScreen.tsx
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+#: src/features/profile/components/EditProfileForm.tsx
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "Uf9F0z"
+msgid "React Rendering"
+msgstr "React Rendering"
+
+#: src/components/shared/CategoryTag.tsx
+#: src/features/browser/components/ChallengeFilters.tsx
+#: src/features/landing/LandingPage.tsx
+#: src/features/leaderboard/components/LeaderboardScreen.tsx
+#: src/features/leaderboard/components/LeaderboardTabs.tsx
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+#: src/features/profile/components/EditProfileForm.tsx
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "lotqPu"
+msgid "Security Flaws"
+msgstr "Security Flaws"
+
+#: src/components/shared/CategoryTag.tsx
+#: src/features/browser/components/ChallengeFilters.tsx
+#: src/features/landing/LandingPage.tsx
+#: src/features/leaderboard/components/LeaderboardScreen.tsx
+#: src/features/leaderboard/components/LeaderboardTabs.tsx
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+#: src/features/profile/components/EditProfileForm.tsx
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "lzXWx4"
+msgid "State Mutations"
+msgstr "State Mutations"
+
+#: src/components/shared/DiffBadge.tsx
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/browser/components/ChallengeFilters.tsx
+#: src/features/profile/components/SolvedByDifficultyChart.tsx
+msgctxt "6n4LpX"
+msgid "Easy"
+msgstr "Easy"
+
+#: src/components/shared/DiffBadge.tsx
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/browser/components/ChallengeFilters.tsx
+#: src/features/profile/components/SolvedByDifficultyChart.tsx
+msgctxt "ovJ26C"
+msgid "Medium"
+msgstr "Medium"
+
+#: src/components/shared/DiffBadge.tsx
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/browser/components/ChallengeFilters.tsx
+#: src/features/profile/components/SolvedByDifficultyChart.tsx
+msgctxt "n8uxry"
+msgid "Hard"
+msgstr "Hard"
+
+#: src/components/shared/DiffBadge.tsx
+#: src/features/browser/components/ChallengeFilters.tsx
+#: src/features/profile/components/SolvedByDifficultyChart.tsx
+msgctxt "C4dVmi"
+msgid "Expert"
+msgstr "Expert"
 
 #: src/components/shared/FormattedMarkdown.tsx
 msgctxt "tl6nvu"
@@ -357,6 +482,22 @@ msgstr "Copied"
 msgctxt "4l6vz1"
 msgid "Copy"
 msgstr "Copy"
+
+#: src/components/shared/loading-fallback.tsx
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "gjBiyj"
+msgid "Loading..."
+msgstr "Loading..."
+
+#: src/components/shared/loading-fallback.tsx
+msgctxt "kKcTr-"
+msgid "Preparing your arena..."
+msgstr "Preparing your arena..."
+
+#: src/components/shared/loading-fallback.tsx
+msgctxt "P0YiQn"
+msgid "Fetching challenges, hang tight."
+msgstr "Fetching challenges, hang tight."
 
 #: src/components/shared/offline-banner.tsx
 msgctxt "vS1TVs"
@@ -444,21 +585,6 @@ msgid "All Difficulties"
 msgstr "All Difficulties"
 
 #: src/features/admin/components/AdminChallengeList.tsx
-msgctxt "6n4LpX"
-msgid "Easy"
-msgstr "Easy"
-
-#: src/features/admin/components/AdminChallengeList.tsx
-msgctxt "ovJ26C"
-msgid "Medium"
-msgstr "Medium"
-
-#: src/features/admin/components/AdminChallengeList.tsx
-msgctxt "n8uxry"
-msgid "Hard"
-msgstr "Hard"
-
-#: src/features/admin/components/AdminChallengeList.tsx
 msgctxt "9MidH4"
 msgid "Challenge"
 msgstr "Challenge"
@@ -470,6 +596,7 @@ msgid "Category"
 msgstr "Category"
 
 #: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/analytics/components/AnalyticsOverview.tsx
 msgctxt "d6avGo"
 msgid "Submissions"
 msgstr "Submissions"
@@ -521,6 +648,31 @@ msgstr "Delete Challenge"
 msgctxt "SqPD8G"
 msgid "No challenges found matching your filters."
 msgstr "No challenges found matching your filters."
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "HbZWnK"
+msgid "Showing {from}–{to} of {total} challenges"
+msgstr "Showing {from}–{to} of {total} challenges"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "3kNr3U"
+msgid "Page {page} of {totalPages}"
+msgstr "Page {page} of {totalPages}"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "VCZBMt"
+msgid "Rows per page"
+msgstr "Rows per page"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "JJNc3c"
+msgid "Previous"
+msgstr "Previous"
+
+#: src/features/admin/components/AdminChallengeList.tsx
+msgctxt "9-Ddtu"
+msgid "Next"
+msgstr "Next"
 
 #: src/features/admin/components/AdminChallengeList.tsx
 #: src/features/category/components/CategoryManagement.tsx
@@ -1011,6 +1163,11 @@ msgid "Refine Draft"
 msgstr "Refine Draft"
 
 #: src/features/analytics/components/AnalyticsOverview.tsx
+msgctxt "Jh-Usl"
+msgid "Avg Score"
+msgstr "Avg Score"
+
+#: src/features/analytics/components/AnalyticsOverview.tsx
 msgctxt "4DGgIJ"
 msgid "Challenges by Status"
 msgstr "Challenges by Status"
@@ -1148,6 +1305,25 @@ msgid "Already have an account?"
 msgstr "Already have an account?"
 
 #: src/features/browser/components/ChallengeBrowser.tsx
+#: src/features/browser/components/ChallengeCard.tsx
+#: src/features/leaderboard/components/LeaderboardTable.tsx
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+msgctxt "oIdbxt"
+msgid "Solved"
+msgstr "Solved"
+
+#: src/features/browser/components/ChallengeBrowser.tsx
+msgctxt "zziu-H"
+msgid "Current Streak"
+msgstr "Current Streak"
+
+#: src/features/browser/components/ChallengeBrowser.tsx
+#: src/features/leaderboard/components/LeaderboardTable.tsx
+msgctxt "VP5-CR"
+msgid "Rank"
+msgstr "Rank"
+
+#: src/features/browser/components/ChallengeBrowser.tsx
 #: src/features/leaderboard/components/LeaderboardScreen.tsx
 #: src/features/profile/components/ProfileScreen.tsx
 #: src/features/profile/ProfilePage.tsx
@@ -1175,13 +1351,6 @@ msgstr "{count} solves"
 msgctxt "c3XvPF"
 msgid "~30m"
 msgstr "~30m"
-
-#: src/features/browser/components/ChallengeCard.tsx
-#: src/features/leaderboard/components/LeaderboardTable.tsx
-#: src/features/leaderboard/components/LeaderboardTopThree.tsx
-msgctxt "oIdbxt"
-msgid "Solved"
-msgstr "Solved"
 
 #: src/features/browser/components/ChallengeCard.tsx
 msgctxt "FzL1V-"
@@ -1369,12 +1538,6 @@ msgid "Add a new challenge category."
 msgstr "Add a new challenge category."
 
 #: src/features/category/components/CategoryManagement.tsx
-#: src/features/landing/LandingPage.tsx
-msgctxt "Uf9F0z"
-msgid "React Rendering"
-msgstr "React Rendering"
-
-#: src/features/category/components/CategoryManagement.tsx
 msgctxt "nadL5l"
 msgid "Slug (optional — auto-generated)"
 msgstr "Slug (optional — auto-generated)"
@@ -1496,6 +1659,21 @@ msgstr "Resize right sidebar"
 msgctxt "7Q0LGS"
 msgid "Drag to resize tabs panel (Double click to reset)"
 msgstr "Drag to resize tabs panel (Double click to reset)"
+
+#: src/features/challenge/components/ChallengeTabs.tsx
+msgctxt "iIHf91"
+msgid "explain"
+msgstr "explain"
+
+#: src/features/challenge/components/ChallengeTabs.tsx
+msgctxt "N8eMkw"
+msgid "fix"
+msgstr "fix"
+
+#: src/features/challenge/components/ChallengeTabs.tsx
+msgctxt "4hLwZk"
+msgid "hints"
+msgstr "hints"
 
 #: src/features/challenge/components/CodeViewer.tsx
 msgctxt "kzxB_l"
@@ -1648,41 +1826,6 @@ msgid "Weak-spot analytics"
 msgstr "Weak-spot analytics"
 
 #: src/features/landing/LandingPage.tsx
-msgctxt "r7yXqR"
-msgid "Backend Concurrency"
-msgstr "Backend Concurrency"
-
-#: src/features/landing/LandingPage.tsx
-msgctxt "y3C3I7"
-msgid "Logic Inversions"
-msgstr "Logic Inversions"
-
-#: src/features/landing/LandingPage.tsx
-msgctxt "tQvh_V"
-msgid "Memory Leaks"
-msgstr "Memory Leaks"
-
-#: src/features/landing/LandingPage.tsx
-msgctxt "teorsS"
-msgid "Off-by-One"
-msgstr "Off-by-One"
-
-#: src/features/landing/LandingPage.tsx
-msgctxt "h-2R9E"
-msgid "Race Conditions"
-msgstr "Race Conditions"
-
-#: src/features/landing/LandingPage.tsx
-msgctxt "lotqPu"
-msgid "Security Flaws"
-msgstr "Security Flaws"
-
-#: src/features/landing/LandingPage.tsx
-msgctxt "lzXWx4"
-msgid "State Mutations"
-msgstr "State Mutations"
-
-#: src/features/landing/LandingPage.tsx
 msgctxt "Zk6Cyu"
 msgid "bugs diagnosed"
 msgstr "bugs diagnosed"
@@ -1778,17 +1921,13 @@ msgid "Solve challenges to earn a spot on the leaderboard."
 msgstr "Solve challenges to earn a spot on the leaderboard."
 
 #: src/features/leaderboard/components/LeaderboardTable.tsx
-msgctxt "VP5-CR"
-msgid "Rank"
-msgstr "Rank"
-
-#: src/features/leaderboard/components/LeaderboardTable.tsx
 msgctxt "EwRIOm"
 msgid "User"
 msgstr "User"
 
 #: src/features/leaderboard/components/LeaderboardTable.tsx
 #: src/features/leaderboard/components/LeaderboardTopThree.tsx
+#: src/features/profile/components/CategoryStrengthChart.tsx
 msgctxt "oLkLww"
 msgid "Score"
 msgstr "Score"
@@ -1814,6 +1953,16 @@ msgstr "{streak}d"
 msgctxt "awioES"
 msgid "Showing {from} to {to} of {total} entries"
 msgstr "Showing {from} to {to} of {total} entries"
+
+#: src/features/leaderboard/components/LeaderboardTabs.tsx
+msgctxt "PtxhIN"
+msgid "This week"
+msgstr "This week"
+
+#: src/features/leaderboard/components/LeaderboardTabs.tsx
+msgctxt "s-lPP3"
+msgid "All time"
+msgstr "All time"
 
 #: src/features/leaderboard/components/LeaderboardTopThree.tsx
 msgctxt "PY-B7t"

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
+import { describe, expect, it } from "vitest";
 
 function BareComponent() {
   const t = useExtracted();
@@ -35,7 +35,7 @@ describe("extraction smoke", () => {
       const t = useExtracted();
       return (
         <span>
-          {t({ message: "Right", description: "Advance to next slide" })}
+          {t({ description: "Advance to next slide", message: "Right" })}
         </span>
       );
     }

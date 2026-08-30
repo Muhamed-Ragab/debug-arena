@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale, useExtracted } from "next-intl";
+import { useExtracted, useLocale } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";

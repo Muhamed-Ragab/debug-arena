@@ -3,6 +3,8 @@
 import {
   Archive,
   Bot,
+  ChevronLeft,
+  ChevronRight,
   ExternalLink,
   Globe,
   Lock,
@@ -48,37 +50,52 @@ import {
   deleteAdminChallengeAction,
   toggleChallengeStatusAction,
 } from "../actions";
+import { useAdminChallenges } from "../hooks/useAdminChallenges";
 import type { AdminChallengeItem } from "../types";
 
 interface AdminChallengeListProps {
-  challenges: AdminChallengeItem[];
+  challenges?: AdminChallengeItem[];
+  initialChallenges?: AdminChallengeItem[];
+  initialTotal?: number;
   onRefresh?: () => void;
 }
 
 export function AdminChallengeList({
-  challenges: initialChallenges,
+  challenges: legacyChallenges,
+  initialChallenges,
+  initialTotal,
   onRefresh,
 }: AdminChallengeListProps) {
   const t = useExtracted();
-  const [challenges, setChallenges] = useState(initialChallenges);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sourceFilter, setSourceFilter] = useState<string>("all");
-  const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
+  const resolvedInitialItems = initialChallenges ?? legacyChallenges ?? [];
+  const resolvedInitialTotal = initialTotal ?? legacyChallenges?.length ?? 0;
+
+  const {
+    difficultyFilter,
+    error,
+    items,
+    loading,
+    page,
+    pageSize,
+    refetch,
+    search,
+    setDifficultyFilter,
+    setPage,
+    setPageSize,
+    setSearch,
+    setSourceFilter,
+    setStatusFilter,
+    sourceFilter,
+    statusFilter,
+    total,
+    totalPages,
+  } = useAdminChallenges({
+    initialItems: resolvedInitialItems,
+    initialTotal: resolvedInitialTotal,
+  });
+
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const filteredChallenges = challenges.filter((c) => {
-    const matchesSearch =
-      c.title.toLowerCase().includes(search.toLowerCase()) ||
-      c.categoryName.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "all" || c.status === statusFilter;
-    const matchesSource = sourceFilter === "all" || c.source === sourceFilter;
-    const matchesDifficulty =
-      difficultyFilter === "all" || c.difficulty === difficultyFilter;
-
-    return matchesSearch && matchesStatus && matchesSource && matchesDifficulty;
-  });
 
   const handleToggleStatus = async (
     challengeId: string,
@@ -91,16 +108,12 @@ export function AdminChallengeList({
       });
 
       if (res?.data?.success) {
-        setChallenges((prev) =>
-          prev.map((item) =>
-            item.id === challengeId ? { ...item, status: nextStatus } : item
-          )
-        );
         toast.success(
           nextStatus === "published"
             ? t("Challenge published live to the arena!")
             : t("Challenge status set to draft.")
         );
+        refetch();
         onRefresh?.();
       } else if (res?.validationErrors) {
         const flat = flattenValidationErrors(res.validationErrors);
@@ -131,10 +144,8 @@ export function AdminChallengeList({
         challengeId: deleteTargetId,
       });
       if (res?.data?.success) {
-        setChallenges((prev) =>
-          prev.filter((item) => item.id !== deleteTargetId)
-        );
         toast.success(t("Challenge deleted successfully."));
+        refetch();
         onRefresh?.();
         setDeleteTargetId(null);
       } else if (res?.validationErrors) {
@@ -191,6 +202,11 @@ export function AdminChallengeList({
       </Badge>
     );
   };
+
+  const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, total);
+  const canPrev = page > 1;
+  const canNext = page < totalPages;
 
   return (
     <div className="flex flex-col gap-4">
@@ -273,132 +289,214 @@ export function AdminChallengeList({
         </div>
       </Card>
 
+      {error ? (
+        <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-destructive text-sm">
+          {error}
+        </div>
+      ) : null}
+
       {/* Challenges Table */}
       <Card className="overflow-hidden bg-surface shadow-xs">
-        <Table>
-          <TableHeader className="bg-inset/50">
-            <TableRow>
-              <TableHead className="px-4 py-3">{t("Challenge")}</TableHead>
-              <TableHead className="px-4 py-3">{t("Category")}</TableHead>
-              <TableHead className="px-4 py-3">{t("Difficulty")}</TableHead>
-              <TableHead className="px-4 py-3">{t("Status")}</TableHead>
-              <TableHead className="px-4 py-3">{t("Source")}</TableHead>
-              <TableHead className="px-4 py-3">{t("Submissions")}</TableHead>
-              <TableHead className="px-4 py-3 text-end">
-                {t("Actions")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="divide-y divide-border">
-            {filteredChallenges.length > 0 ? (
-              filteredChallenges.map((c) => (
-                <TableRow
-                  className="transition-colors hover:bg-inset/40"
-                  key={c.id}
-                >
-                  <TableCell className="px-4 py-3.5">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="font-semibold text-heading text-sm">
-                        {c.title}
-                      </span>
-                      <span className="font-mono text-[11px] text-muted-foreground">
-                        ID: {c.id.slice(0, 8)}...
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5">
-                    <Badge variant="secondary">{c.categoryName}</Badge>
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5">
-                    <DiffBadge difficulty={formatDifficulty(c.difficulty)} />
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5">
-                    {renderStatus(c.status)}
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5">
-                    {c.source === "ai_generated" ? (
-                      <Badge className="gap-1 font-medium" variant="default">
-                        <Bot size={11} />
-                        {t("AI Agent")}
-                      </Badge>
-                    ) : (
-                      <Badge className="gap-1 font-medium" variant="outline">
-                        <User size={11} />
-                        {t("Manual")}
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-foreground">
-                        {c.submissionsCount} {t("total")}
-                      </span>
-                      <span className="text-[11px] text-emerald-400">
-                        {c.solvesCount} {t("solves")}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5 text-end">
-                    <div className="flex items-center justify-end gap-1.5">
-                      {c.status === "published" ? (
-                        <>
-                          <Button
-                            asChild
-                            className="h-8 w-8 p-0"
-                            size="icon"
-                            title={t("View in Arena")}
-                            variant="ghost"
-                          >
-                            <Link href={`/challenges/${c.id}`} target="_blank">
-                              <ExternalLink size={15} />
-                            </Link>
-                          </Button>
-                          <Button
-                            className="h-8 w-8 p-0 text-amber-400 hover:bg-amber-500/10 hover:text-amber-400"
-                            onClick={() => handleToggleStatus(c.id, "draft")}
-                            size="icon"
-                            title={t("Unpublish to Draft")}
-                            variant="ghost"
-                          >
-                            <Lock size={15} />
-                          </Button>
-                        </>
+        <div className={loading ? "opacity-60 transition-opacity" : ""}>
+          <Table>
+            <TableHeader className="bg-inset/50">
+              <TableRow>
+                <TableHead className="px-4 py-3">{t("Challenge")}</TableHead>
+                <TableHead className="px-4 py-3">{t("Category")}</TableHead>
+                <TableHead className="px-4 py-3">{t("Difficulty")}</TableHead>
+                <TableHead className="px-4 py-3">{t("Status")}</TableHead>
+                <TableHead className="px-4 py-3">{t("Source")}</TableHead>
+                <TableHead className="px-4 py-3">{t("Submissions")}</TableHead>
+                <TableHead className="px-4 py-3 text-end">
+                  {t("Actions")}
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-border">
+              {items.length > 0 ? (
+                items.map((c) => (
+                  <TableRow
+                    className="transition-colors hover:bg-inset/40"
+                    key={c.id}
+                  >
+                    <TableCell className="px-4 py-3.5">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-semibold text-heading text-sm">
+                          {c.title}
+                        </span>
+                        <span className="font-mono text-[11px] text-muted-foreground">
+                          ID: {c.id.slice(0, 8)}...
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5">
+                      <Badge variant="secondary">{c.categoryName}</Badge>
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5">
+                      <DiffBadge difficulty={formatDifficulty(c.difficulty)} />
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5">
+                      {renderStatus(c.status)}
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5">
+                      {c.source === "ai_generated" ? (
+                        <Badge className="gap-1 font-medium" variant="default">
+                          <Bot size={11} />
+                          {t("AI Agent")}
+                        </Badge>
                       ) : (
+                        <Badge className="gap-1 font-medium" variant="outline">
+                          <User size={11} />
+                          {t("Manual")}
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5">
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-foreground">
+                          {c.submissionsCount} {t("total")}
+                        </span>
+                        <span className="text-[11px] text-emerald-400">
+                          {c.solvesCount} {t("solves")}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5 text-end">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {c.status === "published" ? (
+                          <>
+                            <Button
+                              asChild
+                              className="h-8 w-8 p-0"
+                              size="icon"
+                              title={t("View in Arena")}
+                              variant="ghost"
+                            >
+                              <Link
+                                href={`/challenges/${c.id}`}
+                                target="_blank"
+                              >
+                                <ExternalLink size={15} />
+                              </Link>
+                            </Button>
+                            <Button
+                              className="h-8 w-8 p-0 text-amber-400 hover:bg-amber-500/10 hover:text-amber-400"
+                              onClick={() => handleToggleStatus(c.id, "draft")}
+                              size="icon"
+                              title={t("Unpublish to Draft")}
+                              variant="ghost"
+                            >
+                              <Lock size={15} />
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            className="h-8 w-8 p-0 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
+                            onClick={() =>
+                              handleToggleStatus(c.id, "published")
+                            }
+                            size="icon"
+                            title={t("Publish to Arena")}
+                            variant="ghost"
+                          >
+                            <Globe size={15} />
+                          </Button>
+                        )}
                         <Button
-                          className="h-8 w-8 p-0 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
-                          onClick={() => handleToggleStatus(c.id, "published")}
+                          className="h-8 w-8 p-0 text-rose-400 hover:bg-rose-500/10 hover:text-rose-400"
+                          onClick={() => setDeleteTargetId(c.id)}
                           size="icon"
-                          title={t("Publish to Arena")}
+                          title={t("Delete Challenge")}
                           variant="ghost"
                         >
-                          <Globe size={15} />
+                          <Trash2 size={15} />
                         </Button>
-                      )}
-                      <Button
-                        className="h-8 w-8 p-0 text-rose-400 hover:bg-rose-500/10 hover:text-rose-400"
-                        onClick={() => setDeleteTargetId(c.id)}
-                        size="icon"
-                        title={t("Delete Challenge")}
-                        variant="ghost"
-                      >
-                        <Trash2 size={15} />
-                      </Button>
-                    </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    className="px-4 py-8 text-center text-muted-foreground"
+                    colSpan={7}
+                  >
+                    {loading
+                      ? t("Loading...")
+                      : t("No challenges found matching your filters.")}
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  className="px-4 py-8 text-center text-muted-foreground"
-                  colSpan={7}
-                >
-                  {t("No challenges found matching your filters.")}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Pagination Footer */}
+        <div className="flex flex-col gap-3 border-border border-t bg-inset/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-muted-foreground text-xs">
+            {total > 0
+              ? t("Showing {from}–{to} of {total} challenges", {
+                  from: String(from),
+                  to: String(to),
+                  total: String(total),
+                })
+              : t("No challenges found matching your filters.")}
+            {totalPages > 0
+              ? ` — ${t("Page {page} of {totalPages}", {
+                  page: String(page),
+                  totalPages: String(totalPages),
+                })}`
+              : ""}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Select
+              onValueChange={(val) => setPageSize(Number(val))}
+              value={String(pageSize)}
+            >
+              <SelectTrigger
+                aria-label={t("Rows per page")}
+                className="h-8 min-w-20 rounded-lg border-border bg-background px-2 text-xs"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <div className="flex items-center gap-1">
+              <Button
+                aria-label={t("Previous")}
+                disabled={!canPrev || loading}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                size="sm"
+                variant="outline"
+              >
+                <ChevronLeft size={14} />
+                {t("Previous")}
+              </Button>
+              <span className="px-2 text-xs tabular-nums">
+                {t("Page {page} of {totalPages}", {
+                  page: String(page),
+                  totalPages: String(Math.max(1, totalPages)),
+                })}
+              </span>
+              <Button
+                aria-label={t("Next")}
+                disabled={!canNext || loading}
+                onClick={() => setPage((p) => p + 1)}
+                size="sm"
+                variant="outline"
+              >
+                {t("Next")}
+                <ChevronRight size={14} />
+              </Button>
+            </div>
+          </div>
+        </div>
       </Card>
 
       <AlertDialog

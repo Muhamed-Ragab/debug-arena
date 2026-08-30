@@ -1,7 +1,7 @@
+import { type NextRequest, NextResponse } from "next/server";
+import createMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
-import createMiddleware from "next-intl/middleware";
-import { type NextRequest, NextResponse } from "next/server";
 
 const handleI18nRouting = createMiddleware(routing);
 
@@ -61,6 +61,32 @@ function getRedirectUrl(
   return null;
 }
 
+function extractLocaleFromI18nResponse(
+  response: NextResponse,
+  requestUrl?: string
+): string {
+  const headerLocale = response.headers.get("x-next-intl-locale");
+  if (headerLocale && (routing.locales as readonly string[]).includes(headerLocale)) {
+    return headerLocale;
+  }
+
+  const rewrite = response.headers.get("x-middleware-rewrite");
+  if (rewrite) {
+    try {
+      const base = requestUrl ?? "http://localhost";
+      const url = new URL(rewrite, base);
+      const segment = url.pathname.split("/").find(Boolean);
+      if (segment && (routing.locales as readonly string[]).includes(segment)) {
+        return segment;
+      }
+    } catch {
+      // ignore malformed rewrite urls
+    }
+  }
+
+  return routing.defaultLocale;
+}
+
 function resolveI18nResponse(request: NextRequest): NextResponse {
   const i18nResponse = handleI18nRouting(request);
 
@@ -71,8 +97,7 @@ function resolveI18nResponse(request: NextRequest): NextResponse {
     return i18nResponse;
   }
 
-  const locale =
-    i18nResponse.headers.get("x-next-intl-locale") ?? routing.defaultLocale;
+  const locale = extractLocaleFromI18nResponse(i18nResponse, request.url);
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-next-intl-locale", locale);
 
@@ -103,10 +128,8 @@ function applyI18nToRedirect(
     redirect.cookies.set(cookie);
   }
 
-  const locale = source.headers.get("x-next-intl-locale");
-  if (locale) {
-    redirect.headers.set("x-next-intl-locale", locale);
-  }
+  const locale = extractLocaleFromI18nResponse(source);
+  redirect.headers.set("x-next-intl-locale", locale);
 
   const link = source.headers.get("Link");
   if (link) {

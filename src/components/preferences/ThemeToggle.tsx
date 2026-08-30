@@ -20,8 +20,8 @@ const THEMES = [
 export function ThemeToggle() {
   const t = useExtracted();
   const themeLabels: Record<string, string> = {
-    light: t("Light"),
     dark: t("Dark"),
+    light: t("Light"),
     system: t("System"),
   };
   function getThemeLabel(key: string): string {

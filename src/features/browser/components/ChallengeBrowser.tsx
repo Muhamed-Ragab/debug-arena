@@ -28,21 +28,18 @@ export function ChallengeBrowser({
   const t = useExtracted();
   const [page, setPage] = useState(1);
 
-  function getStatLabel(
-    key: string,
-    tFn: ReturnType<typeof useExtracted>
-  ): string {
+  const getStatLabel = (key: string): string => {
     switch (key) {
       case "browser.stats.solved":
-        return tFn("Solved");
+        return t("Solved");
       case "browser.stats.currentStreak":
-        return tFn("Current Streak");
+        return t("Current Streak");
       case "browser.stats.rank":
-        return tFn("Rank");
+        return t("Rank");
       default:
         return key;
     }
-  }
+  };
 
   const {
     query,
@@ -81,7 +78,7 @@ export function ChallengeBrowser({
           {stats.map((s) => (
             <Card className="p-4" key={s.label}>
               <p className="font-medium text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
-                {getStatLabel(s.label, t)}
+                {getStatLabel(s.label)}
               </p>
               <p className="mt-1 font-semibold text-heading text-xl">
                 {s.value}

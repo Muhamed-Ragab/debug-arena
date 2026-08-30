@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
+import { describe, expect, it } from "vitest";
 
 describe("next-intl catalogs", () => {
   it("en.po and ar.po exist and have same msgctxt count", () => {

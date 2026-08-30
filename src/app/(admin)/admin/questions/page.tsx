@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AdminQuestionsPage } from "@/features/admin/components/AdminQuestionsPage";
 import { adminService } from "@/features/admin/service";
+import { listAdminChallengesQuerySchema } from "@/features/admin/validation";
 import { isOfflineCause, isOfflineError } from "@/lib/offline";
 
 export const metadata: Metadata = {
@@ -11,14 +12,56 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminQuestionsRoute() {
+type SearchParams = {
+  difficulty?: string;
+  page?: string;
+  pageSize?: string;
+  search?: string;
+  source?: string;
+  status?: string;
+};
+
+export default async function AdminQuestionsRoute({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
   try {
-    const [categories, challenges] = await Promise.all([
+    const sp = await searchParams;
+    const parsed = listAdminChallengesQuerySchema.safeParse({
+      difficulty: sp.difficulty,
+      page: sp.page,
+      pageSize: sp.pageSize,
+      search: sp.search,
+      source: sp.source,
+      status: sp.status,
+    });
+
+    const opts = parsed.success
+      ? parsed.data
+      : {
+          difficulty: "all" as const,
+          page: 1,
+          pageSize: 10,
+          search: "",
+          sortBy: "createdAt" as const,
+          sortOrder: "desc" as const,
+          source: "all" as const,
+          status: "all" as const,
+        };
+
+    const [categories, challenges, paginated] = await Promise.all([
       adminService.getAdminCategories(),
       adminService.getAdminChallenges(),
+      adminService.getAdminChallengesPaginated(opts),
     ]);
     return (
-      <AdminQuestionsPage categories={categories} challenges={challenges} />
+      <AdminQuestionsPage
+        categories={categories}
+        challenges={challenges}
+        initialChallenges={paginated.items}
+        initialTotal={paginated.total}
+      />
     );
   } catch (err) {
     const offline = isOfflineError(err) || isOfflineCause(err);

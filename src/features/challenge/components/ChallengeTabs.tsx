@@ -41,10 +41,7 @@ export function ChallengeTabs({
   toggleHint,
 }: Props) {
   const t = useExtracted();
-  function getTabLabel(
-    tab: RightTab,
-    t: ReturnType<typeof useExtracted>
-  ): string {
+  const getTabLabel = (tab: RightTab): string => {
     switch (tab) {
       case "explain":
         return t("explain");
@@ -55,7 +52,7 @@ export function ChallengeTabs({
       default:
         return tab;
     }
-  }
+  };
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-surface">
       <div className="flex border-border border-b">
@@ -73,7 +70,7 @@ export function ChallengeTabs({
             type="button"
             variant="ghost"
           >
-            {getTabLabel(tab, t)}
+            {getTabLabel(tab)}
           </Button>
         ))}
       </div>

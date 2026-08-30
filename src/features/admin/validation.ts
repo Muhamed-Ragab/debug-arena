@@ -249,6 +249,23 @@ export const toggleUserBanSchema = z.object({
   userId: z.string().uuid(),
 });
 
+export const listAdminChallengesQuerySchema = z.object({
+  difficulty: z.enum(["all", "easy", "medium", "hard"]).default("all"),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(5).max(50).default(10),
+  search: z.string().max(200).optional().default(""),
+  sortBy: z.enum(["createdAt", "title"]).default("createdAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  source: z
+    .enum(["all", "manual", "ai_generated", "postmortem_import"])
+    .default("all"),
+  status: z.enum(["all", "draft", "published", "archived"]).default("all"),
+});
+
+export type ListAdminChallengesQuery = z.infer<
+  typeof listAdminChallengesQuerySchema
+>;
+
 export const generateQuestionOutputSchema = z
   .object({ success: z.boolean() })
   .passthrough();
@@ -270,5 +287,9 @@ export const deleteChallengeOutputSchema = z
   .passthrough();
 
 export const toggleUserBanOutputSchema = z
+  .object({ success: z.boolean() })
+  .passthrough();
+
+export const listAdminChallengesOutputSchema = z
   .object({ success: z.boolean() })
   .passthrough();

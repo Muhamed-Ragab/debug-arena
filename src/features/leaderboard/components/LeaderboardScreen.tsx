@@ -19,31 +19,28 @@ export function LeaderboardScreen({ initialEntries }: Props) {
   const t = useExtracted();
   const { tab, setTab, categoryTab } = useLeaderboard();
 
-  function getCategoryLabel(
-    category: Category,
-    tFn: ReturnType<typeof useExtracted>
-  ): string {
+  const getCategoryLabel = (category: Category): string => {
     switch (category) {
       case "Backend Concurrency":
-        return tFn("Backend Concurrency");
+        return t("Backend Concurrency");
       case "Logic Inversions":
-        return tFn("Logic Inversions");
+        return t("Logic Inversions");
       case "Memory Leaks":
-        return tFn("Memory Leaks");
+        return t("Memory Leaks");
       case "Off-by-One":
-        return tFn("Off-by-One");
+        return t("Off-by-One");
       case "Race Conditions":
-        return tFn("Race Conditions");
+        return t("Race Conditions");
       case "React Rendering":
-        return tFn("React Rendering");
+        return t("React Rendering");
       case "Security Flaws":
-        return tFn("Security Flaws");
+        return t("Security Flaws");
       case "State Mutations":
-        return tFn("State Mutations");
+        return t("State Mutations");
       default:
         return category;
     }
-  }
+  };
 
   const filteredEntries = useMemo(() => {
     const list = initialEntries;
@@ -95,9 +92,7 @@ export function LeaderboardScreen({ initialEntries }: Props) {
                     style={{ color: cfg?.color }}
                   >
                     {t("{label} — top solvers ranked by category score", {
-                      label: cfg
-                        ? getCategoryLabel(categoryTab, t)
-                        : categoryTab,
+                      label: cfg ? getCategoryLabel(categoryTab) : categoryTab,
                     })}
                   </span>
                 </div>

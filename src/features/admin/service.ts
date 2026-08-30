@@ -1,7 +1,12 @@
 import { generateDeterministicEmbedding } from "@/features/challenge/lib/embedding";
 import { NotFoundError } from "@/lib/safe-action";
 import { adminRepository } from "./repository";
-import type { AdminRepository, SaveChallengeInput } from "./types";
+import type {
+  AdminChallengeItem,
+  AdminRepository,
+  FindChallengesPaginatedOpts,
+  SaveChallengeInput,
+} from "./types";
 
 export function createAdminService(repo: AdminRepository = adminRepository) {
   async function generateQuestionDraft(params: unknown) {
@@ -88,9 +93,25 @@ export function createAdminService(repo: AdminRepository = adminRepository) {
     return await repo.findCategories();
   }
 
-  async function getAdminChallenges() {
-    const raw = await repo.findChallenges();
-    return raw.map((c) => ({
+  function toAdminChallengeItem(c: {
+    buggyArtifact: unknown;
+    category: { name: string; slug: string };
+    categoryId: string;
+    createdAt: Date;
+    difficulty: "easy" | "medium" | "hard";
+    format: "code_snippet" | "log_only" | "ui_recording";
+    hints: unknown[];
+    id: string;
+    preventionNotes: string | null;
+    prompt: string;
+    referenceFix: unknown;
+    rootCauseSummary: string;
+    source: "manual" | "ai_generated" | "postmortem_import";
+    status: "draft" | "published" | "archived";
+    submissions: { fixCorrect: boolean | null; totalScore: number | null }[];
+    title: string;
+  }): AdminChallengeItem {
+    return {
       buggyArtifact: c.buggyArtifact,
       categoryId: c.categoryId,
       categoryName: c.category.name,
@@ -111,7 +132,27 @@ export function createAdminService(repo: AdminRepository = adminRepository) {
       status: c.status,
       submissionsCount: c.submissions.length,
       title: c.title,
-    }));
+    };
+  }
+
+  async function getAdminChallenges() {
+    const raw = await repo.findChallenges();
+    return raw.map((c) => toAdminChallengeItem(c as never));
+  }
+
+  async function getAdminChallengesPaginated(
+    opts: FindChallengesPaginatedOpts
+  ) {
+    const { rows, total } = await repo.findChallengesPaginated(opts);
+    const items = rows.map((c) => toAdminChallengeItem(c as never));
+    const totalPages = Math.ceil(total / opts.pageSize);
+    return {
+      items,
+      page: opts.page,
+      pageSize: opts.pageSize,
+      total,
+      totalPages,
+    };
   }
 
   async function getAdminChallengeById(challengeId: string) {
@@ -133,6 +174,7 @@ export function createAdminService(repo: AdminRepository = adminRepository) {
     getAdminCategories,
     getAdminChallengeById,
     getAdminChallenges,
+    getAdminChallengesPaginated,
     getAdminUsers,
     refineQuestionDraft,
     saveChallenge,

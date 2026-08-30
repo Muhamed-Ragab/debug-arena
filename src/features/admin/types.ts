@@ -19,6 +19,17 @@ export type AdminChallengeDetailRow = ChallengeRow & {
   submissions: SubmissionRow[];
 };
 
+export interface FindChallengesPaginatedOpts {
+  difficulty: "all" | "easy" | "medium" | "hard";
+  page: number;
+  pageSize: number;
+  search: string;
+  sortBy: "createdAt" | "title";
+  sortOrder: "asc" | "desc";
+  source: "all" | "manual" | "ai_generated" | "postmortem_import";
+  status: "all" | "draft" | "published" | "archived";
+}
+
 export interface AdminRepository {
   deleteChallengeCascade: (challengeId: string) => Promise<void>;
   deleteHintsByChallengeId: (challengeId: string) => Promise<void>;
@@ -26,6 +37,9 @@ export interface AdminRepository {
   findCategories: () => Promise<CategoryRow[]>;
   findChallengeById: (id: string) => Promise<AdminChallengeDetailRow | null>;
   findChallenges: () => Promise<AdminChallengeRow[]>;
+  findChallengesPaginated: (
+    opts: FindChallengesPaginatedOpts
+  ) => Promise<{ rows: AdminChallengeRow[]; total: number }>;
   insertChallenge: (
     data: typeof schema.challenges.$inferInsert
   ) => Promise<ChallengeRow>;
@@ -152,4 +166,12 @@ export interface SaveChallengeInput {
   source?: string;
   status: string;
   title: string;
+}
+
+export interface PaginatedAdminChallenges {
+  items: AdminChallengeItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
 }
