@@ -430,7 +430,9 @@ export function QuestionGeneratorStudio({
               className="w-full rounded-lg border border-border bg-inset px-3.5 py-2.5 text-foreground text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
               id="topic-input"
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="e.g. Stale closure in WebSocket event listener causing state drops"
+              placeholder={t(
+                "e.g. Stale closure in WebSocket event listener causing state drops"
+              )}
               type="text"
               value={topic}
             />
@@ -529,7 +531,7 @@ export function QuestionGeneratorStudio({
                 className="w-full rounded-lg border-border bg-inset px-3 py-2 text-foreground text-xs"
                 id="qgs-language"
               >
-                <SelectValue placeholder="TypeScript" />
+                <SelectValue placeholder={t("TypeScript")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="typescript">TypeScript</SelectItem>
@@ -552,7 +554,9 @@ export function QuestionGeneratorStudio({
               className="w-full rounded-lg border border-border bg-inset px-3.5 py-2.5 text-foreground text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
               id="qgs-instructions"
               onChange={(e) => setAdditionalInstructions(e.target.value)}
-              placeholder="e.g. Include two helper files, focus on async race condition under high throughput..."
+              placeholder={t(
+                "e.g. Include two helper files, focus on async race condition under high throughput..."
+              )}
               type="text"
               value={additionalInstructions}
             />
@@ -979,7 +983,9 @@ export function QuestionGeneratorStudio({
                     handleRefine();
                   }
                 }}
-                placeholder="e.g. Make the bug harder by adding an async timing hazard, or rewrite hints to be more subtle..."
+                placeholder={t(
+                  "e.g. Make the bug harder by adding an async timing hazard, or rewrite hints to be more subtle..."
+                )}
                 type="text"
                 value={refineInput}
               />

@@ -137,7 +137,9 @@ export function HealthPanel() {
     return (
       <div className="rounded-xl border border-border bg-card p-6">
         <div className="flex items-center justify-between">
-          <p className="text-muted-foreground text-sm">Loading health...</p>
+          <p className="text-muted-foreground text-sm">
+            {t("Loading health...")}
+          </p>
           <Button
             disabled={isRefreshing}
             onClick={() => {

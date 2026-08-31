@@ -531,7 +531,7 @@ export function ManualChallengeCreator({
                   });
                 }
               }}
-              placeholder="e.g. Race Condition in Distributed Cache Store"
+              placeholder={t("e.g. Race Condition in Distributed Cache Store")}
               type="text"
               value={title}
             />
@@ -640,7 +640,7 @@ export function ManualChallengeCreator({
                 className="w-full rounded-lg border-border bg-inset px-3 py-2 text-foreground text-xs"
                 id="challenge-language"
               >
-                <SelectValue placeholder="TypeScript" />
+                <SelectValue placeholder={t("TypeScript")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="typescript">TypeScript</SelectItem>
@@ -924,7 +924,9 @@ export function ManualChallengeCreator({
               className="w-full rounded-lg border border-border bg-inset px-3 py-2 text-foreground text-xs focus:border-primary focus:outline-none"
               id="challenge-fix-explanation"
               onChange={(e) => setFixExplanation(e.target.value)}
-              placeholder="e.g. Wrapped balance decrement and update in an atomic transaction..."
+              placeholder={t(
+                "e.g. Wrapped balance decrement and update in an atomic transaction..."
+              )}
               type="text"
               value={fixExplanation}
             />
@@ -1005,7 +1007,9 @@ export function ManualChallengeCreator({
                   });
                 }
               }}
-              placeholder="Explain the failure mechanism, event loop or state lifecycle that triggers the bug..."
+              placeholder={t(
+                "Explain the failure mechanism, event loop or state lifecycle that triggers the bug..."
+              )}
               value={rootCauseSummary}
             />
             {Boolean(fieldErrors.rootCauseSummary) && (
@@ -1025,7 +1029,9 @@ export function ManualChallengeCreator({
             <textarea
               className="h-32 w-full rounded-lg border border-border bg-inset p-3 font-mono text-foreground text-xs focus:border-primary focus:outline-none"
               onChange={(e) => setPreventionNotes(e.target.value)}
-              placeholder="Recommended ESLint rules, architecture patterns, and regression tests..."
+              placeholder={t(
+                "Recommended ESLint rules, architecture patterns, and regression tests..."
+              )}
               value={preventionNotes}
             />
           </div>
