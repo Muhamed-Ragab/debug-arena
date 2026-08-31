@@ -1,10 +1,9 @@
 "use client";
 
 import {
-  FolderTree,
+  LayoutDashboard,
   LayoutGrid,
   Settings,
-  Sparkles,
   Trophy,
   User,
   X,
@@ -56,17 +55,12 @@ export function Sidebar({
   const ADMIN_NAV: Array<{
     to: Route;
     label: string;
-    icon: typeof Sparkles;
+    icon: typeof LayoutDashboard;
   }> = [
     {
-      icon: Sparkles,
-      label: t("AI Question Studio"),
-      to: "/admin/questions" as Route,
-    },
-    {
-      icon: FolderTree,
-      label: t("Categories"),
-      to: "/admin/categories" as Route,
+      icon: LayoutDashboard,
+      label: t("Admin Dashboard"),
+      to: "/admin" as Route,
     },
   ];
 
@@ -129,11 +123,11 @@ export function Sidebar({
         {Boolean(isAdmin) && (
           <div className="mt-6">
             <p className="px-3 pb-2 font-medium text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
-              {t("Admin Portal")}
+              {t("Admin Dashboard")}
             </p>
             <nav className="flex flex-col gap-1">
               {ADMIN_NAV.map(({ to, label, icon: Icon }) => {
-                const isActive = pathname.startsWith(to);
+                const isActive = pathname === to;
                 return (
                   <Link
                     className={cn(

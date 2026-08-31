@@ -36,6 +36,7 @@ msgid "Live status of database and Redis services."
 msgstr "Live status of database and Redis services."
 
 #: src/app/(admin)/admin/page.tsx
+#: src/components/layout/Sidebar.tsx
 msgctxt "3Vr8ps"
 msgid "Admin Dashboard"
 msgstr "Admin Dashboard"
@@ -86,7 +87,6 @@ msgstr "Quick Links"
 
 #: src/app/(admin)/admin/page.tsx
 #: src/components/layout/AdminSidebar.tsx
-#: src/components/layout/Sidebar.tsx
 #: src/features/category/components/CategoryManagement.tsx
 msgctxt "VKb1MS"
 msgid "Categories"
@@ -250,13 +250,11 @@ msgid "Dashboard"
 msgstr "Dashboard"
 
 #: src/components/layout/AdminSidebar.tsx
-#: src/components/layout/Sidebar.tsx
 msgctxt "3dQSAN"
 msgid "AI Question Studio"
 msgstr "AI Question Studio"
 
 #: src/components/layout/AdminSidebar.tsx
-#: src/components/layout/Sidebar.tsx
 msgctxt "crL6uF"
 msgid "Admin Portal"
 msgstr "Admin Portal"
@@ -840,7 +838,6 @@ msgstr "Challenge draft saved successfully."
 #: src/features/admin/components/QuestionGeneratorStudio.tsx
 #: src/features/category/components/CategoryManagement.tsx
 #: src/features/profile/components/EditProfileForm.tsx
-#: src/features/profile/components/LinkedAccounts.tsx
 msgctxt "cT0yxo"
 msgid "Validation failed"
 msgstr "Validation failed"
@@ -2180,6 +2177,11 @@ msgid "Fix the highlighted fields to save."
 msgstr "Fix the highlighted fields to save."
 
 #: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "g9_szf"
+msgid "Provider not available"
+msgstr "Provider not available"
+
+#: src/features/profile/components/LinkedAccounts.tsx
 msgctxt "g89BvK"
 msgid "Provider unlinked"
 msgstr "Provider unlinked"
@@ -2195,14 +2197,9 @@ msgid "Link providers to sign in faster. One stays primary for your avatar and n
 msgstr "Link providers to sign in faster. One stays primary for your avatar and name."
 
 #: src/features/profile/components/LinkedAccounts.tsx
-msgctxt "IvjoDS"
-msgid "Connected"
-msgstr "Connected"
-
-#: src/features/profile/components/LinkedAccounts.tsx
-msgctxt "PuU15u"
-msgid "Not connected"
-msgstr "Not connected"
+msgctxt "4brxgT"
+msgid "Coming soon — only Google is available"
+msgstr "Coming soon — only Google is available"
 
 #: src/features/profile/components/LinkedAccounts.tsx
 msgctxt "6F4qGT"
@@ -2215,9 +2212,24 @@ msgid "Unlink"
 msgstr "Unlink"
 
 #: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "5y2qWO"
+msgid "Connecting..."
+msgstr "Connecting..."
+
+#: src/features/profile/components/LinkedAccounts.tsx
 msgctxt "-vVZ_G"
 msgid "Connect"
 msgstr "Connect"
+
+#: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "IvjoDS"
+msgid "Connected"
+msgstr "Connected"
+
+#: src/features/profile/components/LinkedAccounts.tsx
+msgctxt "PuU15u"
+msgid "Not connected"
+msgstr "Not connected"
 
 #: src/features/profile/components/LinkedAccounts.tsx
 msgctxt "ZPN8QN"

@@ -7,7 +7,7 @@ export function getLeaderboardCacheKey(
   period: string,
   categorySlug?: string | null
 ): string {
-  return `leaderboard:v2:top:24h:${period}:${categorySlug || "all"}`;
+  return `leaderboard:v3:top:24h:${period}:${categorySlug || "all"}`;
 }
 
 export async function getCachedLeaderboard(
@@ -40,18 +40,17 @@ export async function setCachedLeaderboard(
 }
 
 export async function invalidateLeaderboardCache(
-  pattern = "leaderboard:v2:top:24h:*"
+  pattern = "leaderboard:v3:top:24h:*"
 ): Promise<void> {
   try {
     const redis = getRedis();
     const keys = await redis.keys(pattern);
-    if (keys.length > 0) {
-      await redis.del(...keys);
-    }
-    // also clear legacy keys for migration
+    // also clear legacy v2 + base keys for migration
+    const v2Keys = await redis.keys("leaderboard:v2:top:24h:*");
     const legacy = await redis.keys("leaderboard:top:24h:*");
-    if (legacy.length > 0) {
-      await redis.del(...legacy);
+    const allKeys = [...keys, ...v2Keys, ...legacy];
+    if (allKeys.length > 0) {
+      await redis.del(...allKeys);
     }
   } catch (err) {
     console.warn("[LeaderboardCache] Failed to invalidate Redis cache:", err);

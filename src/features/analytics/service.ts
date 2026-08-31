@@ -8,14 +8,7 @@ export function createAnalyticsService(
   repo: AnalyticsRepository = analyticsRepository
 ) {
   async function getOverview(): Promise<AnalyticsOverview> {
-    const [
-      totalUsers,
-      challengesByStatus,
-      submissionsByDay,
-      solveRate,
-      avgScorePerCategory,
-      topCategories,
-    ] = await Promise.all([
+    const settled = await Promise.allSettled([
       repo.countUsers(),
       repo.countChallengesByStatus(),
       repo.countSubmissionsByDay(30),
@@ -23,6 +16,29 @@ export function createAnalyticsService(
       repo.avgScorePerCategory(),
       repo.topCategories(5),
     ]);
+
+    const totalUsers = settled[0].status === "fulfilled" ? settled[0].value : 0;
+    const challengesByStatus =
+      settled[1].status === "fulfilled" ? settled[1].value : [];
+    const submissionsByDay =
+      settled[2].status === "fulfilled" ? settled[2].value : [];
+    const solveRate =
+      settled[3].status === "fulfilled"
+        ? settled[3].value
+        : { rate: 0, solved: 0, total: 0 };
+    const avgScorePerCategory =
+      settled[4].status === "fulfilled" ? settled[4].value : [];
+    const topCategories =
+      settled[5].status === "fulfilled" ? settled[5].value : [];
+
+    for (const [idx, result] of settled.entries()) {
+      if (result.status === "rejected") {
+        console.warn(
+          `[analyticsService.getOverview] query ${idx} failed:`,
+          result.reason
+        );
+      }
+    }
 
     const totalChallenges = challengesByStatus.reduce(
       (sum, r) => sum + r.count,

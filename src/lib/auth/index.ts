@@ -18,6 +18,13 @@ import {
 } from "./validation";
 
 export const auth = betterAuth({
+  account: {
+    accountLinking: {
+      allowDifferentEmails: false,
+      enabled: true,
+      trustedProviders: ["google"],
+    },
+  },
   advanced: {
     database: {
       generateId: "uuid",

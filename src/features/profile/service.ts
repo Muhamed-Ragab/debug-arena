@@ -316,6 +316,7 @@ export function createProfileService(
     const accounts = supportedProviders.map((p) => {
       const acc = userAccountsMap.get(p.provider);
       return {
+        accountId: acc?.id,
         connected: Boolean(acc),
         email: acc?.accountId || (acc ? user.email : undefined),
         isCurrentSignIn: Boolean(acc),

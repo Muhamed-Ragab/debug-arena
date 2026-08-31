@@ -18,7 +18,7 @@ export const editProfileSchema = z.object({
 });
 
 export const unlinkAccountSchema = z.object({
-  providerId: z.string(),
+  providerId: z.enum(["google"]),
 });
 
 export const revokeSessionSchema = z.object({

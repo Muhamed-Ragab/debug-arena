@@ -61,8 +61,10 @@ export const unlinkAccountAction = authActionClient
   .outputSchema(unlinkAccountOutputSchema)
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.user.id;
-    // biome-ignore lint/correctness/noUnusedVariables: providerId validated by zod schema
     const { providerId } = parsedInput;
+    if (providerId !== "google") {
+      throw new ActionError("Provider not available");
+    }
     const accounts = await profileRepository.findByIdForSettings(userId);
     const userAccounts = accounts?.accounts ?? [];
     const hasPassword = userAccounts.some(

@@ -14,8 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { flattenValidationErrors } from "@/lib/safe-action/validation";
-import { unlinkAccountAction } from "../actions";
+import { authClient } from "@/lib/auth/client";
 import type { LinkedAccount, ProviderId } from "../types";
 
 const PROVIDER_BRAND: Record<
@@ -27,6 +26,8 @@ const PROVIDER_BRAND: Record<
   gitlab: { bg: "#fc6d26", fg: "#ffffff", initial: "Git" },
   google: { bg: "#ea4335", fg: "#ffffff", initial: "G" },
 };
+
+const ENABLED_PROVIDERS = new Set<ProviderId>(["google"]);
 
 interface LinkedAccountsProps {
   accounts: LinkedAccount[];
@@ -40,10 +41,43 @@ export function LinkedAccounts({
   const [blocked, setBlocked] = useState<ProviderId | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isUnlinking, setIsUnlinking] = useState<string | null>(null);
+  const [isLinking, setIsLinking] = useState<string | null>(null);
 
   const connectedCount = accounts.filter((a) => a.connected).length;
 
-  const onDisconnect = async (account: LinkedAccount) => {
+  const handleLink = async (provider: ProviderId) => {
+    if (!ENABLED_PROVIDERS.has(provider)) {
+      setErrorMessage(t("Provider not available"));
+      toast.error(t("Provider not available"));
+      return;
+    }
+    setIsLinking(provider);
+    setErrorMessage(null);
+    try {
+      const result = await authClient.linkSocial({
+        callbackURL: "/settings",
+        provider: "google",
+      });
+      if (result?.error) {
+        const msg = result.error.message ?? t("Something went wrong");
+        setErrorMessage(msg);
+        toast.error(msg);
+      }
+    } catch {
+      const msg = t("Something went wrong");
+      setErrorMessage(msg);
+      toast.error(msg);
+    } finally {
+      setIsLinking(null);
+    }
+  };
+
+  const handleUnlink = async (account: LinkedAccount) => {
+    if (!ENABLED_PROVIDERS.has(account.provider)) {
+      setErrorMessage(t("Provider not available"));
+      toast.error(t("Provider not available"));
+      return;
+    }
     if (account.connected && connectedCount <= 1) {
       setBlocked(account.provider);
       return;
@@ -53,8 +87,19 @@ export function LinkedAccounts({
     setErrorMessage(null);
 
     try {
-      const res = await unlinkAccountAction({ providerId: account.provider });
-      if (res?.data?.success) {
+      if (!account.accountId) {
+        setErrorMessage(t("Something went wrong"));
+        toast.error(t("Something went wrong"));
+        return;
+      }
+      const result = await authClient.unlinkAccount({
+        accountId: account.accountId,
+      });
+      if (result?.error) {
+        const msg = result.error.message ?? t("Something went wrong");
+        setErrorMessage(msg);
+        toast.error(msg);
+      } else {
         setAccounts((prev) =>
           prev.map((a) =>
             a.provider === account.provider
@@ -63,24 +108,26 @@ export function LinkedAccounts({
           )
         );
         toast.success(t("Provider unlinked"));
-      } else if (res?.validationErrors) {
-        const flat = flattenValidationErrors(res.validationErrors);
-        const msg = flat.providerId ?? flat._errors ?? "Validation failed";
-        setErrorMessage(msg);
-        toast.error(t("Validation failed"));
-      } else if (res?.serverError) {
-        setErrorMessage(res.serverError);
-        toast.error(res.serverError);
-      } else {
-        setErrorMessage("Something went wrong");
-        toast.error(t("Something went wrong"));
       }
     } catch {
-      setErrorMessage("Something went wrong");
-      toast.error(t("Something went wrong"));
+      const msg = t("Something went wrong");
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setIsUnlinking(null);
     }
+  };
+
+  const onLinkClick = (provider: ProviderId) => {
+    handleLink(provider).catch(() => {
+      // handled inside
+    });
+  };
+
+  const onUnlinkClick = (account: LinkedAccount) => {
+    handleUnlink(account).catch(() => {
+      // handled inside
+    });
   };
 
   return (
@@ -108,7 +155,52 @@ export function LinkedAccounts({
           {accounts.map((account) => {
             const brand = PROVIDER_BRAND[account.provider];
             const isBlocked = blocked === account.provider;
-            const loading = isUnlinking === account.provider;
+            const loadingUnlink = isUnlinking === account.provider;
+            const loadingLink = isLinking === account.provider;
+            const isEnabled = ENABLED_PROVIDERS.has(account.provider);
+
+            let actionButton: React.ReactNode = null;
+            if (account.connected) {
+              actionButton = (
+                <Button
+                  disabled={loadingUnlink || !isEnabled}
+                  onClick={() => onUnlinkClick(account)}
+                  size="sm"
+                  title={
+                    isEnabled
+                      ? undefined
+                      : t("Coming soon — only Google is available")
+                  }
+                  variant="destructive"
+                >
+                  {loadingUnlink ? t("Unlinking...") : t("Unlink")}
+                </Button>
+              );
+            } else if (isEnabled) {
+              actionButton = (
+                <Button
+                  disabled={loadingLink}
+                  onClick={() => onLinkClick(account.provider)}
+                  size="sm"
+                  variant="default"
+                >
+                  <Link2 size={13} />{" "}
+                  {loadingLink ? t("Connecting...") : t("Connect")}
+                </Button>
+              );
+            } else {
+              actionButton = (
+                <Button
+                  aria-disabled="true"
+                  disabled
+                  size="sm"
+                  title={t("Coming soon — only Google is available")}
+                  variant="secondary"
+                >
+                  <Link2 size={13} /> {t("Connect")}
+                </Button>
+              );
+            }
 
             return (
               <li className="py-4" key={account.provider}>
@@ -143,24 +235,7 @@ export function LinkedAccounts({
                   </div>
 
                   <div className="flex shrink-0 items-center gap-2">
-                    {account.connected ? (
-                      <Button
-                        disabled={loading}
-                        onClick={() => onDisconnect(account)}
-                        size="sm"
-                        variant="destructive"
-                      >
-                        {loading ? t("Unlinking...") : t("Unlink")}
-                      </Button>
-                    ) : (
-                      <Button asChild size="sm" variant="default">
-                        <a
-                          href={`/api/auth/sign-in/social?provider=${account.provider}`}
-                        >
-                          <Link2 size={13} /> {t("Connect")}
-                        </a>
-                      </Button>
-                    )}
+                    {actionButton}
                   </div>
                 </div>
 

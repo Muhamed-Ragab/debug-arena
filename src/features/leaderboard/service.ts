@@ -127,20 +127,26 @@ export function createLeaderboardService(
 
     if (currentUserId && !entriesWithUserFlag.some((e) => e.isUser)) {
       const currentUser = await repo.findByIdWithRelations(currentUserId);
-      if (currentUser) {
-        const userRank = await calculateUserRank(currentUserId);
-        const parsedRank =
-          Number.parseInt(userRank.replace("#", ""), 10) ||
-          rawEntries.length + 1;
-        const userEntry = buildUserLeaderboardEntry(
-          currentUser as unknown as UserWithSubmissionsAndStats,
-          parsedRank
-        );
-        entriesWithUserFlag.push({
-          ...userEntry,
-          isUser: true,
-        });
+      if (!currentUser) {
+        return entriesWithUserFlag;
       }
+      if (
+        (currentUser as unknown as { role?: string }).role !== "user" ||
+        (currentUser as unknown as { banned?: boolean }).banned === true
+      ) {
+        return entriesWithUserFlag;
+      }
+      const userRank = await calculateUserRank(currentUserId);
+      const parsedRank =
+        Number.parseInt(userRank.replace("#", ""), 10) || rawEntries.length + 1;
+      const userEntry = buildUserLeaderboardEntry(
+        currentUser as unknown as UserWithSubmissionsAndStats,
+        parsedRank
+      );
+      entriesWithUserFlag.push({
+        ...userEntry,
+        isUser: true,
+      });
     }
 
     return entriesWithUserFlag;

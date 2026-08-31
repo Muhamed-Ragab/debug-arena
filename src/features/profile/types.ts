@@ -111,6 +111,7 @@ export interface SessionData {
 }
 
 export interface LinkedAccount {
+  accountId?: string;
   connected: boolean;
   /** Email shown when connected. */
   email?: string;
