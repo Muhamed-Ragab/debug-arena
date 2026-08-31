@@ -24,7 +24,7 @@ export function TopBar({ crumbs, right }: TopBarProps) {
 
   const user = session?.user;
 
-  const userName = user?.displayName || user?.name || "Developer";
+  const userName = user?.displayName || user?.name || t("Developer");
   const userJobTitle = user?.jobTitle || t("Developer");
 
   return (

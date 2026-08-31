@@ -77,7 +77,7 @@ export function Sidebar({
         <Logo />
         {Boolean(onClose) && (
           <Button
-            aria-label="Close sidebar"
+            aria-label={t("Close sidebar")}
             className="h-8 w-8 p-0 lg:hidden"
             onClick={onClose}
             size="icon"
