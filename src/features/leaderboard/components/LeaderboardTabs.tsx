@@ -12,13 +12,13 @@ interface Props {
   tab: LeaderboardTab;
 }
 
-const TABS: { id: LeaderboardTab; label: string }[] = [
-  { id: "week", label: "This week" },
-  { id: "alltime", label: "All time" },
-  { id: "State Mutations", label: "State Mutations" },
-  { id: "Race Conditions", label: "Race Conditions" },
-  { id: "Security Flaws", label: "Security Flaws" },
-  { id: "Memory Leaks", label: "Memory Leaks" },
+const TABS: { id: LeaderboardTab }[] = [
+  { id: "week" },
+  { id: "alltime" },
+  { id: "State Mutations" },
+  { id: "Race Conditions" },
+  { id: "Security Flaws" },
+  { id: "Memory Leaks" },
 ];
 
 const CATEGORY_TABS: Category[] = [
