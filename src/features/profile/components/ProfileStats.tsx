@@ -12,6 +12,21 @@ interface Props {
 export function ProfileStats({ stats, categoryStats }: Props) {
   const t = useExtracted();
 
+  const getStatLabel = (label: string): string => {
+    switch (label) {
+      case "Avg. Score":
+        return t("Avg. Score");
+      case "Avg. Time to Fix":
+        return t("Avg. Time to Fix");
+      case "Challenges Solved":
+        return t("Challenges Solved");
+      case "Hints Used":
+        return t("Hints Used");
+      default:
+        return label;
+    }
+  };
+
   const getCategoryLabel = (category: string): string => {
     switch (category) {
       case "Backend Concurrency":
@@ -44,7 +59,9 @@ export function ProfileStats({ stats, categoryStats }: Props) {
         <div className="space-y-2.5">
           {stats.map(({ label, value, Icon, iconColor }) => (
             <div className="flex items-center justify-between" key={label}>
-              <span className="text-[12px] text-muted-foreground">{label}</span>
+              <span className="text-[12px] text-muted-foreground">
+                {getStatLabel(label)}
+              </span>
               <span
                 className="flex items-center gap-1 font-mono text-[12px] text-foreground"
                 style={iconColor ? { color: iconColor } : {}}
@@ -67,7 +84,7 @@ export function ProfileStats({ stats, categoryStats }: Props) {
             <div className="mb-3" key={category}>
               <div className="mb-1 flex items-center justify-between">
                 <span className="text-[11.5px] text-muted-foreground">
-                  {getCategoryLabel(cfg?.label ?? category)}
+                  {getCategoryLabel(category)}
                 </span>
                 <span
                   className="font-mono text-[11px]"

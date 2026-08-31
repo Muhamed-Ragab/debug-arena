@@ -216,7 +216,7 @@ function CategoryInterestsSection({
                 className="h-1.5 w-1.5 rounded-full"
                 style={{ backgroundColor: cfg.color }}
               />
-              {getCategoryLabel(cfg.label)}
+              {getCategoryLabel(cat)}
               {Boolean(selected) && <Check className="ms-auto" size={12} />}
             </Button>
           );

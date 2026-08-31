@@ -40,7 +40,7 @@ export function ProfileScreen({ data }: Props) {
               size={56}
             />
             <h2 className="mt-3 mb-0.5 font-semibold text-[15px] text-heading">
-              {profile.name}
+              {profile.name || t("Developer")}
             </h2>
             <p className="font-mono text-[12px] text-primary">
               {profile.handle}
@@ -58,15 +58,20 @@ export function ProfileScreen({ data }: Props) {
                 <Trophy size={11} /> {profile.rank}
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 font-medium font-mono text-[11px] text-emerald-400">
-                {profile.points} pts
+                {t("{points} pts", { points: profile.points })}
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 font-medium font-mono text-[11px] text-amber-500">
-                <Flame size={11} /> {profile.streak}
+                <Flame size={11} />{" "}
+                {t("{count}-day streak", {
+                  count: String(profile.streakCount),
+                })}
               </span>
             </div>
 
             <p className="mt-2.5 text-[11px] text-muted-foreground">
-              {profile.joined}
+              {profile.joinedDate
+                ? t("Member since {date}", { date: profile.joinedDate })
+                : t("Member")}
             </p>
 
             {Boolean(profile.bio) && (
