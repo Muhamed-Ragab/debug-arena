@@ -120,6 +120,33 @@ msgctxt "QB07Ok"
 msgid "No recent submissions."
 msgstr "No recent submissions."
 
+#: src/app/(admin)/admin/questions/page.tsx
+msgctxt "GtD3NZ"
+msgid "Failed to load admin data"
+msgstr "Failed to load admin data"
+
+#: src/app/(admin)/admin/questions/page.tsx
+#: src/app/global-error.tsx
+#: src/components/shared/offline-banner.tsx
+msgctxt "vS1TVs"
+msgid "You are offline"
+msgstr "You are offline"
+
+#: src/app/(admin)/admin/questions/page.tsx
+msgctxt "xs8uBJ"
+msgid "Failed to load"
+msgstr "Failed to load"
+
+#: src/app/(admin)/admin/questions/page.tsx
+msgctxt "WYsxtz"
+msgid "Database and AI services require an internet connection. Reconnect and refresh the page — already-generated drafts and the studio UI remain available locally."
+msgstr "Database and AI services require an internet connection. Reconnect and refresh the page — already-generated drafts and the studio UI remain available locally."
+
+#: src/app/(admin)/admin/questions/page.tsx
+msgctxt "Fle7fW"
+msgid "Check: Wi-Fi / VPN, then retry. Server stays running — no restart needed."
+msgstr "Check: Wi-Fi / VPN, then retry. Server stays running — no restart needed."
+
 #: src/app/(admin)/admin/users/page.tsx
 msgctxt "J_X6rJ"
 msgid "User Management"
@@ -129,6 +156,15 @@ msgstr "User Management"
 msgctxt "M3fHPr"
 msgid "Manage community members. Admins are excluded from gameplay ranking."
 msgstr "Manage community members. Admins are excluded from gameplay ranking."
+
+#: src/app/(admin)/admin/users/users-client.tsx
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+#: src/features/category/components/CategoryManagement.tsx
+#: src/features/profile/components/EditProfileForm.tsx
+msgctxt "cT0yxo"
+msgid "Validation failed"
+msgstr "Validation failed"
 
 #: src/app/(admin)/admin/users/users-client.tsx
 msgctxt "xerM7K"
@@ -152,6 +188,44 @@ msgid "No users found."
 msgstr "No users found."
 
 #: src/app/(admin)/admin/users/users-client.tsx
+#: src/features/leaderboard/components/LeaderboardTable.tsx
+msgctxt "EwRIOm"
+msgid "User"
+msgstr "User"
+
+#: src/app/(admin)/admin/users/users-client.tsx
+#: src/features/auth/ForgotPasswordPage.tsx
+#: src/features/auth/LoginPage.tsx
+#: src/features/auth/RegisterPage.tsx
+msgctxt "sy-pv5"
+msgid "Email"
+msgstr "Email"
+
+#: src/app/(admin)/admin/users/users-client.tsx
+msgctxt "ETRyBL"
+msgid "Rating"
+msgstr "Rating"
+
+#: src/app/(admin)/admin/users/users-client.tsx
+#: src/features/leaderboard/components/LeaderboardTable.tsx
+#: src/features/leaderboard/components/LeaderboardTopThree.tsx
+msgctxt "xLCZAR"
+msgid "Streak"
+msgstr "Streak"
+
+#: src/app/(admin)/admin/users/users-client.tsx
+#: src/features/admin/components/AdminChallengeList.tsx
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "tzMNF3"
+msgid "Status"
+msgstr "Status"
+
+#: src/app/(admin)/admin/users/users-client.tsx
+msgctxt "QlsDcr"
+msgid "Action"
+msgstr "Action"
+
+#: src/app/(admin)/admin/users/users-client.tsx
 msgctxt "6U4eIn"
 msgid "Unban"
 msgstr "Unban"
@@ -163,6 +237,7 @@ msgstr "Ban"
 
 #: src/app/(app)/challenges/error.tsx
 #: src/app/error.tsx
+#: src/app/global-error.tsx
 #: src/components/shared/offline-banner.tsx
 #: src/features/admin/components/AdminChallengeList.tsx
 #: src/features/admin/components/ManualChallengeCreator.tsx
@@ -177,6 +252,7 @@ msgstr "Something went wrong"
 
 #: src/app/(app)/challenges/error.tsx
 #: src/app/error.tsx
+#: src/app/global-error.tsx
 #: src/components/shared/offline-banner.tsx
 msgctxt "q5KjVi"
 msgid "Service temporarily unavailable. Please try again."
@@ -184,9 +260,16 @@ msgstr "Service temporarily unavailable. Please try again."
 
 #: src/app/(app)/challenges/error.tsx
 #: src/app/error.tsx
+#: src/app/global-error.tsx
 msgctxt "PWOCUB"
 msgid "Error ID: {digest}"
 msgstr "Error ID: {digest}"
+
+#: src/app/global-error.tsx
+#: src/components/shared/offline-banner.tsx
+msgctxt "FazwRl"
+msgid "Try again"
+msgstr "Try again"
 
 #: src/app/not-found.tsx
 msgctxt "CxbWUG"
@@ -255,6 +338,12 @@ msgid "AI Question Studio"
 msgstr "AI Question Studio"
 
 #: src/components/layout/AdminSidebar.tsx
+#: src/components/layout/Sidebar.tsx
+msgctxt "HyS0qp"
+msgid "Close sidebar"
+msgstr "Close sidebar"
+
+#: src/components/layout/AdminSidebar.tsx
 msgctxt "crL6uF"
 msgid "Admin Portal"
 msgstr "Admin Portal"
@@ -291,6 +380,7 @@ msgstr "Leaderboard"
 #: src/components/layout/Sidebar.tsx
 #: src/features/profile/components/ProfileScreen.tsx
 #: src/features/profile/ProfilePage.tsx
+#: src/features/profile/ProfileSettingsPage.tsx
 msgctxt "itPgxd"
 msgid "Profile"
 msgstr "Profile"
@@ -307,6 +397,7 @@ msgid "Navigation"
 msgstr "Navigation"
 
 #: src/components/layout/TopBar.tsx
+#: src/features/profile/components/ProfileScreen.tsx
 msgctxt "yZJxVS"
 msgid "Developer"
 msgstr "Developer"
@@ -497,15 +588,15 @@ msgctxt "P0YiQn"
 msgid "Fetching challenges, hang tight."
 msgstr "Fetching challenges, hang tight."
 
-#: src/components/shared/offline-banner.tsx
-msgctxt "vS1TVs"
-msgid "You are offline"
-msgstr "You are offline"
+#: src/components/ui/dialog.tsx
+msgctxt "rbrahO"
+msgid "Close"
+msgstr "Close"
 
-#: src/components/shared/offline-banner.tsx
-msgctxt "FazwRl"
-msgid "Try again"
-msgstr "Try again"
+#: src/components/ui/select.tsx
+msgctxt "724CrE"
+msgid "Select..."
+msgstr "Select..."
 
 #: src/features/admin/components/AdminChallengeList.tsx
 #: src/features/admin/components/ManualChallengeCreator.tsx
@@ -539,12 +630,6 @@ msgstr "Archived"
 msgctxt "IowmXh"
 msgid "Search challenges by title or category..."
 msgstr "Search challenges by title or category..."
-
-#: src/features/admin/components/AdminChallengeList.tsx
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "tzMNF3"
-msgid "Status"
-msgstr "Status"
 
 #: src/features/admin/components/AdminChallengeList.tsx
 msgctxt "tADQQm"
@@ -754,6 +839,11 @@ msgid "Challenge Management ({count})"
 msgstr "Challenge Management ({count})"
 
 #: src/features/admin/components/HealthPanel.tsx
+msgctxt "wr2Ttz"
+msgid "Loading health..."
+msgstr "Loading health..."
+
+#: src/features/admin/components/HealthPanel.tsx
 msgctxt "o9y8_n"
 msgid "Refreshing..."
 msgstr "Refreshing..."
@@ -836,14 +926,6 @@ msgstr "Challenge draft saved successfully."
 
 #: src/features/admin/components/ManualChallengeCreator.tsx
 #: src/features/admin/components/QuestionGeneratorStudio.tsx
-#: src/features/category/components/CategoryManagement.tsx
-#: src/features/profile/components/EditProfileForm.tsx
-msgctxt "cT0yxo"
-msgid "Validation failed"
-msgstr "Validation failed"
-
-#: src/features/admin/components/ManualChallengeCreator.tsx
-#: src/features/admin/components/QuestionGeneratorStudio.tsx
 msgctxt "iNMYvh"
 msgid "Failed to save challenge."
 msgstr "Failed to save challenge."
@@ -880,6 +962,11 @@ msgid "Challenge Title *"
 msgstr "Challenge Title *"
 
 #: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "tB1N7_"
+msgid "e.g. Race Condition in Distributed Cache Store"
+msgstr "e.g. Race Condition in Distributed Cache Store"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
 msgctxt "hYSRRp"
 msgid "Category *"
 msgstr "Category *"
@@ -900,6 +987,12 @@ msgstr "Difficulty *"
 msgctxt "c8rNZE"
 msgid "Select difficulty..."
 msgstr "Select difficulty..."
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "xVv8Lk"
+msgid "TypeScript"
+msgstr "TypeScript"
 
 #: src/features/admin/components/ManualChallengeCreator.tsx
 msgctxt "zQLEfz"
@@ -1002,6 +1095,11 @@ msgid "Reference Fix Explanation"
 msgstr "Reference Fix Explanation"
 
 #: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "CRlWkt"
+msgid "e.g. Wrapped balance decrement and update in an atomic transaction..."
+msgstr "e.g. Wrapped balance decrement and update in an atomic transaction..."
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
 msgctxt "rqcXTG"
 msgid "Progressive Socratic Hints"
 msgstr "Progressive Socratic Hints"
@@ -1019,10 +1117,20 @@ msgid "Canonical Root Cause Breakdown *"
 msgstr "Canonical Root Cause Breakdown *"
 
 #: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "fJZWYb"
+msgid "Explain the failure mechanism, event loop or state lifecycle that triggers the bug..."
+msgstr "Explain the failure mechanism, event loop or state lifecycle that triggers the bug..."
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
 #: src/features/admin/components/QuestionGeneratorStudio.tsx
 msgctxt "njurlR"
 msgid "Prevention Notes & Safeguards"
 msgstr "Prevention Notes & Safeguards"
+
+#: src/features/admin/components/ManualChallengeCreator.tsx
+msgctxt "5I-Veu"
+msgid "Recommended ESLint rules, architecture patterns, and regression tests..."
+msgstr "Recommended ESLint rules, architecture patterns, and regression tests..."
 
 #: src/features/admin/components/ManualChallengeCreator.tsx
 msgctxt "rbOe9R"
@@ -1075,9 +1183,19 @@ msgid "Scenario / Bug Topic Idea"
 msgstr "Scenario / Bug Topic Idea"
 
 #: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "Kapukd"
+msgid "e.g. Stale closure in WebSocket event listener causing state drops"
+msgstr "e.g. Stale closure in WebSocket event listener causing state drops"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
 msgctxt "JCQ4GG"
 msgid "Custom Instructions (Optional)"
 msgstr "Custom Instructions (Optional)"
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "0zYCg9"
+msgid "e.g. Include two helper files, focus on async race condition under high throughput..."
+msgstr "e.g. Include two helper files, focus on async race condition under high throughput..."
 
 #: src/features/admin/components/QuestionGeneratorStudio.tsx
 msgctxt "y8VKxi"
@@ -1155,6 +1273,11 @@ msgid "AI Agent Refinement Chat"
 msgstr "AI Agent Refinement Chat"
 
 #: src/features/admin/components/QuestionGeneratorStudio.tsx
+msgctxt "u6Or_T"
+msgid "e.g. Make the bug harder by adding an async timing hazard, or rewrite hints to be more subtle..."
+msgstr "e.g. Make the bug harder by adding an async timing hazard, or rewrite hints to be more subtle..."
+
+#: src/features/admin/components/QuestionGeneratorStudio.tsx
 msgctxt "UtjyCi"
 msgid "Refine Draft"
 msgstr "Refine Draft"
@@ -1190,6 +1313,16 @@ msgid "Avg Score per Category"
 msgstr "Avg Score per Category"
 
 #: src/features/auth/ForgotPasswordPage.tsx
+msgctxt "BPS7I2"
+msgid "Could not send reset link"
+msgstr "Could not send reset link"
+
+#: src/features/auth/ForgotPasswordPage.tsx
+msgctxt "HXsf9H"
+msgid "Failed to request password reset."
+msgstr "Failed to request password reset."
+
+#: src/features/auth/ForgotPasswordPage.tsx
 msgctxt "p-kmJg"
 msgid "Reset your password"
 msgstr "Reset your password"
@@ -1202,9 +1335,14 @@ msgstr "Enter your email and we'll send a reset link."
 #: src/features/auth/ForgotPasswordPage.tsx
 #: src/features/auth/LoginPage.tsx
 #: src/features/auth/RegisterPage.tsx
-msgctxt "sy-pv5"
-msgid "Email"
-msgstr "Email"
+msgctxt "VvR2rk"
+msgid "you@company.com"
+msgstr "you@company.com"
+
+#: src/features/auth/ForgotPasswordPage.tsx
+msgctxt "ptsEP6"
+msgid "Sending link..."
+msgstr "Sending link..."
 
 #: src/features/auth/ForgotPasswordPage.tsx
 msgctxt "DkQ5Q8"
@@ -1227,6 +1365,23 @@ msgid "Back to login"
 msgstr "Back to login"
 
 #: src/features/auth/LoginPage.tsx
+#: src/features/auth/RegisterPage.tsx
+msgctxt "zTKuw-"
+msgid "This password appeared in a data breach. Please choose another."
+msgstr "This password appeared in a data breach. Please choose another."
+
+#: src/features/auth/LoginPage.tsx
+msgctxt "nuWwea"
+msgid "Login failed"
+msgstr "Login failed"
+
+#: src/features/auth/LoginPage.tsx
+#: src/features/auth/RegisterPage.tsx
+msgctxt "Xkdnen"
+msgid "An unexpected error occurred."
+msgstr "An unexpected error occurred."
+
+#: src/features/auth/LoginPage.tsx
 msgctxt "UKxoV8"
 msgid "Welcome back"
 msgstr "Welcome back"
@@ -1235,6 +1390,12 @@ msgstr "Welcome back"
 msgctxt "pc0-8E"
 msgid "Log in to keep diagnosing."
 msgstr "Log in to keep diagnosing."
+
+#: src/features/auth/LoginPage.tsx
+#: src/features/auth/RegisterPage.tsx
+msgctxt "iQhFxR"
+msgid "Last used"
+msgstr "Last used"
 
 #: src/features/auth/LoginPage.tsx
 #: src/features/auth/RegisterPage.tsx
@@ -1255,6 +1416,17 @@ msgstr "Forgot password?"
 
 #: src/features/auth/LoginPage.tsx
 #: src/features/auth/RegisterPage.tsx
+msgctxt "SjPI1y"
+msgid "••••••••"
+msgstr "••••••••"
+
+#: src/features/auth/LoginPage.tsx
+msgctxt "AWVk03"
+msgid "Logging in..."
+msgstr "Logging in..."
+
+#: src/features/auth/LoginPage.tsx
+#: src/features/auth/RegisterPage.tsx
 #: src/features/landing/LandingPage.tsx
 msgctxt "odXlk8"
 msgid "Log in"
@@ -1271,6 +1443,11 @@ msgid "Create an account"
 msgstr "Create an account"
 
 #: src/features/auth/RegisterPage.tsx
+msgctxt "G7yB8N"
+msgid "Registration failed"
+msgstr "Registration failed"
+
+#: src/features/auth/RegisterPage.tsx
 msgctxt "yEH80I"
 msgid "Create your arena"
 msgstr "Create your arena"
@@ -1285,6 +1462,16 @@ msgstr "Start diagnosing real-world bugs."
 msgctxt "dOQCL8"
 msgid "Display name"
 msgstr "Display name"
+
+#: src/features/auth/RegisterPage.tsx
+msgctxt "CBo9Ag"
+msgid "Ada Lovelace"
+msgstr "Ada Lovelace"
+
+#: src/features/auth/RegisterPage.tsx
+msgctxt "v7Bl2J"
+msgid "Creating account..."
+msgstr "Creating account..."
 
 #: src/features/auth/RegisterPage.tsx
 msgctxt "huqKGl"
@@ -1918,22 +2105,11 @@ msgid "Solve challenges to earn a spot on the leaderboard."
 msgstr "Solve challenges to earn a spot on the leaderboard."
 
 #: src/features/leaderboard/components/LeaderboardTable.tsx
-msgctxt "EwRIOm"
-msgid "User"
-msgstr "User"
-
-#: src/features/leaderboard/components/LeaderboardTable.tsx
 #: src/features/leaderboard/components/LeaderboardTopThree.tsx
 #: src/features/profile/components/CategoryStrengthChart.tsx
 msgctxt "oLkLww"
 msgid "Score"
 msgstr "Score"
-
-#: src/features/leaderboard/components/LeaderboardTable.tsx
-#: src/features/leaderboard/components/LeaderboardTopThree.tsx
-msgctxt "xLCZAR"
-msgid "Streak"
-msgstr "Streak"
 
 #: src/features/leaderboard/components/LeaderboardTable.tsx
 msgctxt "Jjrc4P"
@@ -2241,6 +2417,46 @@ msgctxt "9fvgCl"
 msgid "Unlinking a provider only removes the connection — it never deletes your Debug Arena account or your challenge history."
 msgstr "Unlinking a provider only removes the connection — it never deletes your Debug Arena account or your challenge history."
 
+#: src/features/profile/components/ProfileScreen.tsx
+msgctxt "kyYf9Q"
+msgid "{points} pts"
+msgstr "{points} pts"
+
+#: src/features/profile/components/ProfileScreen.tsx
+msgctxt "uJ61dq"
+msgid "{count}-day streak"
+msgstr "{count}-day streak"
+
+#: src/features/profile/components/ProfileScreen.tsx
+msgctxt "RNnNfX"
+msgid "Member since {date}"
+msgstr "Member since {date}"
+
+#: src/features/profile/components/ProfileScreen.tsx
+msgctxt "7L86Z5"
+msgid "Member"
+msgstr "Member"
+
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "7HzkPo"
+msgid "Avg. Score"
+msgstr "Avg. Score"
+
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "kx2jkp"
+msgid "Avg. Time to Fix"
+msgstr "Avg. Time to Fix"
+
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "ZhWTfe"
+msgid "Challenges Solved"
+msgstr "Challenges Solved"
+
+#: src/features/profile/components/ProfileStats.tsx
+msgctxt "U-knM2"
+msgid "Hints Used"
+msgstr "Hints Used"
+
 #: src/features/profile/components/ProfileStats.tsx
 msgctxt "U86B6w"
 msgid "Stats"
@@ -2330,6 +2546,31 @@ msgstr "New-login events are flagged here so you can spot unexpected sessions. W
 msgctxt "dRDf_t"
 msgid "Solved by difficulty"
 msgstr "Solved by difficulty"
+
+#: src/features/profile/ProfilePage.tsx
+msgctxt "Hpb0Yw"
+msgid "Profile data is unavailable."
+msgstr "Profile data is unavailable."
+
+#: src/features/profile/ProfileSettingsPage.tsx
+msgctxt "ris6V6"
+msgid "Connected Accounts"
+msgstr "Connected Accounts"
+
+#: src/features/profile/ProfileSettingsPage.tsx
+msgctxt "X5rIjZ"
+msgid "Danger Zone"
+msgstr "Danger Zone"
+
+#: src/features/profile/ProfileSettingsPage.tsx
+msgctxt "Z3EDd9"
+msgid "Sessions"
+msgstr "Sessions"
+
+#: src/features/profile/ProfileSettingsPage.tsx
+msgctxt "xyXpWi"
+msgid "Settings sections"
+msgstr "Settings sections"
 
 #: src/features/results/components/ExplanationComparison.tsx
 msgctxt "MB7815"
