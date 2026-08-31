@@ -124,17 +124,26 @@ function computeAvgHints(submissions: Array<{ hintsUsed: number }>): string {
   return (total / submissions.length).toFixed(1);
 }
 
-function formatJoinedLabel(
+function formatJoinedDate(
   createdAt: Date | string | null | undefined
-): string {
+): string | null {
   if (!createdAt) {
-    return "Member";
+    return null;
   }
-  const formatted = new Date(createdAt).toLocaleDateString("en-US", {
+  return new Date(createdAt).toLocaleDateString("en-US", {
     month: "short",
     year: "numeric",
   });
-  return `Member since ${formatted}`;
+}
+
+function formatJoinedLabelLegacy(
+  createdAt: Date | string | null | undefined
+): string {
+  const d = formatJoinedDate(createdAt);
+  if (!d) {
+    return "Member";
+  }
+  return `Member since ${d}`;
 }
 
 function resolveHandleDisplay(
@@ -155,7 +164,7 @@ function resolveDisplayName(user: {
   name: string | null | undefined;
   username: string | null | undefined;
 }): string {
-  return user.displayName || user.name || user.username || "Developer";
+  return user.displayName || user.name || user.username || "";
 }
 
 function buildRecentSubmissions(
@@ -241,7 +250,8 @@ export function createProfileService(
     const avgScore = computeAvgScore(typedUser.submissions);
     const avgTimeMinutes = computeAvgTimeMinutes(typedUser.submissions);
     const avgHintsUsed = computeAvgHints(typedUser.submissions);
-    const joinedFormatted = formatJoinedLabel(typedUser.createdAt);
+    const joinedDate = formatJoinedDate(typedUser.createdAt);
+    const joinedFormatted = formatJoinedLabelLegacy(typedUser.createdAt);
     const handleDisplay = resolveHandleDisplay(
       typedUser.username,
       typedUser.email
@@ -285,10 +295,12 @@ export function createProfileService(
         image: typedUser.image || typedUser.avatarUrl,
         jobTitle: typedUser.jobTitle || "",
         joined: joinedFormatted,
+        joinedDate,
         name: displayName,
         points: totalPoints.toLocaleString(),
         rank: liveRank,
         streak: `${typedUser.streakCount}-day streak`,
+        streakCount: typedUser.streakCount ?? 0,
       },
       profileStats,
       radarData,

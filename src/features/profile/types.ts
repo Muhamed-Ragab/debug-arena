@@ -133,10 +133,12 @@ export interface UserProfileData {
     image?: string | null;
     jobTitle?: string;
     joined: string;
+    joinedDate: string | null;
     name: string;
     points: string;
     rank: string;
     streak: string;
+    streakCount: number;
   };
   profileStats: ProfileStat[];
   radarData: RadarPoint[];
