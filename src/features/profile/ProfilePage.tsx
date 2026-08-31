@@ -17,7 +17,7 @@ export function ProfilePage({ data }: Props) {
         <TopBar crumbs={[{ label: t("Arena") }, { label: t("Profile") }]} />
         <div className="flex flex-1 items-center justify-center">
           <p className="text-muted-foreground text-sm">
-            Profile data is unavailable.
+            {t("Profile data is unavailable.")}
           </p>
         </div>
       </div>

@@ -16,14 +16,13 @@ type SectionId = "profile" | "sessions" | "accounts" | "danger";
 
 const SECTIONS: {
   id: SectionId;
-  label: string;
   icon: typeof User;
   danger?: boolean;
 }[] = [
-  { icon: User, id: "profile", label: "Profile" },
-  { icon: MonitorSmartphone, id: "sessions", label: "Sessions" },
-  { icon: Link2, id: "accounts", label: "Connected Accounts" },
-  { danger: true, icon: ShieldAlert, id: "danger", label: "Danger Zone" },
+  { icon: User, id: "profile" },
+  { icon: MonitorSmartphone, id: "sessions" },
+  { icon: Link2, id: "accounts" },
+  { danger: true, icon: ShieldAlert, id: "danger" },
 ];
 
 function getNavClasses(isActive: boolean, danger?: boolean): string {
@@ -59,6 +58,21 @@ export function ProfileSettingsPage({
   const t = useExtracted();
   const [active, setActive] = useState<SectionId>("profile");
 
+  const getSectionLabel = (id: SectionId): string => {
+    switch (id) {
+      case "accounts":
+        return t("Connected Accounts");
+      case "danger":
+        return t("Danger Zone");
+      case "profile":
+        return t("Profile");
+      case "sessions":
+        return t("Sessions");
+      default:
+        return id;
+    }
+  };
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <TopBar crumbs={[{ label: t("Arena") }, { label: t("Settings") }]} />
@@ -66,10 +80,10 @@ export function ProfileSettingsPage({
       <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
         {/* Section nav */}
         <nav
-          aria-label="Settings sections"
+          aria-label={t("Settings sections")}
           className="shrink-0 space-y-1 border-border border-b bg-surface px-4 py-3 lg:w-55 lg:border-e lg:border-b-0 lg:px-3 lg:py-6"
         >
-          {SECTIONS.map(({ id, label, icon: Icon, danger }) => {
+          {SECTIONS.map(({ id, icon: Icon, danger }) => {
             const isActive = active === id;
             return (
               <Button
@@ -95,7 +109,7 @@ export function ProfileSettingsPage({
                   className={isActive && !danger ? "text-primary" : ""}
                   size={17}
                 />
-                <span>{label}</span>
+                <span>{getSectionLabel(id)}</span>
               </Button>
             );
           })}
