@@ -1,16 +1,12 @@
 "use client";
 
-import { isOfflineCause, isOfflineError, OFFLINE_MESSAGE } from "@/lib/offline";
+import { useExtracted } from "next-intl";
+import { isOfflineCause, isOfflineError } from "@/lib/offline";
 
 interface GlobalErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
 }
-
-const VARIANT_TITLE: Record<"offline" | "generic", string> = {
-  generic: "Something went wrong",
-  offline: "You are offline",
-};
 
 const VARIANT_CONTAINER: Record<"offline" | "generic", string> = {
   generic:
@@ -18,19 +14,6 @@ const VARIANT_CONTAINER: Record<"offline" | "generic", string> = {
   offline:
     "rounded-lg border border-amber-200 bg-amber-50 p-6 dark:border-amber-900 dark:bg-amber-950/30",
 };
-
-function getTitle(variant: "offline" | "generic"): string {
-  switch (variant) {
-    case "offline":
-      return VARIANT_TITLE.offline;
-    case "generic":
-      return VARIANT_TITLE.generic;
-    default: {
-      const exhaustive: never = variant;
-      return exhaustive;
-    }
-  }
-}
 
 function getContainerClass(variant: "offline" | "generic"): string {
   switch (variant) {
@@ -49,12 +32,16 @@ export default function GlobalError({
   error: boundaryError,
   reset,
 }: GlobalErrorProps) {
+  const t = useExtracted();
   const { cause } = boundaryError as Error & { cause?: unknown };
   const offline = isOfflineError(boundaryError) || isOfflineCause(cause);
 
   const variant: "offline" | "generic" = offline ? "offline" : "generic";
-  const message = offline ? OFFLINE_MESSAGE : "Something went wrong";
-  const title = getTitle(variant);
+  const title =
+    variant === "offline" ? t("You are offline") : t("Something went wrong");
+  const message = offline
+    ? t("Service temporarily unavailable. Please try again.")
+    : t("Something went wrong");
   const containerClass = getContainerClass(variant);
 
   const headingClass =
@@ -79,13 +66,13 @@ export default function GlobalError({
               onClick={reset}
               type="button"
             >
-              Try again
+              {t("Try again")}
             </button>
           </div>
           {boundaryError.digest !== undefined &&
           boundaryError.digest.length > 0 ? (
             <p className="mt-3 text-center text-muted-foreground text-xs">
-              Error ID: {boundaryError.digest}
+              {t("Error ID: {digest}", { digest: boundaryError.digest })}
             </p>
           ) : null}
         </div>

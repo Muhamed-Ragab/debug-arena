@@ -56,7 +56,7 @@ export function UserManagementClient({ initialUsers }: Props) {
     }
     if (result?.validationErrors) {
       setUsers(previous);
-      toast.error("Validation failed");
+      toast.error(t("Validation failed"));
       return;
     }
     toast.success(nextBanned ? t("Banned") : t("Active"));
@@ -79,12 +79,12 @@ export function UserManagementClient({ initialUsers }: Props) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-border border-b text-left text-muted-foreground">
-                <th className="px-3 py-2 font-medium">User</th>
-                <th className="px-3 py-2 font-medium">Email</th>
-                <th className="px-3 py-2 font-medium">Rating</th>
-                <th className="px-3 py-2 font-medium">Streak</th>
-                <th className="px-3 py-2 font-medium">Status</th>
-                <th className="px-3 py-2 font-medium">Action</th>
+                <th className="px-3 py-2 font-medium">{t("User")}</th>
+                <th className="px-3 py-2 font-medium">{t("Email")}</th>
+                <th className="px-3 py-2 font-medium">{t("Rating")}</th>
+                <th className="px-3 py-2 font-medium">{t("Streak")}</th>
+                <th className="px-3 py-2 font-medium">{t("Status")}</th>
+                <th className="px-3 py-2 font-medium">{t("Action")}</th>
               </tr>
             </thead>
             <tbody>

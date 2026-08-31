@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getExtracted } from "next-intl/server";
 import { AdminQuestionsPage } from "@/features/admin/components/AdminQuestionsPage";
 import { adminService } from "@/features/admin/service";
 import { listAdminChallengesQuerySchema } from "@/features/admin/validation";
@@ -26,6 +27,7 @@ export default async function AdminQuestionsRoute({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const t = await getExtracted();
   try {
     const sp = await searchParams;
     const parsed = listAdminChallengesQuerySchema.safeParse({
@@ -67,26 +69,27 @@ export default async function AdminQuestionsRoute({
   } catch (err) {
     const offline = isOfflineError(err) || isOfflineCause(err);
     const message =
-      err instanceof Error ? err.message : "Failed to load admin data";
+      err instanceof Error ? err.message : t("Failed to load admin data");
     return (
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-6">
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 dark:border-amber-900 dark:bg-amber-950/30">
           <h2 className="font-semibold text-amber-900 dark:text-amber-100">
-            {offline ? "You are offline" : "Failed to load"}
+            {offline ? t("You are offline") : t("Failed to load")}
           </h2>
           <p className="mt-1 text-amber-800 text-sm dark:text-amber-200">
             {message}
           </p>
           {offline ? (
             <p className="mt-2 text-amber-700 text-sm dark:text-amber-300">
-              Database and AI services require an internet connection. Reconnect
-              and refresh the page — already-generated drafts and the studio UI
-              remain available locally.
+              {t(
+                "Database and AI services require an internet connection. Reconnect and refresh the page — already-generated drafts and the studio UI remain available locally."
+              )}
             </p>
           ) : null}
           <p className="mt-3 text-muted-foreground text-xs">
-            Check: Wi-Fi / VPN, then retry. Server stays running — no restart
-            needed.
+            {t(
+              "Check: Wi-Fi / VPN, then retry. Server stays running — no restart needed."
+            )}
           </p>
         </div>
         <AdminQuestionsPage categories={[]} challenges={[]} />
