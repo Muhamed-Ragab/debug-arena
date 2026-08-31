@@ -61,10 +61,10 @@ export function LoginPage() {
       if (signInError) {
         if (signInError.code === "PASSWORD_COMPROMISED") {
           setError(
-            "This password appeared in a data breach. Please choose another."
+            t("This password appeared in a data breach. Please choose another.")
           );
         } else {
-          setError(signInError.message ?? "Login failed");
+          setError(signInError.message ?? t("Login failed"));
         }
         return;
       }
@@ -81,7 +81,7 @@ export function LoginPage() {
         router.push((callbackUrl ?? "/challenges") as Route);
       }
     } catch {
-      setError("An unexpected error occurred.");
+      setError(t("An unexpected error occurred."));
     } finally {
       setLoading(false);
     }
@@ -129,7 +129,7 @@ export function LoginPage() {
                 GitHub
                 {lastMethod === "github" && (
                   <Badge className="absolute -inset-e-2 -top-2 text-[10px]">
-                    Last used
+                    {t("Last used")}
                   </Badge>
                 )}
               </Button>
@@ -152,7 +152,7 @@ export function LoginPage() {
                 Google
                 {lastMethod === "google" && (
                   <Badge className="absolute -inset-e-2 -top-2 text-[10px]">
-                    Last used
+                    {t("Last used")}
                   </Badge>
                 )}
               </Button>
@@ -177,7 +177,7 @@ export function LoginPage() {
                     className="h-10 ps-10 pe-3"
                     id="email"
                     name="email"
-                    placeholder="you@company.com"
+                    placeholder={t("you@company.com")}
                     type="email"
                   />
                 </div>
@@ -203,7 +203,7 @@ export function LoginPage() {
                     className="h-10 ps-10 pe-3"
                     id="password"
                     name="password"
-                    placeholder="••••••••"
+                    placeholder={t("••••••••")}
                     type="password"
                   />
                 </div>
@@ -222,11 +222,11 @@ export function LoginPage() {
                 type="submit"
                 variant="default"
               >
-                {loading ? "Logging in..." : t("Log in")}
+                {loading ? t("Logging in...") : t("Log in")}
                 <ArrowRight size={16} />
                 {lastMethod === "email" && (
                   <Badge className="ms-2" variant="secondary">
-                    Last used
+                    {t("Last used")}
                   </Badge>
                 )}
               </Button>

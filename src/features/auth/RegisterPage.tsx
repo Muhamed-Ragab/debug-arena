@@ -62,10 +62,10 @@ export function RegisterPage() {
       if (signUpError) {
         if (signUpError.code === "PASSWORD_COMPROMISED") {
           setError(
-            "This password appeared in a data breach. Please choose another."
+            t("This password appeared in a data breach. Please choose another.")
           );
         } else {
-          setError(signUpError.message ?? "Registration failed");
+          setError(signUpError.message ?? t("Registration failed"));
         }
         return;
       }
@@ -82,7 +82,7 @@ export function RegisterPage() {
         router.push((callbackUrl ?? "/challenges") as Route);
       }
     } catch {
-      setError("An unexpected error occurred.");
+      setError(t("An unexpected error occurred."));
     } finally {
       setLoading(false);
     }
@@ -130,7 +130,7 @@ export function RegisterPage() {
                 GitHub
                 {lastMethod === "github" && (
                   <Badge className="absolute -inset-e-2 -top-2 text-[10px]">
-                    Last used
+                    {t("Last used")}
                   </Badge>
                 )}
               </Button>
@@ -153,7 +153,7 @@ export function RegisterPage() {
                 Google
                 {lastMethod === "google" && (
                   <Badge className="absolute -inset-e-2 -top-2 text-[10px]">
-                    Last used
+                    {t("Last used")}
                   </Badge>
                 )}
               </Button>
@@ -178,7 +178,7 @@ export function RegisterPage() {
                     className="h-10 ps-10 pe-3"
                     id="name"
                     name="name"
-                    placeholder="Ada Lovelace"
+                    placeholder={t("Ada Lovelace")}
                     type="text"
                   />
                 </div>
@@ -196,7 +196,7 @@ export function RegisterPage() {
                     className="h-10 ps-10 pe-3"
                     id="email"
                     name="email"
-                    placeholder="you@company.com"
+                    placeholder={t("you@company.com")}
                     type="email"
                   />
                 </div>
@@ -214,7 +214,7 @@ export function RegisterPage() {
                     className="h-10 ps-10 pe-3"
                     id="password"
                     name="password"
-                    placeholder="••••••••"
+                    placeholder={t("••••••••")}
                     type="password"
                   />
                 </div>
@@ -233,11 +233,11 @@ export function RegisterPage() {
                 type="submit"
                 variant="default"
               >
-                {loading ? "Creating account..." : t("Create account")}
+                {loading ? t("Creating account...") : t("Create account")}
                 <ArrowRight size={16} />
                 {lastMethod === "email" && (
                   <Badge className="ms-2" variant="secondary">
-                    Last used
+                    {t("Last used")}
                   </Badge>
                 )}
               </Button>

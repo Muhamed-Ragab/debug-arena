@@ -31,12 +31,12 @@ export function ForgotPasswordPage() {
         redirectTo: `${typeof window === "undefined" ? "" : window.location.origin}/login`,
       });
       if (resetError) {
-        setError(resetError.message ?? "Could not send reset link");
+        setError(resetError.message ?? t("Could not send reset link"));
         return;
       }
       setSent(true);
     } catch {
-      setError("Failed to request password reset.");
+      setError(t("Failed to request password reset."));
     } finally {
       setLoading(false);
     }
@@ -77,7 +77,7 @@ export function ForgotPasswordPage() {
                     className="h-10 ps-10 pe-3"
                     id="email"
                     name="email"
-                    placeholder="you@company.com"
+                    placeholder={t("you@company.com")}
                     type="email"
                   />
                 </div>
@@ -89,7 +89,7 @@ export function ForgotPasswordPage() {
                 size="lg"
                 type="submit"
               >
-                {loading ? "Sending link..." : t("Send reset link")}
+                {loading ? t("Sending link...") : t("Send reset link")}
                 <ArrowRight size={16} />
               </Button>
 
