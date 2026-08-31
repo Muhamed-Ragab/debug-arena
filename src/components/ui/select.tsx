@@ -2,6 +2,7 @@
 
 import { Select as SelectPrimitive } from "@base-ui/react/select";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { useExtracted } from "next-intl";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
@@ -221,10 +222,12 @@ export function SimpleSelect({
   options,
   value,
   onValueChange,
-  placeholder = "Select...",
+  placeholder,
   disabled = false,
   className,
 }: SimpleSelectProps) {
+  const t = useExtracted();
+  const effectivePlaceholder = placeholder ?? t("Select...");
   const selectedOption = options.find((opt) => opt.value === value);
 
   return (
@@ -234,7 +237,7 @@ export function SimpleSelect({
       value={value}
     >
       <SelectTrigger className={cn("w-full", className)}>
-        <SelectValue placeholder={placeholder}>
+        <SelectValue placeholder={effectivePlaceholder}>
           {selectedOption ? (
             <span className="flex items-center gap-2 truncate">
               {Boolean(selectedOption.indicatorColor) && (
@@ -249,7 +252,7 @@ export function SimpleSelect({
               <span className="truncate">{selectedOption.label}</span>
             </span>
           ) : (
-            placeholder
+            effectivePlaceholder
           )}
         </SelectValue>
       </SelectTrigger>
