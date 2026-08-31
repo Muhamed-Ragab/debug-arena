@@ -106,13 +106,13 @@ export function CodeViewer({
                   >
                     {n}
                   </td>
-                  <td className="py-[2.5px] ps-2 pe-6 text-[12.5px] transition-colors whitespace-pre">
-                    {tokens.map((t) => (
+                  <td className="whitespace-pre py-[2.5px] ps-2 pe-6 text-[12.5px] transition-colors">
+                    {tokens.map((token) => (
                       <span
-                        key={t.id}
-                        style={{ color: selected ? cfg.color : t.color }}
+                        key={token.id}
+                        style={{ color: selected ? cfg.color : token.color }}
                       >
-                        {t.text}
+                        {token.text}
                       </span>
                     ))}
                   </td>

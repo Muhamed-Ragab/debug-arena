@@ -13,8 +13,17 @@ export default getRequestConfig(async ({ requestLocale }) => {
     locale = routing.defaultLocale;
   }
 
+  if (locale === "ar") {
+    try {
+      const messages = (await import("../../messages/ar.po")).default;
+      return { locale, messages };
+    } catch {
+      const messages = (await import("../../messages/en.po")).default;
+      return { locale: routing.defaultLocale, messages };
+    }
+  }
   try {
-    const messages = (await import(`../../messages/${locale}.po`)).default;
+    const messages = (await import("../../messages/en.po")).default;
     return { locale, messages };
   } catch {
     const messages = (await import("../../messages/en.po")).default;

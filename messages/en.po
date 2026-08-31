@@ -1393,6 +1393,56 @@ msgid "Select Level"
 msgstr "Select Level"
 
 #: src/features/category/components/CategoryManagement.tsx
+msgctxt "HAlOn1"
+msgid "Name"
+msgstr "Name"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "IoDlcd"
+msgid "Slug"
+msgstr "Slug"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "kk4TVW"
+msgid "Icon"
+msgstr "Icon"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "uMhpKe"
+msgid "Color"
+msgstr "Color"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "3LXmOC"
+msgid "Sort order"
+msgstr "Sort order"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "6Tps09"
+msgid "Inactive"
+msgstr "Inactive"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "s3IOQQ"
+msgid "Edit {name}"
+msgstr "Edit {name}"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "JpsXCp"
+msgid "Delete {name}"
+msgstr "Delete {name}"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "VuuMkj"
+msgid "No categories yet — create one"
+msgstr "No categories yet — create one"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "LWGsgA"
+msgid "No categories matching filter."
+msgstr "No categories matching filter."
+
+#: src/features/category/components/CategoryManagement.tsx
 msgctxt "suk_ol"
 msgid "Name must be at least 2 characters"
 msgstr "Name must be at least 2 characters"
@@ -1481,56 +1531,6 @@ msgstr "Active only"
 msgctxt "PCQhDD"
 msgid "Inactive only"
 msgstr "Inactive only"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "HAlOn1"
-msgid "Name"
-msgstr "Name"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "IoDlcd"
-msgid "Slug"
-msgstr "Slug"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "kk4TVW"
-msgid "Icon"
-msgstr "Icon"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "uMhpKe"
-msgid "Color"
-msgstr "Color"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "3LXmOC"
-msgid "Sort order"
-msgstr "Sort order"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "6Tps09"
-msgid "Inactive"
-msgstr "Inactive"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "s3IOQQ"
-msgid "Edit {name}"
-msgstr "Edit {name}"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "JpsXCp"
-msgid "Delete {name}"
-msgstr "Delete {name}"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "VuuMkj"
-msgid "No categories yet — create one"
-msgstr "No categories yet — create one"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "LWGsgA"
-msgid "No categories matching filter."
-msgstr "No categories matching filter."
 
 #: src/features/category/components/CategoryManagement.tsx
 msgctxt "L2AzSY"

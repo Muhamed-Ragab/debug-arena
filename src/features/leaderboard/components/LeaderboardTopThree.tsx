@@ -18,8 +18,8 @@ const MEDAL_ACCENT: Record<number, string> = {
 function TopThreeCard({ entry }: { entry: LeaderboardEntry }) {
   const t = useExtracted();
 
-  const getCategoryLabel = (category: Category): string => {
-    switch (category) {
+  const getCategoryLabel = (categoryName: Category): string => {
+    switch (categoryName) {
       case "Backend Concurrency":
         return t("Backend Concurrency");
       case "Logic Inversions":
@@ -37,7 +37,7 @@ function TopThreeCard({ entry }: { entry: LeaderboardEntry }) {
       case "State Mutations":
         return t("State Mutations");
       default:
-        return category;
+        return categoryName;
     }
   };
 

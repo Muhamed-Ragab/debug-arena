@@ -23,6 +23,12 @@ interface AdminQuestionsPageProps {
   challenges: AdminChallengeItem[];
   initialChallenges?: AdminChallengeItem[];
   initialTotal?: number;
+  stats?: {
+    aiGenerated: number;
+    draft: number;
+    published: number;
+    total: number;
+  };
 }
 
 export function AdminQuestionsPage({
@@ -30,6 +36,7 @@ export function AdminQuestionsPage({
   challenges,
   initialChallenges,
   initialTotal,
+  stats,
 }: AdminQuestionsPageProps) {
   const t = useExtracted();
   const router = useRouter();
@@ -37,14 +44,15 @@ export function AdminQuestionsPage({
     "studio"
   );
 
-  const totalChallenges = initialTotal ?? challenges.length;
-  const aiGeneratedCount = challenges.filter(
-    (c) => c.source === "ai_generated"
-  ).length;
-  const publishedCount = challenges.filter(
-    (c) => c.status === "published"
-  ).length;
-  const draftCount = challenges.filter((c) => c.status === "draft").length;
+  const totalChallenges = stats?.total ?? initialTotal ?? challenges.length;
+  const aiGeneratedCount =
+    stats?.aiGenerated ??
+    challenges.filter((c) => c.source === "ai_generated").length;
+  const publishedCount =
+    stats?.published ??
+    challenges.filter((c) => c.status === "published").length;
+  const draftCount =
+    stats?.draft ?? challenges.filter((c) => c.status === "draft").length;
 
   const handleRefresh = () => {
     router.refresh();

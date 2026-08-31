@@ -16,35 +16,39 @@ const {
   mockUpdateSet,
   mockUpdateWhere,
 } = vi.hoisted(() => {
-  const mockFindMany = vi.fn();
-  const mockFindFirst = vi.fn();
-  const mockInsertReturning = vi.fn();
-  const mockInsertValues = vi.fn(() => ({ returning: mockInsertReturning }));
-  const mockUpdateReturning = vi.fn();
-  const mockUpdateWhere = vi.fn(() => ({ returning: mockUpdateReturning }));
-  const mockUpdateSet = vi.fn(() => ({ where: mockUpdateWhere }));
-  const mockDeleteWhere = vi.fn().mockResolvedValue(undefined);
-  const mockSelectWhere = vi.fn();
-  const mockSelectFrom = vi.fn(() => ({ where: mockSelectWhere }));
-  const mockInsertFn = vi.fn(() => ({ values: mockInsertValues }));
-  const mockUpdateFn = vi.fn(() => ({ set: mockUpdateSet }));
-  const mockDeleteFn = vi.fn(() => ({ where: mockDeleteWhere }));
-  const mockSelectFn = vi.fn(() => ({ from: mockSelectFrom }));
+  const hoistedFindMany = vi.fn();
+  const hoistedFindFirst = vi.fn();
+  const hoistedInsertReturning = vi.fn();
+  const hoistedInsertValues = vi.fn(() => ({
+    returning: hoistedInsertReturning,
+  }));
+  const hoistedUpdateReturning = vi.fn();
+  const hoistedUpdateWhere = vi.fn(() => ({
+    returning: hoistedUpdateReturning,
+  }));
+  const hoistedUpdateSet = vi.fn(() => ({ where: hoistedUpdateWhere }));
+  const hoistedDeleteWhere = vi.fn().mockResolvedValue(undefined);
+  const hoistedSelectWhere = vi.fn();
+  const hoistedSelectFrom = vi.fn(() => ({ where: hoistedSelectWhere }));
+  const hoistedInsertFn = vi.fn(() => ({ values: hoistedInsertValues }));
+  const hoistedUpdateFn = vi.fn(() => ({ set: hoistedUpdateSet }));
+  const hoistedDeleteFn = vi.fn(() => ({ where: hoistedDeleteWhere }));
+  const hoistedSelectFn = vi.fn(() => ({ from: hoistedSelectFrom }));
   return {
-    mockDeleteFn,
-    mockDeleteWhere,
-    mockFindFirst,
-    mockFindMany,
-    mockInsertFn,
-    mockInsertReturning,
-    mockInsertValues,
-    mockSelectFn,
-    mockSelectFrom,
-    mockSelectWhere,
-    mockUpdateFn,
-    mockUpdateReturning,
-    mockUpdateSet,
-    mockUpdateWhere,
+    mockDeleteFn: hoistedDeleteFn,
+    mockDeleteWhere: hoistedDeleteWhere,
+    mockFindFirst: hoistedFindFirst,
+    mockFindMany: hoistedFindMany,
+    mockInsertFn: hoistedInsertFn,
+    mockInsertReturning: hoistedInsertReturning,
+    mockInsertValues: hoistedInsertValues,
+    mockSelectFn: hoistedSelectFn,
+    mockSelectFrom: hoistedSelectFrom,
+    mockSelectWhere: hoistedSelectWhere,
+    mockUpdateFn: hoistedUpdateFn,
+    mockUpdateReturning: hoistedUpdateReturning,
+    mockUpdateSet: hoistedUpdateSet,
+    mockUpdateWhere: hoistedUpdateWhere,
   };
 });
 

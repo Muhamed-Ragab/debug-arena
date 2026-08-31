@@ -197,6 +197,55 @@ export function ManualChallengeCreator({
     }
   };
 
+  function buildManualPayload(args: {
+    buggyFiles: ChallengeFile[];
+    buggyLines: [number, number];
+    categorySlug: string;
+    computedDiff: DiffLine[];
+    difficulty: "easy" | "medium" | "hard";
+    entryBuggy: ChallengeFile | undefined;
+    fixedFiles: ChallengeFile[];
+    fixExplanation: string;
+    format: "code_snippet" | "log_only" | "ui_recording";
+    hiddenTests: ChallengeHiddenTest[];
+    hints: ChallengeHint[];
+    language: string;
+    points: number;
+    preventionNotes: string;
+    prompt: string;
+    rootCauseSummary: string;
+    status: "draft" | "published";
+    timeLimit: string;
+    title: string;
+  }): Record<string, unknown> {
+    return {
+      buggyArtifact: {
+        buggyLines: args.buggyLines,
+        entryFile: args.entryBuggy?.name ?? "App.tsx",
+        files: args.buggyFiles,
+        language: args.language,
+        points: args.points,
+        timeLimit: args.timeLimit,
+      },
+      categorySlug: args.categorySlug,
+      difficulty: args.difficulty,
+      format: args.format,
+      hiddenTests: args.hiddenTests,
+      hints: args.hints,
+      preventionNotes: args.preventionNotes,
+      prompt: args.prompt,
+      referenceFix: {
+        diff: args.computedDiff,
+        explanation: args.fixExplanation,
+        files: args.fixedFiles,
+      },
+      rootCauseSummary: args.rootCauseSummary,
+      source: "manual",
+      status: args.status,
+      title: args.title,
+    };
+  }
+
   const validateChallenge = (): string | null => {
     if (!title.trim()) {
       return t("Challenge title is required.");
@@ -210,13 +259,116 @@ export function ManualChallengeCreator({
     return null;
   };
 
+  function getComputedDiffForSave(
+    existingDiff: DiffLine[],
+    buggyEntry: ChallengeFile | undefined,
+    fixedEntry: ChallengeFile | undefined
+  ): DiffLine[] {
+    if (existingDiff.length > 0) {
+      return existingDiff;
+    }
+    if (buggyEntry && fixedEntry) {
+      return computeUnifiedDiff(buggyEntry.code, fixedEntry.code);
+    }
+    return [];
+  }
+
+  function isSuccessfulSaveResponse(res: unknown): boolean {
+    if (res === null || typeof res !== "object" || !("data" in res)) {
+      return false;
+    }
+    const { data } = res as {
+      data?: { success?: boolean; challengeId?: string };
+    };
+    return Boolean(data?.success && data.challengeId);
+  }
+
+  function extractChallengeId(res: unknown): string | null {
+    if (res === null || typeof res !== "object" || !("data" in res)) {
+      return null;
+    }
+    const { data } = res as { data?: { challengeId?: string } };
+    return data?.challengeId ?? null;
+  }
+
+  function getFirstValidationMessage(
+    flat: Record<string, string | undefined>
+  ): string {
+    return (
+      flat.title ??
+      flat.prompt ??
+      flat.rootCauseSummary ??
+      flat.categorySlug ??
+      flat.difficulty ??
+      flat._errors ??
+      "Validation failed"
+    );
+  }
+
+  function handleValidationFailure(
+    res: unknown,
+    setFieldErrorsFn: (v: Record<string, string | undefined>) => void,
+    setServerErrorFn: (v: string | null) => void
+  ): boolean {
+    if (
+      res === null ||
+      typeof res !== "object" ||
+      !("validationErrors" in res)
+    ) {
+      return false;
+    }
+    const { validationErrors } = res as { validationErrors?: unknown };
+    if (!validationErrors) {
+      return false;
+    }
+    const flat = flattenValidationErrors(validationErrors);
+    setFieldErrorsFn(flat);
+    const first = getFirstValidationMessage(flat);
+    setServerErrorFn(first);
+    return true;
+  }
+
+  function handleServerFailure(
+    res: unknown,
+    setFieldErrorsFn: (
+      updater: (
+        prev: Record<string, string | undefined>
+      ) => Record<string, string | undefined>
+    ) => void,
+    setServerErrorFn: (v: string | null) => void
+  ): string | null {
+    if (res === null || typeof res !== "object" || !("serverError" in res)) {
+      return null;
+    }
+    const { serverError: responseServerError } = res as {
+      serverError?: string;
+    };
+    if (!responseServerError) {
+      return null;
+    }
+    setServerErrorFn(responseServerError);
+    const lower = responseServerError.toLowerCase();
+    if (lower.includes("category") && lower.includes("slug")) {
+      setFieldErrorsFn((prev) => ({
+        ...prev,
+        categorySlug: responseServerError,
+      }));
+    }
+    if (lower.includes("title")) {
+      setFieldErrorsFn((prev) => ({
+        ...prev,
+        title: responseServerError,
+      }));
+    }
+    return responseServerError;
+  }
+
   const handleSave = async (status: "draft" | "published") => {
     const validationError = validateChallenge();
     if (validationError) {
       toast.error(validationError);
       return;
     }
-
     setIsSaving(true);
     setServerError(null);
     setFieldErrors({});
@@ -224,42 +376,40 @@ export function ManualChallengeCreator({
       const entryBuggy = buggyFiles.find((f) => f.isEntry) || buggyFiles[0];
       const entryFixed =
         fixedFiles.find((f) => f.name === entryBuggy?.name) || fixedFiles[0];
-      let computedDiff: DiffLine[] = [];
-      if (diffLines.length > 0) {
-        computedDiff = diffLines;
-      } else if (entryBuggy && entryFixed) {
-        computedDiff = computeUnifiedDiff(entryBuggy.code, entryFixed.code);
-      }
-
-      const res = await saveAdminChallengeAction({
-        buggyArtifact: {
-          buggyLines,
-          entryFile: entryBuggy.name,
-          files: buggyFiles,
-          language,
-          points,
-          timeLimit,
-        },
+      const computedDiff = getComputedDiffForSave(
+        diffLines,
+        entryBuggy,
+        entryFixed
+      );
+      const payload = buildManualPayload({
+        buggyFiles,
+        buggyLines,
         categorySlug,
+        computedDiff,
         difficulty,
+        entryBuggy,
+        fixExplanation,
+        fixedFiles,
         format,
         hiddenTests,
         hints,
+        language,
+        points,
         preventionNotes,
         prompt,
-        referenceFix: {
-          diff: computedDiff,
-          explanation: fixExplanation,
-          files: fixedFiles,
-        },
         rootCauseSummary,
-        source: "manual",
         status,
+        timeLimit,
         title,
       });
-
-      if (res?.data?.success && res.data.challengeId) {
-        setPublishedId(res.data.challengeId);
+      const res = await saveAdminChallengeAction(
+        payload as unknown as Parameters<typeof saveAdminChallengeAction>[0]
+      );
+      if (isSuccessfulSaveResponse(res)) {
+        const challengeId = extractChallengeId(res);
+        if (challengeId) {
+          setPublishedId(challengeId);
+        }
         setServerError(null);
         toast.success(
           status === "published"
@@ -267,40 +417,23 @@ export function ManualChallengeCreator({
             : t("Challenge draft saved successfully.")
         );
         onChallengeSaved?.();
-      } else if (res?.validationErrors) {
-        const flat = flattenValidationErrors(res.validationErrors);
-        setFieldErrors(flat);
-        const first =
-          flat.title ??
-          flat.prompt ??
-          flat.rootCauseSummary ??
-          flat.categorySlug ??
-          flat.difficulty ??
-          flat._errors ??
-          "Validation failed";
-        setServerError(first);
-        toast.error(t("Validation failed"));
-      } else if (res?.serverError) {
-        setServerError(res.serverError);
-        toast.error(res.serverError);
-        // map known Conflict/NotFound to fieldErrors where applicable
-        const lower = res.serverError.toLowerCase();
-        if (lower.includes("category") && lower.includes("slug")) {
-          setFieldErrors((prev) => ({
-            ...prev,
-            categorySlug: res.serverError as string,
-          }));
-        }
-        if (lower.includes("title")) {
-          setFieldErrors((prev) => ({
-            ...prev,
-            title: res.serverError as string,
-          }));
-        }
-      } else {
-        setServerError(t("Something went wrong"));
-        toast.error(t("Something went wrong"));
+        return;
       }
+      if (handleValidationFailure(res, setFieldErrors, setServerError)) {
+        toast.error(t("Validation failed"));
+        return;
+      }
+      const serverMessage = handleServerFailure(
+        res,
+        setFieldErrors,
+        setServerError
+      );
+      if (serverMessage) {
+        toast.error(serverMessage);
+        return;
+      }
+      setServerError(t("Something went wrong"));
+      toast.error(t("Something went wrong"));
     } catch (err) {
       console.error(err);
       toast.error(t("Failed to save challenge."));

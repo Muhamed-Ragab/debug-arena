@@ -43,7 +43,7 @@ export function LoginPage() {
     if (isPending || !session) {
       return;
     }
-    const role = session.user.role;
+    const { role } = session.user;
     const target = callbackUrl ?? (role === "admin" ? "/admin" : "/challenges");
     router.replace(target as Route);
   }, [session, isPending, callbackUrl, router]);
@@ -70,7 +70,9 @@ export function LoginPage() {
       }
       try {
         const sessionRes = await authClient.getSession();
-        const sessionRole = sessionRes.data?.user?.role;
+        const { role: sessionRole } = sessionRes.data?.user ?? {
+          role: undefined,
+        };
         const target =
           callbackUrl ?? (sessionRole === "admin" ? "/admin" : "/challenges");
         router.push(target as Route);

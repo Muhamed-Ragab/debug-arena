@@ -23,8 +23,21 @@ export function LanguageSwitcher() {
 
   const current = LANGS.find((l) => l.code === locale)?.label ?? locale;
 
-  const switchTo = (code: "en" | "ar") => {
-    document.cookie = `NEXT_LOCALE=${code}; path=/; max-age=31536000`;
+  const switchTo = async (code: "en" | "ar") => {
+    if (
+      typeof window !== "undefined" &&
+      "cookieStore" in window &&
+      window.cookieStore?.set
+    ) {
+      await window.cookieStore.set({
+        expires: Date.now() + 31_536_000_000,
+        name: "NEXT_LOCALE",
+        path: "/",
+        value: code,
+      });
+    } else {
+      document.cookie = `NEXT_LOCALE=${code}; path=/; max-age=31536000`;
+    }
     router.refresh();
   };
 

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { hasConsentForLastLogin } from "@/lib/consent/hasConsent";
 
 describe("consent gate for lastLoginMethod", () => {
-  it("beforeStoreCookie returns false when no consent", async () => {
+  it("beforeStoreCookie returns false when no consent", () => {
     const header = "";
     expect(hasConsentForLastLogin(header)).toBe(false);
   });

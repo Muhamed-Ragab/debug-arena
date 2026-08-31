@@ -236,79 +236,95 @@ function getTimeLimitByDifficulty(diff: "easy" | "medium" | "hard"): string {
   return "20 min";
 }
 
+function normalizeFileEntries(files: unknown): unknown {
+  if (!Array.isArray(files)) {
+    return files;
+  }
+  return (files as unknown[]).map((file) => {
+    if (file === null || file === undefined || typeof file !== "object") {
+      return file;
+    }
+    const fileObj = file as Record<string, unknown>;
+    if (fileObj.isEntry === undefined) {
+      return { ...fileObj, isEntry: false };
+    }
+    return fileObj;
+  });
+}
+
+function coerceBuggyArtifactField(value: unknown): unknown {
+  if (value === null || value === undefined || typeof value !== "object") {
+    return value;
+  }
+  const ba = value as Record<string, unknown>;
+  const baCopy: Record<string, unknown> = { ...ba };
+  if (baCopy.buggyLines === undefined) {
+    baCopy.buggyLines = null;
+  }
+  if (baCopy.points === undefined) {
+    baCopy.points = null;
+  }
+  if (baCopy.timeLimit === undefined) {
+    baCopy.timeLimit = null;
+  }
+  if (Array.isArray(baCopy.files)) {
+    baCopy.files = normalizeFileEntries(baCopy.files);
+  }
+  return baCopy;
+}
+
+function coerceReferenceFixField(value: unknown): unknown {
+  if (value === undefined) {
+    return null;
+  }
+  if (value === null || typeof value !== "object") {
+    return value;
+  }
+  const rf = value as Record<string, unknown>;
+  const rfCopy: Record<string, unknown> = { ...rf };
+  if (rfCopy.diff === undefined) {
+    rfCopy.diff = null;
+  }
+  if (rfCopy.explanation === undefined) {
+    rfCopy.explanation = null;
+  }
+  if (rfCopy.files === undefined) {
+    rfCopy.files = null;
+  }
+  return rfCopy;
+}
+
+function applyNullableDefaults(target: Record<string, unknown>): void {
+  const nullableKeys = [
+    "categorySlug",
+    "hiddenTests",
+    "hints",
+    "preventionNotes",
+    "rootCauseSummary",
+  ] as const;
+  for (const key of nullableKeys) {
+    if (target[key] === undefined) {
+      target[key] = null;
+    }
+  }
+}
+
 function coerceRawInput(raw: unknown): unknown {
   if (raw === null || raw === undefined || typeof raw !== "object") {
     return raw;
   }
   const obj = raw as Record<string, unknown>;
   const copy: Record<string, unknown> = { ...obj };
-
+  const buggyArtifactValue = copy.buggyArtifact;
   if (
-    copy.buggyArtifact !== null &&
-    copy.buggyArtifact !== undefined &&
-    typeof copy.buggyArtifact === "object"
+    buggyArtifactValue !== null &&
+    buggyArtifactValue !== undefined &&
+    typeof buggyArtifactValue === "object"
   ) {
-    const ba = copy.buggyArtifact as Record<string, unknown>;
-    const baCopy: Record<string, unknown> = { ...ba };
-    if (baCopy.buggyLines === undefined) {
-      baCopy.buggyLines = null;
-    }
-    if (baCopy.points === undefined) {
-      baCopy.points = null;
-    }
-    if (baCopy.timeLimit === undefined) {
-      baCopy.timeLimit = null;
-    }
-    if (Array.isArray(baCopy.files)) {
-      baCopy.files = (baCopy.files as unknown[]).map((file) => {
-        if (file !== null && file !== undefined && typeof file === "object") {
-          const fileObj = file as Record<string, unknown>;
-          if (fileObj.isEntry === undefined) {
-            return { ...fileObj, isEntry: false };
-          }
-          return fileObj;
-        }
-        return file;
-      });
-    }
-    copy.buggyArtifact = baCopy;
+    copy.buggyArtifact = coerceBuggyArtifactField(buggyArtifactValue);
   }
-
-  if (copy.categorySlug === undefined) {
-    copy.categorySlug = null;
-  }
-  if (copy.hiddenTests === undefined) {
-    copy.hiddenTests = null;
-  }
-  if (copy.hints === undefined) {
-    copy.hints = null;
-  }
-  if (copy.preventionNotes === undefined) {
-    copy.preventionNotes = null;
-  }
-  if (copy.rootCauseSummary === undefined) {
-    copy.rootCauseSummary = null;
-  }
-  if (copy.referenceFix === undefined) {
-    copy.referenceFix = null;
-  } else if (
-    copy.referenceFix !== null &&
-    typeof copy.referenceFix === "object"
-  ) {
-    const rf = copy.referenceFix as Record<string, unknown>;
-    const rfCopy: Record<string, unknown> = { ...rf };
-    if (rfCopy.diff === undefined) {
-      rfCopy.diff = null;
-    }
-    if (rfCopy.explanation === undefined) {
-      rfCopy.explanation = null;
-    }
-    if (rfCopy.files === undefined) {
-      rfCopy.files = null;
-    }
-    copy.referenceFix = rfCopy;
-  }
-
+  applyNullableDefaults(copy);
+  copy.referenceFix = coerceReferenceFixField(copy.referenceFix);
   return copy;
 }
 

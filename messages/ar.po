@@ -466,7 +466,7 @@ msgstr "صعب"
 #: src/features/profile/components/SolvedByDifficultyChart.tsx
 msgctxt "C4dVmi"
 msgid "Expert"
-msgstr ""
+msgstr "خبير"
 
 #: src/components/shared/FormattedMarkdown.tsx
 msgctxt "tl6nvu"
@@ -487,17 +487,17 @@ msgstr "Copy"
 #: src/features/admin/components/AdminChallengeList.tsx
 msgctxt "gjBiyj"
 msgid "Loading..."
-msgstr ""
+msgstr "جارٍ التحميل..."
 
 #: src/components/shared/loading-fallback.tsx
 msgctxt "kKcTr-"
 msgid "Preparing your arena..."
-msgstr ""
+msgstr "تجهيز الساحة..."
 
 #: src/components/shared/loading-fallback.tsx
 msgctxt "P0YiQn"
 msgid "Fetching challenges, hang tight."
-msgstr ""
+msgstr "جلب التحديات، انتظر قليلاً."
 
 #: src/components/shared/offline-banner.tsx
 msgctxt "vS1TVs"
@@ -652,27 +652,27 @@ msgstr "No challenges found matching your filters."
 #: src/features/admin/components/AdminChallengeList.tsx
 msgctxt "HbZWnK"
 msgid "Showing {from}–{to} of {total} challenges"
-msgstr ""
+msgstr "عرض {from}–{to} من أصل {total} تحديات"
 
 #: src/features/admin/components/AdminChallengeList.tsx
 msgctxt "3kNr3U"
 msgid "Page {page} of {totalPages}"
-msgstr ""
+msgstr "صفحة {page} من {totalPages}"
 
 #: src/features/admin/components/AdminChallengeList.tsx
 msgctxt "VCZBMt"
 msgid "Rows per page"
-msgstr ""
+msgstr "صفوف لكل صفحة"
 
 #: src/features/admin/components/AdminChallengeList.tsx
 msgctxt "JJNc3c"
 msgid "Previous"
-msgstr ""
+msgstr "السابق"
 
 #: src/features/admin/components/AdminChallengeList.tsx
 msgctxt "9-Ddtu"
 msgid "Next"
-msgstr ""
+msgstr "التالي"
 
 #: src/features/admin/components/AdminChallengeList.tsx
 #: src/features/category/components/CategoryManagement.tsx
@@ -1165,7 +1165,7 @@ msgstr "Refine Draft"
 #: src/features/analytics/components/AnalyticsOverview.tsx
 msgctxt "Jh-Usl"
 msgid "Avg Score"
-msgstr ""
+msgstr "متوسط الدرجات"
 
 #: src/features/analytics/components/AnalyticsOverview.tsx
 msgctxt "4DGgIJ"
@@ -1315,7 +1315,7 @@ msgstr "Solved"
 #: src/features/browser/components/ChallengeBrowser.tsx
 msgctxt "zziu-H"
 msgid "Current Streak"
-msgstr ""
+msgstr "السلسلة الحالية"
 
 #: src/features/browser/components/ChallengeBrowser.tsx
 #: src/features/leaderboard/components/LeaderboardTable.tsx
@@ -1391,6 +1391,56 @@ msgstr "اختر الفئة"
 msgctxt "jDnU4W"
 msgid "Select Level"
 msgstr "اختر المستوى"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "HAlOn1"
+msgid "Name"
+msgstr "Name"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "IoDlcd"
+msgid "Slug"
+msgstr "Slug"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "kk4TVW"
+msgid "Icon"
+msgstr "Icon"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "uMhpKe"
+msgid "Color"
+msgstr "Color"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "3LXmOC"
+msgid "Sort order"
+msgstr "Sort order"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "6Tps09"
+msgid "Inactive"
+msgstr "Inactive"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "s3IOQQ"
+msgid "Edit {name}"
+msgstr "Edit {name}"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "JpsXCp"
+msgid "Delete {name}"
+msgstr "Delete {name}"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "VuuMkj"
+msgid "No categories yet — create one"
+msgstr "No categories yet — create one"
+
+#: src/features/category/components/CategoryManagement.tsx
+msgctxt "LWGsgA"
+msgid "No categories matching filter."
+msgstr "No categories matching filter."
 
 #: src/features/category/components/CategoryManagement.tsx
 msgctxt "suk_ol"
@@ -1481,56 +1531,6 @@ msgstr "Active only"
 msgctxt "PCQhDD"
 msgid "Inactive only"
 msgstr "Inactive only"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "HAlOn1"
-msgid "Name"
-msgstr "Name"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "IoDlcd"
-msgid "Slug"
-msgstr "Slug"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "kk4TVW"
-msgid "Icon"
-msgstr "Icon"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "uMhpKe"
-msgid "Color"
-msgstr "Color"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "3LXmOC"
-msgid "Sort order"
-msgstr "Sort order"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "6Tps09"
-msgid "Inactive"
-msgstr "Inactive"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "s3IOQQ"
-msgid "Edit {name}"
-msgstr "Edit {name}"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "JpsXCp"
-msgid "Delete {name}"
-msgstr "Delete {name}"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "VuuMkj"
-msgid "No categories yet — create one"
-msgstr "No categories yet — create one"
-
-#: src/features/category/components/CategoryManagement.tsx
-msgctxt "LWGsgA"
-msgid "No categories matching filter."
-msgstr "No categories matching filter."
 
 #: src/features/category/components/CategoryManagement.tsx
 msgctxt "L2AzSY"
@@ -1663,17 +1663,17 @@ msgstr "Drag to resize tabs panel (Double click to reset)"
 #: src/features/challenge/components/ChallengeTabs.tsx
 msgctxt "iIHf91"
 msgid "explain"
-msgstr ""
+msgstr "شرح"
 
 #: src/features/challenge/components/ChallengeTabs.tsx
 msgctxt "N8eMkw"
 msgid "fix"
-msgstr ""
+msgstr "إصلاح"
 
 #: src/features/challenge/components/ChallengeTabs.tsx
 msgctxt "4hLwZk"
 msgid "hints"
-msgstr ""
+msgstr "تلميحات"
 
 #: src/features/challenge/components/CodeViewer.tsx
 msgctxt "kzxB_l"
@@ -1957,12 +1957,12 @@ msgstr "Showing {from} to {to} of {total} entries"
 #: src/features/leaderboard/components/LeaderboardTabs.tsx
 msgctxt "PtxhIN"
 msgid "This week"
-msgstr ""
+msgstr "هذا الأسبوع"
 
 #: src/features/leaderboard/components/LeaderboardTabs.tsx
 msgctxt "s-lPP3"
 msgid "All time"
-msgstr ""
+msgstr "كل الوقت"
 
 #: src/features/leaderboard/components/LeaderboardTopThree.tsx
 msgctxt "PY-B7t"

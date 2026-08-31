@@ -15,12 +15,14 @@ export default async function Page({
 }) {
   const { id } = await params;
   const session = await getServerSession();
+  const sessionRole = session?.user
+    ? (session.user as { role?: string }).role
+    : undefined;
   const dbChallenge = await challengeService.getChallengeById(id);
 
   if (
     !dbChallenge ||
-    (dbChallenge.status !== "published" &&
-      (session?.user as { role?: string })?.role !== "admin")
+    (dbChallenge.status !== "published" && sessionRole !== "admin")
   ) {
     notFound();
   }
@@ -60,7 +62,7 @@ export default async function Page({
     ? dbChallenge.prompt.split("\n\n").filter(Boolean)
     : undefined;
 
-  const isAdmin = (session?.user as { role?: string })?.role === "admin";
+  const isAdmin = sessionRole === "admin";
 
   return (
     <div className="flex h-full w-full flex-col">

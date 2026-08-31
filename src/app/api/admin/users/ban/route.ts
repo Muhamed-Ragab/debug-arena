@@ -7,7 +7,9 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const session = await getServerSession();
-  const role = (session?.user as { role?: string })?.role;
+  const role = session?.user
+    ? (session.user as { role?: string }).role
+    : undefined;
   if (!session || role !== "admin") {
     return NextResponse.json(
       { error: "Forbidden", success: false },
@@ -21,8 +23,7 @@ export async function POST(request: Request) {
       banned?: boolean;
       userId?: string;
     };
-    const userId = body.userId;
-    const banned = body.banned;
+    const { userId, banned } = body;
     if (!userId || typeof banned !== "boolean") {
       return NextResponse.json(
         { error: "Invalid payload", success: false },

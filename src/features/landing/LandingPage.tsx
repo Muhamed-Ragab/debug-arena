@@ -108,7 +108,7 @@ function HeroSnippet() {
   );
 }
 
-const FEATURES: Array<{
+const _FEATURES: Array<{
   bodyKey: string;
   category: Category;
   icon: typeof GitBranch;

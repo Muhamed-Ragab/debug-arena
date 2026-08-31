@@ -17,8 +17,7 @@ import { adminRole, EMBEDDING_DIM, userRole } from "@/db/schema/roles";
 import { users } from "@/features/auth/schema";
 import { categories } from "@/features/category/schema";
 
-// Re-export for backward compatibility
-export { categories };
+export { categories } from "@/features/category/schema";
 
 // --- Enums ---
 export const challengeFormatEnum = pgEnum("challenge_format", [

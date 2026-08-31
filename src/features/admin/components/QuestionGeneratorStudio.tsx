@@ -224,6 +224,77 @@ export function QuestionGeneratorStudio({
     }
   };
 
+  function getFirstValidationMessageStudio(
+    flat: Record<string, string | undefined>
+  ): string {
+    return (
+      flat.title ??
+      flat.prompt ??
+      flat.rootCauseSummary ??
+      flat.categorySlug ??
+      flat._errors ??
+      "Validation failed"
+    );
+  }
+
+  function handleValidationFailureStudio(
+    res: unknown,
+    setFieldErrorsFn: (v: Record<string, string | undefined>) => void,
+    setServerErrorFn: (v: string | null) => void
+  ): boolean {
+    if (
+      res === null ||
+      typeof res !== "object" ||
+      !("validationErrors" in res)
+    ) {
+      return false;
+    }
+    const { validationErrors } = res as { validationErrors?: unknown };
+    if (!validationErrors) {
+      return false;
+    }
+    const flat = flattenValidationErrors(validationErrors);
+    setFieldErrorsFn(flat);
+    const first = getFirstValidationMessageStudio(flat);
+    setServerErrorFn(first);
+    return true;
+  }
+
+  function handleServerFailureStudio(
+    res: unknown,
+    setFieldErrorsFn: (
+      updater: (
+        prev: Record<string, string | undefined>
+      ) => Record<string, string | undefined>
+    ) => void,
+    setServerErrorFn: (v: string | null) => void
+  ): string | null {
+    if (res === null || typeof res !== "object" || !("serverError" in res)) {
+      return null;
+    }
+    const { serverError: responseServerError } = res as {
+      serverError?: string;
+    };
+    if (!responseServerError) {
+      return null;
+    }
+    setServerErrorFn(responseServerError);
+    const lower = responseServerError.toLowerCase();
+    if (lower.includes("category")) {
+      setFieldErrorsFn((prev) => ({
+        ...prev,
+        categorySlug: responseServerError,
+      }));
+    }
+    if (lower.includes("title")) {
+      setFieldErrorsFn((prev) => ({
+        ...prev,
+        title: responseServerError,
+      }));
+    }
+    return responseServerError;
+  }
+
   const handleSave = async (status: "draft" | "published") => {
     if (!draft) {
       return;
@@ -256,38 +327,23 @@ export function QuestionGeneratorStudio({
             : t("Challenge draft saved successfully.")
         );
         onChallengeSaved?.();
-      } else if (res?.validationErrors) {
-        const flat = flattenValidationErrors(res.validationErrors);
-        setFieldErrors(flat);
-        const first =
-          flat.title ??
-          flat.prompt ??
-          flat.rootCauseSummary ??
-          flat.categorySlug ??
-          flat._errors ??
-          "Validation failed";
-        setServerError(first);
-        toast.error(t("Validation failed"));
-      } else if (res?.serverError) {
-        setServerError(res.serverError);
-        toast.error(res.serverError);
-        const lower = res.serverError.toLowerCase();
-        if (lower.includes("category")) {
-          setFieldErrors((prev) => ({
-            ...prev,
-            categorySlug: res.serverError as string,
-          }));
-        }
-        if (lower.includes("title")) {
-          setFieldErrors((prev) => ({
-            ...prev,
-            title: res.serverError as string,
-          }));
-        }
-      } else {
-        setServerError(t("Something went wrong"));
-        toast.error(t("Something went wrong"));
+        return;
       }
+      if (handleValidationFailureStudio(res, setFieldErrors, setServerError)) {
+        toast.error(t("Validation failed"));
+        return;
+      }
+      const serverMessage = handleServerFailureStudio(
+        res,
+        setFieldErrors,
+        setServerError
+      );
+      if (serverMessage) {
+        toast.error(serverMessage);
+        return;
+      }
+      setServerError(t("Something went wrong"));
+      toast.error(t("Something went wrong"));
     } catch (err) {
       console.error(err);
       toast.error(t("Failed to save challenge."));
@@ -881,19 +937,19 @@ export function QuestionGeneratorStudio({
           {activeTab === "tests" && (
             <div className="flex flex-col gap-3">
               {draft?.hiddenTests && draft.hiddenTests.length > 0 ? (
-                draft.hiddenTests.map((t) => (
+                draft.hiddenTests.map((hiddenTest) => (
                   <div
                     className="rounded-lg border border-border bg-inset p-4"
-                    key={`test-${t.name}`}
+                    key={`test-${hiddenTest.name}`}
                   >
                     <div className="mb-1 font-semibold text-heading text-xs">
-                      {t.name}
+                      {hiddenTest.name}
                     </div>
                     <div className="mb-2 text-muted-foreground text-xs">
-                      {t.description}
+                      {hiddenTest.description}
                     </div>
                     <pre className="rounded border border-border/80 bg-black/70 p-3 font-mono text-emerald-300 text-xs">
-                      {t.testCode}
+                      {hiddenTest.testCode}
                     </pre>
                   </div>
                 ))

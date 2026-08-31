@@ -107,7 +107,7 @@ vi.mock("next-intl/server", async () => {
     ),
     getLocale: vi.fn(async () => "en"),
     getMessages: vi.fn(async () => ({})),
-    getTranslations: vi.fn(async (ns?: string) => {
+    getTranslations: vi.fn((ns?: string) => {
       function lookup(key: string, vars?: Record<string, unknown>) {
         const fullKey = ns ? `${ns}.${key}` : key;
         let str = fullKey;

@@ -28,6 +28,26 @@
           }
         }
       }
+    },
+    {
+      "includes": ["src/components/preferences/LanguageSwitcher.tsx"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noDocumentCookie": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/lib/auth/plugins.test.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noDocumentCookie": "off"
+          }
+        }
+      }
     }
   ],
   "linter": {

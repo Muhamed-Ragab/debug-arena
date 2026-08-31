@@ -28,21 +28,28 @@ function createMockRepo(overrides: Partial<CategoryRepository> = {}) {
     findById: vi.fn().mockResolvedValue(null),
     findBySlug: vi.fn().mockResolvedValue(null),
     update: vi.fn().mockImplementation((id, input) => {
-      const data = (input as unknown as Record<string, unknown>).data
-        ? ((input as unknown as Record<string, unknown>).data as Record<
-            string,
-            unknown
-          >)
-        : (input as unknown as Record<string, unknown>);
+      const isRecord = (value: unknown): value is Record<string, unknown> =>
+        typeof value === "object" && value !== null;
+      const raw = isRecord(input) ? input : {};
+      const dataCandidate = raw.data;
+      const data = isRecord(dataCandidate) ? dataCandidate : raw;
+      const stringOrNull = (key: string): string | null => {
+        const value = data[key];
+        return typeof value === "string" ? value : null;
+      };
+      const stringOrDefault = (key: string, fallback: string): string => {
+        const value = data[key];
+        return typeof value === "string" ? value : fallback;
+      };
       return Promise.resolve({
-        color: (data.color as string | null) ?? null,
-        description: (data.description as string | null) ?? null,
-        icon: (data.icon as string | null) ?? null,
+        color: stringOrNull("color"),
+        description: stringOrNull("description"),
+        icon: stringOrNull("icon"),
         id,
-        isActive: (data.isActive as boolean) ?? true,
-        name: (data.name as string) ?? "Updated",
-        slug: (data.slug as string) ?? "updated",
-        sortOrder: (data.sortOrder as number) ?? 0,
+        isActive: typeof data.isActive === "boolean" ? data.isActive : true,
+        name: stringOrDefault("name", "Updated"),
+        slug: stringOrDefault("slug", "updated"),
+        sortOrder: typeof data.sortOrder === "number" ? data.sortOrder : 0,
       });
     }),
     ...overrides,

@@ -117,8 +117,8 @@ describe("QuestionGeneratorStudio", () => {
     await user.click(generateBtn);
 
     expect(generateQuestionAction).toHaveBeenCalledTimes(1);
-    const callArg = (generateQuestionAction as ReturnType<typeof vi.fn>).mock
-      .calls[0][0];
+    const { calls } = (generateQuestionAction as ReturnType<typeof vi.fn>).mock;
+    const [[callArg]] = calls;
     expect(callArg.difficulty).toBe("hard");
   });
 });

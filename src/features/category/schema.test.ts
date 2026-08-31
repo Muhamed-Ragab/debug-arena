@@ -41,7 +41,7 @@ describe("category/schema", () => {
 
   it("has 2 RLS policies", () => {
     const cfg = getTableConfig(categories);
-    const policies = cfg.policies ?? [];
+    const { policies } = cfg;
     expect(policies.length).toBe(2);
     const names = policies.map((p) => (p as unknown as { name: string }).name);
     expect(names).toEqual(

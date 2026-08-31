@@ -93,6 +93,132 @@ export function buildStrengthData(
   });
 }
 
+function computeAvgScore(
+  submissions: Array<{ totalScore: number | null }>
+): number {
+  if (submissions.length === 0) {
+    return 0;
+  }
+  const sum = submissions.reduce((acc, s) => acc + (s.totalScore ?? 0), 0);
+  return Math.round(sum / submissions.length);
+}
+
+function computeAvgTimeMinutes(
+  submissions: Array<{ timeSpentSeconds: number | null }>
+): number {
+  if (submissions.length === 0) {
+    return 0;
+  }
+  const total = submissions.reduce(
+    (acc, s) => acc + (s.timeSpentSeconds ?? 0),
+    0
+  );
+  return Math.round(total / submissions.length / 60);
+}
+
+function computeAvgHints(submissions: Array<{ hintsUsed: number }>): string {
+  if (submissions.length === 0) {
+    return "0";
+  }
+  const total = submissions.reduce((acc, s) => acc + s.hintsUsed, 0);
+  return (total / submissions.length).toFixed(1);
+}
+
+function formatJoinedLabel(
+  createdAt: Date | string | null | undefined
+): string {
+  if (!createdAt) {
+    return "Member";
+  }
+  const formatted = new Date(createdAt).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+  return `Member since ${formatted}`;
+}
+
+function resolveHandleDisplay(
+  username: string | null | undefined,
+  email: string | null | undefined
+): string {
+  if (username) {
+    return `@${username}`;
+  }
+  if (email) {
+    return `@${email.split("@")[0]}`;
+  }
+  return "@coder";
+}
+
+function resolveDisplayName(user: {
+  displayName: string | null | undefined;
+  name: string | null | undefined;
+  username: string | null | undefined;
+}): string {
+  return user.displayName || user.name || user.username || "Developer";
+}
+
+function buildRecentSubmissions(
+  submissions: UserWithRelations["submissions"]
+): (RecentSubmission & { id?: string; submittedAt?: string })[] {
+  return submissions.map((submission) => {
+    const artifact = submission.challenge?.buggyArtifact as {
+      points?: number;
+    } | null;
+    const submittedAt = submission.createdAt
+      ? new Date(submission.createdAt).toLocaleDateString("en-US", {
+          day: "numeric",
+          month: "short",
+        })
+      : undefined;
+    return {
+      category:
+        (submission.challenge?.category?.name as Category) || "State Mutations",
+      id: submission.id,
+      pts: artifact?.points ?? 100,
+      score: submission.totalScore ?? 0,
+      submittedAt,
+      title: submission.challenge?.title || "Challenge",
+    };
+  });
+}
+
+function buildProfileStatsValues(params: {
+  avgHintsUsed: string;
+  avgScore: number;
+  avgTimeMinutes: number;
+  solvedCount: number;
+  totalPublishedCount: number;
+  totalSubmissionsCount: number;
+}) {
+  const {
+    avgHintsUsed,
+    avgScore,
+    avgTimeMinutes,
+    solvedCount,
+    totalPublishedCount,
+    totalSubmissionsCount,
+  } = params;
+  return [
+    {
+      label: "Challenges Solved",
+      value: `${solvedCount} / ${totalPublishedCount}`,
+    },
+    {
+      label: "Avg. Score",
+      value: totalSubmissionsCount > 0 ? `${avgScore}` : "-",
+    },
+    {
+      label: "Avg. Time to Fix",
+      value: totalSubmissionsCount > 0 ? `${avgTimeMinutes}m` : "-",
+    },
+    {
+      label: "Hints Used",
+      value: totalSubmissionsCount > 0 ? `${avgHintsUsed}` : "0",
+    },
+  ];
+}
+
 export function createProfileService(
   repo: ProfileRepository = profileRepository,
   profileRepo: ProfileRepository = profileRepository
@@ -112,46 +238,14 @@ export function createProfileService(
       successfulSubmissions.map((s) => s.challengeId)
     );
     const totalSubmissionsCount = typedUser.submissions.length;
-    const avgScore =
-      totalSubmissionsCount > 0
-        ? Math.round(
-            typedUser.submissions.reduce(
-              (sum, s) => sum + (s.totalScore ?? 0),
-              0
-            ) / totalSubmissionsCount
-          )
-        : 0;
-    const totalTimeSeconds = typedUser.submissions.reduce(
-      (sum, s) => sum + (s.timeSpentSeconds ?? 0),
-      0
+    const avgScore = computeAvgScore(typedUser.submissions);
+    const avgTimeMinutes = computeAvgTimeMinutes(typedUser.submissions);
+    const avgHintsUsed = computeAvgHints(typedUser.submissions);
+    const joinedFormatted = formatJoinedLabel(typedUser.createdAt);
+    const handleDisplay = resolveHandleDisplay(
+      typedUser.username,
+      typedUser.email
     );
-    const avgTimeMinutes =
-      totalSubmissionsCount > 0
-        ? Math.round(totalTimeSeconds / totalSubmissionsCount / 60)
-        : 0;
-    const totalHints = typedUser.submissions.reduce(
-      (sum, s) => sum + s.hintsUsed,
-      0
-    );
-    const avgHintsUsed =
-      totalSubmissionsCount > 0
-        ? (totalHints / totalSubmissionsCount).toFixed(1)
-        : "0";
-    const joinedFormatted = typedUser.createdAt
-      ? `Member since ${new Date(typedUser.createdAt).toLocaleDateString(
-          "en-US",
-          {
-            month: "short",
-            year: "numeric",
-          }
-        )}`
-      : "Member";
-    let handleDisplay = "@coder";
-    if (typedUser.username) {
-      handleDisplay = `@${typedUser.username}`;
-    } else if (typedUser.email) {
-      handleDisplay = `@${typedUser.email.split("@")[0]}`;
-    }
     const totalPoints = calcPoints(
       typedUser.currentRating,
       solvedChallengeIds.size
@@ -171,29 +265,16 @@ export function createProfileService(
       typedUser.submissions
     );
     const strengthData = buildStrengthData(typedUser.submissions);
-    const recentSubmissions: (RecentSubmission & {
-      id?: string;
-      submittedAt?: string;
-    })[] = typedUser.submissions.map((s) => ({
-      category: (s.challenge?.category?.name as Category) || "State Mutations",
-      id: s.id,
-      pts:
-        (s.challenge?.buggyArtifact as { points?: number } | null)?.points ??
-        100,
-      score: s.totalScore ?? 0,
-      submittedAt: s.createdAt
-        ? new Date(s.createdAt).toLocaleDateString("en-US", {
-            day: "numeric",
-            month: "short",
-          })
-        : undefined,
-      title: s.challenge?.title || "Challenge",
-    }));
-    const displayName =
-      typedUser.displayName ||
-      typedUser.name ||
-      typedUser.username ||
-      "Developer";
+    const recentSubmissions = buildRecentSubmissions(typedUser.submissions);
+    const displayName = resolveDisplayName(typedUser);
+    const profileStats = buildProfileStatsValues({
+      avgHintsUsed,
+      avgScore,
+      avgTimeMinutes,
+      solvedCount: solvedChallengeIds.size,
+      totalPublishedCount,
+      totalSubmissionsCount,
+    });
     return {
       categoryStats,
       profile: {
@@ -209,24 +290,7 @@ export function createProfileService(
         rank: liveRank,
         streak: `${typedUser.streakCount}-day streak`,
       },
-      profileStats: [
-        {
-          label: "Challenges Solved",
-          value: `${solvedChallengeIds.size} / ${totalPublishedCount}`,
-        },
-        {
-          label: "Avg. Score",
-          value: totalSubmissionsCount > 0 ? `${avgScore}` : "-",
-        },
-        {
-          label: "Avg. Time to Fix",
-          value: totalSubmissionsCount > 0 ? `${avgTimeMinutes}m` : "-",
-        },
-        {
-          label: "Hints Used",
-          value: totalSubmissionsCount > 0 ? `${avgHintsUsed}` : "0",
-        },
-      ],
+      profileStats,
       radarData,
       recentSubmissions,
       strengthData,

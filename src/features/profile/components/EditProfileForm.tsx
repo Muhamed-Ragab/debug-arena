@@ -364,6 +364,86 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
       prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
     );
 
+  const buildPayload = () => ({
+    avatarUrl: avatarUrl.trim() || undefined,
+    bio: bio.trim() || undefined,
+    displayName: displayName.trim(),
+    interests,
+    isPublic,
+    jobTitle: jobTitle.trim() || undefined,
+    preferredColor: avatarColor,
+    username: handle.trim(),
+  });
+
+  const syncSession = async () => {
+    try {
+      await authClient.updateUser({
+        avatarUrl: avatarUrl.trim() || "",
+        bio: bio.trim() || "",
+        displayName: displayName.trim(),
+        image: avatarUrl.trim() || undefined,
+        isPublic,
+        jobTitle: jobTitle.trim() || "",
+        name: displayName.trim(),
+        preferredColor: avatarColor,
+        username: handle.trim(),
+      } as unknown as Record<string, unknown>);
+    } catch {
+      // Non-fatal: DB already updated, session will refresh on next getSession fetch
+    }
+  };
+
+  const handleSuccess = async () => {
+    await syncSession();
+    router.refresh();
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+    toast.success(t("Profile updated"));
+  };
+
+  const getFirstValidationMessage = (
+    flat: Record<string, string | undefined>
+  ): string =>
+    flat.displayName ??
+    flat.username ??
+    flat.bio ??
+    flat.avatarUrl ??
+    flat._errors ??
+    t("Validation failed");
+
+  const handleValidationErrors = (
+    validationErrors: Parameters<typeof flattenValidationErrors>[0]
+  ) => {
+    const flat = flattenValidationErrors(validationErrors);
+    setFieldErrors(flat);
+    const first = getFirstValidationMessage(flat);
+    setServerError(first);
+    toast.error(t("Validation failed"));
+  };
+
+  const handleServerError = (message: string) => {
+    setServerError(message);
+    toast.error(message);
+  };
+
+  const processResult = async (
+    res: Awaited<ReturnType<typeof updateProfileAction>>
+  ) => {
+    if (res?.data?.success) {
+      await handleSuccess();
+      return;
+    }
+    if (res?.validationErrors) {
+      handleValidationErrors(res.validationErrors);
+      return;
+    }
+    if (res?.serverError) {
+      handleServerError(res.serverError);
+      return;
+    }
+    handleServerError(t("Something went wrong"));
+  };
+
   const onSave = async () => {
     if (hasErrors || isSaving) {
       return;
@@ -371,64 +451,11 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
     setIsSaving(true);
     setServerError(null);
     setFieldErrors({});
-
     try {
-      const res = await updateProfileAction({
-        avatarUrl: avatarUrl.trim() || undefined,
-        bio: bio.trim() || undefined,
-        displayName: displayName.trim(),
-        interests,
-        isPublic,
-        jobTitle: jobTitle.trim() || undefined,
-        preferredColor: avatarColor,
-        username: handle.trim(),
-      });
-
-      if (res?.data?.success) {
-        // Sync better-auth session cookie so TopBar (useSession) shows fresh jobTitle/displayName without reload.
-        // updateProfileAction writes directly via Drizzle, bypassing better-auth's session cache (secondaryStorage/JWT).
-        // authClient.updateUser refreshes the cookie with updated user data via /api/auth/update-user.
-        try {
-          await authClient.updateUser({
-            avatarUrl: avatarUrl.trim() || "",
-            bio: bio.trim() || "",
-            displayName: displayName.trim(),
-            image: avatarUrl.trim() || undefined,
-            isPublic,
-            jobTitle: jobTitle.trim() || "",
-            name: displayName.trim(),
-            preferredColor: avatarColor,
-            username: handle.trim(),
-          } as unknown as Record<string, unknown>);
-        } catch {
-          // Non-fatal: DB already updated, session will refresh on next getSession fetch
-        }
-        router.refresh();
-        setSaved(true);
-        setTimeout(() => setSaved(false), 3000);
-        toast.success(t("Profile updated"));
-      } else if (res?.validationErrors) {
-        const flat = flattenValidationErrors(res.validationErrors);
-        setFieldErrors(flat);
-        const first =
-          flat.displayName ??
-          flat.username ??
-          flat.bio ??
-          flat.avatarUrl ??
-          flat._errors ??
-          t("Validation failed");
-        setServerError(first);
-        toast.error(t("Validation failed"));
-      } else if (res?.serverError) {
-        setServerError(res.serverError);
-        toast.error(res.serverError);
-      } else {
-        setServerError(t("Something went wrong"));
-        toast.error(t("Something went wrong"));
-      }
+      const res = await updateProfileAction(buildPayload());
+      await processResult(res);
     } catch {
-      setServerError(t("Something went wrong"));
-      toast.error(t("Something went wrong"));
+      handleServerError(t("Something went wrong"));
     } finally {
       setIsSaving(false);
     }

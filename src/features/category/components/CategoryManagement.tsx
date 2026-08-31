@@ -80,6 +80,275 @@ function toFormState(cat: CategoryDTO): FormState {
   };
 }
 
+function validateNameFieldPure(name: string): string | undefined {
+  if (!name || name.length < 2) {
+    return "Name must be at least 2 characters";
+  }
+  if (name.length > 80) {
+    return "Name must be at most 80 characters";
+  }
+  return undefined;
+}
+
+function validateSlugFieldPure(slug: string): string | undefined {
+  if (!slug) {
+    return undefined;
+  }
+  if (slug.length < 2 || slug.length > 50) {
+    return "Slug must be 2-50 characters";
+  }
+  if (!/^[a-z0-9-]+$/.test(slug)) {
+    return "Slug must contain only lowercase letters, numbers and hyphens";
+  }
+  return undefined;
+}
+
+function validateColorFieldPure(color: string): string | undefined {
+  if (color && !/^#[0-9a-fA-F]{6}$/.test(color)) {
+    return "Invalid hex color (e.g. #3b82f6)";
+  }
+  return undefined;
+}
+
+function validateIconFieldPure(icon: string): string | undefined {
+  if (icon && icon.length > 50) {
+    return "Icon must be at most 50 characters";
+  }
+  return undefined;
+}
+
+function validateDescriptionFieldPure(description: string): string | undefined {
+  if (description && description.length > 500) {
+    return "Description must be at most 500 characters";
+  }
+  return undefined;
+}
+
+function validateSortOrderFieldPure(sortOrder: string): string | undefined {
+  const order = Number(sortOrder);
+  if (
+    Number.isNaN(order) ||
+    !Number.isInteger(order) ||
+    order < 0 ||
+    order > 1000
+  ) {
+    return "Sort order must be an integer 0-1000";
+  }
+  return undefined;
+}
+
+function buildCreatePayload(form: FormState): {
+  color: string | null;
+  description: string | null;
+  icon: string | null;
+  isActive: boolean;
+  name: string;
+  slug?: string;
+  sortOrder: number;
+} {
+  return {
+    color: form.color || null,
+    description: form.description || null,
+    icon: form.icon || null,
+    isActive: form.isActive,
+    name: form.name,
+    sortOrder: Number(form.sortOrder),
+    ...(form.slug ? { slug: form.slug } : {}),
+  };
+}
+
+function buildUpdatePayload(
+  form: FormState,
+  editing: CategoryDTO
+): Record<string, unknown> {
+  const data: Record<string, unknown> = {};
+  if (form.name !== editing.name) {
+    data.name = form.name;
+  }
+  if (form.slug !== editing.slug) {
+    data.slug = form.slug;
+  }
+  if (form.description !== (editing.description ?? "")) {
+    data.description = form.description || null;
+  }
+  if (form.icon !== (editing.icon ?? "")) {
+    data.icon = form.icon || null;
+  }
+  if (form.color !== (editing.color ?? "")) {
+    data.color = form.color || null;
+  }
+  if (Number(form.sortOrder) !== editing.sortOrder) {
+    data.sortOrder = Number(form.sortOrder);
+  }
+  if (form.isActive !== editing.isActive) {
+    data.isActive = form.isActive;
+  }
+  if (Object.keys(data).length === 0) {
+    data.name = form.name;
+  }
+  return data;
+}
+
+function getFilteredCategories(
+  categories: CategoryDTO[],
+  filter: FilterValue
+): CategoryDTO[] {
+  if (filter === "active") {
+    return categories.filter((c) => c.isActive);
+  }
+  if (filter === "inactive") {
+    return categories.filter((c) => !c.isActive);
+  }
+  return categories;
+}
+
+function validateCategoryFormPure(form: FormState): Record<string, string> {
+  const errs: Record<string, string> = {};
+  const nameErr = validateNameFieldPure(form.name);
+  if (nameErr) {
+    errs.name = nameErr;
+  }
+  const slugErr = validateSlugFieldPure(form.slug);
+  if (slugErr) {
+    errs.slug = slugErr;
+  }
+  const colorErr = validateColorFieldPure(form.color);
+  if (colorErr) {
+    errs.color = colorErr;
+  }
+  const iconErr = validateIconFieldPure(form.icon);
+  if (iconErr) {
+    errs.icon = iconErr;
+  }
+  const descErr = validateDescriptionFieldPure(form.description);
+  if (descErr) {
+    errs.description = descErr;
+  }
+  const orderErr = validateSortOrderFieldPure(form.sortOrder);
+  if (orderErr) {
+    errs.sortOrder = orderErr;
+  }
+  return errs;
+}
+
+function CategoryTable({
+  categories,
+  filtered,
+  onDelete,
+  onEdit,
+}: {
+  categories: CategoryDTO[];
+  filtered: CategoryDTO[];
+  onDelete: (cat: CategoryDTO) => void;
+  onEdit: (cat: CategoryDTO) => void;
+}) {
+  const t = useExtracted();
+  return (
+    <Card className="overflow-hidden bg-surface shadow-xs">
+      <Table>
+        <TableHeader className="bg-inset/50">
+          <TableRow>
+            <TableHead className="px-4 py-3">{t("Name")}</TableHead>
+            <TableHead className="px-4 py-3">{t("Slug")}</TableHead>
+            <TableHead className="px-4 py-3">{t("Icon")}</TableHead>
+            <TableHead className="px-4 py-3">{t("Color")}</TableHead>
+            <TableHead className="px-4 py-3">{t("Sort order")}</TableHead>
+            <TableHead className="px-4 py-3">{t("Status")}</TableHead>
+            <TableHead className="px-4 py-3 text-end">{t("Actions")}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className="divide-y divide-border">
+          {filtered.length > 0 ? (
+            filtered.map((cat) => (
+              <TableRow
+                className="transition-colors hover:bg-inset/40"
+                key={cat.id}
+              >
+                <TableCell className="px-4 py-3.5 font-semibold text-heading text-sm">
+                  {cat.name}
+                </TableCell>
+                <TableCell className="px-4 py-3.5 font-mono text-muted-foreground text-xs">
+                  {cat.slug}
+                </TableCell>
+                <TableCell className="px-4 py-3.5 text-muted-foreground text-sm">
+                  {cat.icon ?? "-"}
+                </TableCell>
+                <TableCell className="px-4 py-3.5">
+                  {cat.color ? (
+                    <span className="flex items-center gap-2">
+                      <span
+                        aria-label={`Color ${cat.color}`}
+                        className="inline-block h-4 w-4 shrink-0 rounded-full border border-border"
+                        role="img"
+                        style={{ backgroundColor: cat.color }}
+                      />
+                      <span className="font-mono text-muted-foreground text-xs">
+                        {cat.color}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground text-xs">-</span>
+                  )}
+                </TableCell>
+                <TableCell className="px-4 py-3.5 text-sm">
+                  {cat.sortOrder}
+                </TableCell>
+                <TableCell className="px-4 py-3.5">
+                  {cat.isActive ? (
+                    <Badge variant="success">{t("Active")}</Badge>
+                  ) : (
+                    <Badge variant="secondary">{t("Inactive")}</Badge>
+                  )}
+                </TableCell>
+                <TableCell className="px-4 py-3.5 text-end">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <Button
+                      aria-label={t("Edit {name}", { name: cat.name })}
+                      className="h-8 w-8 p-0"
+                      onClick={() => onEdit(cat)}
+                      size="icon"
+                      variant="ghost"
+                    >
+                      <Pencil size={15} />
+                    </Button>
+                    <Button
+                      aria-label={t("Delete {name}", { name: cat.name })}
+                      className="h-8 w-8 p-0 text-rose-400 hover:bg-rose-500/10 hover:text-rose-400"
+                      onClick={() => onDelete(cat)}
+                      size="icon"
+                      variant="ghost"
+                    >
+                      <Trash2 size={15} />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                className="px-4 py-8 text-center text-muted-foreground"
+                colSpan={7}
+              >
+                {categories.length === 0 ? (
+                  <span className="flex flex-col items-center gap-3">
+                    <span>{t("No categories yet — create one")}</span>
+                    <span className="text-muted-foreground text-xs">
+                      {t("No categories matching filter.")}
+                    </span>
+                  </span>
+                ) : (
+                  t("No categories matching filter.")
+                )}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </Card>
+  );
+}
+
 export function CategoryManagement({
   categories: initialCategories,
 }: CategoryManagementProps) {
@@ -108,154 +377,123 @@ export function CategoryManagement({
   >({});
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const filtered = categories.filter((c) => {
-    if (filter === "active") {
-      return c.isActive;
-    }
-    if (filter === "inactive") {
-      return !c.isActive;
-    }
-    return true;
-  });
+  const filtered = getFilteredCategories(categories, filter);
 
-  function validateForm(form: FormState): Record<string, string> {
-    const errs: Record<string, string> = {};
-    if (!form.name || form.name.length < 2) {
-      errs.name = t("Name must be at least 2 characters");
-    } else if (form.name.length > 80) {
-      errs.name = t("Name must be at most 80 characters");
-    }
-    if (form.slug) {
-      if (form.slug.length < 2 || form.slug.length > 50) {
-        errs.slug = t("Slug must be 2-50 characters");
-      } else if (!/^[a-z0-9-]+$/.test(form.slug)) {
-        errs.slug = t(
+  function translateMessage(raw: string): string {
+    switch (raw) {
+      case "Name must be at least 2 characters":
+        return t("Name must be at least 2 characters");
+      case "Name must be at most 80 characters":
+        return t("Name must be at most 80 characters");
+      case "Slug must be 2-50 characters":
+        return t("Slug must be 2-50 characters");
+      case "Slug must contain only lowercase letters, numbers and hyphens":
+        return t(
           "Slug must contain only lowercase letters, numbers and hyphens"
         );
-      }
+      case "Invalid hex color (e.g. #3b82f6)":
+        return t("Invalid hex color (e.g. #3b82f6)");
+      case "Icon must be at most 50 characters":
+        return t("Icon must be at most 50 characters");
+      case "Description must be at most 500 characters":
+        return t("Description must be at most 500 characters");
+      case "Sort order must be an integer 0-1000":
+        return t("Sort order must be an integer 0-1000");
+      default:
+        return raw;
     }
-    if (form.color && !/^#[0-9a-fA-F]{6}$/.test(form.color)) {
-      errs.color = t("Invalid hex color (e.g. #3b82f6)");
-    }
-    if (form.icon && form.icon.length > 50) {
-      errs.icon = t("Icon must be at most 50 characters");
-    }
-    if (form.description && form.description.length > 500) {
-      errs.description = t("Description must be at most 500 characters");
-    }
-    const order = Number(form.sortOrder);
-    if (
-      Number.isNaN(order) ||
-      !Number.isInteger(order) ||
-      order < 0 ||
-      order > 1000
-    ) {
-      errs.sortOrder = t("Sort order must be an integer 0-1000");
-    }
-    return errs;
   }
 
-  function handleCreate() {
-    const errs = validateForm(createForm);
-    if (Object.keys(errs).length > 0) {
-      setCreateErrors(errs);
-      return;
+  function getValidationErrors(form: FormState): Record<string, string> {
+    const raw = validateCategoryFormPure(form);
+    const out: Record<string, string> = {};
+    for (const [key, value] of Object.entries(raw)) {
+      out[key] = translateMessage(value);
     }
-    setCreateErrors({});
+    return out;
+  }
 
-    startTransition(async () => {
-      const payload = {
-        color: createForm.color || null,
-        description: createForm.description || null,
-        icon: createForm.icon || null,
-        isActive: createForm.isActive,
-        name: createForm.name,
-        sortOrder: Number(createForm.sortOrder),
-        ...(createForm.slug ? { slug: createForm.slug } : {}),
+  function handleCreateSuccess(res: unknown): boolean {
+    if (res && typeof res === "object" && "data" in res) {
+      const { data } = res as {
+        data?: { success?: boolean; category?: unknown };
       };
-      const res = await createCategoryAction(payload);
-
-      if (res?.data?.success && res.data.category) {
-        const newCat = res.data.category as CategoryDTO;
+      if (data?.success && data.category) {
+        const newCat = data.category as CategoryDTO;
         setCategories((prev) =>
           [...prev, newCat].sort((a, b) => a.sortOrder - b.sortOrder)
         );
         toast.success(t("Category created"));
         setCreateOpen(false);
         setCreateForm(EMPTY_FORM);
-      } else if (res?.validationErrors) {
-        const flat = flattenValidationErrors(res.validationErrors);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function handleCreateValidationError(res: unknown): boolean {
+    if (res && typeof res === "object" && "validationErrors" in res) {
+      const ve = (res as { validationErrors?: unknown }).validationErrors;
+      if (ve) {
+        const flat = flattenValidationErrors(ve);
         setCreateErrors(flat);
         toast.error(t("Validation failed"));
-      } else if ((res as { serverError?: string }).serverError) {
-        const msg = (res as { serverError?: string }).serverError as string;
-        toast.error(msg);
-        if (
-          msg.toLowerCase().includes("already exists") ||
-          msg.includes("409")
-        ) {
-          setCreateErrors((prev) => ({ ...prev, slug: msg }));
-        }
-      } else {
-        toast.error(t("Something went wrong"));
+        return true;
       }
+    }
+    return false;
+  }
+
+  function handleCreateServerError(res: unknown): boolean {
+    const { serverError } = res as { serverError?: string };
+    if (serverError) {
+      toast.error(serverError);
+      if (
+        serverError.toLowerCase().includes("already exists") ||
+        serverError.includes("409")
+      ) {
+        setCreateErrors((prev) => ({ ...prev, slug: serverError }));
+      }
+      return true;
+    }
+    return false;
+  }
+
+  async function executeCreate(): Promise<void> {
+    const payload = buildCreatePayload(createForm);
+    const res = await createCategoryAction(payload);
+    if (handleCreateSuccess(res)) {
+      return;
+    }
+    if (handleCreateValidationError(res)) {
+      return;
+    }
+    if (handleCreateServerError(res)) {
+      return;
+    }
+    toast.error(t("Something went wrong"));
+  }
+
+  function handleCreate() {
+    const errs = getValidationErrors(createForm);
+    if (Object.keys(errs).length > 0) {
+      setCreateErrors(errs);
+      return;
+    }
+    setCreateErrors({});
+    startTransition(() => {
+      executeCreate();
     });
   }
 
-  function handleEdit() {
-    if (!editing) {
-      return;
-    }
-    const errs = validateForm(editForm);
-    if (Object.keys(errs).length > 0) {
-      setEditErrors(errs);
-      return;
-    }
-    setEditErrors({});
-
-    startTransition(async () => {
-      const data: Record<string, unknown> = {};
-      if (editForm.name !== editing.name) {
-        data.name = editForm.name;
-      }
-      if (editForm.slug !== editing.slug) {
-        data.slug = editForm.slug;
-      }
-      if (editForm.description !== (editing.description ?? "")) {
-        data.description = editForm.description || null;
-      }
-      if (editForm.icon !== (editing.icon ?? "")) {
-        data.icon = editForm.icon || null;
-      }
-      if (editForm.color !== (editing.color ?? "")) {
-        data.color = editForm.color || null;
-      }
-      if (Number(editForm.sortOrder) !== editing.sortOrder) {
-        data.sortOrder = Number(editForm.sortOrder);
-      }
-      if (editForm.isActive !== editing.isActive) {
-        data.isActive = editForm.isActive;
-      }
-      // Always send at least one field; if no diff, send name to avoid empty
-      if (Object.keys(data).length === 0) {
-        data.name = editForm.name;
-      }
-
-      const res = await updateCategoryAction({
-        data: data as unknown as {
-          name?: string;
-          slug?: string;
-          description?: string | null;
-          icon?: string | null;
-          color?: string | null;
-          sortOrder?: number;
-          isActive?: boolean;
-        },
-        id: editing.id,
-      });
-
-      if (res?.data?.success && res.data.category) {
-        const updated = res.data.category as CategoryDTO;
+  function handleEditSuccess(res: unknown): boolean {
+    if (res && typeof res === "object" && "data" in res) {
+      const { data } = res as {
+        data?: { success?: boolean; category?: unknown };
+      };
+      if (data?.success && data.category) {
+        const updated = data.category as CategoryDTO;
         setCategories((prev) =>
           prev
             .map((c) => (c.id === updated.id ? updated : c))
@@ -264,20 +502,141 @@ export function CategoryManagement({
         toast.success(t("Category updated"));
         setEditOpen(false);
         setEditing(null);
-      } else if (res?.validationErrors) {
-        const flat = flattenValidationErrors(res.validationErrors);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function handleEditValidationError(res: unknown): boolean {
+    if (res && typeof res === "object" && "validationErrors" in res) {
+      const ve = (res as { validationErrors?: unknown }).validationErrors;
+      if (ve) {
+        const flat = flattenValidationErrors(ve);
         setEditErrors(flat);
         toast.error(t("Validation failed"));
-      } else if ((res as { serverError?: string }).serverError) {
-        const msg = (res as { serverError?: string }).serverError as string;
-        toast.error(msg);
-        if (msg.toLowerCase().includes("already exists")) {
-          setEditErrors((prev) => ({ ...prev, slug: msg }));
-        }
-      } else {
-        toast.error(t("Something went wrong"));
+        return true;
       }
+    }
+    return false;
+  }
+
+  function handleEditServerError(res: unknown): boolean {
+    const { serverError } = res as { serverError?: string };
+    if (serverError) {
+      toast.error(serverError);
+      if (serverError.toLowerCase().includes("already exists")) {
+        setEditErrors((prev) => ({ ...prev, slug: serverError }));
+      }
+      return true;
+    }
+    return false;
+  }
+
+  async function executeEdit(): Promise<void> {
+    if (!editing) {
+      return;
+    }
+    const data = buildUpdatePayload(editForm, editing);
+    const res = await updateCategoryAction({
+      data: data as unknown as {
+        name?: string;
+        slug?: string;
+        description?: string | null;
+        icon?: string | null;
+        color?: string | null;
+        sortOrder?: number;
+        isActive?: boolean;
+      },
+      id: editing.id,
     });
+    if (handleEditSuccess(res)) {
+      return;
+    }
+    if (handleEditValidationError(res)) {
+      return;
+    }
+    if (handleEditServerError(res)) {
+      return;
+    }
+    toast.error(t("Something went wrong"));
+  }
+
+  function handleEdit() {
+    if (!editing) {
+      return;
+    }
+    const errs = getValidationErrors(editForm);
+    if (Object.keys(errs).length > 0) {
+      setEditErrors(errs);
+      return;
+    }
+    setEditErrors({});
+    startTransition(() => {
+      executeEdit();
+    });
+  }
+
+  function handleDeleteSuccess(res: unknown): boolean {
+    if (res && typeof res === "object" && "data" in res) {
+      const { data } = res as { data?: { success?: boolean } };
+      if (data?.success) {
+        if (deleting) {
+          setCategories((prev) => prev.filter((c) => c.id !== deleting.id));
+        }
+        toast.success(t("Category deleted"));
+        setDeleteOpen(false);
+        setDeleting(null);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function handleDeleteValidationError(res: unknown): boolean {
+    if (res && typeof res === "object" && "validationErrors" in res) {
+      const ve = (res as { validationErrors?: unknown }).validationErrors;
+      if (ve) {
+        const flat = flattenValidationErrors(ve);
+        setDeleteError(flat._errors ?? flat.id ?? "Validation failed");
+        toast.error(t("Validation failed"));
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function handleDeleteServerError(res: unknown): boolean {
+    const { serverError } = res as { serverError?: string };
+    if (serverError) {
+      if (
+        serverError.includes("409") ||
+        serverError.toLowerCase().includes("challenges use") ||
+        serverError.toLowerCase().includes("cannot delete")
+      ) {
+        setDeleteError(serverError);
+      }
+      toast.error(serverError);
+      return true;
+    }
+    return false;
+  }
+
+  async function executeDelete(): Promise<void> {
+    if (!deleting) {
+      return;
+    }
+    const res = await deleteCategoryAction({ id: deleting.id });
+    if (handleDeleteSuccess(res)) {
+      return;
+    }
+    if (handleDeleteValidationError(res)) {
+      return;
+    }
+    if (handleDeleteServerError(res)) {
+      return;
+    }
+    toast.error(t("Something went wrong"));
   }
 
   function handleDelete() {
@@ -285,31 +644,8 @@ export function CategoryManagement({
       return;
     }
     setDeleteError(null);
-    startTransition(async () => {
-      const res = await deleteCategoryAction({ id: deleting.id });
-      if (res?.data?.success) {
-        setCategories((prev) => prev.filter((c) => c.id !== deleting.id));
-        toast.success(t("Category deleted"));
-        setDeleteOpen(false);
-        setDeleting(null);
-      } else if (res?.validationErrors) {
-        const flat = flattenValidationErrors(res.validationErrors);
-        // delete validation is just id uuid — map to Alert
-        setDeleteError(flat._errors ?? flat.id ?? "Validation failed");
-        toast.error(t("Validation failed"));
-      } else if (res?.serverError) {
-        const msg = res.serverError;
-        if (
-          msg.includes("409") ||
-          msg.toLowerCase().includes("challenges use") ||
-          msg.toLowerCase().includes("cannot delete")
-        ) {
-          setDeleteError(msg);
-        }
-        toast.error(msg);
-      } else {
-        toast.error(t("Something went wrong"));
-      }
+    startTransition(() => {
+      executeDelete();
     });
   }
 
@@ -375,122 +711,12 @@ export function CategoryManagement({
         </div>
       </Card>
 
-      {/* Table */}
-      <Card className="overflow-hidden bg-surface shadow-xs">
-        <Table>
-          <TableHeader className="bg-inset/50">
-            <TableRow>
-              <TableHead className="px-4 py-3">{t("Name")}</TableHead>
-              <TableHead className="px-4 py-3">{t("Slug")}</TableHead>
-              <TableHead className="px-4 py-3">{t("Icon")}</TableHead>
-              <TableHead className="px-4 py-3">{t("Color")}</TableHead>
-              <TableHead className="px-4 py-3">{t("Sort order")}</TableHead>
-              <TableHead className="px-4 py-3">{t("Status")}</TableHead>
-              <TableHead className="px-4 py-3 text-end">
-                {t("Actions")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="divide-y divide-border">
-            {filtered.length > 0 ? (
-              filtered.map((cat) => (
-                <TableRow
-                  className="transition-colors hover:bg-inset/40"
-                  key={cat.id}
-                >
-                  <TableCell className="px-4 py-3.5 font-semibold text-heading text-sm">
-                    {cat.name}
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5 font-mono text-muted-foreground text-xs">
-                    {cat.slug}
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5 text-muted-foreground text-sm">
-                    {cat.icon ?? "-"}
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5">
-                    {cat.color ? (
-                      <span className="flex items-center gap-2">
-                        <span
-                          aria-label={`Color ${cat.color}`}
-                          className="inline-block h-4 w-4 shrink-0 rounded-full border border-border"
-                          style={{ backgroundColor: cat.color }}
-                        />
-                        <span className="font-mono text-muted-foreground text-xs">
-                          {cat.color}
-                        </span>
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground text-xs">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5 text-sm">
-                    {cat.sortOrder}
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5">
-                    {cat.isActive ? (
-                      <Badge variant="success">{t("Active")}</Badge>
-                    ) : (
-                      <Badge variant="secondary">{t("Inactive")}</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5 text-end">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <Button
-                        aria-label={t("Edit {name}", {
-                          name: cat.name,
-                        })}
-                        className="h-8 w-8 p-0"
-                        onClick={() => openEdit(cat)}
-                        size="icon"
-                        variant="ghost"
-                      >
-                        <Pencil size={15} />
-                      </Button>
-                      <Button
-                        aria-label={t("Delete {name}", {
-                          name: cat.name,
-                        })}
-                        className="h-8 w-8 p-0 text-rose-400 hover:bg-rose-500/10 hover:text-rose-400"
-                        onClick={() => openDelete(cat)}
-                        size="icon"
-                        variant="ghost"
-                      >
-                        <Trash2 size={15} />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  className="px-4 py-8 text-center text-muted-foreground"
-                  colSpan={7}
-                >
-                  {categories.length === 0 ? (
-                    <span className="flex flex-col items-center gap-3">
-                      <span>{t("No categories yet — create one")}</span>
-                      <Button
-                        onClick={() => {
-                          setCreateForm(EMPTY_FORM);
-                          setCreateErrors({});
-                          setCreateOpen(true);
-                        }}
-                        size="sm"
-                      >
-                        <Plus size={14} />
-                        {t("Create category")}
-                      </Button>
-                    </span>
-                  ) : (
-                    t("No categories matching filter.")
-                  )}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </Card>
+      <CategoryTable
+        categories={categories}
+        filtered={filtered}
+        onDelete={openDelete}
+        onEdit={openEdit}
+      />
 
       {/* Create Dialog */}
       <Dialog onOpenChange={setCreateOpen} open={createOpen}>

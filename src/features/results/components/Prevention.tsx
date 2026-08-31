@@ -10,13 +10,13 @@ export function Prevention({ items }: { items: string[] }) {
         {t("How to prevent this")}
       </p>
       <div className="space-y-2.5 rounded-lg border border-border bg-card p-4">
-        {items.map((t) => (
+        {items.map((item) => (
           <p
             className="flex gap-2 text-[13px] text-muted-foreground leading-relaxed"
-            key={t}
+            key={item}
           >
             <span className="select-none text-muted-foreground">•</span>
-            <span>{t}</span>
+            <span>{item}</span>
           </p>
         ))}
       </div>

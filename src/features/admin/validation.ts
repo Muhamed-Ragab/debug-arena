@@ -291,5 +291,20 @@ export const toggleUserBanOutputSchema = z
   .passthrough();
 
 export const listAdminChallengesOutputSchema = z
-  .object({ success: z.boolean() })
+  .object({
+    items: z.array(z.unknown()),
+    page: z.number(),
+    pageSize: z.number(),
+    success: z.boolean(),
+    total: z.number(),
+    totalPages: z.number(),
+  })
   .passthrough();
+
+export const adminChallengeStatsSchema = z.object({
+  aiGenerated: z.number(),
+  draft: z.number(),
+  published: z.number(),
+  success: z.boolean(),
+  total: z.number(),
+});

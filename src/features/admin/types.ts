@@ -30,6 +30,13 @@ export interface FindChallengesPaginatedOpts {
   status: "all" | "draft" | "published" | "archived";
 }
 
+export interface AdminChallengeStats {
+  aiGenerated: number;
+  draft: number;
+  published: number;
+  total: number;
+}
+
 export interface AdminRepository {
   deleteChallengeCascade: (challengeId: string) => Promise<void>;
   deleteHintsByChallengeId: (challengeId: string) => Promise<void>;
@@ -40,6 +47,7 @@ export interface AdminRepository {
   findChallengesPaginated: (
     opts: FindChallengesPaginatedOpts
   ) => Promise<{ rows: AdminChallengeRow[]; total: number }>;
+  getChallengeStats: () => Promise<AdminChallengeStats>;
   insertChallenge: (
     data: typeof schema.challenges.$inferInsert
   ) => Promise<ChallengeRow>;

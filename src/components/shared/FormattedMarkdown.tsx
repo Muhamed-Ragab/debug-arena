@@ -78,9 +78,9 @@ function CodeBlock({ code, language }: CodeBlockProps) {
                     {lineNum}
                   </td>
                   <td className="whitespace-pre ps-2 pe-4">
-                    {tokens.map((t) => (
-                      <span key={t.id} style={{ color: t.color }}>
-                        {t.text}
+                    {tokens.map((token) => (
+                      <span key={token.id} style={{ color: token.color }}>
+                        {token.text}
                       </span>
                     ))}
                   </td>

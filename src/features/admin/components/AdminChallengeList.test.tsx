@@ -168,7 +168,7 @@ describe("AdminChallengeList", () => {
     );
   });
 
-  it("renders pagination controls and page size selector", async () => {
+  it("renders pagination controls and page size selector", () => {
     renderWithProviders(<AdminChallengeList challenges={mockChallenges} />);
 
     expect(screen.getByText(/Showing/)).toBeDefined();
@@ -194,9 +194,10 @@ describe("AdminChallengeList", () => {
     await waitFor(
       () => {
         // spy should have been called at least once with debounced value
-        const calls = spy.mock.calls;
-        const lastCall = calls.at(-1)?.[0] as { search?: string } | undefined;
-        expect(lastCall?.search).toBe("Stale");
+        const { calls } = spy.mock;
+        const [lastCall] = calls.at(-1) ?? [];
+        const typedLastCall = lastCall as { search?: string } | undefined;
+        expect(typedLastCall?.search).toBe("Stale");
       },
       { timeout: 2000 }
     );
@@ -243,7 +244,6 @@ describe("AdminChallengeList", () => {
       "",
       "?search=Deadlock&page=1&pageSize=10"
     );
-    const user = userEvent.setup();
     renderWithProviders(<AdminChallengeList challenges={mockChallenges} />);
 
     await waitFor(
@@ -263,8 +263,7 @@ describe("AdminChallengeList", () => {
     // with only 1 matching item and pageSize 10, next is disabled, so change pageSize to force pagination
     // instead test that URL already contains page param
     expect(window.location.search).toContain("search=Deadlock");
-    void nextBtn;
-    void user;
+    expect(nextBtn).toBeDefined();
   });
 
   it("syncs pageSize to URL query params", async () => {

@@ -6,17 +6,17 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { toggleUserBanAction } from "@/features/admin/actions";
 
-type UserRow = {
+interface UserRow {
+  banExpires?: Date | string | null;
   banned: boolean | null;
   banReason?: string | null;
-  banExpires?: Date | string | null;
   currentRating: number;
   displayName: string | null;
   email: string;
   id: string;
   name: string | null;
   streakCount: number;
-};
+}
 
 interface Props {
   initialUsers: UserRow[];
@@ -88,39 +88,50 @@ export function UserManagementClient({ initialUsers }: Props) {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((u) => (
-                <tr className="border-border border-b last:border-0" key={u.id}>
-                  <td className="px-3 py-2 font-medium text-heading">
-                    {u.displayName || u.name || "—"}
-                  </td>
-                  <td className="px-3 py-2 text-muted-foreground">{u.email}</td>
-                  <td className="px-3 py-2">{u.currentRating}</td>
-                  <td className="px-3 py-2">{u.streakCount}</td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={
-                        u.banned ? "text-destructive" : "text-emerald-600"
-                      }
-                    >
-                      {u.banned ? t("Banned") : t("Active")}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <Button
-                      disabled={pendingId === u.id}
-                      onClick={() => toggleBan(u)}
-                      size="sm"
-                      variant={u.banned ? "outline" : "destructive"}
-                    >
-                      {pendingId === u.id
-                        ? "..."
-                        : u.banned
-                          ? t("Unban")
-                          : t("Ban")}
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+              {filtered.map((u) => {
+                let banLabel: string;
+                if (pendingId === u.id) {
+                  banLabel = "...";
+                } else if (u.banned) {
+                  banLabel = t("Unban");
+                } else {
+                  banLabel = t("Ban");
+                }
+                return (
+                  <tr
+                    className="border-border border-b last:border-0"
+                    key={u.id}
+                  >
+                    <td className="px-3 py-2 font-medium text-heading">
+                      {u.displayName || u.name || "—"}
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {u.email}
+                    </td>
+                    <td className="px-3 py-2">{u.currentRating}</td>
+                    <td className="px-3 py-2">{u.streakCount}</td>
+                    <td className="px-3 py-2">
+                      <span
+                        className={
+                          u.banned ? "text-destructive" : "text-emerald-600"
+                        }
+                      >
+                        {u.banned ? t("Banned") : t("Active")}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2">
+                      <Button
+                        disabled={pendingId === u.id}
+                        onClick={() => toggleBan(u)}
+                        size="sm"
+                        variant={u.banned ? "outline" : "destructive"}
+                      >
+                        {banLabel}
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -10,7 +10,7 @@ export const submitChallengeAction = authActionClient
   .inputSchema(submitChallengeSchema)
   .outputSchema(submitChallengeOutputSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const role = (ctx.user as { role?: string }).role;
+    const { role } = ctx.user;
     if (role === "admin") {
       throw new ActionError("error.forbiddenAdminSubmit");
     }

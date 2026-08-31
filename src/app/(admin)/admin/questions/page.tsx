@@ -12,14 +12,14 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-type SearchParams = {
+interface SearchParams {
   difficulty?: string;
   page?: string;
   pageSize?: string;
   search?: string;
   source?: string;
   status?: string;
-};
+}
 
 export default async function AdminQuestionsRoute({
   searchParams,
@@ -50,17 +50,18 @@ export default async function AdminQuestionsRoute({
           status: "all" as const,
         };
 
-    const [categories, challenges, paginated] = await Promise.all([
+    const [categories, stats, paginated] = await Promise.all([
       adminService.getAdminCategories(),
-      adminService.getAdminChallenges(),
+      adminService.getAdminChallengeStats(),
       adminService.getAdminChallengesPaginated(opts),
     ]);
     return (
       <AdminQuestionsPage
         categories={categories}
-        challenges={challenges}
+        challenges={paginated.items}
         initialChallenges={paginated.items}
         initialTotal={paginated.total}
+        stats={stats}
       />
     );
   } catch (err) {

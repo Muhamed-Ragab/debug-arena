@@ -3,6 +3,8 @@ import { NotFoundError } from "@/lib/safe-action";
 import { adminRepository } from "./repository";
 import type {
   AdminChallengeItem,
+  AdminChallengeRow,
+  AdminChallengeStats,
   AdminRepository,
   FindChallengesPaginatedOpts,
   SaveChallengeInput,
@@ -93,24 +95,7 @@ export function createAdminService(repo: AdminRepository = adminRepository) {
     return await repo.findCategories();
   }
 
-  function toAdminChallengeItem(c: {
-    buggyArtifact: unknown;
-    category: { name: string; slug: string };
-    categoryId: string;
-    createdAt: Date;
-    difficulty: "easy" | "medium" | "hard";
-    format: "code_snippet" | "log_only" | "ui_recording";
-    hints: unknown[];
-    id: string;
-    preventionNotes: string | null;
-    prompt: string;
-    referenceFix: unknown;
-    rootCauseSummary: string;
-    source: "manual" | "ai_generated" | "postmortem_import";
-    status: "draft" | "published" | "archived";
-    submissions: { fixCorrect: boolean | null; totalScore: number | null }[];
-    title: string;
-  }): AdminChallengeItem {
+  function toAdminChallengeItem(c: AdminChallengeRow): AdminChallengeItem {
     return {
       buggyArtifact: c.buggyArtifact,
       categoryId: c.categoryId,
@@ -135,17 +120,23 @@ export function createAdminService(repo: AdminRepository = adminRepository) {
     };
   }
 
-  async function getAdminChallenges() {
+  async function getAdminChallenges(): Promise<AdminChallengeItem[]> {
     const raw = await repo.findChallenges();
-    return raw.map((c) => toAdminChallengeItem(c as never));
+    return raw.map((c) => toAdminChallengeItem(c));
   }
 
   async function getAdminChallengesPaginated(
     opts: FindChallengesPaginatedOpts
-  ) {
+  ): Promise<{
+    items: AdminChallengeItem[];
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  }> {
     const { rows, total } = await repo.findChallengesPaginated(opts);
-    const items = rows.map((c) => toAdminChallengeItem(c as never));
-    const totalPages = Math.ceil(total / opts.pageSize);
+    const items = rows.map((c) => toAdminChallengeItem(c));
+    const totalPages = total === 0 ? 0 : Math.ceil(total / opts.pageSize);
     return {
       items,
       page: opts.page,
@@ -153,6 +144,10 @@ export function createAdminService(repo: AdminRepository = adminRepository) {
       total,
       totalPages,
     };
+  }
+
+  function getAdminChallengeStats(): Promise<AdminChallengeStats> {
+    return repo.getChallengeStats();
   }
 
   async function getAdminChallengeById(challengeId: string) {
@@ -173,6 +168,7 @@ export function createAdminService(repo: AdminRepository = adminRepository) {
     generateQuestionDraft,
     getAdminCategories,
     getAdminChallengeById,
+    getAdminChallengeStats,
     getAdminChallenges,
     getAdminChallengesPaginated,
     getAdminUsers,

@@ -54,6 +54,7 @@ import { useAdminChallenges } from "../hooks/useAdminChallenges";
 import type { AdminChallengeItem } from "../types";
 
 interface AdminChallengeListProps {
+  /** @deprecated use initialChallenges/initialTotal instead */
   challenges?: AdminChallengeItem[];
   initialChallenges?: AdminChallengeItem[];
   initialTotal?: number;
@@ -113,7 +114,7 @@ export function AdminChallengeList({
             ? t("Challenge published live to the arena!")
             : t("Challenge status set to draft.")
         );
-        refetch();
+        await refetch();
         onRefresh?.();
       } else if (res?.validationErrors) {
         const flat = flattenValidationErrors(res.validationErrors);
@@ -145,7 +146,7 @@ export function AdminChallengeList({
       });
       if (res?.data?.success) {
         toast.success(t("Challenge deleted successfully."));
-        refetch();
+        await refetch();
         onRefresh?.();
         setDeleteTargetId(null);
       } else if (res?.validationErrors) {

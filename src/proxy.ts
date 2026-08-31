@@ -66,7 +66,10 @@ function extractLocaleFromI18nResponse(
   requestUrl?: string
 ): string {
   const headerLocale = response.headers.get("x-next-intl-locale");
-  if (headerLocale && (routing.locales as readonly string[]).includes(headerLocale)) {
+  if (
+    headerLocale &&
+    (routing.locales as readonly string[]).includes(headerLocale)
+  ) {
     return headerLocale;
   }
 
