@@ -1,6 +1,4 @@
 "use client";
-
-import { useExtracted } from "next-intl";
 import type { ScorePart } from "../types";
 
 function getScoreColor(pct: number): string {
@@ -14,11 +12,10 @@ function getScoreColor(pct: number): string {
 }
 
 export function ScoreBreakdown({ parts }: { parts: ScorePart[] }) {
-  const t = useExtracted();
   return (
     <div>
       <p className="mb-3 font-mono text-[11px] text-muted-foreground uppercase tracking-widest">
-        {t("Score breakdown")}
+        {"Score breakdown"}
       </p>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {parts.map((part) => {

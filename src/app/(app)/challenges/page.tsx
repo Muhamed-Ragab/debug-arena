@@ -1,5 +1,6 @@
 import { OfflineBanner } from "@/components/shared/offline-banner";
 import { ChallengeBrowser } from "@/features/browser/components/ChallengeBrowser";
+import { categoryService } from "@/features/category/service";
 import { challengeService } from "@/features/challenge/service";
 import { getServerSession } from "@/lib/auth/session";
 import type { Category, Challenge, Difficulty } from "@/lib/domain/types";
@@ -17,11 +18,15 @@ export default async function ChallengesPage() {
   let userStats: Awaited<
     ReturnType<typeof challengeService.getUserChallengeStats>
   >;
+  let categories: Awaited<
+    ReturnType<typeof categoryService.getActiveCategories>
+  >;
 
   try {
-    [dbChallenges, userStats] = await Promise.all([
+    [dbChallenges, userStats, categories] = await Promise.all([
       challengeService.getPublishedChallenges(),
       challengeService.getUserChallengeStats(userId),
+      categoryService.getActiveCategories(),
     ]);
   } catch (err) {
     console.error("[ChallengesPage] Failed to load:", err);
@@ -34,6 +39,7 @@ export default async function ChallengesPage() {
           <OfflineBanner message={message} variant={variant} />
         </div>
         <ChallengeBrowser
+          categories={[]}
           initialChallenges={[]}
           stats={[
             { label: "browser.stats.solved", value: "0 / 0" },
@@ -65,6 +71,9 @@ export default async function ChallengesPage() {
 
     return {
       category: c.categoryName as Category,
+      categoryColor: c.categoryColor,
+      categoryIcon: c.categoryIcon,
+      categorySlug: c.categorySlug,
       difficulty: diff,
       filePath: artifact.entryFile ?? "main.ts",
       id: c.id,
@@ -86,6 +95,7 @@ export default async function ChallengesPage() {
 
   return (
     <ChallengeBrowser
+      categories={categories}
       initialChallenges={formattedChallenges}
       stats={statsProps}
     />

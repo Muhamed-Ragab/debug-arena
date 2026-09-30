@@ -1,6 +1,4 @@
 "use client";
-
-import { useExtracted } from "next-intl";
 import { isOfflineCause, isOfflineError } from "@/lib/offline";
 
 interface GlobalErrorProps {
@@ -32,16 +30,15 @@ export default function GlobalError({
   error: boundaryError,
   reset,
 }: GlobalErrorProps) {
-  const t = useExtracted();
   const { cause } = boundaryError as Error & { cause?: unknown };
   const offline = isOfflineError(boundaryError) || isOfflineCause(cause);
 
   const variant: "offline" | "generic" = offline ? "offline" : "generic";
   const title =
-    variant === "offline" ? t("You are offline") : t("Something went wrong");
+    variant === "offline" ? "You are offline" : "Something went wrong";
   const message = offline
-    ? t("Service temporarily unavailable. Please try again.")
-    : t("Something went wrong");
+    ? "Service temporarily unavailable. Please try again."
+    : "Something went wrong";
   const containerClass = getContainerClass(variant);
 
   const headingClass =
@@ -66,13 +63,13 @@ export default function GlobalError({
               onClick={reset}
               type="button"
             >
-              {t("Try again")}
+              {"Try again"}
             </button>
           </div>
           {boundaryError.digest !== undefined &&
           boundaryError.digest.length > 0 ? (
             <p className="mt-3 text-center text-muted-foreground text-xs">
-              {t("Error ID: {digest}", { digest: boundaryError.digest })}
+              {`Error ID: ${boundaryError.digest}`}
             </p>
           ) : null}
         </div>

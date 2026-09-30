@@ -9,18 +9,13 @@ import {
   Radar,
 } from "lucide-react";
 import Link from "next/link";
-import { useExtracted } from "next-intl";
 import { Logo } from "@/components/layout/Logo";
-import { LanguageSwitcher } from "@/components/preferences/LanguageSwitcher";
 import { ThemeToggle } from "@/components/preferences/ThemeToggle";
 import { buttonVariants } from "@/components/ui/button";
 import { SignOutButton } from "@/features/auth/components/SignOutButton";
+import type { CategoryDTO } from "@/features/category/types";
 import { useSession } from "@/lib/auth/client";
-import {
-  CATEGORY_CONFIG,
-  CATEGORY_ORDER,
-  type Category,
-} from "@/lib/domain/categories";
+import { getCategoryAppearance } from "@/lib/domain/categories";
 
 function HeroBackdrop() {
   return (
@@ -108,78 +103,32 @@ function HeroSnippet() {
   );
 }
 
-const _FEATURES: Array<{
-  bodyKey: string;
-  category: Category;
-  icon: typeof GitBranch;
-  titleKey: string;
-}> = [
-  {
-    bodyKey: "landing.features.realBugClasses.body",
-    category: "State Mutations",
-    icon: GitBranch,
-    titleKey: "landing.features.realBugClasses.title",
-  },
-  {
-    bodyKey: "landing.features.explainRootCause.body",
-    category: "Race Conditions",
-    icon: Microscope,
-    titleKey: "landing.features.explainRootCause.title",
-  },
-  {
-    bodyKey: "landing.features.hiddenTests.body",
-    category: "Security Flaws",
-    icon: Bot,
-    titleKey: "landing.features.hiddenTests.title",
-  },
-  {
-    bodyKey: "landing.features.weakSpotAnalytics.body",
-    category: "Memory Leaks",
-    icon: Radar,
-    titleKey: "landing.features.weakSpotAnalytics.title",
-  },
-];
-
 function FeatureBlocks() {
-  const t = useExtracted();
   const features = [
     {
-      body: t(
-        "React rendering, state mutation, race conditions, memory leaks — the bugs that actually page you, not toy algorithms."
-      ),
-      category: "State Mutations" as Category,
+      body: "React rendering, state mutation, race conditions, memory leaks — the bugs that actually page you, not toy algorithms.",
       icon: GitBranch,
-      title: t("Real bug classes"),
+      title: "Real bug classes",
     },
     {
-      body: t(
-        "The graded deliverable is the diagnosis, not a passing test. You prove you understood the bug, not just that you patched it."
-      ),
-      category: "Race Conditions" as Category,
+      body: "The graded deliverable is the diagnosis, not a passing test. You prove you understood the bug, not just that you patched it.",
       icon: Microscope,
-      title: t("Explain the root cause"),
+      title: "Explain the root cause",
     },
     {
-      body: t(
-        "Your fix runs against hidden tests, then an agent grades the explanation against the canonical root cause."
-      ),
-      category: "Security Flaws" as Category,
+      body: "Your fix runs against hidden tests, then an agent grades the explanation against the canonical root cause.",
       icon: Bot,
-      title: t("Hidden tests + grading agent"),
+      title: "Hidden tests + grading agent",
     },
     {
-      body: t(
-        "A per-category radar shows exactly where you keep getting paged, so practice targets your real gaps."
-      ),
-      category: "Memory Leaks" as Category,
+      body: "A per-category radar shows exactly where you keep getting paged, so practice targets your real gaps.",
       icon: Radar,
-      title: t("Weak-spot analytics"),
+      title: "Weak-spot analytics",
     },
   ];
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {features.map((f) => {
-        const cfg = CATEGORY_CONFIG[f.category];
         const Icon = f.icon;
         return (
           <div
@@ -189,17 +138,11 @@ function FeatureBlocks() {
             <div
               className="absolute inset-x-0 top-0 h-px opacity-60"
               style={{
-                background: `linear-gradient(90deg, transparent, ${cfg.color}, transparent)`,
+                background:
+                  "linear-gradient(90deg, transparent, var(--primary), transparent)",
               }}
             />
-            <div
-              className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg border"
-              style={{
-                backgroundColor: cfg.bg,
-                borderColor: cfg.border,
-                color: cfg.color,
-              }}
-            >
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
               <Icon size={18} />
             </div>
             <h3 className="font-semibold text-[15px] text-heading">
@@ -215,26 +158,15 @@ function FeatureBlocks() {
   );
 }
 
-function CategoryChips() {
-  const t = useExtracted();
-  const labels: Record<Category, string> = {
-    "Backend Concurrency": t("Backend Concurrency"),
-    "Logic Inversions": t("Logic Inversions"),
-    "Memory Leaks": t("Memory Leaks"),
-    "Off-by-One": t("Off-by-One"),
-    "Race Conditions": t("Race Conditions"),
-    "React Rendering": t("React Rendering"),
-    "Security Flaws": t("Security Flaws"),
-    "State Mutations": t("State Mutations"),
-  };
+function CategoryChips({ categories }: { categories: CategoryDTO[] }) {
   return (
     <div className="flex flex-wrap gap-2">
-      {CATEGORY_ORDER.map((c) => {
-        const cfg = CATEGORY_CONFIG[c];
+      {categories.map((category) => {
+        const cfg = getCategoryAppearance(category);
         return (
           <span
             className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium text-[11px]"
-            key={c}
+            key={category.id}
             style={{
               backgroundColor: cfg.bg,
               border: `1px solid ${cfg.border}`,
@@ -245,7 +177,7 @@ function CategoryChips() {
               className="h-1.5 w-1.5 rounded-full"
               style={{ backgroundColor: cfg.color }}
             />
-            {labels[c]}
+            {category.name}
           </span>
         );
       })}
@@ -253,18 +185,17 @@ function CategoryChips() {
   );
 }
 
-function SocialProof() {
-  const t = useExtracted();
+function SocialProof({ categoryCount }: { categoryCount: number }) {
   const STATS = [
-    { label: t("bugs diagnosed"), value: "12k" },
-    { label: t("bug classes"), value: "6" },
-    { label: t("hidden-test grading"), value: "100%" },
+    { label: "bugs diagnosed", value: "12k" },
+    { label: "bug classes", value: String(categoryCount) },
+    { label: "hidden-test grading", value: "100%" },
   ];
   return (
     <div className="border-border border-t bg-surface/60">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-8">
         <p className="text-center font-medium text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
-          {t("Trusted by engineers who would rather not get paged twice")}
+          {"Trusted by engineers who would rather not get paged twice"}
         </p>
         <div className="mt-6 flex flex-col items-center justify-center gap-8 sm:flex-row sm:gap-16">
           {STATS.map((s) => (
@@ -290,8 +221,7 @@ function SocialProof() {
   );
 }
 
-export function LandingPage() {
-  const t = useExtracted();
+export function LandingPage({ categories }: { categories: CategoryDTO[] }) {
   const { data: session } = useSession();
 
   return (
@@ -301,7 +231,6 @@ export function LandingPage() {
           <Logo />
           <nav className="flex items-center gap-2 sm:gap-3">
             <div className="me-4 hidden items-center gap-2 sm:flex">
-              <LanguageSwitcher />
               <ThemeToggle />
             </div>
             {session?.user ? (
@@ -310,7 +239,7 @@ export function LandingPage() {
                   className={buttonVariants({ size: "sm", variant: "default" })}
                   href="/challenges"
                 >
-                  {t("Enter Arena")}
+                  {"Enter Arena"}
                 </Link>
                 <SignOutButton
                   className="text-xs"
@@ -325,13 +254,13 @@ export function LandingPage() {
                   className={buttonVariants({ size: "sm", variant: "ghost" })}
                   href="/login"
                 >
-                  {t("Log in")}
+                  {"Log in"}
                 </Link>
                 <Link
                   className={buttonVariants({ size: "sm", variant: "default" })}
                   href="/register"
                 >
-                  {t("Sign up")}
+                  {"Sign up"}
                 </Link>
               </>
             )}
@@ -345,29 +274,29 @@ export function LandingPage() {
           <div>
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 font-medium text-[11px] text-muted-foreground">
               <Bug className="text-primary" size={13} />
-              {t("LeetCode for debugging")}
+              {"LeetCode for debugging"}
             </div>
             <h1 className="text-balance font-semibold text-4xl text-heading leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-              {t("Debug like it's 2am on call.")}
+              {"Debug like it's 2am on call."}
             </h1>
             <p className="mt-5 max-w-xl text-pretty text-base text-body leading-relaxed sm:text-lg">
-              {t(
+              {
                 "LeetCode for debugging — practice root-cause diagnosis on real-world bugs, not toy algorithms."
-              )}
+              }
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 className={buttonVariants({ size: "lg", variant: "default" })}
                 href="/challenges"
               >
-                {t("Start a challenge")}
+                {"Start a challenge"}
                 <ArrowRight size={16} />
               </Link>
               <Link
                 className={buttonVariants({ size: "lg", variant: "outline" })}
                 href="/challenges"
               >
-                {t("See how grading works")}
+                {"See how grading works"}
               </Link>
             </div>
           </div>
@@ -378,15 +307,15 @@ export function LandingPage() {
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-8">
         <div className="mb-10 max-w-2xl">
           <h2 className="font-semibold text-2xl text-heading tracking-tight sm:text-3xl">
-            {t("Practice the bugs that actually page you.")}
+            {"Practice the bugs that actually page you."}
           </h2>
           <p className="mt-3 text-muted-foreground text-sm leading-relaxed">
-            {t(
-              "Four bug classes, one graded deliverable: the diagnosis. Pick your weak spot and train it."
-            )}
+            {
+              "Explore the categories and practice one graded deliverable: the diagnosis. Pick your weak spot and train it."
+            }
           </p>
           <div className="mt-5">
-            <CategoryChips />
+            <CategoryChips categories={categories} />
           </div>
         </div>
 
@@ -394,40 +323,38 @@ export function LandingPage() {
 
         <div className="mt-12 flex flex-col items-center gap-4 rounded-xl border border-border bg-card px-6 py-10 text-center">
           <h3 className="font-semibold text-heading text-lg">
-            {t("Ready to find out why it broke?")}
+            {"Ready to find out why it broke?"}
           </h3>
           <Link
             className={buttonVariants({ size: "lg", variant: "default" })}
             href="/challenges"
           >
-            {t("Start a challenge")}
+            {"Start a challenge"}
             <ArrowRight size={16} />
           </Link>
         </div>
       </section>
 
-      <SocialProof />
+      <SocialProof categoryCount={categories.length} />
 
       <footer className="border-border border-t bg-surface/60">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 text-muted-foreground text-xs sm:flex-row sm:px-8">
           <Logo />
           <p>
-            {t("© {year} Debug Arena. Diagnose, don't guess.", {
-              year: String(new Date().getFullYear()),
-            })}
+            {`© ${String(new Date().getFullYear())} Debug Arena. Diagnose, don't guess.`}
           </p>
           <div className="flex items-center gap-4">
             <Link
               className="transition-colors hover:text-foreground"
               href="/login"
             >
-              {t("Log in")}
+              {"Log in"}
             </Link>
             <Link
               className="transition-colors hover:text-foreground"
               href="/register"
             >
-              {t("Sign up")}
+              {"Sign up"}
             </Link>
           </div>
         </div>

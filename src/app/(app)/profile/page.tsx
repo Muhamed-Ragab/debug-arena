@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { categoryService } from "@/features/category/service";
 import { ProfilePage } from "@/features/profile/ProfilePage";
 import { profileService } from "@/features/profile/service";
 import { getServerSession } from "@/lib/auth/session";
@@ -11,7 +12,10 @@ export default async function Page() {
     redirect("/login");
   }
 
-  const profileData = await profileService.getUserProfileData(session.user.id);
+  const [profileData, categories] = await Promise.all([
+    profileService.getUserProfileData(session.user.id),
+    categoryService.getActiveCategories(),
+  ]);
 
-  return <ProfilePage data={profileData} />;
+  return <ProfilePage categories={categories} data={profileData} />;
 }

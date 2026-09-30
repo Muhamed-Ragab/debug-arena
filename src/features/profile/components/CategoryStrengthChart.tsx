@@ -1,6 +1,4 @@
 "use client";
-
-import { useExtracted } from "next-intl";
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -17,14 +15,13 @@ import {
 import type { RadarPoint } from "../types";
 
 export function CategoryStrengthChart({ data }: { data: RadarPoint[] }) {
-  const t = useExtracted();
   const chartConfig = {
-    score: { color: "#6366f1", label: t("Score") },
+    score: { color: "#6366f1", label: "Score" },
   } satisfies ChartConfig;
   return (
     <div className="rounded-lg border border-border bg-card p-5">
       <p className="mb-4 font-mono text-[11px] text-muted-foreground uppercase tracking-widest">
-        {t("Category strength")}
+        {"Category strength"}
       </p>
       <ChartContainer className="h-[220px] w-full" config={chartConfig}>
         <RadarChart accessibilityLayer data={data}>

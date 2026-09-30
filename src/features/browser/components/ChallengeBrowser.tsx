@@ -1,13 +1,13 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useChallengeFilters } from "@/features/browser/hooks/useChallengeFilters";
-import type { Category, Challenge, Difficulty } from "@/lib/domain/types";
+import type { CategoryDTO } from "@/features/category/types";
+import type { Challenge, Difficulty } from "@/lib/domain/types";
 import { ChallengeCard } from "./ChallengeCard";
 import { ChallengeFilters } from "./ChallengeFilters";
 
@@ -19,23 +19,24 @@ export interface ChallengeBrowserStat {
 }
 
 export function ChallengeBrowser({
+  categories,
   initialChallenges,
   stats,
 }: {
+  categories: CategoryDTO[];
   initialChallenges: Challenge[];
   stats: ChallengeBrowserStat[];
 }) {
-  const t = useExtracted();
   const [page, setPage] = useState(1);
 
   const getStatLabel = (key: string): string => {
     switch (key) {
       case "browser.stats.solved":
-        return t("Solved");
+        return "Solved";
       case "browser.stats.currentStreak":
-        return t("Current Streak");
+        return "Current Streak";
       case "browser.stats.rank":
-        return t("Rank");
+        return "Rank";
       default:
         return key;
     }
@@ -60,17 +61,15 @@ export function ChallengeBrowser({
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <TopBar crumbs={[{ label: t("Arena") }, { label: t("Challenges") }]} />
+      <TopBar crumbs={[{ label: "Arena" }, { label: "Challenges" }]} />
 
       <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
         <div className="mb-6">
           <h1 className="font-semibold text-2xl text-heading tracking-tight">
-            {t("Challenges")}
+            {"Challenges"}
           </h1>
           <p className="mt-1 text-muted-foreground text-sm">
-            {t(
-              "Pick a bug, read the scenario, and ship a root-cause diagnosis."
-            )}
+            {"Pick a bug, read the scenario, and ship a root-cause diagnosis."}
           </p>
         </div>
 
@@ -89,7 +88,8 @@ export function ChallengeBrowser({
 
         <div className="mb-6">
           <ChallengeFilters
-            category={(catFilter ?? "all") as Category | "all"}
+            categories={categories}
+            category={catFilter ?? "all"}
             difficulty={(diffFilter ?? "all") as Difficulty | "all"}
             onCategory={(c) => {
               setCatFilter(c === "all" ? null : c);
@@ -112,7 +112,7 @@ export function ChallengeBrowser({
 
         {pageItems.length === 0 && (
           <div className="flex h-40 items-center justify-center text-muted-foreground text-sm">
-            {t("No challenges match the current filters.")}
+            {"No challenges match the current filters."}
           </div>
         )}
 

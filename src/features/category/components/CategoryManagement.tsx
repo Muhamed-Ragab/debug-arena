@@ -1,7 +1,6 @@
 "use client";
 
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -242,19 +241,18 @@ function CategoryTable({
   onDelete: (cat: CategoryDTO) => void;
   onEdit: (cat: CategoryDTO) => void;
 }) {
-  const t = useExtracted();
   return (
     <Card className="overflow-hidden bg-surface shadow-xs">
       <Table>
         <TableHeader className="bg-inset/50">
           <TableRow>
-            <TableHead className="px-4 py-3">{t("Name")}</TableHead>
-            <TableHead className="px-4 py-3">{t("Slug")}</TableHead>
-            <TableHead className="px-4 py-3">{t("Icon")}</TableHead>
-            <TableHead className="px-4 py-3">{t("Color")}</TableHead>
-            <TableHead className="px-4 py-3">{t("Sort order")}</TableHead>
-            <TableHead className="px-4 py-3">{t("Status")}</TableHead>
-            <TableHead className="px-4 py-3 text-end">{t("Actions")}</TableHead>
+            <TableHead className="px-4 py-3">{"Name"}</TableHead>
+            <TableHead className="px-4 py-3">{"Slug"}</TableHead>
+            <TableHead className="px-4 py-3">{"Icon"}</TableHead>
+            <TableHead className="px-4 py-3">{"Color"}</TableHead>
+            <TableHead className="px-4 py-3">{"Sort order"}</TableHead>
+            <TableHead className="px-4 py-3">{"Status"}</TableHead>
+            <TableHead className="px-4 py-3 text-end">{"Actions"}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="divide-y divide-border">
@@ -295,15 +293,15 @@ function CategoryTable({
                 </TableCell>
                 <TableCell className="px-4 py-3.5">
                   {cat.isActive ? (
-                    <Badge variant="success">{t("Active")}</Badge>
+                    <Badge variant="success">{"Active"}</Badge>
                   ) : (
-                    <Badge variant="secondary">{t("Inactive")}</Badge>
+                    <Badge variant="secondary">{"Inactive"}</Badge>
                   )}
                 </TableCell>
                 <TableCell className="px-4 py-3.5 text-end">
                   <div className="flex items-center justify-end gap-1.5">
                     <Button
-                      aria-label={t("Edit {name}", { name: cat.name })}
+                      aria-label={`Edit ${cat.name}`}
                       className="h-8 w-8 p-0"
                       onClick={() => onEdit(cat)}
                       size="icon"
@@ -312,7 +310,7 @@ function CategoryTable({
                       <Pencil size={15} />
                     </Button>
                     <Button
-                      aria-label={t("Delete {name}", { name: cat.name })}
+                      aria-label={`Delete ${cat.name}`}
                       className="h-8 w-8 p-0 text-rose-400 hover:bg-rose-500/10 hover:text-rose-400"
                       onClick={() => onDelete(cat)}
                       size="icon"
@@ -332,13 +330,13 @@ function CategoryTable({
               >
                 {categories.length === 0 ? (
                   <span className="flex flex-col items-center gap-3">
-                    <span>{t("No categories yet — create one")}</span>
+                    <span>{"No categories yet — create one"}</span>
                     <span className="text-muted-foreground text-xs">
-                      {t("No categories matching filter.")}
+                      {"No categories matching filter."}
                     </span>
                   </span>
                 ) : (
-                  t("No categories matching filter.")
+                  "No categories matching filter."
                 )}
               </TableCell>
             </TableRow>
@@ -352,7 +350,6 @@ function CategoryTable({
 export function CategoryManagement({
   categories: initialCategories,
 }: CategoryManagementProps) {
-  const t = useExtracted();
   const [categories, setCategories] = useState<CategoryDTO[]>(
     [...initialCategories].sort((a, b) => a.sortOrder - b.sortOrder)
   );
@@ -382,23 +379,21 @@ export function CategoryManagement({
   function translateMessage(raw: string): string {
     switch (raw) {
       case "Name must be at least 2 characters":
-        return t("Name must be at least 2 characters");
+        return "Name must be at least 2 characters";
       case "Name must be at most 80 characters":
-        return t("Name must be at most 80 characters");
+        return "Name must be at most 80 characters";
       case "Slug must be 2-50 characters":
-        return t("Slug must be 2-50 characters");
+        return "Slug must be 2-50 characters";
       case "Slug must contain only lowercase letters, numbers and hyphens":
-        return t(
-          "Slug must contain only lowercase letters, numbers and hyphens"
-        );
+        return "Slug must contain only lowercase letters, numbers and hyphens";
       case "Invalid hex color (e.g. #3b82f6)":
-        return t("Invalid hex color (e.g. #3b82f6)");
+        return "Invalid hex color (e.g. #3b82f6)";
       case "Icon must be at most 50 characters":
-        return t("Icon must be at most 50 characters");
+        return "Icon must be at most 50 characters";
       case "Description must be at most 500 characters":
-        return t("Description must be at most 500 characters");
+        return "Description must be at most 500 characters";
       case "Sort order must be an integer 0-1000":
-        return t("Sort order must be an integer 0-1000");
+        return "Sort order must be an integer 0-1000";
       default:
         return raw;
     }
@@ -423,7 +418,7 @@ export function CategoryManagement({
         setCategories((prev) =>
           [...prev, newCat].sort((a, b) => a.sortOrder - b.sortOrder)
         );
-        toast.success(t("Category created"));
+        toast.success("Category created");
         setCreateOpen(false);
         setCreateForm(EMPTY_FORM);
         return true;
@@ -438,7 +433,7 @@ export function CategoryManagement({
       if (ve) {
         const flat = flattenValidationErrors(ve);
         setCreateErrors(flat);
-        toast.error(t("Validation failed"));
+        toast.error("Validation failed");
         return true;
       }
     }
@@ -472,7 +467,7 @@ export function CategoryManagement({
     if (handleCreateServerError(res)) {
       return;
     }
-    toast.error(t("Something went wrong"));
+    toast.error("Something went wrong");
   }
 
   function handleCreate() {
@@ -499,7 +494,7 @@ export function CategoryManagement({
             .map((c) => (c.id === updated.id ? updated : c))
             .sort((a, b) => a.sortOrder - b.sortOrder)
         );
-        toast.success(t("Category updated"));
+        toast.success("Category updated");
         setEditOpen(false);
         setEditing(null);
         return true;
@@ -514,7 +509,7 @@ export function CategoryManagement({
       if (ve) {
         const flat = flattenValidationErrors(ve);
         setEditErrors(flat);
-        toast.error(t("Validation failed"));
+        toast.error("Validation failed");
         return true;
       }
     }
@@ -559,7 +554,7 @@ export function CategoryManagement({
     if (handleEditServerError(res)) {
       return;
     }
-    toast.error(t("Something went wrong"));
+    toast.error("Something went wrong");
   }
 
   function handleEdit() {
@@ -584,7 +579,7 @@ export function CategoryManagement({
         if (deleting) {
           setCategories((prev) => prev.filter((c) => c.id !== deleting.id));
         }
-        toast.success(t("Category deleted"));
+        toast.success("Category deleted");
         setDeleteOpen(false);
         setDeleting(null);
         return true;
@@ -599,7 +594,7 @@ export function CategoryManagement({
       if (ve) {
         const flat = flattenValidationErrors(ve);
         setDeleteError(flat._errors ?? flat.id ?? "Validation failed");
-        toast.error(t("Validation failed"));
+        toast.error("Validation failed");
         return true;
       }
     }
@@ -636,7 +631,7 @@ export function CategoryManagement({
     if (handleDeleteServerError(res)) {
       return;
     }
-    toast.error(t("Something went wrong"));
+    toast.error("Something went wrong");
   }
 
   function handleDelete() {
@@ -668,10 +663,10 @@ export function CategoryManagement({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-bold text-2xl text-heading tracking-tight">
-            {t("Categories")}
+            {"Categories"}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {t("Manage challenge categories — sorted by sort order.")}
+            {"Manage challenge categories — sorted by sort order."}
           </p>
         </div>
         <Button
@@ -682,7 +677,7 @@ export function CategoryManagement({
           }}
         >
           <Plus size={16} />
-          {t("Create category")}
+          {"Create category"}
         </Button>
       </div>
 
@@ -690,22 +685,22 @@ export function CategoryManagement({
       <Card className="bg-surface/70 p-4">
         <div className="flex items-center gap-3">
           <span className="font-medium text-muted-foreground text-xs">
-            {t("Filter:")}
+            {"Filter:"}
           </span>
           <Select
             onValueChange={(v) => setFilter(v as FilterValue)}
             value={filter}
           >
             <SelectTrigger
-              aria-label={t("Filter by status")}
+              aria-label={"Filter by status"}
               className="h-9 min-w-36 rounded-lg border-border bg-inset px-3 text-foreground text-xs"
             >
-              <SelectValue placeholder={t("All categories")} />
+              <SelectValue placeholder={"All categories"} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("All categories")}</SelectItem>
-              <SelectItem value="active">{t("Active only")}</SelectItem>
-              <SelectItem value="inactive">{t("Inactive only")}</SelectItem>
+              <SelectItem value="all">{"All categories"}</SelectItem>
+              <SelectItem value="active">{"Active only"}</SelectItem>
+              <SelectItem value="inactive">{"Inactive only"}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -722,20 +717,20 @@ export function CategoryManagement({
       <Dialog onOpenChange={setCreateOpen} open={createOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("Create category")}</DialogTitle>
+            <DialogTitle>{"Create category"}</DialogTitle>
             <DialogDescription>
-              {t("Add a new challenge category.")}
+              {"Add a new challenge category."}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="create-name">{t("Name")}</Label>
+              <Label htmlFor="create-name">{"Name"}</Label>
               <Input
                 id="create-name"
                 onChange={(e) =>
                   setCreateForm((p) => ({ ...p, name: e.target.value }))
                 }
-                placeholder={t("React Rendering")}
+                placeholder={"React Rendering"}
                 value={createForm.name}
               />
               {Boolean(createErrors.name) && (
@@ -746,14 +741,14 @@ export function CategoryManagement({
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="create-slug">
-                {t("Slug (optional — auto-generated)")}
+                {"Slug (optional — auto-generated)"}
               </Label>
               <Input
                 id="create-slug"
                 onChange={(e) =>
                   setCreateForm((p) => ({ ...p, slug: e.target.value }))
                 }
-                placeholder={t("react-rendering")}
+                placeholder={"react-rendering"}
                 value={createForm.slug}
               />
               {Boolean(createErrors.slug) && (
@@ -763,13 +758,13 @@ export function CategoryManagement({
               )}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="create-description">{t("Description")}</Label>
+              <Label htmlFor="create-description">{"Description"}</Label>
               <Input
                 id="create-description"
                 onChange={(e) =>
                   setCreateForm((p) => ({ ...p, description: e.target.value }))
                 }
-                placeholder={t("Short description")}
+                placeholder={"Short description"}
                 value={createForm.description}
               />
               {Boolean(createErrors.description) && (
@@ -780,13 +775,13 @@ export function CategoryManagement({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="create-icon">{t("Icon")}</Label>
+                <Label htmlFor="create-icon">{"Icon"}</Label>
                 <Input
                   id="create-icon"
                   onChange={(e) =>
                     setCreateForm((p) => ({ ...p, icon: e.target.value }))
                   }
-                  placeholder={t("Layers")}
+                  placeholder={"Layers"}
                   value={createForm.icon}
                 />
                 {Boolean(createErrors.icon) && (
@@ -796,13 +791,13 @@ export function CategoryManagement({
                 )}
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="create-color">{t("Color")}</Label>
+                <Label htmlFor="create-color">{"Color"}</Label>
                 <Input
                   id="create-color"
                   onChange={(e) =>
                     setCreateForm((p) => ({ ...p, color: e.target.value }))
                   }
-                  placeholder={t("#3b82f6")}
+                  placeholder={"#3b82f6"}
                   value={createForm.color}
                 />
                 {Boolean(createErrors.color) && (
@@ -813,7 +808,7 @@ export function CategoryManagement({
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="create-sortOrder">{t("Sort order")}</Label>
+              <Label htmlFor="create-sortOrder">{"Sort order"}</Label>
               <Input
                 id="create-sortOrder"
                 onChange={(e) =>
@@ -830,7 +825,7 @@ export function CategoryManagement({
             </div>
             <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-inset/50 px-3 py-2.5">
               <Label className="cursor-pointer" htmlFor="create-isActive">
-                {t("Active")}
+                {"Active"}
               </Label>
               <Switch
                 checked={createForm.isActive}
@@ -843,10 +838,10 @@ export function CategoryManagement({
           </div>
           <DialogFooter>
             <Button onClick={() => setCreateOpen(false)} variant="outline">
-              {t("Cancel")}
+              {"Cancel"}
             </Button>
             <Button disabled={isPending} onClick={handleCreate}>
-              {isPending ? t("Creating...") : t("Create")}
+              {isPending ? "Creating..." : "Create"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -856,14 +851,12 @@ export function CategoryManagement({
       <Dialog onOpenChange={setEditOpen} open={editOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("Edit category")}</DialogTitle>
-            <DialogDescription>
-              {t("Update category details.")}
-            </DialogDescription>
+            <DialogTitle>{"Edit category"}</DialogTitle>
+            <DialogDescription>{"Update category details."}</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="edit-name">{t("Name")}</Label>
+              <Label htmlFor="edit-name">{"Name"}</Label>
               <Input
                 id="edit-name"
                 onChange={(e) =>
@@ -878,7 +871,7 @@ export function CategoryManagement({
               )}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="edit-slug">{t("Slug")}</Label>
+              <Label htmlFor="edit-slug">{"Slug"}</Label>
               <Input
                 id="edit-slug"
                 onChange={(e) =>
@@ -893,7 +886,7 @@ export function CategoryManagement({
               )}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="edit-description">{t("Description")}</Label>
+              <Label htmlFor="edit-description">{"Description"}</Label>
               <Input
                 id="edit-description"
                 onChange={(e) =>
@@ -909,7 +902,7 @@ export function CategoryManagement({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="edit-icon">{t("Icon")}</Label>
+                <Label htmlFor="edit-icon">{"Icon"}</Label>
                 <Input
                   id="edit-icon"
                   onChange={(e) =>
@@ -924,7 +917,7 @@ export function CategoryManagement({
                 )}
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="edit-color">{t("Color")}</Label>
+                <Label htmlFor="edit-color">{"Color"}</Label>
                 <Input
                   id="edit-color"
                   onChange={(e) =>
@@ -940,7 +933,7 @@ export function CategoryManagement({
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="edit-sortOrder">{t("Sort order")}</Label>
+              <Label htmlFor="edit-sortOrder">{"Sort order"}</Label>
               <Input
                 id="edit-sortOrder"
                 onChange={(e) =>
@@ -957,7 +950,7 @@ export function CategoryManagement({
             </div>
             <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-inset/50 px-3 py-2.5">
               <Label className="cursor-pointer" htmlFor="edit-isActive">
-                {t("Active")}
+                {"Active"}
               </Label>
               <Switch
                 checked={editForm.isActive}
@@ -970,10 +963,10 @@ export function CategoryManagement({
           </div>
           <DialogFooter>
             <Button onClick={() => setEditOpen(false)} variant="outline">
-              {t("Cancel")}
+              {"Cancel"}
             </Button>
             <Button disabled={isPending} onClick={handleEdit}>
-              {isPending ? t("Saving...") : t("Save changes")}
+              {isPending ? "Saving..." : "Save changes"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -983,16 +976,11 @@ export function CategoryManagement({
       <Dialog onOpenChange={setDeleteOpen} open={deleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("Delete category")}</DialogTitle>
+            <DialogTitle>{"Delete category"}</DialogTitle>
             <DialogDescription>
               {deleting
-                ? t(
-                    'Are you sure you want to delete "{name}"? This cannot be undone.',
-                    {
-                      name: deleting.name,
-                    }
-                  )
-                : t("Are you sure?")}
+                ? `Are you sure you want to delete "${deleting.name}"? This cannot be undone.`
+                : "Are you sure?"}
             </DialogDescription>
           </DialogHeader>
           {Boolean(deleteError) && (
@@ -1004,14 +992,14 @@ export function CategoryManagement({
           )}
           <DialogFooter>
             <Button onClick={() => setDeleteOpen(false)} variant="outline">
-              {t("Cancel")}
+              {"Cancel"}
             </Button>
             <Button
               disabled={isPending}
               onClick={handleDelete}
               variant="destructive"
             >
-              {isPending ? t("Deleting...") : t("Delete")}
+              {isPending ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>

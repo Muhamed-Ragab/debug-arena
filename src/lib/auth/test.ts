@@ -87,7 +87,6 @@ export const testAuth = betterAuth({
       interests: { required: false, type: "string[]" },
       isPublic: { required: false, type: "boolean" },
       jobTitle: { required: false, type: "string" },
-      locale: { required: false, type: "string" },
       preferredColor: { required: false, type: "string" },
       role: { input: false, required: false, type: "string" },
       username: { required: false, type: "string" },

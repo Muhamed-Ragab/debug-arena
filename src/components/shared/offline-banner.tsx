@@ -1,7 +1,4 @@
 "use client";
-
-import { useExtracted } from "next-intl";
-
 type BannerVariant = "offline" | "generic";
 
 interface OfflineBannerProps {
@@ -46,19 +43,15 @@ export function OfflineBanner({
   onRetry,
   variant,
 }: OfflineBannerProps) {
-  const t = useExtracted();
   const config = getVariantConfig(variant);
-  // Seed OFFLINE_MESSAGE literal for extraction (dynamic message prop won't be extracted otherwise)
-  t("Service temporarily unavailable. Please try again.");
   const title =
-    variant === "offline" ? t("You are offline") : t("Something went wrong");
-  const retryLabel = t("Try again");
-  const translatedMessage = message;
+    variant === "offline" ? "You are offline" : "Something went wrong";
+  const retryLabel = "Try again";
 
   return (
     <div className={config.container} role="alert">
       <h2 className={config.heading}>{title}</h2>
-      <p className={config.text}>{translatedMessage}</p>
+      <p className={config.text}>{message}</p>
       {onRetry ? (
         <button
           className="mt-4 inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

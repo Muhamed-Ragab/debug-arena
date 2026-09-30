@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import { cn } from "@/lib/utils";
 import "./globals.css";
@@ -19,27 +17,21 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const locale = await getLocale();
-  const messages = await getMessages();
-
   return (
     <html
       className={cn("font-sans", geist.variable)}
-      dir={locale === "ar" ? "rtl" : "ltr"}
-      lang={locale}
+      lang="en"
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background text-foreground antialiased">
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            disableTransitionOnChange
-            enableSystem
-          >
-            <Providers>{children}</Providers>
-          </ThemeProvider>
-        </NextIntlClientProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          disableTransitionOnChange
+          enableSystem
+        >
+          <Providers>{children}</Providers>
+        </ThemeProvider>
       </body>
     </html>
   );

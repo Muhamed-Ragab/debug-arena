@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Flame } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { RankMedal } from "@/components/shared/RankMedal";
 import { Avatar } from "@/components/ui/avatar";
@@ -34,7 +33,6 @@ function getStreakColor(streak: number): string {
 }
 
 export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
-  const t = useExtracted();
   const [page, setPage] = useState(1);
 
   const totalPages = Math.max(1, Math.ceil(entries.length / pageSize));
@@ -49,11 +47,11 @@ export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="w-16">{t("Rank")}</TableHead>
-            <TableHead>{t("User")}</TableHead>
-            <TableHead className="text-end">{t("Score")}</TableHead>
-            <TableHead className="text-end">{t("Solved")}</TableHead>
-            <TableHead className="text-end">{t("Streak")}</TableHead>
+            <TableHead className="w-16">{"Rank"}</TableHead>
+            <TableHead>{"User"}</TableHead>
+            <TableHead className="text-end">{"Score"}</TableHead>
+            <TableHead className="text-end">{"Solved"}</TableHead>
+            <TableHead className="text-end">{"Streak"}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -85,14 +83,14 @@ export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
                         className="ms-2 font-mono text-[10px]"
                         variant="default"
                       >
-                        {t("you")}
+                        {"you"}
                       </Badge>
                     )}
                   </span>
                 </div>
               </TableCell>
               <TableCell className="py-3 text-end font-mono text-[13px] text-foreground tabular-nums">
-                {row.score.toLocaleString()}
+                {row.score.toLocaleString("en-US")}
               </TableCell>
               <TableCell className="py-3 text-end font-mono text-[13px] text-muted-foreground tabular-nums">
                 {row.solved}
@@ -103,7 +101,7 @@ export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
                   style={{ color: getStreakColor(row.streak) }}
                 >
                   {row.streak >= 7 ? <Flame size={11} /> : null}
-                  {t("{streak}d", { streak: String(row.streak) })}
+                  {`${String(row.streak)}d`}
                 </span>
               </TableCell>
             </TableRow>
@@ -114,11 +112,7 @@ export function LeaderboardTable({ entries, pageSize = 10 }: Props) {
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-between border-border border-t pt-4">
           <p className="text-muted-foreground text-xs">
-            {t("Showing {from} to {to} of {total} entries", {
-              from: String((safePage - 1) * pageSize + 1),
-              to: String(Math.min(safePage * pageSize, entries.length)),
-              total: String(entries.length),
-            })}
+            {`Showing ${String((safePage - 1) * pageSize + 1)} to ${String(Math.min(safePage * pageSize, entries.length))} of ${String(entries.length)} entries`}
           </p>
           <div className="flex items-center gap-1">
             <Button

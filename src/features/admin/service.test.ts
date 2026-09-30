@@ -37,10 +37,6 @@ describe("admin/service", () => {
         calls.push("updateChallenge");
         return Promise.resolve();
       },
-      upsertEmbedding: () => {
-        calls.push("upsertEmbedding");
-        return Promise.resolve();
-      },
     } as unknown as never;
     const svc = createAdminService(repo);
     await svc.saveChallenge({
@@ -52,11 +48,7 @@ describe("admin/service", () => {
       status: "draft",
       title: "Test",
     });
-    expect(calls).toEqual([
-      "insertChallenge",
-      "insertHints",
-      "upsertEmbedding",
-    ]);
+    expect(calls).toEqual(["insertChallenge", "insertHints"]);
   });
 
   it("getAdminChallengesPaginated maps rows and returns pagination meta", async () => {
@@ -94,7 +86,6 @@ describe("admin/service", () => {
       insertHints: () => Promise.resolve(),
       updateChallenge: () => Promise.resolve(),
       updateUserBanStatus: () => Promise.resolve(),
-      upsertEmbedding: () => Promise.resolve(),
     } as unknown as never;
 
     const svc = createAdminService(repo);

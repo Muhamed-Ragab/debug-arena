@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_CATEGORIES } from "./constants";
 import {
   buildCategoryStats,
   buildRadarData,
@@ -12,16 +13,30 @@ describe("profile/service", () => {
     expect(isSolved({ fixCorrect: false, totalScore: 70 })).toBe(true);
   });
   it("calcPoints", () => {
-    expect(calcPoints(1000, 2)).toBe(1000 * 10 + 2 * 50);
+    expect(
+      calcPoints([
+        {
+          challenge: {
+            buggyArtifact: { points: 200 },
+            difficulty: "medium",
+          },
+          challengeId: "challenge-1",
+          createdAt: new Date("2026-09-29T12:00:00.000Z"),
+          fixCorrect: true,
+          totalScore: 75,
+        },
+      ])
+    ).toBe(150);
   });
-  it("buildRadarData 4 entries", () => {
-    const map = new Map([["State Mutations", { avgScore: 80 }]]);
+  it("buildRadarData entries matches categories", () => {
+    const [targetCategory] = DEFAULT_CATEGORIES;
+    const map = new Map([[targetCategory, { avgScore: 80 }]]);
     const radar = buildRadarData(map as never);
-    expect(radar).toHaveLength(4);
-    expect(radar.find((r) => r.subject === "State Mutations")?.score).toBe(80);
+    expect(radar).toHaveLength(DEFAULT_CATEGORIES.length);
+    expect(radar.find((r) => r.subject === targetCategory)?.score).toBe(80);
   });
   it("buildCategoryStats", () => {
     const stats = buildCategoryStats(new Map(), []);
-    expect(stats).toHaveLength(4);
+    expect(stats).toHaveLength(DEFAULT_CATEGORIES.length);
   });
 });

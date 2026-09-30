@@ -16,7 +16,7 @@ export function handleServerError(e: Error): string {
     return e.message;
   }
   console.error(e);
-  return "error.somethingWrong";
+  return "Something went wrong. Please try again.";
 }
 
 export const actionClient = createSafeActionClient({
@@ -30,7 +30,7 @@ export const authActionClient = actionClient.use(async ({ next }) => {
   });
 
   if (!session) {
-    throw new ActionError("error.unauthorized");
+    throw new ActionError("Please sign in to continue.");
   }
 
   return next({
@@ -44,7 +44,7 @@ export const authActionClient = actionClient.use(async ({ next }) => {
 export const adminActionClient = authActionClient.use(async ({ ctx, next }) => {
   const userRole = ctx.user?.role;
   if (userRole !== "admin") {
-    throw new ActionError("error.forbiddenAdmin");
+    throw new ActionError("You do not have permission to perform this action.");
   }
 
   return await next({

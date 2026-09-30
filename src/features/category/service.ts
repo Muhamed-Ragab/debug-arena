@@ -30,7 +30,7 @@ export function createCategoryService(
     if (excludeId && existing.id === excludeId) {
       return;
     }
-    throw new ConflictError("error.categorySlugExists");
+    throw new ConflictError("A category with this slug already exists.");
   }
 
   async function getAllCategories() {
@@ -62,7 +62,7 @@ export function createCategoryService(
     }
     const result = await repo.update(id, input);
     if (!result) {
-      throw new NotFoundError("error.categoryNotFound");
+      throw new NotFoundError("Category not found.");
     }
 
     return result;
@@ -71,7 +71,9 @@ export function createCategoryService(
   async function deleteCategory(id: string) {
     const count = await repo.countChallengesByCategoryId(id);
     if (count > 0) {
-      throw new ConflictError("error.cannotDeleteCategory");
+      throw new ConflictError(
+        "Categories that contain challenges cannot be deleted."
+      );
     }
 
     await repo.deleteById(id);

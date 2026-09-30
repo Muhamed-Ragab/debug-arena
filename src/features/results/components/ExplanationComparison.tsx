@@ -7,7 +7,6 @@ import {
   Sparkles,
   XCircle,
 } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { EvaluationDetails } from "../types";
 
@@ -26,7 +25,6 @@ export function ExplanationComparison({
   aiFeedback,
   evaluationDetails,
 }: Props) {
-  const t = useExtracted();
   const isCorrect = evaluationDetails?.isCorrect;
   const needsEnhancement = evaluationDetails?.needsEnhancement;
   const enhancementSuggestions =
@@ -38,14 +36,14 @@ export function ExplanationComparison({
     <div className="space-y-4">
       <div>
         <p className="mb-3 font-mono text-[11px] text-muted-foreground uppercase tracking-widest">
-          {t("Diagnosis & Solution comparison")}
+          {"Diagnosis & Solution comparison"}
         </p>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-3 rounded-lg border border-border bg-card p-4">
             <div>
               <div className="mb-1.5 flex items-center justify-between">
                 <p className="font-mono text-[11px] text-muted-foreground uppercase tracking-wide">
-                  {t("Your root cause diagnosis")}
+                  {"Your root cause diagnosis"}
                 </p>
                 {isCorrect !== undefined && (
                   <span
@@ -58,11 +56,11 @@ export function ExplanationComparison({
                   >
                     {isCorrect ? (
                       <>
-                        <CheckCircle2 size={12} /> {t("Correct Diagnosis")}
+                        <CheckCircle2 size={12} /> {"Correct Diagnosis"}
                       </>
                     ) : (
                       <>
-                        <XCircle size={12} /> {t("Incorrect Mechanism")}
+                        <XCircle size={12} /> {"Incorrect Mechanism"}
                       </>
                     )}
                   </span>
@@ -75,7 +73,7 @@ export function ExplanationComparison({
             {Boolean(userSolution) && (
               <div className="border-border border-t pt-3">
                 <p className="mb-1.5 font-mono text-[11px] text-muted-foreground uppercase tracking-wide">
-                  {t("Your proposed solution")}
+                  {"Your proposed solution"}
                 </p>
                 <p className="text-[13px] text-foreground leading-relaxed">
                   {userSolution}
@@ -86,7 +84,7 @@ export function ExplanationComparison({
 
           <div className="rounded-lg border border-emerald-500/30 bg-card p-4">
             <p className="mb-2.5 font-mono text-[11px] text-emerald-400 uppercase tracking-wide">
-              {t("Canonical root cause")}
+              {"Canonical root cause"}
             </p>
             <p className="text-[13px] text-foreground leading-relaxed">
               {canonical}
@@ -101,20 +99,18 @@ export function ExplanationComparison({
           <div className="flex items-center gap-2">
             <Sparkles className="text-primary" size={16} />
             <p className="font-medium font-mono text-[12px] text-primary uppercase tracking-wide">
-              {t("LLM Mentor Evaluation & Feedback")}
+              {"LLM Mentor Evaluation & Feedback"}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {Boolean(needsEnhancement) && (
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-0.5 font-medium text-[11px] text-amber-400">
-                <AlertTriangle size={12} /> {t("Needs Enhancement")}
+                <AlertTriangle size={12} /> {"Needs Enhancement"}
               </span>
             )}
             {evaluationDetails?.alignmentPercent !== undefined && (
               <span className="rounded-full bg-primary/15 px-2 py-0.5 font-mono text-[11px] text-primary">
-                {t("{percent}% alignment", {
-                  percent: String(evaluationDetails.alignmentPercent),
-                })}
+                {`${String(evaluationDetails.alignmentPercent)}% alignment`}
               </span>
             )}
           </div>
@@ -130,7 +126,7 @@ export function ExplanationComparison({
             <div className="mb-2 flex items-center gap-1.5 text-amber-400">
               <Lightbulb size={14} />
               <p className="font-medium font-mono text-[11px] uppercase tracking-wide">
-                {t("Enhancement Recommendations")}
+                {"Enhancement Recommendations"}
               </p>
             </div>
             <ul className="space-y-1.5 text-[12px] text-muted-foreground">
@@ -153,7 +149,7 @@ export function ExplanationComparison({
             {keyConcepts.length > 0 && (
               <div className="rounded-md border border-border/60 bg-card/60 p-3">
                 <p className="mb-2 font-mono text-[11px] text-emerald-400 uppercase tracking-wide">
-                  {t("Key Concepts Identified")}
+                  {"Key Concepts Identified"}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {keyConcepts.map((concept) => (
@@ -170,7 +166,7 @@ export function ExplanationComparison({
             {missedMechanisms.length > 0 && (
               <div className="rounded-md border border-border/60 bg-card/60 p-3">
                 <p className="mb-2 font-mono text-[11px] text-rose-400 uppercase tracking-wide">
-                  {t("Missed Mechanisms")}
+                  {"Missed Mechanisms"}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {missedMechanisms.map((missed) => (

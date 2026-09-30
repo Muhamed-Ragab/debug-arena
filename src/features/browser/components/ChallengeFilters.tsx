@@ -1,21 +1,17 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { type SelectOption, SimpleSelect } from "@/components/ui/select";
-import {
-  CATEGORY_CONFIG,
-  CATEGORY_ORDER,
-  DIFFICULTY_CONFIG,
-  DIFFICULTY_ORDER,
-} from "@/lib/domain/categories";
-import type { Category, Difficulty } from "@/lib/domain/types";
+import type { CategoryDTO } from "@/features/category/types";
+import { DIFFICULTY_CONFIG, DIFFICULTY_ORDER } from "@/lib/domain/categories";
+import type { Difficulty } from "@/lib/domain/types";
 
 interface Props {
-  category: Category | "all";
+  categories: CategoryDTO[];
+  category: string;
   difficulty: Difficulty | "all";
-  onCategory: (c: Category | "all") => void;
+  onCategory: (c: string) => void;
   onDifficulty: (d: Difficulty | "all") => void;
   onSearch: (v: string) => void;
   search: string;
@@ -28,58 +24,32 @@ export function ChallengeFilters({
   onCategory,
   difficulty,
   onDifficulty,
+  categories,
 }: Props) {
-  const t = useExtracted();
-
-  const getCategoryLabel = (categoryVal: Category): string => {
-    switch (categoryVal) {
-      case "Backend Concurrency":
-        return t("Backend Concurrency");
-      case "Logic Inversions":
-        return t("Logic Inversions");
-      case "Memory Leaks":
-        return t("Memory Leaks");
-      case "Off-by-One":
-        return t("Off-by-One");
-      case "Race Conditions":
-        return t("Race Conditions");
-      case "React Rendering":
-        return t("React Rendering");
-      case "Security Flaws":
-        return t("Security Flaws");
-      case "State Mutations":
-        return t("State Mutations");
-      default:
-        return categoryVal;
-    }
-  };
-
   const getDifficultyLabel = (difficultyVal: Difficulty): string => {
     switch (difficultyVal) {
       case "Easy":
-        return t("Easy");
+        return "Easy";
       case "Medium":
-        return t("Medium");
+        return "Medium";
       case "Hard":
-        return t("Hard");
-      case "Expert":
-        return t("Expert");
+        return "Hard";
       default:
         return difficultyVal;
     }
   };
 
   const categoryOptions: SelectOption[] = [
-    { label: t("All Categories"), value: "all" },
-    ...CATEGORY_ORDER.map((c) => ({
-      indicatorColor: CATEGORY_CONFIG[c]?.color,
-      label: getCategoryLabel(c),
-      value: c,
+    { label: "All Categories", value: "all" },
+    ...categories.map((categoryItem) => ({
+      indicatorColor: categoryItem.color ?? undefined,
+      label: categoryItem.name,
+      value: categoryItem.slug,
     })),
   ];
 
   const difficultyOptions: SelectOption[] = [
-    { label: t("All Levels"), value: "all" },
+    { label: "All Levels", value: "all" },
     ...DIFFICULTY_ORDER.map((d) => ({
       indicatorColor: DIFFICULTY_CONFIG[d]?.color,
       label: getDifficultyLabel(d),
@@ -98,7 +68,7 @@ export function ChallengeFilters({
         <Input
           className="bg-card ps-10 pe-4"
           onChange={(e) => onSearch(e.target.value)}
-          placeholder={t("Search challenges...")}
+          placeholder={"Search challenges..."}
           value={search}
         />
       </div>
@@ -107,9 +77,9 @@ export function ChallengeFilters({
       <div className="flex flex-wrap items-center gap-3">
         <div className="w-full min-w-[180px] sm:w-auto">
           <SimpleSelect
-            onValueChange={(val) => onCategory(val as Category | "all")}
+            onValueChange={(val) => onCategory(val)}
             options={categoryOptions}
-            placeholder={t("Select Category")}
+            placeholder={"Select Category"}
             value={category}
           />
         </div>
@@ -118,7 +88,7 @@ export function ChallengeFilters({
           <SimpleSelect
             onValueChange={(val) => onDifficulty(val as Difficulty | "all")}
             options={difficultyOptions}
-            placeholder={t("Select Level")}
+            placeholder={"Select Level"}
             value={difficulty}
           />
         </div>

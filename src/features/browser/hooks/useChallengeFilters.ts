@@ -26,7 +26,11 @@ export function useChallengeFilters(challenges: Challenge[]): ChallengeFilters {
   const filtered = useMemo(
     () =>
       challenges.filter((c) => {
-        if (catFilter && c.category !== catFilter) {
+        if (
+          catFilter &&
+          c.categorySlug !== catFilter &&
+          c.category !== catFilter
+        ) {
           return false;
         }
         if (diffFilter && c.difficulty !== diffFilter) {

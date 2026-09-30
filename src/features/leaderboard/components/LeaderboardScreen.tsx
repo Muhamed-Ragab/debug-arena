@@ -1,10 +1,7 @@
 "use client";
-
-import { useExtracted } from "next-intl";
-import { useMemo } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { CATEGORY_CONFIG } from "@/lib/domain/categories";
-import type { Category } from "@/lib/domain/types";
+import type { CategoryDTO } from "@/features/category/types";
+import { getCategoryAppearance } from "@/lib/domain/categories";
 import { useLeaderboard } from "../hooks/useLeaderboard";
 import type { LeaderboardEntry } from "../types";
 import { LeaderboardTable } from "./LeaderboardTable";
@@ -12,70 +9,48 @@ import { LeaderboardTabs } from "./LeaderboardTabs";
 import { LeaderboardTopThree } from "./LeaderboardTopThree";
 
 interface Props {
+  categories: CategoryDTO[];
   initialEntries: LeaderboardEntry[];
 }
 
-export function LeaderboardScreen({ initialEntries }: Props) {
-  const t = useExtracted();
-  const { tab, setTab, categoryTab } = useLeaderboard();
-
-  const getCategoryLabel = (category: Category): string => {
-    switch (category) {
-      case "Backend Concurrency":
-        return t("Backend Concurrency");
-      case "Logic Inversions":
-        return t("Logic Inversions");
-      case "Memory Leaks":
-        return t("Memory Leaks");
-      case "Off-by-One":
-        return t("Off-by-One");
-      case "Race Conditions":
-        return t("Race Conditions");
-      case "React Rendering":
-        return t("React Rendering");
-      case "Security Flaws":
-        return t("Security Flaws");
-      case "State Mutations":
-        return t("State Mutations");
-      default:
-        return category;
-    }
-  };
-
-  const filteredEntries = useMemo(() => {
-    const list = initialEntries;
-    if (!categoryTab) {
-      return list;
-    }
-    const matching = list.filter((e) => e.strongest === categoryTab);
-    return matching.length > 0
-      ? matching.map((e, idx) => ({ ...e, rank: idx + 1 }))
-      : list;
-  }, [categoryTab, initialEntries]);
+export function LeaderboardScreen({ categories, initialEntries }: Props) {
+  const { entries, isPending, tab, setTab, categoryTab } =
+    useLeaderboard(initialEntries);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <TopBar crumbs={[{ label: t("Arena") }, { label: t("Leaderboard") }]} />
+      <TopBar crumbs={[{ label: "Arena" }, { label: "Leaderboard" }]} />
 
       <div className="border-border border-b bg-surface px-4 pt-4 pb-0 sm:px-8">
         <div className="mb-4">
           <h1 className="font-semibold text-2xl text-heading tracking-tight">
-            {t("Leaderboard")}
+            {"Leaderboard"}
           </h1>
           <p className="mt-1 text-muted-foreground text-sm">
-            {t(
-              "Top debuggers ranked by accuracy, streak, and diagnosis speed. (Cached 24h)"
-            )}
+            {
+              "Ranked by earned challenge points. Weekly rankings cover the last seven days."
+            }
           </p>
         </div>
-        <LeaderboardTabs setTab={setTab} tab={tab} />
+        <LeaderboardTabs categories={categories} setTab={setTab} tab={tab} />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
+      <div
+        aria-busy={isPending}
+        className="flex-1 overflow-y-auto px-4 py-6 sm:px-8"
+      >
         {categoryTab
           ? (() => {
-              const cfg = CATEGORY_CONFIG[categoryTab];
+              const selectedCategory = categories.find(
+                (category) => category.slug === categoryTab
+              );
+              const cfg = selectedCategory
+                ? getCategoryAppearance(selectedCategory)
+                : null;
               const Icon = cfg?.Icon;
+              if (!selectedCategory) {
+                return null;
+              }
               return (
                 <div
                   className="mb-4 flex items-center gap-2 rounded-lg border px-3 py-2.5"
@@ -91,28 +66,26 @@ export function LeaderboardScreen({ initialEntries }: Props) {
                     className="font-medium text-[12px]"
                     style={{ color: cfg?.color }}
                   >
-                    {t("{label} — top solvers ranked by category score", {
-                      label: cfg ? getCategoryLabel(categoryTab) : categoryTab,
-                    })}
+                    {`${selectedCategory.name} — top solvers ranked by category score`}
                   </span>
                 </div>
               );
             })()
           : null}
 
-        {filteredEntries.length === 0 ? (
+        {entries.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-border border-dashed py-16 text-center">
             <p className="font-medium text-heading">
-              {t("No leaderboard data yet")}
+              {"No leaderboard data yet"}
             </p>
             <p className="mt-1 text-muted-foreground text-sm">
-              {t("Solve challenges to earn a spot on the leaderboard.")}
+              {"Solve challenges to earn a spot on the leaderboard."}
             </p>
           </div>
         ) : (
           <>
-            <LeaderboardTopThree entries={filteredEntries} />
-            <LeaderboardTable entries={filteredEntries} />
+            <LeaderboardTopThree categories={categories} entries={entries} />
+            <LeaderboardTable entries={entries} />
           </>
         )}
       </div>

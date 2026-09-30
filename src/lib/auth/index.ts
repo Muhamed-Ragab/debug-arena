@@ -1,5 +1,4 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-import { locales as authLocales, i18n } from "@better-auth/i18n";
 import { redisStorage } from "@better-auth/redis-storage";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
@@ -41,13 +40,6 @@ export const auth = betterAuth({
     requireEmailVerification: false,
   },
   plugins: [
-    i18n({
-      defaultLocale: "en",
-      detection: ["cookie", "header", "session"],
-      localeCookie: "NEXT_LOCALE",
-      translations: { ar: authLocales.ar, en: authLocales.en },
-      userLocaleField: "locale",
-    }),
     haveIBeenPwned({
       enabled: process.env.NODE_ENV !== "test",
     }),
@@ -113,7 +105,6 @@ export const auth = betterAuth({
       interests: { required: false, type: "string[]" },
       isPublic: { required: false, type: "boolean" },
       jobTitle: { required: false, type: "string" },
-      locale: { required: false, type: "string" },
       preferredColor: { required: false, type: "string" },
       role: { input: false, required: false, type: "string" },
       username: { required: false, type: "string" },

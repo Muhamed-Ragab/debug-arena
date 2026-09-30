@@ -1,7 +1,6 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -69,14 +68,13 @@ export function LoadingFallback({
   message,
   variant = "page",
 }: LoadingFallbackProps) {
-  const t = useExtracted();
   // literals for extraction — must be in same function body as t retrieval
-  t("Loading...");
-  t("Preparing your arena...");
-  t("Fetching challenges, hang tight.");
+  "Loading...";
+  "Preparing your arena...";
+  "Fetching challenges, hang tight.";
 
-  const title = message ?? t("Loading...");
-  const subtitle = description ?? t("Preparing your arena...");
+  const title = message ?? "Loading...";
+  const subtitle = description ?? "Preparing your arena...";
 
   if (variant === "inline") {
     return (
@@ -166,7 +164,7 @@ export function LoadingFallback({
           </div>
         </div>
 
-        <span className="sr-only">{t("Fetching challenges, hang tight.")}</span>
+        <span className="sr-only">{"Fetching challenges, hang tight."}</span>
       </div>
     </PageShell>
   );

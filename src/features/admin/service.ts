@@ -1,4 +1,3 @@
-import { generateDeterministicEmbedding } from "@/features/challenge/lib/embedding";
 import { NotFoundError } from "@/lib/safe-action";
 import { adminRepository } from "./repository";
 import type {
@@ -26,9 +25,8 @@ export function createAdminService(repo: AdminRepository = adminRepository) {
       .findCategories()
       .then((cats) => cats.find((c) => c.slug === input.categorySlug));
     if (!category) {
-      throw new NotFoundError("error.unknownCategorySlug");
+      throw new NotFoundError("The selected category does not exist.");
     }
-    const embedding = generateDeterministicEmbedding(input.rootCauseSummary);
     let challengeId = input.id ?? null;
     if (challengeId) {
       await repo.updateChallenge(challengeId, {
@@ -69,13 +67,6 @@ export function createAdminService(repo: AdminRepository = adminRepository) {
           penaltyPoints: hint.penaltyPoints ?? 10,
           socraticPrompt: hint.socraticPrompt,
         }))
-      );
-    }
-    if (challengeId) {
-      await repo.upsertEmbedding(
-        challengeId,
-        `${input.title} ${input.rootCauseSummary} ${input.prompt}`,
-        embedding as never
       );
     }
     return { challengeId, status: input.status, success: true };

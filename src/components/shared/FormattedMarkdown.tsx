@@ -1,7 +1,6 @@
 "use client";
 
 import { Check, Copy, FileCode } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { tokenizeLine } from "@/features/challenge/lib/tokenize";
@@ -20,7 +19,6 @@ interface CodeBlockProps {
 }
 
 function CodeBlock({ code, language }: CodeBlockProps) {
-  const t = useExtracted();
   const [copied, setCopied] = useState(false);
   const lines = code.trim().split("\n");
 
@@ -41,7 +39,7 @@ function CodeBlock({ code, language }: CodeBlockProps) {
         <div className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
           <FileCode className="text-primary" size={13} />
           <span className="font-semibold text-heading uppercase tracking-wider">
-            {language || t("code")}
+            {language || "code"}
           </span>
         </div>
         <Button
@@ -54,12 +52,12 @@ function CodeBlock({ code, language }: CodeBlockProps) {
           {copied ? (
             <>
               <Check className="text-emerald-400" size={11} />
-              <span className="text-emerald-400">{t("Copied")}</span>
+              <span className="text-emerald-400">{"Copied"}</span>
             </>
           ) : (
             <>
               <Copy size={11} />
-              <span>{t("Copy")}</span>
+              <span>{"Copy"}</span>
             </>
           )}
         </Button>

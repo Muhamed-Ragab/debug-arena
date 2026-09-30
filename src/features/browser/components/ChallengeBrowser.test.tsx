@@ -1,12 +1,13 @@
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import type { CategoryDTO } from "@/features/category/types";
 import type { Challenge } from "@/lib/domain/types";
 import { renderWithProviders, screen } from "@/test/test-utils";
 import { ChallengeBrowser } from "./ChallengeBrowser";
 
 const SEARCH_INPUT_REGEX = /search challenges/i;
 const ALL_CATEGORIES_REGEX = /all categories/i;
-const STATE_MUTATIONS_REGEX = /state mutations/i;
+const STATE_MANAGEMENT_REGEX = /state management/i;
 const ALL_LEVELS_REGEX = /all levels/i;
 const HARD_DIFF_REGEX = /^hard$/i;
 
@@ -20,6 +21,7 @@ vi.mock("next/navigation", () => ({
 const mockChallenges: Challenge[] = [
   {
     category: "React Rendering",
+    categorySlug: "react-rendering",
     difficulty: "Easy",
     filePath: "src/Counter.tsx",
     id: "11111111-1111-1111-1111-111111111111",
@@ -30,6 +32,7 @@ const mockChallenges: Challenge[] = [
   },
   {
     category: "Backend Concurrency",
+    categorySlug: "backend-concurrency",
     difficulty: "Hard",
     filePath: "src/transfer.ts",
     id: "22222222-2222-2222-2222-222222222222",
@@ -39,7 +42,8 @@ const mockChallenges: Challenge[] = [
     title: "Race Condition in Account Balance",
   },
   {
-    category: "State Mutations",
+    category: "State Management",
+    categorySlug: "state-management",
     difficulty: "Medium",
     filePath: "src/store.ts",
     id: "33333333-3333-3333-3333-333333333333",
@@ -50,10 +54,47 @@ const mockChallenges: Challenge[] = [
   },
 ];
 
+const mockCategories: CategoryDTO[] = [
+  {
+    color: "#3b82f6",
+    description: null,
+    icon: "Layers",
+    id: "category-react",
+    isActive: true,
+    name: "React Rendering",
+    slug: "react-rendering",
+    sortOrder: 0,
+  },
+  {
+    color: "#10b981",
+    description: null,
+    icon: "Cpu",
+    id: "category-backend",
+    isActive: true,
+    name: "Backend Concurrency",
+    slug: "backend-concurrency",
+    sortOrder: 1,
+  },
+  {
+    color: "#f59e0b",
+    description: null,
+    icon: "Database",
+    id: "category-state",
+    isActive: true,
+    name: "State Management",
+    slug: "state-management",
+    sortOrder: 2,
+  },
+];
+
 describe("ChallengeBrowser Component", () => {
   it("renders challenge cards from initialChallenges", () => {
     renderWithProviders(
-      <ChallengeBrowser initialChallenges={mockChallenges} stats={[]} />
+      <ChallengeBrowser
+        categories={mockCategories}
+        initialChallenges={mockChallenges}
+        stats={[]}
+      />
     );
 
     expect(
@@ -70,7 +111,11 @@ describe("ChallengeBrowser Component", () => {
   it("filters challenges by search term", async () => {
     const user = userEvent.setup();
     renderWithProviders(
-      <ChallengeBrowser initialChallenges={mockChallenges} stats={[]} />
+      <ChallengeBrowser
+        categories={mockCategories}
+        initialChallenges={mockChallenges}
+        stats={[]}
+      />
     );
 
     const searchInput = screen.getByPlaceholderText(SEARCH_INPUT_REGEX);
@@ -87,7 +132,11 @@ describe("ChallengeBrowser Component", () => {
   it("filters challenges by category", async () => {
     const user = userEvent.setup();
     renderWithProviders(
-      <ChallengeBrowser initialChallenges={mockChallenges} stats={[]} />
+      <ChallengeBrowser
+        categories={mockCategories}
+        initialChallenges={mockChallenges}
+        stats={[]}
+      />
     );
 
     const categorySelectTrigger =
@@ -96,7 +145,7 @@ describe("ChallengeBrowser Component", () => {
     await user.click(categorySelectTrigger);
 
     const categoryOption = screen.getByRole("option", {
-      name: STATE_MUTATIONS_REGEX,
+      name: STATE_MANAGEMENT_REGEX,
     });
     await user.click(categoryOption);
 
@@ -111,7 +160,11 @@ describe("ChallengeBrowser Component", () => {
   it("filters challenges by difficulty", async () => {
     const user = userEvent.setup();
     renderWithProviders(
-      <ChallengeBrowser initialChallenges={mockChallenges} stats={[]} />
+      <ChallengeBrowser
+        categories={mockCategories}
+        initialChallenges={mockChallenges}
+        stats={[]}
+      />
     );
 
     const diffSelectTrigger =

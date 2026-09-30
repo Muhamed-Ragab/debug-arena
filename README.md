@@ -4,6 +4,9 @@ A "LeetCode for debugging" platform — challenges test root-cause bug diagnosis
 (React rendering bugs, backend concurrency/singleton issues, etc.) instead of
 writing new code from scratch. See `docs/` for the full spec.
 
+Free to use: the app has no payment flow, no paid tiers, and no payment
+integrations.
+
 ## Docs
 - `docs/erd.md` — data model
 - `docs/architecture.md` — system design
@@ -18,10 +21,10 @@ writing new code from scratch. See `docs/` for the full spec.
 - **Forms / Server Actions**: `next-safe-action` with Zod input schemas
 - **Environment**: `@t3-oss/env-nextjs` type-safe env validation
 - **Auth**: better-auth (server + React client; admin role + RLS claim bridge)
-- **ORM / DB**: Drizzle ORM on Postgres + pgvector (single instance for relational data + embeddings)
+- **ORM / DB**: Drizzle ORM on Postgres 16 (relational data only, no vector extension)
 - **Cache / Sessions**: Redis 7 (better-auth redis storage)
-- **i18n**: Lingui (English + Arabic), runtime `dynamicActivate` catalogs
-- **AI**: Vercel AI SDK (bug-injection agent, grading agent, adaptive hints)
+- **Language**: English-only interface; locale switching and translation catalogs are not included
+- **AI**: Vercel AI SDK with Groq models (challenge generation, grading judge, Socratic hints); deterministic token-overlap fallback when no API key is configured
 - **Tooling**: Biome (lint + format), pnpm 9.9.0, Node >= 20.9
 
 ## Structure
@@ -31,7 +34,7 @@ src/
   components/
     ui/                shadcn-style primitives (Base UI)
     shared/            Cross-feature components (markdown, badges, medals…)
-    preferences/       Language switcher, theme toggle
+    preferences/       Theme toggle
     layout/            Sidebar, TopBar
   features/{name}/     One directory per page/feature (admin, auth, browser,
                        challenge, leaderboard, profile, results)
@@ -44,14 +47,13 @@ src/
   db/
     schema/            Drizzle schema split by domain
     client.ts          Drizzle pool client
-  locales/{en,ar}/     Lingui catalogs (.po source + compiled .ts)
 drizzle/               Migrations
-docker-compose.yml     Local Postgres (pgvector:pg16) + Redis 7
+docker-compose.yml     Local Postgres 16 + Redis 7
 ```
 
 ## Getting started
 1. `pnpm install`
-2. `docker compose up -d` — starts Postgres (pgvector:pg16) + Redis 7
+2. `docker compose up -d` — starts Postgres 16 + Redis 7
 3. `cp .env.example .env` and fill in secrets (`BETTER_AUTH_SECRET`, `DATABASE_URL`, etc.)
 4. `pnpm db:generate && pnpm db:migrate` — generate + run Drizzle migrations
 5. `pnpm dev` — starts the Next.js dev server (Turbopack)

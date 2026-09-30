@@ -8,6 +8,8 @@ export type UserRow = typeof schema.users.$inferSelect;
 
 export interface PublishedChallengeDTO {
   buggyArtifact: ChallengeRow["buggyArtifact"];
+  categoryColor: CategoryRow["color"];
+  categoryIcon: CategoryRow["icon"];
   categoryId: ChallengeRow["categoryId"];
   categoryName: CategoryRow["name"];
   categorySlug: CategoryRow["slug"];
@@ -27,6 +29,8 @@ export interface PublishedChallengeDTO {
 
 export interface ChallengeDetailDTO {
   buggyArtifact: ChallengeRow["buggyArtifact"];
+  categoryColor: CategoryRow["color"];
+  categoryIcon: CategoryRow["icon"];
   categoryId: ChallengeRow["categoryId"];
   categoryName: CategoryRow["name"];
   categorySlug: CategoryRow["slug"];
@@ -53,6 +57,14 @@ export interface UserChallengeStatsData {
   user: (UserRow & { submissions: SubmissionRow[] }) | null;
 }
 
+export interface FindPublishedChallengesPaginatedOpts {
+  category: string;
+  difficulty: string;
+  page: number;
+  pageSize: number;
+  search: string;
+}
+
 export interface ChallengeRepository {
   findById: (id: string) => Promise<ChallengeDetailDTO | null>;
   findChallengeByIdForDetail: (
@@ -60,6 +72,9 @@ export interface ChallengeRepository {
   ) => Promise<(ChallengeDetailDTO & { submissions: SubmissionRow[] }) | null>;
   findHintsByChallengeId: (id: string) => Promise<HintRow[]>;
   findPublished: () => Promise<PublishedChallengeDTO[]>;
+  findPublishedPaginated: (
+    opts: FindPublishedChallengesPaginatedOpts
+  ) => Promise<{ rows: PublishedChallengeDTO[]; total: number }>;
   findSubmissionById: (id: string) => Promise<SubmissionWithRelations | null>;
   findUserChallengeStatsData: (
     userId: string

@@ -14,12 +14,12 @@ Handles the core debugging challenge lifecycle: browsing published challenges, v
 | `constants.ts` | `SEED_CATEGORIES`, `DIFFICULTY_LABEL`, `STATUS_LABEL` |
 | `types.ts` | ALL types (row aliases `ChallengeRow`/`HintRow`, DTOs `PublishedChallengeDTO`, `ChallengeRepository`, `RightTab`, `DiffLine`, `SubmitChallengeInput`, `UserChallengeStats`) |
 | `validation.ts` | Zod `submitChallengeSchema` + `submitChallengeOutputSchema` (passthrough) |
-| `schema.ts` | Drizzle `challenges`, `hints`, `submissions`, `challengeEmbeddings` |
+| `schema.ts` | Drizzle `challenges`, `hints`, `submissions` |
 | `utils/` | Helpers re-exported via service if >300 lines |
 | `hooks/useChallengeWorkspace.ts` | Client state, validation, calls `submitChallengeAction` |
 | `components/ChallengeScreen.tsx` | Pure presentational (resize via hook) |
 | `actions.ts` | Facade `authActionClient.inputSchema().outputSchema()` → `challengeService.method` |
-| `lib/grading.ts, ai-evaluator.ts, sandbox.ts, embedding.ts` | Pure vs side-effect separated |
+| `lib/grading.ts, ai-evaluator.ts, sandbox.ts, text-similarity.ts` | Pure vs side-effect separated |
 
 ## Data flow
 ```

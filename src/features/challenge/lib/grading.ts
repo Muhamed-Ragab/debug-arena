@@ -1,7 +1,7 @@
 import type { AIEvaluationResult } from "@/features/challenge/types";
 import type { ScorePart } from "@/features/results/types";
-import { cosineSimilarity, generateDeterministicEmbedding } from "./embedding";
 import type { SandboxExecutionResult } from "./sandbox";
+import { overlapScore } from "./text-similarity";
 
 export interface GradingInput {
   aiEvaluation?: AIEvaluationResult;
@@ -100,9 +100,7 @@ function evaluateRootCause(
       score: 0,
     };
   }
-  const userEmbedding = generateDeterministicEmbedding(userExplanation);
-  const canonicalEmbedding = generateDeterministicEmbedding(canonical);
-  const similarity = cosineSimilarity(userEmbedding, canonicalEmbedding);
+  const similarity = overlapScore(userExplanation, canonical);
 
   if (similarity >= 0.65) {
     return {
@@ -116,7 +114,7 @@ function evaluateRootCause(
       score: 18,
     };
   }
-  if (similarity >= 0.25) {
+  if (similarity >= 0.2) {
     return {
       desc: "Identified surface symptoms, but missed the underlying root cause mechanism.",
       score: 10,
@@ -197,8 +195,9 @@ function generateFeedback(
 }
 
 /**
- * Grades a user challenge submission combining localization check, vector similarity or Groq AI evaluation,
- * sandbox unit test verification, prevention assessment, and hint penalties.
+ * Grades a user challenge submission combining localization check, deterministic
+ * token-overlap or Groq AI evaluation, sandbox unit test verification,
+ * prevention assessment, and hint penalties.
  */
 export function gradeSubmission(input: GradingInput): GradingResult {
   const loc = evaluateLocalization(input.localizationLines, input.buggyLines);

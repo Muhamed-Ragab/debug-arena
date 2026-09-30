@@ -4,7 +4,7 @@ import type { AIEvaluationResult } from "@/features/challenge/types";
 import { getAIModel } from "@/lib/ai/client";
 import { AI_FAST_MODEL, AI_PRIMARY_MODEL } from "@/lib/ai/constants";
 import { env } from "@/lib/env/env";
-import { cosineSimilarity, generateDeterministicEmbedding } from "./embedding";
+import { overlapScore } from "./text-similarity";
 
 export interface EvaluateExplanationParams {
   buggyCodeSnippet?: string;
@@ -59,9 +59,7 @@ function fallbackEvaluation(
     };
   }
 
-  const userEmbedding = generateDeterministicEmbedding(userExplanation);
-  const canonicalEmbedding = generateDeterministicEmbedding(canonicalRootCause);
-  const similarity = cosineSimilarity(userEmbedding, canonicalEmbedding);
+  const similarity = overlapScore(userExplanation, canonicalRootCause);
   const alignmentPercent = Math.round(similarity * 100);
 
   let rootCauseScore = 8;
@@ -86,7 +84,7 @@ function fallbackEvaluation(
     enhancementSuggestions.push(
       "Elaborate on the specific state transitions and race/closure lifecycle conditions."
     );
-  } else if (similarity >= 0.25) {
+  } else if (similarity >= 0.2) {
     rootCauseScore = 12;
     feedback =
       "You identified surface symptoms, but missed the underlying root cause mechanism.";
@@ -107,8 +105,7 @@ function fallbackEvaluation(
 
   let fixScore = 15;
   if (solutionExplanation && solutionExplanation.trim().length >= 10) {
-    const solEmbedding = generateDeterministicEmbedding(solutionExplanation);
-    const solSim = cosineSimilarity(solEmbedding, canonicalEmbedding);
+    const solSim = overlapScore(solutionExplanation, canonicalRootCause);
     fixScore = Math.max(8, Math.min(25, Math.round(solSim * 25 + 5)));
     if (solSim < 0.5) {
       enhancementSuggestions.push(
@@ -124,12 +121,8 @@ function fallbackEvaluation(
 
   let preventionScore = 15;
   if (canonicalPreventionNotes) {
-    const prevEmbedding = generateDeterministicEmbedding(
-      canonicalPreventionNotes
-    );
     const combinedText = `${userExplanation} ${solutionExplanation || ""}`;
-    const combinedEmbedding = generateDeterministicEmbedding(combinedText);
-    const prevSim = cosineSimilarity(combinedEmbedding, prevEmbedding);
+    const prevSim = overlapScore(combinedText, canonicalPreventionNotes);
     preventionScore = Math.max(10, Math.min(25, Math.round(prevSim * 25 + 5)));
   } else {
     preventionScore = Math.max(

@@ -4,8 +4,6 @@ export type ChallengeRow = typeof schema.challenges.$inferSelect;
 export type HintRow = typeof schema.hints.$inferSelect;
 export type SubmissionRow = typeof schema.submissions.$inferSelect;
 export type CategoryRow = typeof schema.categories.$inferSelect;
-export type ChallengeEmbeddingRow =
-  typeof schema.challengeEmbeddings.$inferSelect;
 
 export type AdminChallengeRow = ChallengeRow & {
   category: CategoryRow;
@@ -57,11 +55,6 @@ export interface AdminRepository {
     data: Partial<typeof schema.challenges.$inferInsert>
   ) => Promise<void>;
   updateUserBanStatus: (userId: string, banned: boolean) => Promise<void>;
-  upsertEmbedding: (
-    challengeId: string,
-    content: string,
-    embedding: (typeof schema.challengeEmbeddings.$inferInsert)["embedding"]
-  ) => Promise<void>;
 }
 
 export interface AdminChallengeItem {

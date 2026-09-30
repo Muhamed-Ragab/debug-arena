@@ -6,6 +6,3 @@ export const userRole = pgRole("user").existing();
 
 // --- Schemas ---
 export const analyticsSchema = pgSchema("analytics");
-
-// --- Constants ---
-export const EMBEDDING_DIM = 1536;

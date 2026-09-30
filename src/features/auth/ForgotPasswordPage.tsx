@@ -2,10 +2,8 @@
 
 import { ArrowRight, AtSign } from "lucide-react";
 import Link from "next/link";
-import { useExtracted } from "next-intl";
 import { type FormEvent, useState } from "react";
 import { Logo } from "@/components/layout/Logo";
-import { LanguageSwitcher } from "@/components/preferences/LanguageSwitcher";
 import { ThemeToggle } from "@/components/preferences/ThemeToggle";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -15,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth/client";
 
 export function ForgotPasswordPage() {
-  const t = useExtracted();
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -31,12 +28,12 @@ export function ForgotPasswordPage() {
         redirectTo: `${typeof window === "undefined" ? "" : window.location.origin}/login`,
       });
       if (resetError) {
-        setError(resetError.message ?? t("Could not send reset link"));
+        setError(resetError.message ?? "Could not send reset link");
         return;
       }
       setSent(true);
     } catch {
-      setError(t("Failed to request password reset."));
+      setError("Failed to request password reset.");
     } finally {
       setLoading(false);
     }
@@ -47,7 +44,6 @@ export function ForgotPasswordPage() {
       <header className="flex h-16 items-center justify-between px-4 sm:px-8">
         <Logo />
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
           <ThemeToggle />
         </div>
       </header>
@@ -56,17 +52,17 @@ export function ForgotPasswordPage() {
         <Card className="w-full max-w-md p-2 shadow-2xl shadow-black/30">
           <CardHeader className="space-y-1.5 text-center">
             <h1 className="font-semibold text-2xl text-heading tracking-tight">
-              {t("Reset your password")}
+              {"Reset your password"}
             </h1>
             <p className="text-muted-foreground text-sm">
-              {t("Enter your email and we'll send a reset link.")}
+              {"Enter your email and we'll send a reset link."}
             </p>
           </CardHeader>
 
           <CardContent className="space-y-4">
             <form className="space-y-4" noValidate onSubmit={handleSubmit}>
               <div className="space-y-1.5">
-                <Label htmlFor="email">{t("Email")}</Label>
+                <Label htmlFor="email">{"Email"}</Label>
                 <div className="relative">
                   <AtSign
                     className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -77,7 +73,7 @@ export function ForgotPasswordPage() {
                     className="h-10 ps-10 pe-3"
                     id="email"
                     name="email"
-                    placeholder={t("you@company.com")}
+                    placeholder={"you@company.com"}
                     type="email"
                   />
                 </div>
@@ -89,7 +85,7 @@ export function ForgotPasswordPage() {
                 size="lg"
                 type="submit"
               >
-                {loading ? t("Sending link...") : t("Send reset link")}
+                {loading ? "Sending link..." : "Send reset link"}
                 <ArrowRight size={16} />
               </Button>
 
@@ -99,7 +95,7 @@ export function ForgotPasswordPage() {
                   variant="default"
                 >
                   <AlertDescription>
-                    {t("If that account exists, a reset link is on its way.")}
+                    {"If that account exists, a reset link is on its way."}
                   </AlertDescription>
                 </Alert>
               )}
@@ -111,12 +107,12 @@ export function ForgotPasswordPage() {
             </form>
 
             <p className="mt-4 text-center text-muted-foreground text-sm">
-              {t("Remembered it?")}{" "}
+              {"Remembered it?"}{" "}
               <Link
                 className="font-medium text-primary hover:underline"
                 href="/login"
               >
-                {t("Back to login")}
+                {"Back to login"}
               </Link>
             </p>
           </CardContent>

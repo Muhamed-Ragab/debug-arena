@@ -1,6 +1,4 @@
 "use client";
-
-import { useExtracted } from "next-intl";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import type { ChartConfig } from "@/components/ui/chart";
 import {
@@ -13,17 +11,15 @@ import {
 import type { StrengthPoint } from "../types";
 
 export function SolvedByDifficultyChart({ data }: { data: StrengthPoint[] }) {
-  const t = useExtracted();
   const chartConfig = {
-    Easy: { color: "var(--diff-easy)", label: t("Easy") },
-    Expert: { color: "var(--diff-expert)", label: t("Expert") },
-    Hard: { color: "var(--diff-hard)", label: t("Hard") },
-    Medium: { color: "var(--diff-medium)", label: t("Medium") },
+    Easy: { color: "var(--diff-easy)", label: "Easy" },
+    Hard: { color: "var(--diff-hard)", label: "Hard" },
+    Medium: { color: "var(--diff-medium)", label: "Medium" },
   } satisfies ChartConfig;
   return (
     <div className="rounded-lg border border-border bg-card p-5">
       <p className="mb-4 font-mono text-[11px] text-muted-foreground uppercase tracking-widest">
-        {t("Solved by difficulty")}
+        {"Solved by difficulty"}
       </p>
       <ChartContainer className="h-[220px] w-full" config={chartConfig}>
         <BarChart
@@ -62,12 +58,6 @@ export function SolvedByDifficultyChart({ data }: { data: StrengthPoint[] }) {
           <Bar
             dataKey="Hard"
             fill="var(--color-Hard)"
-            fillOpacity={0.7}
-            stackId="a"
-          />
-          <Bar
-            dataKey="Expert"
-            fill="var(--color-Expert)"
             fillOpacity={0.7}
             radius={[3, 3, 0, 0]}
             stackId="a"

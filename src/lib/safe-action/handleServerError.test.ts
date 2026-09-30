@@ -61,14 +61,16 @@ describe("handleServerError", () => {
 
   it("sanitizes unknown error to generic message", () => {
     const err = new Error("sensitive internal failure");
-    expect(handleServerError(err)).toBe("error.somethingWrong");
+    expect(handleServerError(err)).toBe(
+      "Something went wrong. Please try again."
+    );
   });
 
   it("does not leak secret in sanitized error", () => {
     const secret = "DATABASE_URL=postgres://secret:123@localhost/db";
     const err = new Error(secret);
     const result = handleServerError(err);
-    expect(result).toBe("error.somethingWrong");
+    expect(result).toBe("Something went wrong. Please try again.");
     expect(result).not.toContain("postgres");
     expect(result).not.toContain("secret");
     expect(result).not.toContain(secret);
@@ -79,7 +81,9 @@ describe("handleServerError", () => {
       "P2002",
       "Unique constraint failed on the fields: (`email`)"
     );
-    expect(handleServerError(err)).toBe("error.somethingWrong");
+    expect(handleServerError(err)).toBe(
+      "Something went wrong. Please try again."
+    );
   });
 
   it("does not leak ECONNREFUSED message content", () => {
@@ -117,7 +121,9 @@ describe("handleServerError", () => {
 
   it("sanitizes generic Error even with 409-like message", () => {
     const err = new Error('Category slug "dup" already exists');
-    expect(handleServerError(err)).toBe("error.somethingWrong");
+    expect(handleServerError(err)).toBe(
+      "Something went wrong. Please try again."
+    );
   });
 });
 
@@ -155,7 +161,7 @@ describe("safe-action clients share handleServerError", () => {
       });
 
     const result = await action({ v: "x" });
-    expect(result?.serverError).toBe("error.somethingWrong");
+    expect(result?.serverError).toBe("Something went wrong. Please try again.");
     expect(result?.serverError).not.toContain("secret");
     consoleSpy.mockRestore();
   });

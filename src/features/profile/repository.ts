@@ -62,30 +62,50 @@ export function createProfileRepository(
             },
           },
           profileLinks: true,
-          submissions: {
-            limit: 10,
-            orderBy: [desc(schema.submissions.createdAt)],
-            with: {
-              challenge: {
-                with: {
-                  category: true,
-                },
+        },
+      });
+
+      if (!user) {
+        const publishedChallenges = await dbClient.query.challenges.findMany({
+          where: eq(schema.challenges.status, "published"),
+          with: {
+            category: true,
+          },
+        });
+        return {
+          publishedChallenges: publishedChallenges as PublishedChallenge[],
+          user: null,
+        };
+      }
+
+      const [allSubmissions, publishedChallenges] = await Promise.all([
+        dbClient.query.submissions.findMany({
+          orderBy: [desc(schema.submissions.createdAt)],
+          where: eq(schema.submissions.userId, userId),
+          with: {
+            challenge: {
+              with: {
+                category: true,
               },
             },
           },
-        },
-      });
+        }),
+        dbClient.query.challenges.findMany({
+          where: eq(schema.challenges.status, "published"),
+          with: {
+            category: true,
+          },
+        }),
+      ]);
 
-      const publishedChallenges = await dbClient.query.challenges.findMany({
-        where: eq(schema.challenges.status, "published"),
-        with: {
-          category: true,
-        },
-      });
+      const userWithRelations = {
+        ...user,
+        submissions: allSubmissions,
+      } as unknown as UserWithRelations;
 
       return {
         publishedChallenges: publishedChallenges as PublishedChallenge[],
-        user: (user as UserWithRelations | undefined) ?? null,
+        user: userWithRelations,
       };
     } catch (err) {
       console.warn("[profileRepository.findByIdWithRelations] DB error:", err);
@@ -95,19 +115,44 @@ export function createProfileRepository(
 
   async function findCategoryStats(
     userId: string,
-    category: string
+    categoryId: string
   ): Promise<CategoryStatRow | null> {
     try {
       const stat = await dbClient.query.userCategoryStats.findFirst({
         where: and(
           eq(schema.userCategoryStats.userId, userId),
-          eq(schema.userCategoryStats.categoryId, category)
+          eq(schema.userCategoryStats.categoryId, categoryId)
         ),
       });
 
       return (stat as CategoryStatRow | undefined) ?? null;
     } catch (err) {
       console.warn("[profileRepository.findCategoryStats] DB error:", err);
+      throw toOfflineError(err, OFFLINE_MESSAGE);
+    }
+  }
+
+  async function findAllSubmissionsByUserId(
+    userId: string
+  ): Promise<UserWithRelations["submissions"]> {
+    try {
+      const subs = await dbClient.query.submissions.findMany({
+        orderBy: [desc(schema.submissions.createdAt)],
+        where: eq(schema.submissions.userId, userId),
+        with: {
+          challenge: {
+            with: {
+              category: true,
+            },
+          },
+        },
+      });
+      return subs as unknown as UserWithRelations["submissions"];
+    } catch (err) {
+      console.warn(
+        "[profileRepository.findAllSubmissionsByUserId] DB error:",
+        err
+      );
       throw toOfflineError(err, OFFLINE_MESSAGE);
     }
   }
@@ -155,6 +200,7 @@ export function createProfileRepository(
 
   return {
     deleteUser,
+    findAllSubmissionsByUserId,
     findByIdForSettings,
     findByIdWithRelations,
     findCategoryStats,

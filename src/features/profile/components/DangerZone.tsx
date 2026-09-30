@@ -2,7 +2,6 @@
 
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,7 +16,6 @@ interface DangerZoneProps {
 }
 
 export function DangerZone({ handle }: DangerZoneProps) {
-  const t = useExtracted();
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [typed, setTyped] = useState("");
@@ -54,12 +52,12 @@ export function DangerZone({ handle }: DangerZoneProps) {
         </div>
         <div className="min-w-0 flex-1">
           <h2 className="font-semibold text-[15px] text-destructive">
-            {t("Delete account")}
+            {"Delete account"}
           </h2>
           <p className="mt-1 text-[13px] text-muted-foreground">
-            {t(
+            {
               "Permanently remove your account and all associated data. This cannot be undone."
-            )}
+            }
           </p>
         </div>
       </div>
@@ -68,12 +66,7 @@ export function DangerZone({ handle }: DangerZoneProps) {
         <div className="mt-4 rounded-md border border-destructive/30 bg-inset p-4">
           <p className="text-[13px] text-foreground">
             {(() => {
-              const translated = t(
-                "To confirm, type your handle {phrase} below.",
-                {
-                  phrase: CONFIRM_PHRASE,
-                }
-              );
+              const translated = `To confirm, type your handle ${CONFIRM_PHRASE} below.`;
               const parts = translated.split(CONFIRM_PHRASE);
               if (parts.length === 2) {
                 return (
@@ -103,10 +96,10 @@ export function DangerZone({ handle }: DangerZoneProps) {
               variant="destructive"
             >
               <Trash2 size={14} />{" "}
-              {isDeleting ? t("Deleting...") : t("Permanently delete")}
+              {isDeleting ? "Deleting..." : "Permanently delete"}
             </Button>
             <Button onClick={reset} size="sm" variant="outline">
-              {t("Cancel")}
+              {"Cancel"}
             </Button>
           </div>
         </div>
@@ -117,7 +110,7 @@ export function DangerZone({ handle }: DangerZoneProps) {
           size="sm"
           variant="outline"
         >
-          <Trash2 size={14} /> {t("Delete account")}
+          <Trash2 size={14} /> {"Delete account"}
         </Button>
       )}
     </Card>

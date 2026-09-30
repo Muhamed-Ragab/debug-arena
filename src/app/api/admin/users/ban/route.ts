@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     }
     if (userId === session.user.id) {
       return NextResponse.json(
-        { error: "error.cannotBanSelf", success: false },
+        { error: "You cannot ban your own account.", success: false },
         { status: 400 }
       );
     }

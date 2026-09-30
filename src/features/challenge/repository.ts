@@ -1,6 +1,6 @@
 import "server-only";
 
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, or, type SQL } from "drizzle-orm";
 import { db } from "@/db/client";
 import * as schema from "@/db/schema";
 import { OFFLINE_MESSAGE, toOfflineError } from "@/lib/offline";
@@ -8,6 +8,7 @@ import { ConflictError } from "@/lib/safe-action/errors";
 import type {
   ChallengeDetailDTO,
   ChallengeRepository,
+  FindPublishedChallengesPaginatedOpts,
   HintRow,
   PublishedChallengeDTO,
   SubmissionRow,
@@ -54,6 +55,8 @@ export function createChallengeRepository(
 
       return {
         buggyArtifact: challenge.buggyArtifact,
+        categoryColor: challenge.category.color,
+        categoryIcon: challenge.category.icon,
         categoryId: challenge.categoryId,
         categoryName: challenge.category.name,
         categorySlug: challenge.category.slug,
@@ -95,6 +98,8 @@ export function createChallengeRepository(
 
       return {
         buggyArtifact: challenge.buggyArtifact,
+        categoryColor: challenge.category.color,
+        categoryIcon: challenge.category.icon,
         categoryId: challenge.categoryId,
         categoryName: challenge.category.name,
         categorySlug: challenge.category.slug,
@@ -147,6 +152,8 @@ export function createChallengeRepository(
 
       return challengesList.map((c) => ({
         buggyArtifact: c.buggyArtifact,
+        categoryColor: c.category.color,
+        categoryIcon: c.category.icon,
         categoryId: c.categoryId,
         categoryName: c.category.name,
         categorySlug: c.category.slug,
@@ -165,6 +172,104 @@ export function createChallengeRepository(
       }));
     } catch (err) {
       handleDbError(err, "findPublished");
+    }
+  }
+
+  function escapeLike(input: string): string {
+    return input.replace(/[%_\\]/g, "\\$&");
+  }
+
+  async function findPublishedPaginated(
+    opts: FindPublishedChallengesPaginatedOpts
+  ): Promise<{ rows: PublishedChallengeDTO[]; total: number }> {
+    try {
+      const { page, pageSize, search, category, difficulty } = opts;
+      const trimmedSearch = search.trim();
+      const conditions: SQL[] = [eq(schema.challenges.status, "published")];
+
+      if (category !== "all") {
+        const cat = await dbClient.query.categories.findFirst({
+          columns: { id: true },
+          where: or(
+            eq(schema.categories.slug, category),
+            eq(schema.categories.name, category)
+          ),
+        });
+        if (cat) {
+          conditions.push(eq(schema.challenges.categoryId, cat.id));
+        } else {
+          return { rows: [], total: 0 };
+        }
+      }
+
+      if (difficulty !== "all") {
+        const normalized = difficulty.toLowerCase() as
+          | "easy"
+          | "medium"
+          | "hard";
+        if (["easy", "medium", "hard"].includes(normalized)) {
+          conditions.push(eq(schema.challenges.difficulty, normalized));
+        }
+      }
+
+      if (trimmedSearch) {
+        const escaped = escapeLike(trimmedSearch);
+        const pattern = `%${escaped}%`;
+        conditions.push(ilike(schema.challenges.title, pattern));
+      }
+
+      const whereClause = and(...conditions);
+
+      const countResult = await dbClient
+        .select({ cnt: count() })
+        .from(schema.challenges)
+        .where(whereClause);
+      const total = Number(countResult[0]?.cnt ?? 0);
+
+      if (total === 0) {
+        return { rows: [], total: 0 };
+      }
+
+      const offset = (page - 1) * pageSize;
+
+      const rowsRaw = await dbClient.query.challenges.findMany({
+        limit: pageSize,
+        offset,
+        orderBy: [desc(schema.challenges.createdAt)],
+        where: whereClause,
+        with: {
+          category: true,
+          hints: {
+            orderBy: [asc(schema.hints.order)],
+          },
+          submissions: true,
+        },
+      });
+
+      const rows: PublishedChallengeDTO[] = rowsRaw.map((c) => ({
+        buggyArtifact: c.buggyArtifact,
+        categoryColor: c.category.color,
+        categoryIcon: c.category.icon,
+        categoryId: c.categoryId,
+        categoryName: c.category.name,
+        categorySlug: c.category.slug,
+        createdAt: c.createdAt,
+        difficulty: c.difficulty,
+        format: c.format,
+        hints: c.hints,
+        id: c.id,
+        preventionNotes: c.preventionNotes,
+        prompt: c.prompt,
+        referenceFix: c.referenceFix,
+        rootCauseSummary: c.rootCauseSummary,
+        status: c.status,
+        submissions: c.submissions,
+        title: c.title,
+      }));
+
+      return { rows, total };
+    } catch (err) {
+      handleDbError(err, "findPublishedPaginated");
     }
   }
 
@@ -240,6 +345,7 @@ export function createChallengeRepository(
     findChallengeByIdForDetail,
     findHintsByChallengeId,
     findPublished,
+    findPublishedPaginated,
     findSubmissionById,
     findUserChallengeStatsData,
     insertSubmission,

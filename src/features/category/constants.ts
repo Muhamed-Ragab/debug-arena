@@ -81,4 +81,44 @@ export const SEED_CATEGORIES = [
     slug: "security",
     sortOrder: 5,
   },
+  {
+    color: "#a855f7",
+    description:
+      "Service boundaries, capacity planning, caching, queues, and resilient system architecture.",
+    icon: "Layers",
+    isActive: true,
+    name: "System Design",
+    slug: "system-design",
+    sortOrder: 6,
+  },
+  {
+    color: "#14b8a6",
+    description:
+      "Schema design, transactions, indexing, query plans, and data consistency.",
+    icon: "Database",
+    isActive: true,
+    name: "Database Design",
+    slug: "database-design",
+    sortOrder: 7,
+  },
+  {
+    color: "#f97316",
+    description:
+      "Retries, idempotency, ordering, replication, and fault handling across services.",
+    icon: "Cpu",
+    isActive: true,
+    name: "Distributed Systems",
+    slug: "distributed-systems",
+    sortOrder: 8,
+  },
+  {
+    color: "#ec4899",
+    description:
+      "Test isolation, reliability checks, deployment safety, and production diagnostics.",
+    icon: "Wrench",
+    isActive: true,
+    name: "Testing & Reliability",
+    slug: "testing-reliability",
+    sortOrder: 9,
+  },
 ] as const;

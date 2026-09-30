@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Arena — Architecture Map</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --bg2: #161b22;
+            --bg3: #21262d;
+            --border: #30363d;
+            --text: #e6edf3;
+            --muted: #8b949e;
+            --accent: #58a6ff;
+            --green: #3fb950;
+            --yellow: #d29922;
+            --red: #f85149;
+            --purple: #bc8cff;
+            --orange: #ff8c42;
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-code: 'Fira Code', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            height: 65px;
+        }
+        .header-top {
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .app-layout {
+            display: flex;
+            width: 100vw;
+            min-height: calc(100vh - 65px);
+        }
+
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 65px;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 16px 20px 12px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .brand-icon {
+            font-size: 28px;
+        }
+        .brand-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+        }
+        .brand-sub {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+        .sidebar-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .badge {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+        .badge-green {
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--green);
+            border: 1px solid rgba(63, 185, 80, 0.4);
+            font-weight: 600;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: 1px solid transparent;
+            color: var(--muted);
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: left;
+            transition: all .15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .nav-btn:hover {
+            background: var(--bg3);
+            color: var(--text);
+        }
+        .nav-btn.active {
+            background: rgba(88, 166, 255, 0.15);
+            color: var(--accent);
+            border-color: rgba(88, 166, 255, 0.4);
+            font-weight: 600;
+        }
+        .nav-btn-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-count {
+            background: var(--bg3);
+            color: var(--muted);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .nav-btn.active .nav-count {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .sidebar-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 28px 36px;
+            max-width: 1500px;
+            width: calc(100vw - 280px);
+        }
+        .section { display: none; }
+        .section.active { display: block; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .stat {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-num {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .stat-lbl {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .sec-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin: 24px 0 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+        }
+
+        .grid3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+        .grid2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 16px; }
+        .grid1 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: border-color .2s;
+        }
+        .card:hover {
+            border-color: var(--accent);
+        }
+        .color-bar {
+            height: 3px;
+            border-radius: 3px;
+            margin-bottom: 12px;
+        }
+        .chead {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .card-sub {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+        .card-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            margin: 2px;
+        }
+        .tb { background: rgba(88,166,255,.15); color: var(--accent); }
+        .tg { background: rgba(63,185,80,.15); color: var(--green); }
+        .tr { background: rgba(248,81,73,.15); color: var(--red); }
+        .ty { background: rgba(210,153,34,.15); color: var(--yellow); }
+        .tp { background: rgba(188,140,255,.15); color: var(--purple); }
+        .tq { background: var(--bg3); color: var(--muted); }
+
+        .endpoint {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin: 4px 0;
+            background: var(--bg3);
+        }
+        .method {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 4px;
+            min-width: 54px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .GET { background: rgba(63,185,80,.2); color: var(--green); }
+        .POST { background: rgba(88,166,255,.2); color: var(--accent); }
+        .PUT { background: rgba(210,153,34,.2); color: var(--yellow); }
+        .PATCH { background: rgba(255,140,66,.2); color: var(--orange); }
+        .DELETE { background: rgba(248,81,73,.2); color: var(--red); }
+
+        .ep-path { font-size: 12px; font-family: var(--font-code); color: var(--text); }
+        .ep-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .lock { font-size: 10px; margin-left: 6px; opacity: .8; color: var(--purple); }
+
+        .search {
+            width: 100%;
+            padding: 10px 16px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+        .search:focus { border-color: var(--accent); }
+
+        .pipeline { display: flex; flex-direction: column; }
+        .pipe-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            margin-top: -1px;
+        }
+        .pipe-step:first-child { border-radius: 8px 8px 0 0; }
+        .pipe-step:last-child { border-radius: 0 0 8px 8px; }
+        .pipe-num {
+            background: var(--accent);
+            color: #000;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .perm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; margin-bottom: 20px; }
+        .perm-item {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-family: var(--font-code);
+            color: var(--purple);
+        }
+
+        .perm-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--purple);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .perm-flow {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            background: var(--bg3);
+            padding: 12px;
+            border-radius: 6px;
+        }
+        .flow-arrow { color: var(--muted); font-weight: bold; }
+
+        .code-block {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            font-family: var(--font-code);
+            font-size: 12px;
+            color: var(--text);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            margin-top: 8px;
+        }
+        .diagram-box {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            overflow-x: auto;
+        }
+        .mwcard {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 10px;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: var(--bg3); color: var(--muted); font-weight: 600; font-size: 12px; }
+
+        /* Sub-tab buttons for Swagger view switcher */
+        .sub-tab-btn {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all .15s ease;
+        }
+        .sub-tab-btn:hover {
+            background: var(--bg3);
+            color: var(--text);
+        }
+        .sub-tab-btn.active {
+            background: var(--accent);
+            color: #000;
+            font-weight: 600;
+            border-color: var(--accent);
+        }
+        .swagger-view-pane {
+            display: none;
+        }
+        .swagger-view-pane.active {
+            display: block;
+        }
+
+        /* Swagger UI Dark Mode Theme Overrides */
+        #swagger-ui-container .swagger-ui {
+            color: var(--text);
+            font-family: var(--font-main);
+        }
+        #swagger-ui-container .swagger-ui .info .title {
+            color: var(--text);
+        }
+        #swagger-ui-container .swagger-ui .info p, 
+        #swagger-ui-container .swagger-ui .info li {
+            color: var(--muted);
+        }
+        #swagger-ui-container .swagger-ui .scheme-container {
+            background: var(--bg2);
+            box-shadow: none;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+        }
+        #swagger-ui-container .swagger-ui .opblock-tag {
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            font-size: 16px;
+        }
+        #swagger-ui-container .swagger-ui .opblock {
+            background: var(--bg2);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+        }
+        #swagger-ui-container .swagger-ui .opblock .opblock-summary-path {
+            color: var(--text);
+            font-family: var(--font-code);
+            font-size: 13px;
+        }
+        #swagger-ui-container .swagger-ui .opblock .opblock-summary-description {
+            color: var(--muted);
+            font-size: 12px;
+        }
+        #swagger-ui-container .swagger-ui table thead tr th, 
+        #swagger-ui-container .swagger-ui table thead tr td {
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+        }
+        #swagger-ui-container .swagger-ui .parameter__name, 
+        #swagger-ui-container .swagger-ui .parameter__type {
+            color: var(--text);
+        }
+        #swagger-ui-container .swagger-ui section.models {
+            border: 1px solid var(--border);
+            background: var(--bg2);
+            border-radius: 8px;
+        }
+        #swagger-ui-container .swagger-ui section.models h4 {
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+        }
+        #swagger-ui-container .swagger-ui .model-title {
+            color: var(--text);
+        }
+        #swagger-ui-container .swagger-ui pre {
+            background: var(--bg3);
+            color: var(--text);
+            border-radius: 6px;
+        }
+        #swagger-ui-container .swagger-ui input, 
+        #swagger-ui-container .swagger-ui select, 
+        #swagger-ui-container .swagger-ui textarea {
+            background: var(--bg3);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+        #swagger-ui-container .swagger-ui .btn {
+            background: var(--bg3);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-top">
+        <div class="brand">
+            <span class="brand-icon">&#127959;</span>
+            <div>
+                <h1 class="brand-title">Debug Arena</h1>
+                <div class="brand-sub">Architecture Map & Documentation</div>
+            </div>
+        </div>
+        <div class="sidebar-badges" style="margin-top:0;">
+            <span class="badge">v1.0.0</span>
+            <span class="badge">TypeScript</span>
+            <span class="badge badge-green">Generated 2026-09-30</span>
+        </div>
+    </div>
+</header>
+
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px;">Navigation</div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <button class="nav-btn active" onclick="showTab('overview', this)">
+                <div class="nav-btn-left"><span>&#128204;</span> <span>Overview</span></div>
+            </button>
+            <button class="nav-btn" onclick="showTab('modules', this)">
+                <div class="nav-btn-left"><span>&#128230;</span> <span>API Modules</span></div>
+                <span class="nav-count">3</span>
+            </button>
+            <button class="nav-btn" onclick="showTab('sysarch', this)">
+                <div class="nav-btn-left"><span>&#127963;</span> <span>System Architecture</span></div>
+            </button>
+            <button class="nav-btn" onclick="showTab('docker', this)">
+                <div class="nav-btn-left"><span>&#128051;</span> <span>Docker Topology</span></div>
+            </button>
+            <button class="nav-btn" onclick="showTab('swagger', this)">
+                <div class="nav-btn-left"><span>&#9889;</span> <span>Swagger & OpenAPI</span></div>
+            </button>
+            <button class="nav-btn" onclick="showTab('perms', this)">
+                <div class="nav-btn-left"><span>&#128273;</span> <span>Permissions</span></div>
+            </button>
+            <button class="nav-btn" onclick="showTab('sql', this)">
+                <div class="nav-btn-left"><span>&#128452;</span> <span>SQL Queries</span></div>
+                <span class="nav-count">0</span>
+            </button>
+            <button class="nav-btn" onclick="showTab('infra', this)">
+                <div class="nav-btn-left"><span>&#128187;</span> <span>Infrastructure</span></div>
+                <span class="nav-count">2</span>
+            </button>
+            <button class="nav-btn" onclick="showTab('core', this)">
+                <div class="nav-btn-left"><span>&#128737;</span> <span>Core Layer</span></div>
+            </button>
+            <button class="nav-btn" onclick="showTab('flow', this)">
+                <div class="nav-btn-left"><span>&#128257;</span> <span>Request Pipeline</span></div>
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+           © Debug Arena — Architecture
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+    <!-- 1. OVERVIEW -->
+    <div class="section active" id="sec-overview">
+        <div class="stats">
+            <div class="stat"><div class="stat-num">3</div><div class="stat-lbl">API Modules</div></div>
+            <div class="stat"><div class="stat-num">4</div><div class="stat-lbl">Total Endpoints</div></div>
+            <div class="stat"><div class="stat-num">2</div><div class="stat-lbl">Docker Services</div></div>
+            <div class="stat"><div class="stat-num">1</div><div class="stat-lbl">Permissions</div></div>
+            <div class="stat"><div class="stat-num">0</div><div class="stat-lbl">SQL Queries</div></div>
+            <div class="stat"><div class="stat-num">1</div><div class="stat-lbl">Workspaces</div></div>
+        </div>
+
+        <div class="sec-title">📦 Workspaces</div>
+        <div class="grid3">
+
+            <div class="card">
+                <div class="chead">
+                    <span style="font-size:22px">💻</span>
+                    <div>
+                        <div class="card-title">debug-arena</div>
+                        <div class="card-sub">FRONTEND : 3000</div>
+                    </div>
+                </div>
+                <div class="card-desc">Next.js App Router UI, server actions, and API routes</div>
+                <span class="tag tq">src/app/layout.tsx</span>
+            </div>
+
+        </div>
+
+        <div class="sec-title">🌐 System Endpoints</div>
+        <div class="grid1">
+
+        </div>
+    </div>
+
+    <!-- 2. API MODULES -->
+    <div class="section" id="sec-modules">
+        <input class="search" id="modSearch" placeholder="Search endpoints, paths, permissions, descriptions..." oninput="filterModules()">
+        <div class="grid2" id="modulesGrid">
+
+            <div class="card mod-card">
+                <div class="color-bar" style="background: #8b5cf6"></div>
+                <div class="chead">
+                    <span style="font-size:22px">🔐</span>
+                    <div>
+                        <div class="card-title">Authentication</div>
+                        <div class="card-sub" style="font-family: var(--font-code);">/api/auth</div>
+                    </div>
+                </div>
+                <div class="card-desc">better-auth native session, sign-in, sign-up, OAuth, and account endpoints.</div>
+                
+                
+                <div class="endpoint">
+                    <span class="method GET">GET</span>
+                    <div>
+                        <div class="ep-path">/api/auth/*</div>
+                        <div class="ep-desc">better-auth native session and account reads.</div>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <span class="method POST">POST</span>
+                    <div>
+                        <div class="ep-path">/api/auth/*</div>
+                        <div class="ep-desc">better-auth native sign-in, sign-up, OAuth, and account operations.</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card mod-card">
+                <div class="color-bar" style="background: #22c55e"></div>
+                <div class="chead">
+                    <span style="font-size:22px">💚</span>
+                    <div>
+                        <div class="card-title">Health</div>
+                        <div class="card-sub" style="font-family: var(--font-code);">/api/health</div>
+                    </div>
+                </div>
+                <div class="card-desc">Application and dependency health status.</div>
+                
+                
+                <div class="endpoint">
+                    <span class="method GET">GET</span>
+                    <div>
+                        <div class="ep-path">/api/health</div>
+                        <div class="ep-desc">Returns application health status.</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card mod-card">
+                <div class="color-bar" style="background: #f97316"></div>
+                <div class="chead">
+                    <span style="font-size:22px">🛡️</span>
+                    <div>
+                        <div class="card-title">Admin User Management</div>
+                        <div class="card-sub" style="font-family: var(--font-code);">/api/admin/users</div>
+                    </div>
+                </div>
+                <div class="card-desc">Admin-only account moderation operations.</div>
+                <div style="margin-bottom:10px"><span class="tag tp">admin</span></div>
+                
+                <div class="endpoint">
+                    <span class="method POST">POST</span>
+                    <div>
+                        <div class="ep-path">/api/admin/users/ban<span class="lock">🔒 admin</span></div>
+                        <div class="ep-desc">Bans or unbans a user; requires an admin session.</div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 3. SYSTEM ARCHITECTURE & COMPONENTS DIAGRAM -->
+    <div class="section" id="sec-sysarch">
+        <div class="card">
+            <div class="chead">
+                <span style="font-size:24px">🏛️</span>
+                <div>
+                    <div class="card-title">System Design & Component Architecture Diagram</div>
+                    <div class="card-sub">High-level software architecture, layered boundaries, and component relationships</div>
+                </div>
+            </div>
+            <p class="card-desc">Next.js UI and server-side feature layers use better-auth, Drizzle/PostgreSQL, and Redis.</p>
+            <div class="diagram-box">
+                <div id="sysarchMermaid" style="width: 100%; min-height: 500px; display: flex; justify-content: center; align-items: center;"></div>
+                <script type="text/plain" id="sysarchMermaidSrc">
+flowchart TB
+    classDef proxy fill:#1e293b,stroke:#64748b,stroke-width:2px,color:#fff;
+    classDef app fill:#1e3a8a,stroke:#58a6ff,stroke-width:2px,color:#fff;
+    classDef database fill:#064e3b,stroke:#3fb950,stroke-width:2px,color:#fff;
+    classDef cache fill:#78350f,stroke:#f59e0b,stroke-width:2px,color:#fff;
+    classDef queue fill:#4c1d95,stroke:#8b5cf6,stroke-width:2px,color:#fff;
+    classDef monitoring fill:#7c2d12,stroke:#f97316,stroke-width:2px,color:#fff;
+    classDef logging fill:#831843,stroke:#ec4899,stroke-width:2px,color:#fff;
+
+    subgraph sg_presentation["Presentation"]
+        browser["Browser UI"]
+        next-app["Next.js App Router"]
+    end
+
+    subgraph sg_application["Application Services"]
+        proxy["Next.js Proxy: session and role guards"]
+        actions["Server Actions and API routes"]
+        features["Feature services and repositories"]
+        auth["better-auth"]
+    end
+
+    subgraph sg_data["Data and Storage"]
+        postgres["PostgreSQL 16"]
+        redis["Redis 7"]
+    end
+
+    browser -->|"HTTP"| next-app
+    next-app -->|"Request"| proxy
+    proxy -->|"Authorized request"| actions
+    actions -->|"Validated operation"| features
+    actions -->|"Authentication endpoints"| auth
+    features -->|"Drizzle queries"| postgres
+    auth -->|"User and account records"| postgres
+    auth -->|"Secondary storage"| redis
+
+    class browser,next-app,proxy,actions,features,auth app;
+    class postgres database;
+    class redis cache;
+
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. DOCKER DIAGRAM -->
+    <div class="section" id="sec-docker">
+        <div class="card">
+            <div class="chead">
+                <span style="font-size:24px">🐳</span>
+                <div>
+                    <div class="card-title">Docker Infrastructure Topology &amp; Dependency Diagram</div>
+                    <div class="card-sub">Rendered live using Mermaid.js from container specifications</div>
+                </div>
+            </div>
+            <p class="card-desc">Local Docker services; the Next.js app runs separately on port 3000.</p>
+
+            <div class="diagram-box">
+                <div id="dockerMermaid" style="width: 100%; min-height: 400px; display: flex; justify-content: center; align-items: center;"></div>
+                <script type="text/plain" id="dockerMermaidSrc">
+flowchart TD
+    classDef proxy fill:#1e293b,stroke:#64748b,stroke-width:2px,color:#fff;
+    classDef app fill:#1e3a8a,stroke:#58a6ff,stroke-width:2px,color:#fff;
+    classDef database fill:#064e3b,stroke:#3fb950,stroke-width:2px,color:#fff;
+    classDef cache fill:#78350f,stroke:#f59e0b,stroke-width:2px,color:#fff;
+    classDef queue fill:#4c1d95,stroke:#8b5cf6,stroke-width:2px,color:#fff;
+    classDef monitoring fill:#7c2d12,stroke:#f97316,stroke-width:2px,color:#fff;
+    classDef logging fill:#831843,stroke:#ec4899,stroke-width:2px,color:#fff;
+    classDef uptime fill:#7f1d1d,stroke:#ef4444,stroke-width:2px,color:#fff;
+
+    postgres["PostgreSQL :5432 Port 5432"]
+    redis["Redis :6379 Port 6379"]
+
+
+    class postgres database;
+    class redis cache;
+
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. SWAGGER & OPENAPI -->
+    <div class="section" id="sec-swagger">
+        <div class="card" style="margin-bottom: 20px;">
+            <div class="chead">
+                <span style="font-size:28px">&#9889;</span>
+                <div>
+                    <div class="card-title">Swagger & OpenAPI 3.0 API Specification & Explorer</div>
+                    <div class="card-sub">Interactive REST API documentation generated from architecture manifest (4 Endpoints)</div>
+                </div>
+                <span class="badge badge-green" style="margin-left:auto; font-size: 12px; padding: 6px 12px;">STATUS: NO OPENAPI OR SWAGGER ENDPOINT IS CONFIGURED</span>
+            </div>
+
+            <div class="grid4" style="margin-top: 15px;">
+                <div style="font-size: 12px; color: var(--muted);">
+                    <div style="color: var(--text); font-weight: 600; margin-bottom: 2px;">OpenAPI Version</div>
+                    <code>Not configured</code>
+                </div>
+                <div style="font-size: 12px; color: var(--muted);">
+                    <div style="color: var(--text); font-weight: 600; margin-bottom: 2px;">Base URL</div>
+                    <code>http://localhost:3000</code>
+                </div>
+                <div style="font-size: 12px; color: var(--muted);">
+                    <div style="color: var(--text); font-weight: 600; margin-bottom: 2px;">Security Scheme</div>
+                    <span class="tag ty">better-auth cookie sessions</span>
+                </div>
+                <div style="font-size: 12px; color: var(--muted);">
+                    <div style="color: var(--text); font-weight: 600; margin-bottom: 2px;">Live Swagger Route</div>
+                    <code>Not served by the application</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Mode Selector -->
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <button class="sub-tab-btn active" onclick="switchSwaggerView('ui', this)">&#9889; Interactive Swagger UI</button>
+            <button class="sub-tab-btn" onclick="switchSwaggerView('catalog', this)">&#128216; API Endpoint Catalog & cURL (4)</button>
+            <button class="sub-tab-btn" onclick="switchSwaggerView('json', this)">&#128220; OpenAPI 3.0 JSON Spec</button>
+        </div>
+
+        <!-- Pane 1: Interactive Swagger UI -->
+        <div id="swagger-view-ui" class="swagger-view-pane active">
+            <div class="card" style="padding: 10px;">
+                <div id="swagger-ui-container">
+                    <div style="padding: 40px; text-align: center; color: var(--muted);">
+                        Loading Interactive Swagger UI...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pane 2: API Endpoint Catalog & cURL -->
+        <div id="swagger-view-catalog" class="swagger-view-pane">
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="chead" style="margin-bottom: 12px;">
+                    <span style="font-size: 22px;">🔐</span>
+                    <div>
+                        <div class="card-title">Authentication API Module</div>
+                        <div class="card-sub">Base Path: <code>/api/auth</code> | 2 Endpoints</div>
+                    </div>
+                </div>
+
+                <div class="grid1" style="gap: 12px;">
+
+                    <div style="background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span class="tag tg" style="font-weight: 700; font-size: 11px;">GET</span>
+                            <span style="font-family: var(--font-code); font-weight: 600; font-size: 13px; color: var(--text);">/api/auth/api/auth/*</span>
+                            <span class="tag ty" style="font-size:10px; margin-left:auto;">&#127760; Public</span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--muted); margin-top: 6px;">better-auth native session and account reads.</div>
+                        <div style="margin-top: 8px;">
+                            <div style="font-size: 10px; color: var(--muted); margin-bottom: 2px;">cURL Snippet:</div>
+                            <code style="display: block; font-size: 11px; color: var(--accent); background: var(--bg); padding: 6px 10px; border-radius: 4px; overflow-x: auto;">curl -X GET &quot;http://localhost:3000/api/auth/api/auth/*&quot;</code>
+                        </div>
+                    </div>
+
+                    <div style="background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span class="tag tb" style="font-weight: 700; font-size: 11px;">POST</span>
+                            <span style="font-family: var(--font-code); font-weight: 600; font-size: 13px; color: var(--text);">/api/auth/api/auth/*</span>
+                            <span class="tag ty" style="font-size:10px; margin-left:auto;">&#127760; Public</span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--muted); margin-top: 6px;">better-auth native sign-in, sign-up, OAuth, and account operations.</div>
+                        <div style="margin-top: 8px;">
+                            <div style="font-size: 10px; color: var(--muted); margin-bottom: 2px;">cURL Snippet:</div>
+                            <code style="display: block; font-size: 11px; color: var(--accent); background: var(--bg); padding: 6px 10px; border-radius: 4px; overflow-x: auto;">curl -X POST &quot;http://localhost:3000/api/auth/api/auth/*&quot; -H &quot;Content-Type: application/json&quot; -d &#x27;{&quot;key&quot;:&quot;value&quot;}&#x27;</code>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="chead" style="margin-bottom: 12px;">
+                    <span style="font-size: 22px;">💚</span>
+                    <div>
+                        <div class="card-title">Health API Module</div>
+                        <div class="card-sub">Base Path: <code>/api/health</code> | 1 Endpoints</div>
+                    </div>
+                </div>
+
+                <div class="grid1" style="gap: 12px;">
+
+                    <div style="background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span class="tag tg" style="font-weight: 700; font-size: 11px;">GET</span>
+                            <span style="font-family: var(--font-code); font-weight: 600; font-size: 13px; color: var(--text);">/api/health/api/health</span>
+                            <span class="tag ty" style="font-size:10px; margin-left:auto;">&#127760; Public</span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--muted); margin-top: 6px;">Returns application health status.</div>
+                        <div style="margin-top: 8px;">
+                            <div style="font-size: 10px; color: var(--muted); margin-bottom: 2px;">cURL Snippet:</div>
+                            <code style="display: block; font-size: 11px; color: var(--accent); background: var(--bg); padding: 6px 10px; border-radius: 4px; overflow-x: auto;">curl -X GET &quot;http://localhost:3000/api/health/api/health&quot;</code>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="chead" style="margin-bottom: 12px;">
+                    <span style="font-size: 22px;">🛡️</span>
+                    <div>
+                        <div class="card-title">Admin User Management API Module</div>
+                        <div class="card-sub">Base Path: <code>/api/admin/users</code> | 1 Endpoints</div>
+                    </div>
+                </div>
+
+                <div class="grid1" style="gap: 12px;">
+
+                    <div style="background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span class="tag tb" style="font-weight: 700; font-size: 11px;">POST</span>
+                            <span style="font-family: var(--font-code); font-weight: 600; font-size: 13px; color: var(--text);">/api/admin/users/api/admin/users/ban</span>
+                            <span class="tag tb" style="font-size:10px; margin-left:auto;">&#128273; admin</span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--muted); margin-top: 6px;">Bans or unbans a user; requires an admin session.</div>
+                        <div style="margin-top: 8px;">
+                            <div style="font-size: 10px; color: var(--muted); margin-bottom: 2px;">cURL Snippet:</div>
+                            <code style="display: block; font-size: 11px; color: var(--accent); background: var(--bg); padding: 6px 10px; border-radius: 4px; overflow-x: auto;">curl -X POST &quot;http://localhost:3000/api/admin/users/api/admin/users/ban&quot; -H &quot;Authorization: Bearer $JWT_TOKEN&quot; -H &quot;Content-Type: application/json&quot; -d &#x27;{&quot;key&quot;:&quot;value&quot;}&#x27;</code>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Pane 3: Raw OpenAPI 3.0 JSON Spec -->
+        <div id="swagger-view-json" class="swagger-view-pane">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div style="font-weight: 600; font-size: 14px;">OpenAPI 3.0.0 JSON Specification Source</div>
+                    <button class="sub-tab-btn" onclick="navigator.clipboard.writeText(document.getElementById('swaggerOpenApiJsonSrc').textContent); alert('Copied OpenAPI JSON Spec to clipboard!');">&#128203; Copy OpenAPI Spec</button>
+                </div>
+                <pre style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: var(--font-code); font-size: 12px; color: var(--text); max-height: 600px; overflow-y: auto;"><code id="swaggerOpenApiJsonSrc">{
+  &quot;openapi&quot;: &quot;3.0.0&quot;,
+  &quot;info&quot;: {
+    &quot;title&quot;: &quot;Debug Arena&quot;,
+    &quot;version&quot;: &quot;1.0.0&quot;,
+    &quot;description&quot;: &quot;Next.js application architecture and HTTP route map&quot;
+  },
+  &quot;servers&quot;: [
+    {
+      &quot;url&quot;: &quot;http://localhost:3000&quot;,
+      &quot;description&quot;: &quot;Local development&quot;
+    }
+  ],
+  &quot;tags&quot;: [
+    {
+      &quot;name&quot;: &quot;Authentication&quot;,
+      &quot;description&quot;: &quot;better-auth native session, sign-in, sign-up, OAuth, and account endpoints.&quot;
+    },
+    {
+      &quot;name&quot;: &quot;Health&quot;,
+      &quot;description&quot;: &quot;Application and dependency health status.&quot;
+    },
+    {
+      &quot;name&quot;: &quot;Admin User Management&quot;,
+      &quot;description&quot;: &quot;Admin-only account moderation operations.&quot;
+    }
+  ],
+  &quot;paths&quot;: {
+    &quot;/api/auth/api/auth/*&quot;: {
+      &quot;get&quot;: {
+        &quot;tags&quot;: [
+          &quot;Authentication&quot;
+        ],
+        &quot;summary&quot;: &quot;better-auth native session and account reads.&quot;,
+        &quot;description&quot;: &quot;better-auth native session and account reads. | Public / Authenticated Route&quot;,
+        &quot;parameters&quot;: [],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;Successful Request&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;example&quot;: {
+                  &quot;success&quot;: true,
+                  &quot;data&quot;: {}
+                }
+              }
+            }
+          },
+          &quot;400&quot;: {
+            &quot;description&quot;: &quot;Invalid payload parameters&quot;
+          },
+          &quot;401&quot;: {
+            &quot;description&quot;: &quot;Missing or expired JWT Bearer token&quot;
+          },
+          &quot;403&quot;: {
+            &quot;description&quot;: &quot;Forbidden - Insufficient permissions&quot;
+          },
+          &quot;422&quot;: {
+            &quot;description&quot;: &quot;Validation error&quot;
+          },
+          &quot;500&quot;: {
+            &quot;description&quot;: &quot;Internal server error&quot;
+          }
+        }
+      },
+      &quot;post&quot;: {
+        &quot;tags&quot;: [
+          &quot;Authentication&quot;
+        ],
+        &quot;summary&quot;: &quot;better-auth native sign-in, sign-up, OAuth, and account operations.&quot;,
+        &quot;description&quot;: &quot;better-auth native sign-in, sign-up, OAuth, and account operations. | Public / Authenticated Route&quot;,
+        &quot;parameters&quot;: [],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;Successful Request&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;example&quot;: {
+                  &quot;success&quot;: true,
+                  &quot;data&quot;: {}
+                }
+              }
+            }
+          },
+          &quot;400&quot;: {
+            &quot;description&quot;: &quot;Invalid payload parameters&quot;
+          },
+          &quot;401&quot;: {
+            &quot;description&quot;: &quot;Missing or expired JWT Bearer token&quot;
+          },
+          &quot;403&quot;: {
+            &quot;description&quot;: &quot;Forbidden - Insufficient permissions&quot;
+          },
+          &quot;422&quot;: {
+            &quot;description&quot;: &quot;Validation error&quot;
+          },
+          &quot;500&quot;: {
+            &quot;description&quot;: &quot;Internal server error&quot;
+          }
+        },
+        &quot;requestBody&quot;: {
+          &quot;required&quot;: true,
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;type&quot;: &quot;object&quot;,
+                &quot;example&quot;: {
+                  &quot;exampleField&quot;: &quot;exampleValue&quot;
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    &quot;/api/health/api/health&quot;: {
+      &quot;get&quot;: {
+        &quot;tags&quot;: [
+          &quot;Health&quot;
+        ],
+        &quot;summary&quot;: &quot;Returns application health status.&quot;,
+        &quot;description&quot;: &quot;Returns application health status. | Public / Authenticated Route&quot;,
+        &quot;parameters&quot;: [],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;Successful Request&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;example&quot;: {
+                  &quot;success&quot;: true,
+                  &quot;data&quot;: {}
+                }
+              }
+            }
+          },
+          &quot;400&quot;: {
+            &quot;description&quot;: &quot;Invalid payload parameters&quot;
+          },
+          &quot;401&quot;: {
+            &quot;description&quot;: &quot;Missing or expired JWT Bearer token&quot;
+          },
+          &quot;403&quot;: {
+            &quot;description&quot;: &quot;Forbidden - Insufficient permissions&quot;
+          },
+          &quot;422&quot;: {
+            &quot;description&quot;: &quot;Validation error&quot;
+          },
+          &quot;500&quot;: {
+            &quot;description&quot;: &quot;Internal server error&quot;
+          }
+        }
+      }
+    },
+    &quot;/api/admin/users/api/admin/users/ban&quot;: {
+      &quot;post&quot;: {
+        &quot;tags&quot;: [
+          &quot;Admin User Management&quot;
+        ],
+        &quot;summary&quot;: &quot;Bans or unbans a user; requires an admin session.&quot;,
+        &quot;description&quot;: &quot;Bans or unbans a user; requires an admin session. | Required Permission: `admin`&quot;,
+        &quot;parameters&quot;: [],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;Successful Request&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;example&quot;: {
+                  &quot;success&quot;: true,
+                  &quot;data&quot;: {}
+                }
+              }
+            }
+          },
+          &quot;400&quot;: {
+            &quot;description&quot;: &quot;Invalid payload parameters&quot;
+          },
+          &quot;401&quot;: {
+            &quot;description&quot;: &quot;Missing or expired JWT Bearer token&quot;
+          },
+          &quot;403&quot;: {
+            &quot;description&quot;: &quot;Forbidden - Insufficient permissions&quot;
+          },
+          &quot;422&quot;: {
+            &quot;description&quot;: &quot;Validation error&quot;
+          },
+          &quot;500&quot;: {
+            &quot;description&quot;: &quot;Internal server error&quot;
+          }
+        },
+        &quot;security&quot;: [
+          {
+            &quot;bearerAuth&quot;: []
+          }
+        ],
+        &quot;requestBody&quot;: {
+          &quot;required&quot;: true,
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;type&quot;: &quot;object&quot;,
+                &quot;example&quot;: {
+                  &quot;exampleField&quot;: &quot;exampleValue&quot;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  &quot;components&quot;: {
+    &quot;securitySchemes&quot;: {
+      &quot;bearerAuth&quot;: {
+        &quot;type&quot;: &quot;http&quot;,
+        &quot;scheme&quot;: &quot;bearer&quot;,
+        &quot;bearerFormat&quot;: &quot;JWT&quot;,
+        &quot;description&quot;: &quot;Provide your JWT Access Token (Header: Authorization: Bearer &lt;token&gt;)&quot;
+      }
+    },
+    &quot;schemas&quot;: {}
+  }
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. PERMISSIONS -->
+    <div class="section" id="sec-perms">
+        <div class="sec-title">&#128273; Permission Catalog</div>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">
+            Route access is enforced through authenticated sessions and admin role checks.
+        </p>
+
+        <div class="perm-grid">
+<div class="perm-item">admin</div>
+        </div>
+
+        <div class="sec-title" style="margin-top: 24px;">&#128279; Interactive Permission-to-Endpoint & Page Mapping Flow</div>
+        <div class="grid1">
+
+            <div class="perm-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-family:var(--font-code); font-weight:700; color:var(--purple); font-size:14px;">&#128273; admin</span>
+                    <span class="tag tp">Admin User Management • MODERATE</span>
+                </div>
+                <div style="margin-top: 8px; font-size: 13px;">
+                    <strong>Protected Endpoints:</strong> <span class="method POST">POST</span> <code style="font-size:12px">/api/admin/users/ban</code> &nbsp; 
+                </div>
+                <div style="margin-top: 6px; font-size: 12px; color: var(--muted);">
+                    <strong>Admin Dashboard Pages:</strong> <span class="tag tb">Admin users</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 6. SQL QUERIES CATALOG -->
+    <div class="section" id="sec-sql">
+        <div class="sec-title">&#128452; SQL Query Catalog & Repository Mapping</div>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">
+            Raw SQL statements mapped to repository/service functions, affected tables, and API endpoints.
+        </p>
+
+        <div class="card" style="text-align: center; padding: 48px 24px; color: var(--muted); border: 1px dashed var(--border); border-radius: 12px;">
+            <div style="font-size: 36px; margin-bottom: 12px;">🗃️</div>
+            <div style="font-size: 16px; font-weight: 600; color: var(--text);">No Database SQL Queries Configured</div>
+            <div style="font-size: 13px; margin-top: 6px;">This project does not contain direct database repositories or SQL queries (e.g. External REST API Proxy or WebClient Service).</div>
+        </div>
+
+    </div>
+
+    <!-- 7. INFRASTRUCTURE -->
+    <div class="section" id="sec-infra">
+        <div class="sec-title">&#128187; Infrastructure Services</div>
+        <div class="grid3">
+
+            <div class="card">
+                <div class="chead">
+                    <div>
+                        <div class="card-title">PostgreSQL 16 <span class="tag tb">database</span></div>
+                        <div class="card-sub">postgres:16 : 5432</div>
+                    </div>
+                </div>
+                <div class="card-desc">Relational application data accessed through Drizzle ORM</div>
+                <div><span class="tag tq">Local Docker service</span><span class="tag tq">No vector extension required</span></div>
+            </div>
+
+            <div class="card">
+                <div class="chead">
+                    <div>
+                        <div class="card-title">Redis 7 <span class="tag tg">cache</span></div>
+                        <div class="card-sub">redis:7-alpine : 6379</div>
+                    </div>
+                </div>
+                <div class="card-desc">better-auth secondary storage and application caching</div>
+                <div><span class="tag tq">Local Docker service</span></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 8. CORE LAYER -->
+    <div class="section" id="sec-core">
+        <div class="sec-title">&#128737; Security Middleware</div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;">
+
+            <div style="background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; min-width:160px;">
+                <div style="font-weight:600; font-size:13px; margin-bottom:4px; color:var(--accent);">Session and role guards</div>
+                <div style="font-size:12px; color:var(--muted);">Redirects unauthenticated requests for protected routes and limits the admin area to admin users.</div>
+            </div>
+
+            <div style="background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; min-width:160px;">
+                <div style="font-weight:600; font-size:13px; margin-bottom:4px; color:var(--accent);">better-auth</div>
+                <div style="font-size:12px; color:var(--muted);">Manages cookie-based sessions, credentials, and configured social providers.</div>
+            </div>
+
+        </div>
+
+        <div class="sec-title">&#9881; Core Middleware</div>
+        <div class="grid1">
+
+            <div class="mwcard">
+                <div style="font-weight:600; font-size:14px; margin-bottom:4px;">Next.js Proxy</div>
+                <div style="font-size:11px; font-family:var(--font-code); color:var(--muted); margin-bottom:6px;">src/proxy.ts</div>
+                <div style="font-size:13px; color:var(--muted);">Performs optimistic session and role-based route redirects.</div>
+                <div style="margin-top:8px"><span class="tag ty">Protected routes</span><span class="tag ty">Admin role</span></div>
+            </div>
+
+        </div>
+
+        <div class="sec-title">&#128736; Core Services</div>
+        <div class="grid2">
+
+            <div class="card">
+                <div class="card-title">Feature services and repositories</div>
+                <div class="card-sub" style="margin-bottom:8px;">src/features/*/service.ts</div>
+                <div class="card-desc">Use injected repositories and Drizzle to implement feature operations.</div>
+                <div style="margin-top:8px"><span class="tag tb" style="font-family:var(--font-code); font-size:11px">challengeService</span><span class="tag tb" style="font-family:var(--font-code); font-size:11px">categoryService</span><span class="tag tb" style="font-family:var(--font-code); font-size:11px">leaderboardService</span><span class="tag tb" style="font-family:var(--font-code); font-size:11px">profileService</span></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">better-auth Redis storage</div>
+                <div class="card-sub" style="margin-bottom:8px;">src/lib/auth/index.ts</div>
+                <div class="card-desc">Stores secondary authentication state in Redis.</div>
+                <div style="margin-top:8px"><span class="tag tb" style="font-family:var(--font-code); font-size:11px">auth</span></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 9. REQUEST FLOW -->
+    <div class="section" id="sec-flow">
+        <div class="sec-title">&#128257; Request Pipeline</div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:18px; line-height:1.7;">
+            Step-by-step lifecycle of an inbound HTTP request through the application stack.
+            Click any step to see implementation detail.
+        </p>
+        <div class="pipeline">
+
+            <div class="pipe-step" onclick="var d=document.getElementById('pdet-0');d.style.display=d.style.display==='none'?'':'none';" style="cursor:pointer;">
+                <div class="pipe-num">1</div>
+                <div style="font-size:13px; color:var(--text); flex:1;">Browser sends a request to the Next.js App Router.</div>
+                
+                <span style="font-size:10px; color:var(--muted); margin-left:8px;">▼</span>
+            </div>
+            <div class="pipe-detail" id="pdet-0" style="display:none; margin-top:8px; font-size:12px; color:var(--muted); line-height:1.6; padding-left:34px;">The application serves English-only UI routes, API routes, and server actions.</div>
+
+            <div class="pipe-step" onclick="var d=document.getElementById('pdet-1');d.style.display=d.style.display==='none'?'':'none';" style="cursor:pointer;">
+                <div class="pipe-num">2</div>
+                <div style="font-size:13px; color:var(--text); flex:1;">Next.js Proxy checks session and route access.</div>
+                <a href="#" onclick="showTab('core',null);return false;" style="font-size:11px; color:var(--accent); text-decoration:none; margin-left:auto; white-space:nowrap; opacity:0.8;">⚙️ Core Middleware</a>
+                <span style="font-size:10px; color:var(--muted); margin-left:8px;">▼</span>
+            </div>
+            <div class="pipe-detail" id="pdet-1" style="display:none; margin-top:8px; font-size:12px; color:var(--muted); line-height:1.6; padding-left:34px;">Protected routes redirect anonymous users; admin routes require an admin role.</div>
+
+            <div class="pipe-step" onclick="var d=document.getElementById('pdet-2');d.style.display=d.style.display==='none'?'':'none';" style="cursor:pointer;">
+                <div class="pipe-num">3</div>
+                <div style="font-size:13px; color:var(--text); flex:1;">Route or server action validates input.</div>
+                
+                <span style="font-size:10px; color:var(--muted); margin-left:8px;">▼</span>
+            </div>
+            <div class="pipe-detail" id="pdet-2" style="display:none; margin-top:8px; font-size:12px; color:var(--muted); line-height:1.6; padding-left:34px;">Zod schemas and next-safe-action clients validate server action inputs and outputs.</div>
+
+            <div class="pipe-step" onclick="var d=document.getElementById('pdet-3');d.style.display=d.style.display==='none'?'':'none';" style="cursor:pointer;">
+                <div class="pipe-num">4</div>
+                <div style="font-size:13px; color:var(--text); flex:1;">Feature service calls its repository.</div>
+                <a href="#" onclick="showTab('core',null);return false;" style="font-size:11px; color:var(--accent); text-decoration:none; margin-left:auto; white-space:nowrap; opacity:0.8;">🔧 Core Services</a>
+                <span style="font-size:10px; color:var(--muted); margin-left:8px;">▼</span>
+            </div>
+            <div class="pipe-detail" id="pdet-3" style="display:none; margin-top:8px; font-size:12px; color:var(--muted); line-height:1.6; padding-left:34px;">Service factories receive repositories through dependency injection.</div>
+
+            <div class="pipe-step" onclick="var d=document.getElementById('pdet-4');d.style.display=d.style.display==='none'?'':'none';" style="cursor:pointer;">
+                <div class="pipe-num">5</div>
+                <div style="font-size:13px; color:var(--text); flex:1;">Repository reads or writes PostgreSQL through Drizzle.</div>
+                
+                <span style="font-size:10px; color:var(--muted); margin-left:8px;">▼</span>
+            </div>
+            <div class="pipe-detail" id="pdet-4" style="display:none; margin-top:8px; font-size:12px; color:var(--muted); line-height:1.6; padding-left:34px;">The database stores users, categories, challenges, submissions, and related records.</div>
+
+            <div class="pipe-step" onclick="var d=document.getElementById('pdet-5');d.style.display=d.style.display==='none'?'':'none';" style="cursor:pointer;">
+                <div class="pipe-num">6</div>
+                <div style="font-size:13px; color:var(--text); flex:1;">The route or action returns its client-visible response.</div>
+                
+                <span style="font-size:10px; color:var(--muted); margin-left:8px;">▼</span>
+            </div>
+            <div class="pipe-detail" id="pdet-5" style="display:none; margin-top:8px; font-size:12px; color:var(--muted); line-height:1.6; padding-left:34px;">Application API routes use the standard envelope; better-auth endpoints retain their native response contract.</div>
+
+        </div>
+
+        <div style="margin-top:24px;">
+            <div style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-bottom:10px;"
+                 onclick="var ep=document.getElementById('errorPipelineBody');ep.style.display=ep.style.display==='none'?'':'none';">
+                <div style="font-size:14px; font-weight:600; color:var(--red);">⚠ Exception / Error Flow</div>
+                <span style="font-size:11px; color:var(--muted);">click to expand</span>
+            </div>
+            <div id="errorPipelineBody" style="display:none; background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--red); border-radius:8px; padding:14px;">
+                <p style="font-size:12px; color:var(--muted); margin-bottom:10px; line-height:1.6;">
+                    When an exception is thrown at any layer, the following error handling chain is invoked instead of the normal response path.
+                </p>
+                
+                <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--bg); border-radius:6px; margin:3px 0;">
+                    <div style="background:var(--red); color:#fff; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;">1</div>
+                    <div style="font-size:13px; color:var(--text);">Input validation returns a typed action or API error.</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--bg); border-radius:6px; margin:3px 0;">
+                    <div style="background:var(--red); color:#fff; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;">2</div>
+                    <div style="font-size:13px; color:var(--text);">Feature services sanitize unexpected failures at their boundary.</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--bg); border-radius:6px; margin:3px 0;">
+                    <div style="background:var(--red); color:#fff; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;">3</div>
+                    <div style="font-size:13px; color:var(--text);">API routes return the standard success/data/error envelope; better-auth owns its endpoint contract.</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--bg); border-radius:6px; margin:3px 0;">
+                    <div style="background:var(--red); color:#fff; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;">4</div>
+                    <div style="font-size:13px; color:var(--text);">The UI renders an English error state and can retry where appropriate.</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top:24px; background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px;">
+            <div class="sec-title" style="margin-top:0">&#128274; Scope & Isolation</div>
+            <p style="font-size:13px; color:var(--muted); line-height:1.7;">
+                User-scoped database policies and queries isolate private profile and submission data.
+            </p>
+        </div>
+    </div>
+
+
+    </main>
+</div>
+
+<script>
+    var dockerMermaidRendered = false;
+    var sysarchMermaidRendered = false;
+    var swaggerUiRendered = false;
+
+    function renderSysarchDiagram() {
+        if (sysarchMermaidRendered) return;
+        sysarchMermaidRendered = true;
+        var tpl = document.getElementById('sysarchMermaidSrc');
+        var target = document.getElementById('sysarchMermaid');
+        if (tpl && target && typeof mermaid !== 'undefined') {
+            var src = tpl.textContent.trim();
+            var uniqueId = 'svg_' + Math.floor(Math.random() * 1000000);
+            mermaid.render(uniqueId, src).then(function(res) {
+                target.innerHTML = res.svg;
+            }).catch(function(err) {
+                console.error("Mermaid render error:", err);
+                target.innerHTML = '<div style="color:var(--red); padding:20px;">Failed to render Mermaid diagram: ' + err.message + '</div>';
+            });
+        }
+    }
+
+    function renderDockerDiagram() {
+        if (dockerMermaidRendered) return;
+        dockerMermaidRendered = true;
+        var tpl = document.getElementById('dockerMermaidSrc');
+        var target = document.getElementById('dockerMermaid');
+        if (tpl && target && typeof mermaid !== 'undefined') {
+            var src = tpl.textContent.trim();
+            var uniqueId = 'svg_' + Math.floor(Math.random() * 1000000);
+            mermaid.render(uniqueId, src).then(function(res) {
+                target.innerHTML = res.svg;
+            }).catch(function(err) {
+                console.error("Mermaid render error:", err);
+                target.innerHTML = '<div style="color:var(--red); padding:20px;">Failed to render Mermaid diagram: ' + err.message + '</div>';
+            });
+        }
+    }
+
+    function renderSwaggerUI() {
+        if (swaggerUiRendered) return;
+        swaggerUiRendered = true;
+        var srcElem = document.getElementById('swaggerOpenApiJsonSrc');
+        var targetContainer = document.getElementById('swagger-ui-container');
+        if (srcElem && targetContainer && typeof SwaggerUIBundle !== 'undefined') {
+            try {
+                var spec = JSON.parse(srcElem.textContent);
+                SwaggerUIBundle({
+                    spec: spec,
+                    dom_id: '#swagger-ui-container',
+                    deepLinking: true,
+                    presets: [
+                        SwaggerUIBundle.presets.apis,
+                        SwaggerUIBundle.SwaggerUIStandalonePreset
+                    ],
+                    layout: "BaseLayout"
+                });
+            } catch(e) {
+                console.error("Swagger UI init error:", e);
+                targetContainer.innerHTML = '<div style="color:var(--red); padding:20px;">Swagger UI render error: ' + e.message + '</div>';
+            }
+        }
+    }
+
+    function switchSwaggerView(view, btn) {
+        document.querySelectorAll('.sub-tab-btn').forEach(function(el) { el.classList.remove('active'); });
+        document.querySelectorAll('.swagger-view-pane').forEach(function(el) { el.classList.remove('active'); });
+        if (btn) btn.classList.add('active');
+        var pane = document.getElementById('swagger-view-' + view);
+        if (pane) pane.classList.add('active');
+        if (view === 'ui') {
+            setTimeout(renderSwaggerUI, 50);
+        }
+    }
+
+    function showTab(id, btn) {
+        document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+        document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+        document.getElementById('sec-' + id).classList.add('active');
+        if (btn) btn.classList.add('active');
+
+        if (id === 'sysarch') {
+            setTimeout(renderSysarchDiagram, 50);
+        } else if (id === 'docker') {
+            setTimeout(renderDockerDiagram, 50);
+        } else if (id === 'swagger') {
+            setTimeout(renderSwaggerUI, 50);
+        }
+    }
+
+    function filterModules() {
+        var q = document.getElementById('modSearch').value.toLowerCase();
+        document.querySelectorAll('#modulesGrid .card').forEach(function(card) {
+            var text = card.innerText.toLowerCase();
+            card.style.display = text.indexOf(q) !== -1 ? '' : 'none';
+        });
+    }
+
+    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+</script>
+</body>
+</html>

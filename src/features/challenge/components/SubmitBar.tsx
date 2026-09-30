@@ -1,7 +1,6 @@
 "use client";
 
 import { Send } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -26,7 +25,6 @@ export function SubmitBar({
   selectedLines,
   disabled = false,
 }: Props) {
-  const t = useExtracted();
   let activeLines: number[] = [];
   if (Array.isArray(selectedLines)) {
     activeLines = selectedLines;
@@ -39,24 +37,15 @@ export function SubmitBar({
 
   const getLineSummary = () => {
     if (activeLines.length === 0) {
-      return t("Select bug line(s) to submit");
+      return "Select bug line(s) to submit";
     }
     if (activeLines.length === 1) {
-      return t("Bug localized at Line {line} · {file}", {
-        file: fileName,
-        line: String(activeLines[0]),
-      });
+      return `Bug localized at Line ${String(activeLines[0])} · ${fileName}`;
     }
     if (activeLines.length <= 3) {
-      return t("Bug localized at Lines {lines} · {file}", {
-        file: fileName,
-        lines: activeLines.join(", "),
-      });
+      return `Bug localized at Lines ${activeLines.join(", ")} · ${fileName}`;
     }
-    return t("{count} lines localized · {file}", {
-      count: String(activeLines.length),
-      file: fileName,
-    });
+    return `${String(activeLines.length)} lines localized · ${fileName}`;
   };
 
   return (
@@ -79,12 +68,12 @@ export function SubmitBar({
         {isSubmitting ? (
           <>
             <span className="h-3 w-3 flex-shrink-0 animate-spin rounded-full border border-primary-foreground border-t-transparent" />
-            {t("Running tests & AI analysis...")}
+            {"Running tests & AI analysis..."}
           </>
         ) : (
           <>
             <Send size={13} />
-            {t("Submit diagnosis & fix")}
+            {"Submit diagnosis & fix"}
           </>
         )}
       </Button>

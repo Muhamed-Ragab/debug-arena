@@ -1,3 +1,11 @@
+import { ADDITIONAL_SEED_CHALLENGES } from "./challenges.additional.seed";
+
+export interface SeedHiddenTest {
+  description: string;
+  name: string;
+  testCode: string;
+}
+
 export interface SeedChallenge {
   buggyArtifact: {
     buggyLines: [number, number];
@@ -7,18 +15,15 @@ export interface SeedChallenge {
       isEntry?: boolean;
       name: string;
     }>;
+    hiddenTests?: SeedHiddenTest[];
     language: string;
     points: number;
     timeLimit: string;
   };
-  categorySlug: "react-rendering" | "backend-concurrency";
+  categorySlug: string;
   difficulty: "easy" | "medium" | "hard";
   format: "code_snippet";
-  hiddenTests: Array<{
-    description: string;
-    name: string;
-    testCode: string;
-  }>;
+  hiddenTests?: SeedHiddenTest[];
   hints: Array<{
     order: number;
     penaltyPoints: number;
@@ -44,7 +49,7 @@ export interface SeedChallenge {
   title: string;
 }
 
-export const SEED_CHALLENGES: SeedChallenge[] = [
+const BASE_SEED_CHALLENGES: SeedChallenge[] = [
   // 1. Stale Closure
   {
     buggyArtifact: {
@@ -1885,4 +1890,9 @@ export async function getPopularProducts(redis: any, db: any) {
     status: "published",
     title: "Uncaught background task error crashes HTTP server",
   },
+];
+
+export const SEED_CHALLENGES: SeedChallenge[] = [
+  ...BASE_SEED_CHALLENGES,
+  ...ADDITIONAL_SEED_CHALLENGES,
 ];

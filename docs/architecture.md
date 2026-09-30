@@ -1,36 +1,34 @@
 # Architecture — Debug Arena
 
-> **MIGRATION NOTE (2026-08-26):** The NestJS API and Vite SPA are being replaced by a single
-> Next.js 16 app (see docs/superpowers/plans/2026-08-26-nextjs-migration.md). Sections describing
-> `apps/api` modules apply to their Next.js equivalents: controllers → route handlers/server actions,
-> guards → `auth.api.getSession` + `proxy.ts`, AuthModule mount `/auth` → `/api/auth/[...all]`.
-> Data layer (Drizzle/pgvector/RLS), job queue design, sandbox model are unchanged conceptually.
+> **NOTE:** Earlier revisions of this doc described a NestJS API + Vite SPA.
+> That stack was replaced by a single Next.js 16 app (see
+> docs/superpowers/plans/2026-08-26-nextjs-migration.md): controllers →
+> route handlers/server actions, guards → `auth.api.getSession` + `proxy.ts`,
+> AuthModule mount `/auth` → `/api/auth/[...all]`. The app is free to use —
+> no payment flow exists. AI runs server-only via Groq; user-configured
+> (BYOK) providers are roadmap work (see `plan.md`).
 
 ## 1. High-Level Overview
 
 ```
-┌─────────────┐      ┌──────────────────┐      ┌─────────────────────┐
-│  React SPA  │ <──> │  NestJS API      │ <──> │  Postgres + pgvector │
-│ (Vite,      │ (SSE)│  (ts-rest        │      │  (relational data +  │
-│  shadcn/ui) │      │   contracts)     │      │   embeddings)        │
-└─────────────┘      └──────────────────┘      └─────────────────────┘
-                             │
-                             ▼
-                      ┌──────────────┐
-                      │ BullMQ+Redis │
-                      │ job queue    │
-                      └──────────────┘
-                             │
-              ┌──────────────┼──────────────────┐
-              ▼              ▼                  ▼
-     ┌─────────────┐ ┌───────────────┐ ┌──────────────────┐
-     │ Bug-Injection│ │ Grading Agent │ │ Sandboxed Runner  │
-     │ Agent (LLM)  │ │ (LLM judge)   │ │ (Docker, isolated)│
-     └─────────────┘ └───────────────┘ └──────────────────┘
-              │              │                  │
-              └──────────────┴──────────────────┘
-                        Vercel AI SDK
-                     (model orchestration)
+┌─────────────────────────┐      ┌─────────────────────┐
+│  Next.js 16 App Router  │ <──> │  Postgres 16        │
+│  (Server Components,    │      │  (relational data)  │
+│   Server Actions,       │      └─────────────────────┘
+│   Turbopack, English UI)│               │
+└─────────────────────────┘               ▼
+              │                  ┌─────────────────────┐
+              │                  │  Redis 7            │
+              │                  │  (sessions, cache)  │
+              │                  └─────────────────────┘
+              ▼
+     ┌─────────────────────────────────────────┐
+     │  Grading pipeline (server-only)         │
+     │  Sandbox runner → Groq LLM judge →      │
+     │  deterministic token-overlap fallback   │
+     └─────────────────────────────────────────┘
+                      Vercel AI SDK
+                   (model orchestration)
 ```
 
 ## 1.1 Layered Architecture (Flat)
@@ -62,7 +60,7 @@ constants.ts (data) / types.ts (interfaces) / utils/ (helpers if service >300 li
 
 ## 2. Core Components
 
-### 2.1 Frontend (React + Vite + shadcn/ui)
+### 2.1 Frontend (Next.js 16 + shadcn/ui)
 - Challenge browser (filter by category/difficulty)
 - Code viewer with syntax highlighting + inline annotation for localization step
 - Explanation text editor (root-cause step)
@@ -72,30 +70,32 @@ constants.ts (data) / types.ts (interfaces) / utils/ (helpers if service >300 li
 - Profile/stats page: per-category weak-spot radar chart, streaks, and trend analysis
 - Real-time Notifications: Notification bell for achievements, grading completion, and social activities
 
-### 2.2 API layer (NestJS + ts-rest + Drizzle)
+### 2.2 Server layer (Next.js Server Actions + `next-safe-action` + Drizzle)
 - Auth (better-auth + Drizzle adapter; session identity bridged into Postgres RLS per request)
 - Challenge CRUD (admin-only for manual authoring)
-- Submission endpoint: orchestrates validation → sandboxed test run → grading agent call → score computation
-- Stats & Leaderboard endpoints (supports category filters and streak calculations)
-- Gamification Engine: Checks conditions for badges/achievements and streak continuity on submission
-- Social endpoints (follow/unfollow users)
-- Real-time push (SSE/WebSockets) for async grading results and new notifications
+- Submission action: orchestrates validation → sandboxed test run → grading agent call → score computation
+- Stats & Leaderboard actions (all-time, rolling seven-day, and category filters)
+- Profile and admin operations through validated server actions
+- Streak tracking on challenge activity; badges, social feeds, and push notifications are roadmap items
 
-### 2.3 Data layer (Postgres + pgvector)
-- Single database for relational entities (users, challenges, submissions, notifications, social graph) and vector columns
-- pgvector cosine similarity used as one signal in grading
+### 2.3 Data layer (Postgres 16)
+- Single database for relational entities (users, challenges, submissions, notifications, social graph)
+- No vector columns and no `pgvector` extension: grading uses the Groq LLM judge with a deterministic token-overlap fallback
 - Avoids running/operating a separate vector database service
 
-### 2.4 Job queue (BullMQ + Redis)
-- **Bug-injection jobs**: given a reference repo + category + difficulty, an agent generates a modified version of the code with an injected bug, canonical fix, and root-cause summary.
-- **Grading jobs**: submission arrives → queue a grading job. UI gets an SSE push when the score is ready.
-- **Sandbox test-run jobs**: user's proposed fix is applied to the challenge's code and run against hidden tests in an isolated container.
+Points are derived from submission scores and challenge `buggyArtifact.points`;
+the best attempt per challenge counts once. `users.current_rating` is a separate
+rating field and is not used for profile totals or leaderboard points.
 
-### 2.5 AI agents (Vercel AI SDK)
-- **Bug-injection agent**: takes clean reference code, injects a bug matching the requested category/difficulty, verifies the bug reproduces (via the sandbox).
-- **Root-cause grading agent**: computes grading score against canonical root cause utilizing pgvector pre-checks.
-- **Adaptive hint agent**: generates the next Socratic hint based on user's current context.
-- **Postmortem-import agent**: reverse-engineers a challenge from a closed GitHub issue.
+### 2.4 Redis
+- Stores better-auth sessions and short-lived leaderboard cache entries.
+- Grading runs in the server action flow; no BullMQ job queue is configured.
+
+### 2.5 AI operations (Vercel AI SDK + Groq, server-only)
+- **Question generator**: assists admins in drafting challenge content.
+- **Root-cause grading**: the Groq judge scores explanations; when no API key is configured or the request fails, a deterministic token-overlap fallback runs.
+- **Socratic hints**: generates a short hint from challenge context.
+- Per-user provider/model/API-key settings and AI usage limits are roadmap work, not current behavior.
 
 ### 2.6 Sandboxed runner
 - Docker-based isolated execution for validating a newly injected bug or running the user's submitted fix.
@@ -104,15 +104,14 @@ constants.ts (data) / types.ts (interfaces) / utils/ (helpers if service >300 li
 ## 3. Request Flow — Submitting a Challenge Attempt
 
 1. User submits localization answer, explanation, and proposed fix.
-2. API validates the fix compiles/runs (sandboxed runner), returns pass/fail on hidden tests.
-3. API enqueues a grading job with the explanation text + challenge ID.
-4. Grading agent computes embedding, compares via pgvector, and asks LLM judge to score reasoning quality.
-5. Composite score = localization + root-cause + fix + prevention − hint penalties.
-6. Gamification Engine evaluates streak continuity, updates `user_category_stats` (avg time, trends, accuracy), and unlocks any new achievements.
-7. Score persisted to `submissions`, notifications dispatched via SSE for grading completion and badges.
+2. Server validates the fix compiles/runs (sandboxed runner), returns pass/fail on hidden tests.
+3. Server calls the Groq grading judge with the explanation text + challenge ID (or the token-overlap fallback when unconfigured).
+4. Composite score = localization + root-cause + fix + prevention − hint penalties.
+5. Gamification Engine evaluates streak continuity, updates `user_category_stats` (avg time, trends, accuracy), and unlocks any new achievements.
+6. Score persisted to `submissions`, notifications dispatched via SSE for grading completion and badges.
 
 ## 4. Non-Functional Considerations
-- **Cost control**: LLM calls are the main variable cost — use embedding similarity as a cheap first-pass filter.
-- **Security**: sandbox isolation for any code execution is non-negotiable.
+- **Cost control**: LLM calls are the main variable cost — the deterministic token-overlap fallback grades offline for free when Groq is unconfigured. Per-user AI usage quotas are roadmap work (see `plan.md`).
+- **Security**: sandbox isolation for any code execution is non-negotiable. AI API keys live server-side only and are never exposed to the client.
 - **Auth**: handled by better-auth; the per-request user identity is bridged into Postgres RLS via `SET LOCAL "request.jwt.claims"` (see implementation_guide.md §6).
-- **Scalability**: MVP scale relies on flat scan for pgvector and simple DB indexing. Real-time updates (SSE) handle async UI state cleanly without aggressive polling.
+- **Scalability**: MVP scale relies on simple DB indexing. Real-time updates (SSE) handle async UI state cleanly without aggressive polling.

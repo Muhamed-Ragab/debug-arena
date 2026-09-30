@@ -68,7 +68,7 @@ describe("Groq AI Evaluator", () => {
     expect(result.constructiveFeedback).toContain("Spot on diagnosis");
   });
 
-  it("falls back gracefully to deterministic vector scoring when API fails", async () => {
+  it("falls back gracefully to deterministic token-overlap scoring when API fails", async () => {
     const ai = await import("ai");
     vi.mocked(ai.generateText).mockRejectedValueOnce(
       new Error("Network connection timeout")
@@ -102,6 +102,56 @@ describe("Groq AI Evaluator", () => {
 
     expect(result.isAiGraded).toBe(false);
     expect(result.rootCauseScore).toBeGreaterThanOrEqual(6);
+  });
+
+  it("scores exact canonical terms high in offline fallback", async () => {
+    const result = await evaluateExplanationWithGroq(
+      {
+        canonicalRootCause:
+          "setInterval captured stale closure count without functional updater",
+        challengeTitle: "Stale Closure in Counter Interval",
+        userExplanation:
+          "setInterval captured stale closure count without functional updater",
+      },
+      ""
+    );
+
+    expect(result.isAiGraded).toBe(false);
+    expect(result.rootCauseScore).toBe(25);
+    expect(result.alignmentPercent).toBe(100);
+  });
+
+  it("scores unrelated text low in offline fallback", async () => {
+    const result = await evaluateExplanationWithGroq(
+      {
+        canonicalRootCause:
+          "setInterval captured stale closure count without functional updater",
+        challengeTitle: "Stale Closure in Counter Interval",
+        userExplanation:
+          "The pizza delivery arrived late because traffic was heavy downtown",
+      },
+      ""
+    );
+
+    expect(result.isAiGraded).toBe(false);
+    expect(result.rootCauseScore).toBeLessThanOrEqual(8);
+    expect(result.isCorrect).toBe(false);
+  });
+
+  it("scores empty input as zero in offline fallback", async () => {
+    const result = await evaluateExplanationWithGroq(
+      {
+        canonicalRootCause:
+          "setInterval captured stale closure count without functional updater",
+        challengeTitle: "Stale Closure in Counter Interval",
+        userExplanation: "",
+      },
+      ""
+    );
+
+    expect(result.isAiGraded).toBe(false);
+    expect(result.rootCauseScore).toBe(0);
+    expect(result.alignmentPercent).toBe(0);
   });
 
   it("generates progressive Socratic hints via Groq", async () => {

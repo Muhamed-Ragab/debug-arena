@@ -1,7 +1,6 @@
 "use client";
 
 import { Check, Monitor, Moon, Sun } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { useTheme } from "next-themes";
 import {
   DropdownMenu,
@@ -18,11 +17,10 @@ const THEMES = [
 ] as const;
 
 export function ThemeToggle() {
-  const t = useExtracted();
   const themeLabels: Record<string, string> = {
-    dark: t("Dark"),
-    light: t("Light"),
-    system: t("System"),
+    dark: "Dark",
+    light: "Light",
+    system: "System",
   };
   function getThemeLabel(key: string): string {
     return themeLabels[key] ?? key;
@@ -37,7 +35,7 @@ export function ThemeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        aria-label={t("Select theme")}
+        aria-label={"Select theme"}
         className="relative inline-flex h-9 items-center gap-4 rounded-md border border-border bg-inset py-1.5 ps-7 pe-3 text-foreground text-xs transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <CurrentIcon
