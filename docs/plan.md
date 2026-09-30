@@ -1,44 +1,42 @@
-# Plan — Debug Arena
+# Product plan — Debug Arena
 
-## Phase 0 — Foundation (setup)
-- Repo scaffolding: NestJS + Drizzle + Postgres (with pgvector), React + Vite + shadcn/ui, ts-rest contracts
-- Auth (better-auth + Drizzle adapter; RLS bridged per request)
-- Base schema migration (users, categories, challenges, submissions, hints, stats, leaderboards, notifications, social graph, gamification)
+## Current product
 
-## Phase 1 — Manual MVP (Validate the Core Loop)
-- Manually author ~20 challenges across 2 categories: React rendering + Node/backend concurrency (code_snippet format).
-- Build the challenge screen, submission flow, and results screen.
-- Ship the grading agent (embedding similarity + LLM judge).
-- Sandboxed runner for fix validation (Docker isolation, hidden tests per challenge).
-- Basic leaderboard (Global and Category-specific tabs).
-- Profile Dashboard: Basic stats (avg time, avg score, radar charts).
-- **Goal of this phase**: Confirm the root-cause grading feels accurate and valuable.
+Debug Arena is a free debugging practice app. It has no checkout, payment
+provider, subscription plan, or paid tier. Challenge submissions are scored by
+the configured challenge points and the best graded attempt per challenge.
+The leaderboard supports all-time, rolling seven-day, and category rankings.
 
-## Phase 2 — Gamification & Social (Retention Engine)
-- Notifications UI and SSE real-time pushes.
-- Streaks tracking (daily activity streaks).
-- Achievements/Badges (e.g., "Bug Slayer" for 10 consecutive solves).
-- Social features (Follow/Unfollow, friend leaderboards).
-- Enhanced Profile: Trend tracking (improving vs weak spot) and root-cause accuracy percentages.
+AI operations currently run on the server through the configured Groq provider
+and fall back to deterministic text-overlap grading when AI is unavailable.
+There is no persisted vector search or vector database.
 
-## Phase 3 — Scale Content
-- Bug-injection agent: auto-generate challenges from a reference repo.
-- Admin review queue for AI-generated challenges.
-- Expand categories: distributed/systems bugs (idempotency, cache invalidation, retry storms).
+## Next: user-configured AI providers
 
-## Phase 4 — Differentiated Modes & Supply
-- "On-call / log-only" challenge format (diagnose from logs/traces).
-- Adaptive Socratic hint agent (replaces static hint lists).
-- Weak-spot targeting: route users toward categories based on their `weak_spot_rank`.
-- Postmortem-import agent: convert closed GitHub issues into challenges.
-- UI-recording challenge format.
+Build a user settings flow that:
 
-## Sequencing Rationale
-- Core gameplay (Phase 1) must be validated before adding gamification (Phase 2) or scaling content (Phase 3).
-- Security-sensitive sandboxed execution is part of the foundation.
-- Social and gamification elements (Phase 2) are moved up before mass content generation to ensure we have a retention loop for early adopters once the core mechanics are proven.
+1. Lists providers supported by the Vercel AI SDK and lets the user choose one.
+2. Lists/selects a model available for that provider.
+3. Accepts that provider's API key, encrypts it at rest, and only decrypts and
+   uses it inside server-side AI operations. Never return the key to the client.
+4. Tracks requests and enforces per-user usage limits before sending provider
+   calls, with clear usage feedback and safe behavior when the limit is reached.
+5. Keeps the app free of payment flows and paid tiers; provider charges are
+   handled by the user's chosen provider account.
 
-## Open Questions
-- ELO-style dynamic difficulty scaling vs fixed challenge difficulties.
-- B2B Bootcamps vs B2C developer subscriptions model influencing content style.
-- Resolved (2026-08-25): keep the pnpm/Turborepo modular monorepo with `@ts-rest/*` shared contracts; the packages-removal attempt was reverted. `@ts-rest/nest` is NOT wired into controllers yet (see `apps/api/src/modules/auth/auth.controller.ts` TODO). The better-auth ↔ drizzle-orm peer conflict is fully resolved (workspace on drizzle-orm 0.45.2 = adapter peer match; lint/typecheck/build green; see `implementation_guide.md` §6).
+Use the AI SDK provider registry or equivalent maintained provider metadata so
+provider/model options stay aligned with SDK support. Validate model IDs and
+provider credentials server-side; do not trust client-supplied provider or
+model identifiers.
+
+## Later product work
+
+- Improve challenge coverage and admin authoring/review workflows.
+- Add streaks, achievements, and social features after core scoring is stable.
+- Add adaptive hints and weak-spot challenge recommendations.
+- Consider log/trace and postmortem-based challenge formats.
+
+## Product questions
+
+- Whether difficulty should adapt to a user's demonstrated performance.
+- Which social features are most useful for early users.

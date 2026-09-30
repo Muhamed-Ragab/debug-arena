@@ -113,7 +113,7 @@ describe("category/service", () => {
         return false;
       }
       return (
-        err.message === "error.categorySlugExists" &&
+        err.message === "A category with this slug already exists." &&
         err.code === "CONFLICT" &&
         err.status === 409
       );
@@ -179,7 +179,9 @@ describe("category/service", () => {
     }
     expect(err).toBeInstanceOf(ConflictError);
     expect(err).toBeInstanceOf(ActionError);
-    expect((err as Error).message).toBe("error.categorySlugExists");
+    expect((err as Error).message).toBe(
+      "A category with this slug already exists."
+    );
     expect((err as ConflictError).code).toBe("CONFLICT");
     expect((err as ConflictError).status).toBe(409);
     expect(repo.update).not.toHaveBeenCalled();
@@ -206,7 +208,8 @@ describe("category/service", () => {
     await expect(svc.deleteCategory(UUID_1)).rejects.toSatisfy(
       (err: unknown) =>
         err instanceof ConflictError &&
-        (err as Error).message === "error.cannotDeleteCategory" &&
+        (err as Error).message ===
+          "Categories that contain challenges cannot be deleted." &&
         (err as ConflictError).code === "CONFLICT"
     );
     expect(repo.deleteById).not.toHaveBeenCalled();

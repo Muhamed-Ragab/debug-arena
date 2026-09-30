@@ -90,15 +90,6 @@ CREATE TABLE "categories" (
 );
 --> statement-breakpoint
 ALTER TABLE "categories" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
-CREATE TABLE "challenge_embeddings" (
-	"challenge_id" uuid NOT NULL,
-	"content" text NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"embedding" vector(1536) NOT NULL,
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL
-);
---> statement-breakpoint
-ALTER TABLE "challenge_embeddings" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "challenges" (
 	"buggy_artifact" jsonb NOT NULL,
 	"category_id" uuid NOT NULL,
@@ -109,7 +100,6 @@ CREATE TABLE "challenges" (
 	"prevention_notes" text,
 	"prompt" text NOT NULL,
 	"reference_fix" jsonb NOT NULL,
-	"root_cause_embedding" vector(1536),
 	"root_cause_summary" text NOT NULL,
 	"source" "challenge_source" DEFAULT 'manual' NOT NULL,
 	"status" "challenge_status" DEFAULT 'draft' NOT NULL,
@@ -137,7 +127,6 @@ CREATE TABLE "submissions" (
 	"prevention_answer" text,
 	"prevention_score" integer,
 	"proposed_fix" jsonb,
-	"root_cause_embedding" vector(1536),
 	"root_cause_explanation" text,
 	"root_cause_score" integer,
 	"time_spent_seconds" integer,
@@ -182,7 +171,6 @@ ALTER TABLE "bug_injection_jobs" ADD CONSTRAINT "bug_injection_jobs_category_id_
 ALTER TABLE "bug_injection_jobs" ADD CONSTRAINT "bug_injection_jobs_generated_challenge_id_challenges_id_fk" FOREIGN KEY ("generated_challenge_id") REFERENCES "public"."challenges"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "login_attempts" ADD CONSTRAINT "login_attempts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "challenge_embeddings" ADD CONSTRAINT "challenge_embeddings_challenge_id_challenges_id_fk" FOREIGN KEY ("challenge_id") REFERENCES "public"."challenges"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "challenges" ADD CONSTRAINT "challenges_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "hints" ADD CONSTRAINT "hints_challenge_id_challenges_id_fk" FOREIGN KEY ("challenge_id") REFERENCES "public"."challenges"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "submissions" ADD CONSTRAINT "submissions_challenge_id_challenges_id_fk" FOREIGN KEY ("challenge_id") REFERENCES "public"."challenges"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -197,9 +185,6 @@ CREATE UNIQUE INDEX "accounts_provider_account_idx" ON "accounts" USING btree ("
 CREATE INDEX "login_attempt_ip_idx" ON "login_attempts" USING btree ("ip_address","attempted_at");--> statement-breakpoint
 CREATE INDEX "login_attempt_email_idx" ON "login_attempts" USING btree ("email","attempted_at");--> statement-breakpoint
 CREATE UNIQUE INDEX "email_idx" ON "users" USING btree ("email");--> statement-breakpoint
-CREATE INDEX "challenge_embedding_idx" ON "challenge_embeddings" USING hnsw ("embedding" vector_cosine_ops);--> statement-breakpoint
-CREATE INDEX "challenge_embedding_challenge_idx" ON "challenge_embeddings" USING btree ("challenge_id");--> statement-breakpoint
-CREATE INDEX "root_cause_embedding_idx" ON "challenges" USING hnsw ("root_cause_embedding" vector_cosine_ops);--> statement-breakpoint
 CREATE INDEX "leaderboard_period_idx" ON "analytics"."leaderboard_entries" USING btree ("period","category_id");--> statement-breakpoint
 CREATE POLICY "admin_all_jobs" ON "bug_injection_jobs" AS PERMISSIVE FOR ALL TO "admin" USING (true) WITH CHECK (true);--> statement-breakpoint
 CREATE POLICY "admin_all_email_templates" ON "email_templates" AS PERMISSIVE FOR ALL TO "admin" USING (true) WITH CHECK (true);--> statement-breakpoint
@@ -209,8 +194,6 @@ CREATE POLICY "admin_all_users" ON "users" AS PERMISSIVE FOR ALL TO "admin" USIN
 CREATE POLICY "user_own_profile" ON "users" AS PERMISSIVE FOR ALL TO "user" USING ("users"."id" = (select current_setting('request.jwt.claim.sub')::uuid)) WITH CHECK ("users"."id" = (select current_setting('request.jwt.claim.sub')::uuid));--> statement-breakpoint
 CREATE POLICY "admin_all_categories" ON "categories" AS PERMISSIVE FOR ALL TO "admin" USING (true) WITH CHECK (true);--> statement-breakpoint
 CREATE POLICY "user_read_categories" ON "categories" AS PERMISSIVE FOR SELECT TO "user" USING (true);--> statement-breakpoint
-CREATE POLICY "admin_all_challenge_embeddings" ON "challenge_embeddings" AS PERMISSIVE FOR ALL TO "admin" USING (true) WITH CHECK (true);--> statement-breakpoint
-CREATE POLICY "user_read_challenge_embeddings" ON "challenge_embeddings" AS PERMISSIVE FOR SELECT TO "user" USING (true);--> statement-breakpoint
 CREATE POLICY "admin_all_challenges" ON "challenges" AS PERMISSIVE FOR ALL TO "admin" USING (true) WITH CHECK (true);--> statement-breakpoint
 CREATE POLICY "user_read_published" ON "challenges" AS PERMISSIVE FOR SELECT TO "user" USING ("challenges"."status" = 'published');--> statement-breakpoint
 CREATE POLICY "admin_all_hints" ON "hints" AS PERMISSIVE FOR ALL TO "admin" USING (true) WITH CHECK (true);--> statement-breakpoint

@@ -1,11 +1,10 @@
 "use client";
 
 import { Flame } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { RankMedal } from "@/components/shared/RankMedal";
 import { Avatar } from "@/components/ui/avatar";
-import { CATEGORY_CONFIG } from "@/lib/domain/categories";
-import type { Category } from "@/lib/domain/types";
+import type { CategoryDTO } from "@/features/category/types";
+import { getCategoryAppearance } from "@/lib/domain/categories";
 import { cn } from "@/lib/utils";
 import type { LeaderboardEntry } from "../types";
 
@@ -15,35 +14,17 @@ const MEDAL_ACCENT: Record<number, string> = {
   3: "#d97706",
 };
 
-function TopThreeCard({ entry }: { entry: LeaderboardEntry }) {
-  const t = useExtracted();
-
-  const getCategoryLabel = (categoryName: Category): string => {
-    switch (categoryName) {
-      case "Backend Concurrency":
-        return t("Backend Concurrency");
-      case "Logic Inversions":
-        return t("Logic Inversions");
-      case "Memory Leaks":
-        return t("Memory Leaks");
-      case "Off-by-One":
-        return t("Off-by-One");
-      case "Race Conditions":
-        return t("Race Conditions");
-      case "React Rendering":
-        return t("React Rendering");
-      case "Security Flaws":
-        return t("Security Flaws");
-      case "State Mutations":
-        return t("State Mutations");
-      default:
-        return categoryName;
-    }
-  };
-
+function TopThreeCard({
+  categories,
+  entry,
+}: {
+  categories: CategoryDTO[];
+  entry: LeaderboardEntry;
+}) {
   const accent = MEDAL_ACCENT[entry.rank] ?? "#3f3f46";
-  const category = CATEGORY_CONFIG[entry.strongest as Category];
-  const CategoryIcon = category?.Icon;
+  const category = categories.find((item) => item.name === entry.strongest);
+  const appearance = category ? getCategoryAppearance(category) : null;
+  const CategoryIcon = appearance?.Icon;
   const isFirst = entry.rank === 1;
 
   return (
@@ -65,49 +46,46 @@ function TopThreeCard({ entry }: { entry: LeaderboardEntry }) {
         <div className="min-w-0">
           <p className="truncate font-medium text-heading">{entry.name}</p>
           <p className="text-muted-foreground text-xs">
-            {t("{solved} solved · avg {avg}", {
-              avg: String(entry.avgScore),
-              solved: String(entry.solved),
-            })}
+            {`${String(entry.solved)} solved · avg ${String(entry.avgScore)}`}
           </p>
         </div>
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
         <div>
-          <p className="text-muted-foreground text-xs">{t("Score")}</p>
+          <p className="text-muted-foreground text-xs">{"Score"}</p>
           <p className="font-mono text-foreground tabular-nums">
-            {entry.score.toLocaleString()}
+            {entry.score.toLocaleString("en-US")}
           </p>
         </div>
         <div>
-          <p className="text-muted-foreground text-xs">{t("Solved")}</p>
+          <p className="text-muted-foreground text-xs">{"Solved"}</p>
           <p className="font-mono text-foreground tabular-nums">
             {entry.solved}
           </p>
         </div>
         <div>
-          <p className="text-muted-foreground text-xs">{t("Streak")}</p>
+          <p className="text-muted-foreground text-xs">{"Streak"}</p>
           <p className="flex items-center gap-1 font-mono text-foreground tabular-nums">
             <Flame aria-hidden className="h-3.5 w-3.5 text-orange-400" />
-            {t("{streak}d", { streak: String(entry.streak) })}
+            {`${String(entry.streak)}d`}
           </p>
         </div>
         <div>
-          <p className="text-muted-foreground text-xs">{t("Strongest")}</p>
-          {Boolean(category) && (
+          <p className="text-muted-foreground text-xs">{"Strongest"}</p>
+          {Boolean(entry.strongest) && (
             <span
               className="mt-0.5 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-medium text-xs"
               style={{
-                backgroundColor: category.bg,
-                border: `1px solid ${category.border}`,
-                color: category.color,
+                backgroundColor: appearance?.bg,
+                border: `1px solid ${appearance?.border ?? "var(--border)"}`,
+                color: appearance?.color,
               }}
             >
               {CategoryIcon ? (
                 <CategoryIcon aria-hidden className="h-3 w-3" />
               ) : null}
-              {getCategoryLabel(entry.strongest as Category)}
+              {entry.strongest}
             </span>
           )}
         </div>
@@ -117,19 +95,20 @@ function TopThreeCard({ entry }: { entry: LeaderboardEntry }) {
 }
 
 export function LeaderboardTopThree({
+  categories,
   entries,
 }: {
+  categories: CategoryDTO[];
   entries: LeaderboardEntry[];
 }) {
-  const t = useExtracted();
   const top3 = entries.slice(0, 3);
 
   if (top3.length === 0) {
     return (
       <div className="mb-8 flex flex-col items-center justify-center rounded-lg border border-border border-dashed py-12 text-center">
-        <p className="font-medium text-heading">{t("No top solvers yet")}</p>
+        <p className="font-medium text-heading">{"No top solvers yet"}</p>
         <p className="mt-1 text-muted-foreground text-sm">
-          {t("Be the first to climb the podium.")}
+          {"Be the first to climb the podium."}
         </p>
       </div>
     );
@@ -153,7 +132,7 @@ export function LeaderboardTopThree({
 
         return (
           <div className={cn(orderClass, podiumClass)} key={entry.rank}>
-            <TopThreeCard entry={entry} />
+            <TopThreeCard categories={categories} entry={entry} />
           </div>
         );
       })}

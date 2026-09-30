@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
@@ -17,18 +16,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-const withNextIntl = createNextIntlPlugin({
-  requestConfig: "./src/i18n/request.ts",
-  experimental: {
-    extract: true,
-    messages: {
-      path: "./messages",
-      format: "po",
-      locales: "infer",
-      sourceLocale: "en",
-    },
-    srcPath: "./src",
-  },
-});
-
-export default withNextIntl(nextConfig);
+export default nextConfig;

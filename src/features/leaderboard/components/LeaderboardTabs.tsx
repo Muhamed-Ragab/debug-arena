@@ -1,32 +1,16 @@
 "use client";
-
-import { useExtracted } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { CATEGORY_CONFIG } from "@/lib/domain/categories";
-import type { Category } from "@/lib/domain/types";
+import type { CategoryDTO } from "@/features/category/types";
+import { getCategoryAppearance } from "@/lib/domain/categories";
 import { cn } from "@/lib/utils";
+import { buildLeaderboardTabs } from "../tabs";
 import type { LeaderboardTab } from "../types";
 
 interface Props {
+  categories: CategoryDTO[];
   setTab: (t: LeaderboardTab) => void;
   tab: LeaderboardTab;
 }
-
-const TABS: { id: LeaderboardTab }[] = [
-  { id: "week" },
-  { id: "alltime" },
-  { id: "State Mutations" },
-  { id: "Race Conditions" },
-  { id: "Security Flaws" },
-  { id: "Memory Leaks" },
-];
-
-const CATEGORY_TABS: Category[] = [
-  "State Mutations",
-  "Race Conditions",
-  "Security Flaws",
-  "Memory Leaks",
-];
 
 function getTabClasses(active: boolean, hasCfg: boolean): string {
   if (!active) {
@@ -38,34 +22,22 @@ function getTabClasses(active: boolean, hasCfg: boolean): string {
   return "border-primary font-semibold text-primary";
 }
 
-export function LeaderboardTabs({ tab, setTab }: Props) {
-  const t = useExtracted();
-
-  const getTabLabel = (id: LeaderboardTab): string => {
-    switch (id) {
-      case "week":
-        return t("This week");
-      case "alltime":
-        return t("All time");
-      case "State Mutations":
-        return t("State Mutations");
-      case "Race Conditions":
-        return t("Race Conditions");
-      case "Security Flaws":
-        return t("Security Flaws");
-      case "Memory Leaks":
-        return t("Memory Leaks");
-      default:
-        return id;
-    }
-  };
+export function LeaderboardTabs({ categories, tab, setTab }: Props) {
+  const tabs = buildLeaderboardTabs(categories);
 
   return (
     <div className="flex items-center gap-1 overflow-x-auto">
-      {TABS.map(({ id }) => {
+      {tabs.map(({ id, category }) => {
         const active = tab === id;
-        const isCat = CATEGORY_TABS.includes(id as Category);
-        const cfg = isCat ? CATEGORY_CONFIG[id as Category] : null;
+        const cfg = category ? getCategoryAppearance(category) : null;
+        let label: string;
+        if (id === "week") {
+          label = "This week";
+        } else if (id === "alltime") {
+          label = "All time";
+        } else {
+          label = category?.name ?? id;
+        }
         return (
           <Button
             className={cn(
@@ -83,7 +55,7 @@ export function LeaderboardTabs({ tab, setTab }: Props) {
             type="button"
             variant="ghost"
           >
-            {getTabLabel(id)}
+            {label}
           </Button>
         );
       })}

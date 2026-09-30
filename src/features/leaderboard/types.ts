@@ -1,18 +1,32 @@
 import type * as schema from "@/db/schema";
 import type { Category } from "@/lib/domain/types";
 
+export type { LeaderboardTab } from "./tabs";
+
 export type UserRow = typeof schema.users.$inferSelect;
 export type SubmissionRow = typeof schema.submissions.$inferSelect;
+export type ChallengeRow = typeof schema.challenges.$inferSelect;
 export type CategoryRow = typeof schema.categories.$inferSelect;
 export type CategoryStatRow = typeof schema.userCategoryStats.$inferSelect;
 
+export type LeaderboardSubmission = Pick<
+  SubmissionRow,
+  "challengeId" | "createdAt" | "fixCorrect" | "totalScore"
+> & {
+  challenge?:
+    | (Pick<ChallengeRow, "buggyArtifact" | "difficulty"> & {
+        category?: Pick<CategoryRow, "name" | "slug"> | null;
+      })
+    | null;
+};
+
 export type UserWithSubmissions = (UserRow & {
-  submissions: SubmissionRow[];
+  submissions: LeaderboardSubmission[];
 })[];
 
 export type UserWithCategoryStatsAndSubmissions = UserRow & {
   categoryStats: (CategoryStatRow & { category: CategoryRow | null })[];
-  submissions: SubmissionRow[];
+  submissions: LeaderboardSubmission[];
 };
 
 export interface LeaderboardRepository {
@@ -30,15 +44,11 @@ export interface UserWithSubmissionsAndStats {
     avgScore: number;
     category?: { name: string } | null;
   }>;
-  currentRating: number;
   displayName: string | null;
   id: string;
   name: string | null;
   streakCount: number;
-  submissions: Array<{
-    fixCorrect: boolean | null;
-    totalScore: number | null;
-  }>;
+  submissions: LeaderboardSubmission[];
 }
 
 export interface GetLeaderboardOptions {
@@ -47,14 +57,6 @@ export interface GetLeaderboardOptions {
   limit?: number;
   period?: "weekly" | "all_time";
 }
-
-export type LeaderboardTab =
-  | "week"
-  | "alltime"
-  | "State Mutations"
-  | "Race Conditions"
-  | "Security Flaws"
-  | "Memory Leaks";
 
 export interface LeaderboardEntry {
   avgScore: number;

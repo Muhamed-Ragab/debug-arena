@@ -1,5 +1,12 @@
 import { leaderboardService } from "@/features/leaderboard/service";
-import type { Category } from "@/lib/domain/types";
+import {
+  calcPoints,
+  countSolvedChallenges,
+  getChallengeMaxPoints,
+  getSubmissionPoints,
+  isSolved,
+  type ScoringSubmission,
+} from "@/lib/domain/scoring";
 import { DEFAULT_CATEGORIES } from "./constants";
 import { profileRepository } from "./repository";
 import type {
@@ -13,62 +20,110 @@ import type {
   UserWithRelations,
 } from "./types";
 
-export function isSolved(submission: {
-  fixCorrect: boolean | null;
-  totalScore: number | null;
-}): boolean {
-  return Boolean(submission.fixCorrect || (submission.totalScore ?? 0) >= 60);
-}
+export { calcPoints, isSolved } from "@/lib/domain/scoring";
 
-export function calcPoints(currentRating: number, solvedCount: number): number {
-  return currentRating * 10 + solvedCount * 50;
-}
+type ChallengeSubmission = ScoringSubmission;
 
 export function buildRadarData(
+  input:
+    | ChallengeSubmission[]
+    | Map<
+        string | undefined,
+        { avgScore: number; rootCauseAccuracyPercent?: number | null }
+      >
+): RadarPoint[] {
+  // Backwards-compatible: if Map, treat as statsMap (legacy)
+  if (input instanceof Map) {
+    const statsMap = input as Map<
+      string | undefined,
+      { avgScore: number; rootCauseAccuracyPercent?: number | null }
+    >;
+    return DEFAULT_CATEGORIES.map((catName) => {
+      const cs = statsMap.get(catName);
+      const score = cs ? cs.avgScore || cs.rootCauseAccuracyPercent || 0 : 0;
+      return { fullMark: 100, score, subject: catName };
+    });
+  }
+  const submissions = input as ChallengeSubmission[];
+  return DEFAULT_CATEGORIES.map((catName) => {
+    const catSubs = submissions.filter(
+      (s) => s.challenge?.category?.name === catName
+    );
+    if (catSubs.length === 0) {
+      return { fullMark: 100, score: 0, subject: catName };
+    }
+    const scored = catSubs.filter((s) => s.totalScore !== null);
+    if (scored.length === 0) {
+      return { fullMark: 100, score: 0, subject: catName };
+    }
+    const avg = Math.round(
+      scored.reduce((acc, s) => acc + (s.totalScore ?? 0), 0) / scored.length
+    );
+    return { fullMark: 100, score: avg, subject: catName };
+  });
+}
+
+export function buildRadarDataFromStatsMap(
   statsMap: Map<
     string | undefined,
     { avgScore: number; rootCauseAccuracyPercent?: number | null }
   >
 ): RadarPoint[] {
-  return DEFAULT_CATEGORIES.map((catName) => {
-    const cs = statsMap.get(catName);
-    const score = cs ? cs.avgScore || cs.rootCauseAccuracyPercent || 0 : 0;
-    return { fullMark: 100, score, subject: catName };
-  });
+  return buildRadarData(statsMap);
 }
 
 export function buildCategoryStats(
-  statsMap: Map<string | undefined, { avgScore: number }>,
-  submissions: Array<{
-    challenge?: { category?: { name: string } | null } | null;
-    fixCorrect: boolean | null;
-    totalScore: number | null;
-  }>
+  input: ChallengeSubmission[] | Map<string | undefined, { avgScore: number }>,
+  maybeSubmissions?: ChallengeSubmission[]
 ): CategoryStat[] {
+  // Legacy overload: (statsMap, submissions)
+  if (input instanceof Map) {
+    const statsMap = input as Map<string | undefined, { avgScore: number }>;
+    const submissionsLegacy = (maybeSubmissions ?? []) as ChallengeSubmission[];
+    return DEFAULT_CATEGORIES.map((catName) => {
+      const cs = statsMap.get(catName);
+      const catSolved = submissionsLegacy.filter(
+        (s) => s.challenge?.category?.name === catName && isSolved(s)
+      ).length;
+      let score = 0;
+      if (cs) {
+        score = cs.avgScore;
+      } else if (catSolved > 0) {
+        score = 100;
+      }
+      return { category: catName, score, solved: catSolved };
+    });
+  }
+  const submissions = input as ChallengeSubmission[];
   return DEFAULT_CATEGORIES.map((catName) => {
-    const cs = statsMap.get(catName);
-    const catSolved = submissions.filter(
-      (s) => s.challenge?.category?.name === catName && isSolved(s)
-    ).length;
+    const catSubs = submissions.filter(
+      (s) => s.challenge?.category?.name === catName
+    );
+    const finalSolved = (() => {
+      const hasChallengeId = catSubs.some((s) => Boolean(s.challengeId));
+      if (hasChallengeId) {
+        return new Set(catSubs.filter(isSolved).map((s) => s.challengeId)).size;
+      }
+      return catSubs.filter(isSolved).length;
+    })();
+
     let score = 0;
-    if (cs) {
-      score = cs.avgScore;
-    } else if (catSolved > 0) {
-      score = 100;
+    if (catSubs.length > 0) {
+      const scored = catSubs.filter((s) => s.totalScore !== null);
+      if (scored.length > 0) {
+        const avg = Math.round(
+          scored.reduce((acc, s) => acc + (s.totalScore ?? 0), 0) /
+            scored.length
+        );
+        score = avg;
+      }
     }
-    return { category: catName, score, solved: catSolved };
+    return { category: catName, score, solved: finalSolved };
   });
 }
 
 export function buildStrengthData(
-  submissions: Array<{
-    challenge?: {
-      category?: { name: string } | null;
-      difficulty?: string | null;
-    } | null;
-    fixCorrect: boolean | null;
-    totalScore: number | null;
-  }>
+  submissions: ChallengeSubmission[]
 ): StrengthPoint[] {
   return DEFAULT_CATEGORIES.map((catName) => {
     const catSubmissions = submissions.filter(
@@ -85,7 +140,6 @@ export function buildStrengthData(
     ).length;
     return {
       Easy: easyCount,
-      Expert: 0,
       Hard: hardCount,
       Medium: medCount,
       name: catName,
@@ -171,9 +225,6 @@ function buildRecentSubmissions(
   submissions: UserWithRelations["submissions"]
 ): (RecentSubmission & { id?: string; submittedAt?: string })[] {
   return submissions.map((submission) => {
-    const artifact = submission.challenge?.buggyArtifact as {
-      points?: number;
-    } | null;
     const submittedAt = submission.createdAt
       ? new Date(submission.createdAt).toLocaleDateString("en-US", {
           day: "numeric",
@@ -181,11 +232,10 @@ function buildRecentSubmissions(
         })
       : undefined;
     return {
-      category:
-        (submission.challenge?.category?.name as Category) || "State Mutations",
+      category: submission.challenge?.category?.name ?? "",
       id: submission.id,
-      pts: artifact?.points ?? 100,
-      score: submission.totalScore ?? 0,
+      pts: getChallengeMaxPoints(submission.challenge),
+      score: getSubmissionPoints(submission),
       submittedAt,
       title: submission.challenge?.title || "Challenge",
     };
@@ -242,46 +292,44 @@ export function createProfileService(
     }
     const typedUser = user as UserWithRelations;
     const totalPublishedCount = publishedChallenges.length;
-    const successfulSubmissions = typedUser.submissions.filter(isSolved);
-    const solvedChallengeIds = new Set(
-      successfulSubmissions.map((s) => s.challengeId)
+    const allSubmissions =
+      typedUser.submissions as unknown as ChallengeSubmission[];
+    const solvedCount = countSolvedChallenges(allSubmissions);
+    const totalSubmissionsCount = allSubmissions.length;
+    const avgScore = computeAvgScore(
+      allSubmissions as Array<{ totalScore: number | null }>
     );
-    const totalSubmissionsCount = typedUser.submissions.length;
-    const avgScore = computeAvgScore(typedUser.submissions);
-    const avgTimeMinutes = computeAvgTimeMinutes(typedUser.submissions);
-    const avgHintsUsed = computeAvgHints(typedUser.submissions);
+    const avgTimeMinutes = computeAvgTimeMinutes(
+      allSubmissions as unknown as Array<{ timeSpentSeconds: number | null }>
+    );
+    const avgHintsUsed = computeAvgHints(
+      allSubmissions as unknown as Array<{ hintsUsed: number }>
+    );
     const joinedDate = formatJoinedDate(typedUser.createdAt);
     const joinedFormatted = formatJoinedLabelLegacy(typedUser.createdAt);
     const handleDisplay = resolveHandleDisplay(
       typedUser.username,
       typedUser.email
     );
-    const totalPoints = calcPoints(
-      typedUser.currentRating,
-      solvedChallengeIds.size
-    );
+    const totalPoints = calcPoints(allSubmissions);
     const liveRank = await leaderboardService.calculateUserRank(userId);
-    const statsMap = new Map(
-      typedUser.categoryStats.map((cs) => [cs.category?.name, cs])
-    );
-    const radarData = buildRadarData(
-      statsMap as Map<
-        string | undefined,
-        { avgScore: number; rootCauseAccuracyPercent?: number | null }
-      >
-    );
-    const categoryStats = buildCategoryStats(
-      statsMap as Map<string | undefined, { avgScore: number }>,
-      typedUser.submissions
-    );
-    const strengthData = buildStrengthData(typedUser.submissions);
-    const recentSubmissions = buildRecentSubmissions(typedUser.submissions);
+    const radarData = buildRadarData(allSubmissions);
+    const categoryStats = buildCategoryStats(allSubmissions);
+    const strengthData = buildStrengthData(allSubmissions);
+    const recentSlice = [...typedUser.submissions]
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt as unknown as string).getTime() -
+          new Date(a.createdAt as unknown as string).getTime()
+      )
+      .slice(0, 10);
+    const recentSubmissions = buildRecentSubmissions(recentSlice);
     const displayName = resolveDisplayName(typedUser);
     const profileStats = buildProfileStatsValues({
       avgHintsUsed,
       avgScore,
       avgTimeMinutes,
-      solvedCount: solvedChallengeIds.size,
+      solvedCount,
       totalPublishedCount,
       totalSubmissionsCount,
     });
@@ -297,7 +345,7 @@ export function createProfileService(
         joined: joinedFormatted,
         joinedDate,
         name: displayName,
-        points: totalPoints.toLocaleString(),
+        points: totalPoints.toLocaleString("en-US"),
         rank: liveRank,
         streak: `${typedUser.streakCount}-day streak`,
         streakCount: typedUser.streakCount ?? 0,

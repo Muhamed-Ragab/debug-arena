@@ -1,12 +1,10 @@
+import { SEED_CATEGORIES } from "@/features/category/constants";
 import type { Category } from "@/lib/domain/types";
 import type { AvatarPreset } from "./types";
 
-export const DEFAULT_CATEGORIES: Category[] = [
-  "State Mutations",
-  "Race Conditions",
-  "Security Flaws",
-  "Memory Leaks",
-];
+export const DEFAULT_CATEGORIES: Category[] = SEED_CATEGORIES.map(
+  (c) => c.name as Category
+);
 
 export const AVATAR_PRESETS: AvatarPreset[] = [
   { color: "#4f46e5", id: "indigo" },

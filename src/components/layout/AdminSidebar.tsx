@@ -12,8 +12,6 @@ import {
 import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useExtracted } from "next-intl";
-import { LanguageSwitcher } from "@/components/preferences/LanguageSwitcher";
 import { ThemeToggle } from "@/components/preferences/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/features/auth/components/SignOutButton";
@@ -27,7 +25,6 @@ export function AdminSidebar({
   open?: boolean;
   onClose?: () => void;
 }) {
-  const t = useExtracted();
   const pathname = usePathname();
 
   const NAV: Array<{
@@ -37,32 +34,32 @@ export function AdminSidebar({
   }> = [
     {
       icon: LayoutDashboard,
-      label: t("Dashboard"),
+      label: "Dashboard",
       to: "/admin" as Route,
     },
     {
       icon: FolderTree,
-      label: t("Categories"),
+      label: "Categories",
       to: "/admin/categories" as Route,
     },
     {
       icon: Sparkles,
-      label: t("AI Question Studio"),
+      label: "AI Question Studio",
       to: "/admin/questions" as Route,
     },
     {
       icon: Activity,
-      label: t("Health Check"),
+      label: "Health Check",
       to: "/admin/health" as Route,
     },
     {
       icon: BarChart3,
-      label: t("Analytics"),
+      label: "Analytics",
       to: "/admin/analytics" as Route,
     },
     {
       icon: Users,
-      label: t("Users"),
+      label: "Users",
       to: "/admin/users" as Route,
     },
   ];
@@ -80,7 +77,7 @@ export function AdminSidebar({
         <Logo href={"/admin" as Route} />
         {Boolean(onClose) && (
           <Button
-            aria-label={t("Close sidebar")}
+            aria-label={"Close sidebar"}
             className="h-8 w-8 p-0 lg:hidden"
             onClick={onClose}
             size="icon"
@@ -93,7 +90,7 @@ export function AdminSidebar({
 
       <div className="px-3 pt-2">
         <p className="px-3 pb-2 font-medium text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
-          {t("Admin Portal")}
+          {"Admin Portal"}
         </p>
         <nav className="flex flex-col gap-1">
           {NAV.map(({ to, label, icon: Icon }) => {
@@ -128,15 +125,9 @@ export function AdminSidebar({
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="font-medium text-muted-foreground text-sm">
-              {t("Theme")}
+              {"Theme"}
             </span>
             <ThemeToggle />
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="font-medium text-muted-foreground text-sm">
-              {t("Language")}
-            </span>
-            <LanguageSwitcher />
           </div>
           <div className="pt-1">
             <SignOutButton

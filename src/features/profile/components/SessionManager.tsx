@@ -10,7 +10,6 @@ import {
   Smartphone,
   Tablet,
 } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +40,6 @@ interface SessionManagerProps {
 export function SessionManager({
   sessions: initialSessions,
 }: SessionManagerProps) {
-  const t = useExtracted();
   const [sessions, setSessions] = useState<SessionData[]>(initialSessions);
   const [isRevoking, setIsRevoking] = useState<string | null>(null);
 
@@ -63,10 +61,10 @@ export function SessionManager({
       }
       if (res?.data?.success) {
         setSessions((prev) => prev.filter((s) => s.id !== id));
-        toast.success(t("Session revoked"));
+        toast.success("Session revoked");
       }
     } catch {
-      toast.error(t("Something went wrong"));
+      toast.error("Something went wrong");
     } finally {
       setIsRevoking(null);
     }
@@ -87,10 +85,10 @@ export function SessionManager({
       }
       if (res?.data?.success) {
         setSessions((prev) => prev.filter((s) => s.current));
-        toast.success(t("Other sessions revoked"));
+        toast.success("Other sessions revoked");
       }
     } catch {
-      toast.error(t("Something went wrong"));
+      toast.error("Something went wrong");
     } finally {
       setIsRevoking(null);
     }
@@ -102,15 +100,13 @@ export function SessionManager({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-3">
-              <CardTitle className="text-base">
-                {t("Active sessions")}
-              </CardTitle>
+              <CardTitle className="text-base">{"Active sessions"}</CardTitle>
               <SignOutButton />
             </div>
             <CardDescription className="mt-1">
-              {t(
+              {
                 "Devices signed in to your account. Revoke anything you don't recognize."
-              )}
+              }
             </CardDescription>
           </div>
           <Button
@@ -120,9 +116,7 @@ export function SessionManager({
             variant="outline"
           >
             <LogOut size={14} />
-            {isRevoking === "all"
-              ? t("Revoking...")
-              : t("Revoke all other sessions")}
+            {isRevoking === "all" ? "Revoking..." : "Revoke all other sessions"}
           </Button>
         </div>
       </CardHeader>
@@ -155,7 +149,7 @@ export function SessionManager({
                         className="gap-1 font-medium text-[11px]"
                         variant="success"
                       >
-                        <Check size={11} /> {t("This device")}
+                        <Check size={11} /> {"This device"}
                       </Badge>
                     )}
                     {Boolean(s.newLogin) && (
@@ -163,7 +157,7 @@ export function SessionManager({
                         className="gap-1 font-medium text-[11px]"
                         variant="warning"
                       >
-                        <AlertTriangle size={11} /> {t("New login")}
+                        <AlertTriangle size={11} /> {"New login"}
                       </Badge>
                     )}
                   </div>
@@ -187,7 +181,7 @@ export function SessionManager({
                     size="sm"
                     variant="destructive"
                   >
-                    {loading ? t("Revoking...") : t("Revoke")}
+                    {loading ? "Revoking..." : "Revoke"}
                   </Button>
                 )}
               </li>
@@ -198,9 +192,9 @@ export function SessionManager({
         <div className="mt-5 flex items-start gap-2 rounded-md border border-border bg-inset px-3 py-2.5 text-[12px] text-muted-foreground">
           <ShieldAlert className="mt-0.5 shrink-0 text-primary" size={14} />
           <span>
-            {t(
+            {
               "New-login events are flagged here so you can spot unexpected sessions. We never notify via the same channel an attacker could control."
-            )}
+            }
           </span>
         </div>
       </CardContent>

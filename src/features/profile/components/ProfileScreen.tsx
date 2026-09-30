@@ -1,9 +1,9 @@
 "use client";
 
 import { Flame, Trophy } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { TopBar } from "@/components/layout/TopBar";
 import { Avatar } from "@/components/ui/avatar";
+import type { CategoryDTO } from "@/features/category/types";
 import type { UserProfileData } from "@/features/profile/types";
 import { CategoryStrengthChart } from "./CategoryStrengthChart";
 import { ProfileStats } from "./ProfileStats";
@@ -11,11 +11,11 @@ import { RecentSubmissions } from "./RecentSubmissions";
 import { SolvedByDifficultyChart } from "./SolvedByDifficultyChart";
 
 interface Props {
+  categories: CategoryDTO[];
   data: UserProfileData;
 }
 
-export function ProfileScreen({ data }: Props) {
-  const t = useExtracted();
+export function ProfileScreen({ categories, data }: Props) {
   const {
     profile,
     profileStats,
@@ -27,7 +27,7 @@ export function ProfileScreen({ data }: Props) {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <TopBar crumbs={[{ label: t("Arena") }, { label: t("Profile") }]} />
+      <TopBar crumbs={[{ label: "Arena" }, { label: "Profile" }]} />
 
       <div className="flex flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
         {/* Left column: User Identity and Stats */}
@@ -40,7 +40,7 @@ export function ProfileScreen({ data }: Props) {
               size={56}
             />
             <h2 className="mt-3 mb-0.5 font-semibold text-[15px] text-heading">
-              {profile.name || t("Developer")}
+              {profile.name || "Developer"}
             </h2>
             <p className="font-mono text-[12px] text-primary">
               {profile.handle}
@@ -58,20 +58,18 @@ export function ProfileScreen({ data }: Props) {
                 <Trophy size={11} /> {profile.rank}
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 font-medium font-mono text-[11px] text-emerald-400">
-                {t("{points} pts", { points: profile.points })}
+                {`${profile.points} pts`}
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 font-medium font-mono text-[11px] text-amber-500">
                 <Flame size={11} />{" "}
-                {t("{count}-day streak", {
-                  count: String(profile.streakCount),
-                })}
+                {`${String(profile.streakCount)}-day streak`}
               </span>
             </div>
 
             <p className="mt-2.5 text-[11px] text-muted-foreground">
               {profile.joinedDate
-                ? t("Member since {date}", { date: profile.joinedDate })
-                : t("Member")}
+                ? `Member since ${profile.joinedDate}`
+                : "Member"}
             </p>
 
             {Boolean(profile.bio) && (
@@ -81,7 +79,11 @@ export function ProfileScreen({ data }: Props) {
             )}
           </div>
 
-          <ProfileStats categoryStats={categoryStats} stats={profileStats} />
+          <ProfileStats
+            categories={categories}
+            categoryStats={categoryStats}
+            stats={profileStats}
+          />
         </div>
 
         {/* Right column: Performance Charts & Submissions */}
@@ -91,7 +93,10 @@ export function ProfileScreen({ data }: Props) {
             <SolvedByDifficultyChart data={strengthData} />
           </div>
 
-          <RecentSubmissions items={recentSubmissions} />
+          <RecentSubmissions
+            categories={categories}
+            items={recentSubmissions}
+          />
         </div>
       </div>
     </div>

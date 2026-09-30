@@ -11,8 +11,6 @@ import {
 import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useExtracted } from "next-intl";
-import { LanguageSwitcher } from "@/components/preferences/LanguageSwitcher";
 import { ThemeToggle } from "@/components/preferences/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/features/auth/components/SignOutButton";
@@ -27,7 +25,6 @@ export function Sidebar({
   open?: boolean;
   onClose?: () => void;
 }) {
-  const t = useExtracted();
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user as { role?: string } | undefined;
@@ -40,16 +37,16 @@ export function Sidebar({
   }> = [
     {
       icon: LayoutGrid,
-      label: t("Challenges"),
+      label: "Challenges",
       to: "/challenges",
     },
     {
       icon: Trophy,
-      label: t("Leaderboard"),
+      label: "Leaderboard",
       to: "/leaderboard",
     },
-    { icon: User, label: t("Profile"), to: "/profile" },
-    { icon: Settings, label: t("Settings"), to: "/settings" },
+    { icon: User, label: "Profile", to: "/profile" },
+    { icon: Settings, label: "Settings", to: "/settings" },
   ];
 
   const ADMIN_NAV: Array<{
@@ -59,7 +56,7 @@ export function Sidebar({
   }> = [
     {
       icon: LayoutDashboard,
-      label: t("Admin Dashboard"),
+      label: "Admin Dashboard",
       to: "/admin" as Route,
     },
   ];
@@ -77,7 +74,7 @@ export function Sidebar({
         <Logo />
         {Boolean(onClose) && (
           <Button
-            aria-label={t("Close sidebar")}
+            aria-label={"Close sidebar"}
             className="h-8 w-8 p-0 lg:hidden"
             onClick={onClose}
             size="icon"
@@ -90,7 +87,7 @@ export function Sidebar({
 
       <div className="px-3 pt-2">
         <p className="px-3 pb-2 font-medium text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
-          {t("Navigation")}
+          {"Navigation"}
         </p>
         <nav className="flex flex-col gap-1">
           {NAV.map(({ to, label, icon: Icon }) => {
@@ -123,7 +120,7 @@ export function Sidebar({
         {Boolean(isAdmin) && (
           <div className="mt-6">
             <p className="px-3 pb-2 font-medium text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
-              {t("Admin Dashboard")}
+              {"Admin Dashboard"}
             </p>
             <nav className="flex flex-col gap-1">
               {ADMIN_NAV.map(({ to, label, icon: Icon }) => {
@@ -160,15 +157,9 @@ export function Sidebar({
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="font-medium text-muted-foreground text-sm">
-              {t("Theme")}
+              {"Theme"}
             </span>
             <ThemeToggle />
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="font-medium text-muted-foreground text-sm">
-              {t("Language")}
-            </span>
-            <LanguageSwitcher />
           </div>
           <div className="pt-1">
             <SignOutButton

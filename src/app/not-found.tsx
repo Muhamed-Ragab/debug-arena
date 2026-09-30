@@ -3,12 +3,10 @@
 import { Bug, Home, Terminal } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useExtracted } from "next-intl";
 import { useEffect } from "react";
 import { buttonVariants } from "@/components/ui/button";
 
 export default function NotFound() {
-  const t = useExtracted();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -56,7 +54,7 @@ export default function NotFound() {
         {/* Error Badge */}
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-destructive/30 bg-destructive/10 px-3.5 py-1.5 font-mono text-destructive text-xs backdrop-blur-sm">
           <Bug className="animate-pulse" size={14} />
-          <span>{t("404 // NULL_POINTER_EXCEPTION")}</span>
+          <span>{"404 // NULL_POINTER_EXCEPTION"}</span>
         </div>
 
         {/* Big Glitch-style Heading */}
@@ -64,13 +62,13 @@ export default function NotFound() {
           404
         </h1>
         <h2 className="mt-3 font-semibold text-heading text-xl sm:text-2xl">
-          {t("Page Not Found in the Arena")}
+          {"Page Not Found in the Arena"}
         </h2>
 
         <p className="mt-3 max-w-md text-muted-foreground text-sm sm:text-base">
-          {t(
+          {
             "The breakpoint you set led nowhere. The requested route does not exist or may have been refactored out of production."
-          )}
+          }
         </p>
 
         {/* Terminal / Code Card */}
@@ -83,22 +81,22 @@ export default function NotFound() {
             </div>
             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <Terminal size={12} />
-              <span>{t("debugger.log")}</span>
+              <span>{"debugger.log"}</span>
             </div>
           </div>
           <div className="space-y-1.5 p-4 text-[13px]">
             <p className="text-destructive">
               <span className="text-muted-foreground">&gt;</span>{" "}
-              {t("Error: ROUTE_NOT_FOUND")}
+              {"Error: ROUTE_NOT_FOUND"}
             </p>
             <p className="text-muted-foreground text-xs">
-              {t("at resolveRoute (debug-arena://router.ts:404:12)")}
+              {"at resolveRoute (debug-arena://router.ts:404:12)"}
             </p>
             <p className="text-muted-foreground text-xs">
-              {t("at handleRequest (debug-arena://server.ts:89:4)")}
+              {"at handleRequest (debug-arena://server.ts:89:4)"}
             </p>
             <p className="pt-1 text-emerald-500 text-xs">
-              {t("Suggested Fix: Navigate back to the challenge lobby.")}
+              {"Suggested Fix: Navigate back to the challenge lobby."}
             </p>
           </div>
         </div>
@@ -110,14 +108,14 @@ export default function NotFound() {
             href="/challenges"
           >
             <Bug size={16} />
-            <span>{t("Enter Challenges")}</span>
+            <span>{"Enter Challenges"}</span>
           </Link>
           <Link
             className={buttonVariants({ size: "default", variant: "outline" })}
             href="/"
           >
             <Home size={16} />
-            <span>{t("Return Home")}</span>
+            <span>{"Return Home"}</span>
           </Link>
         </div>
       </div>

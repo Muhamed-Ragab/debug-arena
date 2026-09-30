@@ -1,12 +1,7 @@
 import { relations } from "drizzle-orm";
 import { accounts, loginAttempts, users } from "@/features/auth/schema";
 import { categories } from "@/features/category/schema";
-import {
-  challengeEmbeddings,
-  challenges,
-  hints,
-  submissions,
-} from "@/features/challenge/schema";
+import { challenges, hints, submissions } from "@/features/challenge/schema";
 import {
   leaderboardEntries,
   userCategoryStats,
@@ -34,7 +29,6 @@ export const challengesRelations = relations(challenges, ({ one, many }) => ({
     fields: [challenges.categoryId],
     references: [categories.id],
   }),
-  embeddings: many(challengeEmbeddings),
   hints: many(hints),
   submissions: many(submissions),
 }));
@@ -93,13 +87,3 @@ export const loginAttemptsRelations = relations(loginAttempts, ({ one }) => ({
 export const profileLinksRelations = relations(profileLinks, ({ one }) => ({
   user: one(users, { fields: [profileLinks.userId], references: [users.id] }),
 }));
-
-export const challengeEmbeddingsRelations = relations(
-  challengeEmbeddings,
-  ({ one }) => ({
-    challenge: one(challenges, {
-      fields: [challengeEmbeddings.challengeId],
-      references: [challenges.id],
-    }),
-  })
-);

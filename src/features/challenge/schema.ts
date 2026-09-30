@@ -2,7 +2,6 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   check,
-  index,
   integer,
   jsonb,
   pgEnum,
@@ -11,9 +10,8 @@ import {
   text,
   timestamp,
   uuid,
-  vector,
 } from "drizzle-orm/pg-core";
-import { adminRole, EMBEDDING_DIM, userRole } from "@/db/schema/roles";
+import { adminRole, userRole } from "@/db/schema/roles";
 import { users } from "@/features/auth/schema";
 import { categories } from "@/features/category/schema";
 
@@ -57,19 +55,12 @@ export const challenges = pgTable(
     preventionNotes: text("prevention_notes"),
     prompt: text("prompt").notNull(),
     referenceFix: jsonb("reference_fix").notNull(),
-    rootCauseEmbedding: vector("root_cause_embedding", {
-      dimensions: EMBEDDING_DIM,
-    }),
     rootCauseSummary: text("root_cause_summary").notNull(),
     source: challengeSourceEnum("source").notNull().default("manual"),
     status: challengeStatusEnum("status").notNull().default("draft"),
     title: text("title").notNull(),
   },
   (t) => [
-    index("root_cause_embedding_idx").using(
-      "hnsw",
-      t.rootCauseEmbedding.op("vector_cosine_ops")
-    ),
     pgPolicy("admin_all_challenges", {
       for: "all",
       to: adminRole,
@@ -111,40 +102,6 @@ export const hints = pgTable(
   ]
 );
 
-// --- challenge_embeddings ---
-export const challengeEmbeddings = pgTable(
-  "challenge_embeddings",
-  {
-    challengeId: uuid("challenge_id")
-      .notNull()
-      .references(() => challenges.id, { onDelete: "cascade" }),
-    content: text("content").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    embedding: vector("embedding", { dimensions: EMBEDDING_DIM }).notNull(),
-    id: uuid("id").primaryKey().defaultRandom(),
-  },
-  (t) => [
-    index("challenge_embedding_idx").using(
-      "hnsw",
-      t.embedding.op("vector_cosine_ops")
-    ),
-    index("challenge_embedding_challenge_idx").on(t.challengeId),
-    pgPolicy("admin_all_challenge_embeddings", {
-      for: "all",
-      to: adminRole,
-      using: sql`true`,
-      withCheck: sql`true`,
-    }),
-    pgPolicy("user_read_challenge_embeddings", {
-      for: "select",
-      to: userRole,
-      using: sql`true`,
-    }),
-  ]
-);
-
 // --- submissions ---
 export const submissions = pgTable(
   "submissions",
@@ -165,9 +122,6 @@ export const submissions = pgTable(
     preventionAnswer: text("prevention_answer"),
     preventionScore: integer("prevention_score"),
     proposedFix: jsonb("proposed_fix"),
-    rootCauseEmbedding: vector("root_cause_embedding", {
-      dimensions: EMBEDDING_DIM,
-    }),
     rootCauseExplanation: text("root_cause_explanation"),
     rootCauseScore: integer("root_cause_score"),
     timeSpentSeconds: integer("time_spent_seconds"),

@@ -49,6 +49,9 @@ export default async function Page({
 
   const challenge: Challenge = {
     category: dbChallenge.categoryName as Category,
+    categoryColor: dbChallenge.categoryColor,
+    categoryIcon: dbChallenge.categoryIcon,
+    categorySlug: dbChallenge.categorySlug,
     difficulty: diff,
     filePath: fileName,
     id: dbChallenge.id,

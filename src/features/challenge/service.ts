@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { invalidateLeaderboardCache } from "@/features/leaderboard/cache";
 import { leaderboardService } from "@/features/leaderboard/service";
 import { profileRepository } from "@/features/profile/repository";
+import { isSolved } from "@/lib/domain/scoring";
 import { NotFoundError } from "@/lib/safe-action";
 import { DIFFICULTY_LABEL, STATUS_LABEL } from "./constants";
 import { evaluateExplanationWithGroq } from "./lib/ai-evaluator";
@@ -9,14 +10,14 @@ import { gradeSubmission } from "./lib/grading";
 import type { HiddenTestSpec } from "./lib/sandbox";
 import { runSandboxTests } from "./lib/sandbox";
 import { challengeRepository } from "./repository";
-import type { ChallengeRepository, SubmitChallengeInput } from "./types";
+import type {
+  ChallengeRepository,
+  FindPublishedChallengesPaginatedOpts,
+  SubmitChallengeInput,
+} from "./types";
+import type { ListChallengesQuery } from "./validation";
 
-export function isSolved(submission: {
-  fixCorrect: boolean | null;
-  totalScore: number | null;
-}): boolean {
-  return Boolean(submission.fixCorrect || (submission.totalScore ?? 0) >= 60);
-}
+export { isSolved } from "@/lib/domain/scoring";
 
 export function calcRatingDelta(totalScore: number): number {
   return totalScore >= 70
@@ -44,6 +45,38 @@ export function createChallengeService(
       difficultyLabel: DIFFICULTY_LABEL[c.difficulty] ?? c.difficulty,
       statusLabel: STATUS_LABEL[c.status] ?? c.status,
     }));
+  }
+
+  async function getPublishedChallengesPaginated(
+    opts: ListChallengesQuery
+  ): Promise<{
+    items: Awaited<ReturnType<typeof getPublishedChallenges>>;
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  }> {
+    const paginatedOpts: FindPublishedChallengesPaginatedOpts = {
+      category: opts.category,
+      difficulty: opts.difficulty,
+      page: opts.page,
+      pageSize: opts.pageSize,
+      search: opts.search,
+    };
+    const { rows, total } = await repo.findPublishedPaginated(paginatedOpts);
+    const mapped = rows.map((c) => ({
+      ...c,
+      difficultyLabel: DIFFICULTY_LABEL[c.difficulty] ?? c.difficulty,
+      statusLabel: STATUS_LABEL[c.status] ?? c.status,
+    }));
+    const totalPages = total === 0 ? 0 : Math.ceil(total / opts.pageSize);
+    return {
+      items: mapped,
+      page: opts.page,
+      pageSize: opts.pageSize,
+      total,
+      totalPages,
+    };
   }
 
   async function getSubmissionById(id: string) {
@@ -238,7 +271,7 @@ export function createChallengeService(
   ) {
     const challenge = await deps.challengeRepo.findById(input.challengeId);
     if (!challenge) {
-      throw new NotFoundError("error.challengeNotFound");
+      throw new NotFoundError("Challenge not found.");
     }
     const buggyArtifact = challenge.buggyArtifact as {
       buggyLines?: [number, number];
@@ -359,6 +392,7 @@ export function createChallengeService(
     formatLocalizationAnswer,
     getChallengeById,
     getPublishedChallenges,
+    getPublishedChallengesPaginated,
     getSubmissionById,
     getUserChallengeStats,
     isSolved,

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getExtracted } from "next-intl/server";
 import { HealthPanel } from "@/features/admin/components/HealthPanel";
 import { adminService } from "@/features/admin/service";
 import { analyticsService } from "@/features/analytics/service";
@@ -14,7 +13,6 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  const t = await getExtracted();
   let overview: Awaited<
     ReturnType<typeof analyticsService.getOverview>
   > | null = null;
@@ -45,41 +43,37 @@ export default async function AdminDashboardPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-6">
       <div>
         <h1 className="font-semibold text-2xl text-heading">
-          {t("Admin Dashboard")}
+          {"Admin Dashboard"}
         </h1>
         <p className="mt-1 text-muted-foreground text-sm">
-          {t("Overview of platform health, content, and community.")}
+          {"Overview of platform health, content, and community."}
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-border bg-card p-5">
-          <p className="text-muted-foreground text-sm">{t("Total Users")}</p>
+          <p className="text-muted-foreground text-sm">{"Total Users"}</p>
           <p className="mt-2 font-semibold text-2xl text-heading">
             {totalUsers}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
-          <p className="text-muted-foreground text-sm">
-            {t("Total Challenges")}
-          </p>
+          <p className="text-muted-foreground text-sm">{"Total Challenges"}</p>
           <p className="mt-2 font-semibold text-2xl text-heading">
             {totalChallenges}
           </p>
           <p className="mt-1 text-muted-foreground text-xs">
-            {t("Published")}: {published} · {t("Drafts")}: {drafts}
+            {"Published"}: {published} · {"Drafts"}: {drafts}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
-          <p className="text-muted-foreground text-sm">{t("Solve Rate")}</p>
+          <p className="text-muted-foreground text-sm">{"Solve Rate"}</p>
           <p className="mt-2 font-semibold text-2xl text-heading">
             {solveRate}%
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
-          <p className="text-muted-foreground text-sm">
-            {t("Total Submissions")}
-          </p>
+          <p className="text-muted-foreground text-sm">{"Total Submissions"}</p>
           <p className="mt-2 font-semibold text-2xl text-heading">
             {overview?.totalSubmissions ?? 0}
           </p>
@@ -88,13 +82,13 @@ export default async function AdminDashboardPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="rounded-xl border border-border bg-card p-5 lg:col-span-2">
-          <h2 className="font-semibold text-heading">{t("Quick Links")}</h2>
+          <h2 className="font-semibold text-heading">{"Quick Links"}</h2>
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Link
               className="rounded-lg bg-inset px-4 py-3 font-medium text-sm hover:bg-inset/80"
               href="/admin/categories"
             >
-              {t("Categories")}
+              {"Categories"}
             </Link>
             <Link
               className="rounded-lg bg-inset px-4 py-3 font-medium text-sm hover:bg-inset/80"
@@ -106,19 +100,19 @@ export default async function AdminDashboardPage() {
               className="rounded-lg bg-inset px-4 py-3 font-medium text-sm hover:bg-inset/80"
               href="/admin/analytics"
             >
-              {t("Analytics")}
+              {"Analytics"}
             </Link>
             <Link
               className="rounded-lg bg-inset px-4 py-3 font-medium text-sm hover:bg-inset/80"
               href="/admin/health"
             >
-              {t("Health Check")}
+              {"Health Check"}
             </Link>
             <Link
               className="rounded-lg bg-inset px-4 py-3 font-medium text-sm hover:bg-inset/80"
               href="/admin/users"
             >
-              {t("Users")}
+              {"Users"}
             </Link>
             <Link
               className="rounded-lg bg-inset px-4 py-3 font-medium text-sm hover:bg-inset/80"
@@ -129,12 +123,10 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
-          <h2 className="font-semibold text-heading">
-            {t("Recent Submissions")}
-          </h2>
+          <h2 className="font-semibold text-heading">{"Recent Submissions"}</h2>
           {recent.length === 0 ? (
             <p className="mt-4 text-muted-foreground text-sm">
-              {t("No recent submissions.")}
+              {"No recent submissions."}
             </p>
           ) : (
             <ul className="mt-4 flex flex-col gap-2">

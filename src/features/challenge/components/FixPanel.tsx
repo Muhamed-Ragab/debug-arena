@@ -1,6 +1,4 @@
 "use client";
-
-import { useExtracted } from "next-intl";
 import type { DiffLine } from "../types";
 
 const LINE_STYLES = {
@@ -29,13 +27,12 @@ interface Props {
 }
 
 export function FixPanel({ diffLines }: Props) {
-  const t = useExtracted();
   return (
     <div className="flex h-full flex-col">
       <p className="mb-3 text-[11.5px] text-muted-foreground leading-relaxed">
-        {t(
+        {
           "Canonical fix. Your score reflects how closely your diagnosis and solution match this approach."
-        )}
+        }
       </p>
       <div className="w-full flex-1 overflow-x-auto rounded-md border border-border bg-inset font-mono text-[12px]">
         <div className="min-w-max p-1">

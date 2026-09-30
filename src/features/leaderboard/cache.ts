@@ -1,13 +1,14 @@
 import { getRedis } from "@/lib/redis";
 import type { LeaderboardEntry } from "./types";
 
-const LEADERBOARD_CACHE_TTL = 60 * 60 * 24; // 24 hours in seconds
+const LEADERBOARD_CACHE_TTL = 60 * 5; // 5 minutes in seconds
 
 export function getLeaderboardCacheKey(
   period: string,
-  categorySlug?: string | null
+  categorySlug?: string | null,
+  limit = 100
 ): string {
-  return `leaderboard:v3:top:24h:${period}:${categorySlug || "all"}`;
+  return `leaderboard:v4:top:${period}:${categorySlug || "all"}:limit:${limit}`;
 }
 
 export async function getCachedLeaderboard(
@@ -40,15 +41,16 @@ export async function setCachedLeaderboard(
 }
 
 export async function invalidateLeaderboardCache(
-  pattern = "leaderboard:v3:top:24h:*"
+  pattern = "leaderboard:v4:top:*"
 ): Promise<void> {
   try {
     const redis = getRedis();
     const keys = await redis.keys(pattern);
     // also clear legacy v2 + base keys for migration
+    const v3Keys = await redis.keys("leaderboard:v3:top:24h:*");
     const v2Keys = await redis.keys("leaderboard:v2:top:24h:*");
     const legacy = await redis.keys("leaderboard:top:24h:*");
-    const allKeys = [...keys, ...v2Keys, ...legacy];
+    const allKeys = [...keys, ...v3Keys, ...v2Keys, ...legacy];
     if (allKeys.length > 0) {
       await redis.del(...allKeys);
     }

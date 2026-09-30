@@ -1,28 +1,27 @@
 "use client";
-
-import { useExtracted } from "next-intl";
 import { TopBar } from "@/components/layout/TopBar";
+import type { CategoryDTO } from "@/features/category/types";
 import type { UserProfileData } from "@/features/profile/types";
 import { ProfileScreen } from "./components/ProfileScreen";
 
 interface Props {
+  categories: CategoryDTO[];
   data?: UserProfileData | null;
 }
 
-export function ProfilePage({ data }: Props) {
-  const t = useExtracted();
+export function ProfilePage({ categories, data }: Props) {
   if (!data) {
     return (
       <div className="flex h-full flex-col overflow-hidden">
-        <TopBar crumbs={[{ label: t("Arena") }, { label: t("Profile") }]} />
+        <TopBar crumbs={[{ label: "Arena" }, { label: "Profile" }]} />
         <div className="flex flex-1 items-center justify-center">
           <p className="text-muted-foreground text-sm">
-            {t("Profile data is unavailable.")}
+            {"Profile data is unavailable."}
           </p>
         </div>
       </div>
     );
   }
 
-  return <ProfileScreen data={data} />;
+  return <ProfileScreen categories={categories} data={data} />;
 }

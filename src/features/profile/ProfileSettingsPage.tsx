@@ -1,10 +1,10 @@
 "use client";
 
 import { Link2, MonitorSmartphone, ShieldAlert, User } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
+import type { CategoryDTO } from "@/features/category/types";
 import { cn } from "@/lib/utils";
 import { DangerZone } from "./components/DangerZone";
 import { EditProfileForm } from "./components/EditProfileForm";
@@ -36,6 +36,7 @@ function getNavClasses(isActive: boolean, danger?: boolean): string {
 }
 
 interface ProfileSettingsPageProps {
+  categories: CategoryDTO[];
   initialAccounts?: LinkedAccount[];
   initialProfile?: {
     avatarColor?: string;
@@ -51,23 +52,23 @@ interface ProfileSettingsPageProps {
 }
 
 export function ProfileSettingsPage({
+  categories,
   initialProfile,
   initialAccounts,
   initialSessions,
 }: ProfileSettingsPageProps) {
-  const t = useExtracted();
   const [active, setActive] = useState<SectionId>("profile");
 
   const getSectionLabel = (id: SectionId): string => {
     switch (id) {
       case "accounts":
-        return t("Connected Accounts");
+        return "Connected Accounts";
       case "danger":
-        return t("Danger Zone");
+        return "Danger Zone";
       case "profile":
-        return t("Profile");
+        return "Profile";
       case "sessions":
-        return t("Sessions");
+        return "Sessions";
       default:
         return id;
     }
@@ -75,12 +76,12 @@ export function ProfileSettingsPage({
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <TopBar crumbs={[{ label: t("Arena") }, { label: t("Settings") }]} />
+      <TopBar crumbs={[{ label: "Arena" }, { label: "Settings" }]} />
 
       <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
         {/* Section nav */}
         <nav
-          aria-label={t("Settings sections")}
+          aria-label={"Settings sections"}
           className="shrink-0 space-y-1 border-border border-b bg-surface px-4 py-3 lg:w-55 lg:border-e lg:border-b-0 lg:px-3 lg:py-6"
         >
           {SECTIONS.map(({ id, icon: Icon, danger }) => {
@@ -119,7 +120,10 @@ export function ProfileSettingsPage({
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="mx-auto max-w-3xl">
             {active === "profile" && (
-              <EditProfileForm initialProfile={initialProfile} />
+              <EditProfileForm
+                categories={categories}
+                initialProfile={initialProfile}
+              />
             )}
             {active === "sessions" && (
               <SessionManager sessions={initialSessions ?? []} />

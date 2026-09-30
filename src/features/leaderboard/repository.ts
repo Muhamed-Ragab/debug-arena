@@ -38,7 +38,13 @@ export function createLeaderboardRepository(
           eq(schema.users.role, "user")
         ),
         with: {
-          submissions: true,
+          submissions: {
+            with: {
+              challenge: {
+                with: { category: true },
+              },
+            },
+          },
         },
       })) as UserWithSubmissions;
     } catch (err) {
@@ -61,7 +67,13 @@ export function createLeaderboardRepository(
               category: true,
             },
           },
-          submissions: true,
+          submissions: {
+            with: {
+              challenge: {
+                with: { category: true },
+              },
+            },
+          },
         },
       })) as UserWithCategoryStatsAndSubmissions[];
     } catch (err) {
@@ -81,7 +93,13 @@ export function createLeaderboardRepository(
               category: true,
             },
           },
-          submissions: true,
+          submissions: {
+            with: {
+              challenge: {
+                with: { category: true },
+              },
+            },
+          },
         },
       });
       return (user as UserWithCategoryStatsAndSubmissions | undefined) ?? null;

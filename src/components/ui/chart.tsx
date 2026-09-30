@@ -143,7 +143,9 @@ function getLegendItemKey(
 }
 
 function formatRechartsValue(value: unknown): string {
-  return typeof value === "number" ? value.toLocaleString() : String(value);
+  return typeof value === "number"
+    ? value.toLocaleString("en-US")
+    : String(value);
 }
 
 function hasValue(value: unknown): boolean {

@@ -186,7 +186,7 @@ describe("GET /api/health", () => {
 describe("next.config rewrites", () => {
   it("exposes /health -> /api/health rewrite", async () => {
     const mod = await import("../../../../next.config");
-    // next.config is ESM via createNextIntlPlugin; handle default export shape
+    // Read the Next.js config module's default export.
     const cfg = (mod.default ?? mod) as {
       rewrites?: () => Promise<Array<{ source: string; destination: string }>>;
     };

@@ -1,6 +1,5 @@
 "use client";
 
-import { useExtracted, useLocale } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -27,8 +26,8 @@ interface HealthEnvelope {
   success: boolean;
 }
 
-function formatUptime(totalSeconds: number, locale: string): string {
-  const nf = new Intl.NumberFormat(locale);
+function formatUptime(totalSeconds: number): string {
+  const nf = new Intl.NumberFormat("en-US");
   const d = Math.floor(totalSeconds / 86_400);
   const h = Math.floor((totalSeconds % 86_400) / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
@@ -46,8 +45,6 @@ function formatUptime(totalSeconds: number, locale: string): string {
 }
 
 export function HealthPanel() {
-  const t = useExtracted();
-  const locale = useLocale();
   const [data, setData] = useState<HealthData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -55,17 +52,14 @@ export function HealthPanel() {
 
   const dateFormatter = useMemo(
     () =>
-      new Intl.DateTimeFormat(locale, {
+      new Intl.DateTimeFormat("en-US", {
         dateStyle: "medium",
         timeStyle: "medium",
       }),
-    [locale]
+    []
   );
 
-  const numberFormatter = useMemo(
-    () => new Intl.NumberFormat(locale),
-    [locale]
-  );
+  const numberFormatter = useMemo(() => new Intl.NumberFormat("en-US"), []);
 
   const fetchHealth = useCallback(async () => {
     setIsRefreshing(true);
@@ -137,9 +131,7 @@ export function HealthPanel() {
     return (
       <div className="rounded-xl border border-border bg-card p-6">
         <div className="flex items-center justify-between">
-          <p className="text-muted-foreground text-sm">
-            {t("Loading health...")}
-          </p>
+          <p className="text-muted-foreground text-sm">{"Loading health..."}</p>
           <Button
             disabled={isRefreshing}
             onClick={() => {
@@ -148,7 +140,7 @@ export function HealthPanel() {
             size="sm"
             variant="outline"
           >
-            {isRefreshing ? t("Refreshing...") : t("Refresh")}
+            {isRefreshing ? "Refreshing..." : "Refresh"}
           </Button>
         </div>
         {error ? (
@@ -158,20 +150,20 @@ export function HealthPanel() {
     );
   }
 
-  const statusLabel = data.status === "ok" ? t("Operational") : t("Degraded");
+  const statusLabel = data.status === "ok" ? "Operational" : "Degraded";
   const statusColor = data.status === "ok" ? "bg-emerald-500" : "bg-amber-500";
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6">
       <div className="flex items-center justify-between gap-4">
-        <h3 className="font-semibold text-heading">{t("System Health")}</h3>
+        <h3 className="font-semibold text-heading">{"System Health"}</h3>
         <span className="flex items-center gap-3">
           <span className="flex items-center gap-2 text-sm">
             <span className={`h-2.5 w-2.5 rounded-full ${statusColor}`} />
             {statusLabel}
           </span>
           <Button
-            aria-label={t("Refresh")}
+            aria-label={"Refresh"}
             disabled={isRefreshing}
             onClick={() => {
               fetchHealth();
@@ -179,26 +171,26 @@ export function HealthPanel() {
             size="sm"
             variant="outline"
           >
-            {isRefreshing ? t("Refreshing...") : t("Refresh")}
+            {isRefreshing ? "Refreshing..." : "Refresh"}
           </Button>
         </span>
       </div>
       <p className="text-muted-foreground text-sm">
-        {t("Live status of database and Redis services.")}
+        {"Live status of database and Redis services."}
       </p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="rounded-lg bg-inset p-4">
           <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-            {t("Database")}
+            {"Database"}
           </p>
           <p className="mt-1 flex items-center gap-2 text-sm">
             <span
               className={`h-2 w-2 rounded-full ${data.checks.db.ok ? "bg-emerald-500" : "bg-destructive"}`}
             />
-            {data.checks.db.ok ? t("Operational") : t("Degraded")}
+            {data.checks.db.ok ? "Operational" : "Degraded"}
           </p>
           <p className="mt-1 text-muted-foreground text-xs">
-            {t("Latency")}: {numberFormatter.format(data.checks.db.latencyMs)}ms
+            {"Latency"}: {numberFormatter.format(data.checks.db.latencyMs)}ms
           </p>
           {data.checks.db.error ? (
             <p className="mt-1 text-destructive text-xs">
@@ -208,17 +200,16 @@ export function HealthPanel() {
         </div>
         <div className="rounded-lg bg-inset p-4">
           <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-            {t("Redis")}
+            {"Redis"}
           </p>
           <p className="mt-1 flex items-center gap-2 text-sm">
             <span
               className={`h-2 w-2 rounded-full ${data.checks.redis.ok ? "bg-emerald-500" : "bg-destructive"}`}
             />
-            {data.checks.redis.ok ? t("Operational") : t("Degraded")}
+            {data.checks.redis.ok ? "Operational" : "Degraded"}
           </p>
           <p className="mt-1 text-muted-foreground text-xs">
-            {t("Latency")}:{" "}
-            {numberFormatter.format(data.checks.redis.latencyMs)}ms
+            {"Latency"}: {numberFormatter.format(data.checks.redis.latencyMs)}ms
           </p>
           {data.checks.redis.error ? (
             <p className="mt-1 text-destructive text-xs">
@@ -229,14 +220,14 @@ export function HealthPanel() {
       </div>
       <div className="flex flex-wrap gap-4 text-muted-foreground text-xs">
         <span>
-          {t("Uptime")}: {formatUptime(displayUptime, locale)}
+          {"Uptime"}: {formatUptime(displayUptime)}
         </span>
         <span>
-          {t("Checked at")}: {formattedTimestamp}
+          {"Checked at"}: {formattedTimestamp}
         </span>
       </div>
       <p className="text-muted-foreground text-xs">
-        {t("Auto-refresh every 30s")}
+        {"Auto-refresh every 30s"}
       </p>
     </div>
   );

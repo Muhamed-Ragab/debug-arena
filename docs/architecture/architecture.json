@@ -1,0 +1,258 @@
+{
+  "meta": {
+    "displayName": "Debug Arena",
+    "version": "1.0.0",
+    "description": "Next.js application architecture and HTTP route map",
+    "generatedAt": "2026-09-30",
+    "techStack": {
+      "language": "TypeScript",
+      "framework": "Next.js 16 App Router",
+      "database": "PostgreSQL 16 with Drizzle ORM",
+      "auth": "better-auth cookie sessions",
+      "localization": "English-only"
+    }
+  },
+  "workspaces": [
+    {
+      "id": "web-app",
+      "name": "debug-arena",
+      "type": "frontend",
+      "description": "Next.js App Router UI, server actions, and API routes",
+      "port": 3000,
+      "entrypoint": "src/app/layout.tsx"
+    }
+  ],
+  "infrastructure": [
+    {
+      "id": "postgres",
+      "name": "PostgreSQL 16",
+      "type": "database",
+      "image": "postgres:16",
+      "port": 5432,
+      "description": "Relational application data accessed through Drizzle ORM",
+      "features": ["Local Docker service", "No vector extension required"]
+    },
+    {
+      "id": "redis",
+      "name": "Redis 7",
+      "type": "cache",
+      "image": "redis:7-alpine",
+      "port": 6379,
+      "description": "better-auth secondary storage and application caching",
+      "features": ["Local Docker service"]
+    }
+  ],
+  "dockerDiagram": {
+    "description": "Local Docker services; the Next.js app runs separately on port 3000.",
+    "nodes": [
+      { "id": "postgres", "label": "PostgreSQL :5432", "type": "database", "port": 5432 },
+      { "id": "redis", "label": "Redis :6379", "type": "cache", "port": 6379 }
+    ],
+    "edges": []
+  },
+  "systemArchitectureDiagram": {
+    "description": "Next.js UI and server-side feature layers use better-auth, Drizzle/PostgreSQL, and Redis.",
+    "subgraphs": [
+      {
+        "id": "presentation",
+        "label": "Presentation",
+        "nodes": [
+          { "id": "browser", "label": "Browser UI", "type": "app" },
+          { "id": "next-app", "label": "Next.js App Router", "type": "app" }
+        ]
+      },
+      {
+        "id": "application",
+        "label": "Application Services",
+        "nodes": [
+          { "id": "proxy", "label": "Next.js Proxy: session and role guards", "type": "app" },
+          { "id": "actions", "label": "Server Actions and API routes", "type": "app" },
+          { "id": "features", "label": "Feature services and repositories", "type": "app" },
+          { "id": "auth", "label": "better-auth", "type": "app" }
+        ]
+      },
+      {
+        "id": "data",
+        "label": "Data and Storage",
+        "nodes": [
+          { "id": "postgres", "label": "PostgreSQL 16", "type": "database" },
+          { "id": "redis", "label": "Redis 7", "type": "cache" }
+        ]
+      }
+    ],
+    "edges": [
+      { "from": "browser", "to": "next-app", "label": "HTTP" },
+      { "from": "next-app", "to": "proxy", "label": "Request" },
+      { "from": "proxy", "to": "actions", "label": "Authorized request" },
+      { "from": "actions", "to": "features", "label": "Validated operation" },
+      { "from": "actions", "to": "auth", "label": "Authentication endpoints" },
+      { "from": "features", "to": "postgres", "label": "Drizzle queries" },
+      { "from": "auth", "to": "postgres", "label": "User and account records" },
+      { "from": "auth", "to": "redis", "label": "Secondary storage" }
+    ]
+  },
+  "swaggerSchemas": {
+    "matchStatus": "No OpenAPI or Swagger endpoint is configured",
+    "openapi": "Not configured",
+    "servedAt": "Not served by the application",
+    "securityScheme": "better-auth cookie sessions",
+    "servers": [
+      { "url": "http://localhost:3000", "description": "Local development" }
+    ],
+    "schemas": []
+  },
+  "modules": [
+    {
+      "id": "authentication",
+      "name": "Authentication",
+      "basePath": "/api/auth",
+      "description": "better-auth native session, sign-in, sign-up, OAuth, and account endpoints.",
+      "color": "#8b5cf6",
+      "icon": "🔐",
+      "files": ["src/app/api/auth/[...all]/route.ts", "src/lib/auth/index.ts"],
+      "permissions": [],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/auth/*",
+          "auth": false,
+          "permission": null,
+          "description": "better-auth native session and account reads."
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/*",
+          "auth": false,
+          "permission": null,
+          "description": "better-auth native sign-in, sign-up, OAuth, and account operations."
+        }
+      ]
+    },
+    {
+      "id": "health",
+      "name": "Health",
+      "basePath": "/api/health",
+      "description": "Application and dependency health status.",
+      "color": "#22c55e",
+      "icon": "💚",
+      "files": ["src/app/api/health/route.ts"],
+      "permissions": [],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/health",
+          "auth": false,
+          "permission": null,
+          "description": "Returns application health status."
+        }
+      ]
+    },
+    {
+      "id": "admin-users",
+      "name": "Admin User Management",
+      "basePath": "/api/admin/users",
+      "description": "Admin-only account moderation operations.",
+      "color": "#f97316",
+      "icon": "🛡️",
+      "files": ["src/app/api/admin/users/ban/route.ts"],
+      "permissions": ["admin"],
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/admin/users/ban",
+          "auth": true,
+          "permission": "admin",
+          "description": "Bans or unbans a user; requires an admin session."
+        }
+      ]
+    }
+  ],
+  "systemEndpoints": [],
+  "coreLayer": {
+    "security": [
+      {
+        "name": "Session and role guards",
+        "file": "src/proxy.ts",
+        "description": "Redirects unauthenticated requests for protected routes and limits the admin area to admin users."
+      },
+      {
+        "name": "better-auth",
+        "file": "src/lib/auth/index.ts",
+        "description": "Manages cookie-based sessions, credentials, and configured social providers."
+      }
+    ],
+    "middleware": [
+      {
+        "name": "Next.js Proxy",
+        "file": "src/proxy.ts",
+        "description": "Performs optimistic session and role-based route redirects.",
+        "guards": ["Protected routes", "Admin role"]
+      }
+    ],
+    "services": [
+      {
+        "name": "Feature services and repositories",
+        "file": "src/features/*/service.ts",
+        "description": "Use injected repositories and Drizzle to implement feature operations.",
+        "exports": ["challengeService", "categoryService", "leaderboardService", "profileService"]
+      },
+      {
+        "name": "better-auth Redis storage",
+        "file": "src/lib/auth/index.ts",
+        "description": "Stores secondary authentication state in Redis.",
+        "exports": ["auth"]
+      }
+    ]
+  },
+  "dataFlow": {
+    "requestPipeline": [
+      {
+        "step": "Browser sends a request to the Next.js App Router.",
+        "detail": "The application serves English-only UI routes, API routes, and server actions."
+      },
+      {
+        "step": "Next.js Proxy checks session and route access.",
+        "detail": "Protected routes redirect anonymous users; admin routes require an admin role.",
+        "coreRef": "middleware"
+      },
+      {
+        "step": "Route or server action validates input.",
+        "detail": "Zod schemas and next-safe-action clients validate server action inputs and outputs."
+      },
+      {
+        "step": "Feature service calls its repository.",
+        "detail": "Service factories receive repositories through dependency injection.",
+        "coreRef": "services"
+      },
+      {
+        "step": "Repository reads or writes PostgreSQL through Drizzle.",
+        "detail": "The database stores users, categories, challenges, submissions, and related records."
+      },
+      {
+        "step": "The route or action returns its client-visible response.",
+        "detail": "Application API routes use the standard envelope; better-auth endpoints retain their native response contract."
+      }
+    ],
+    "errorPipeline": [
+      "Input validation returns a typed action or API error.",
+      "Feature services sanitize unexpected failures at their boundary.",
+      "API routes return the standard success/data/error envelope; better-auth owns its endpoint contract.",
+      "The UI renders an English error state and can retry where appropriate."
+    ],
+    "tenantIsolation": "User-scoped database policies and queries isolate private profile and submission data."
+  },
+  "permissions": {
+    "description": "Route access is enforced through authenticated sessions and admin role checks.",
+    "catalog": ["admin"],
+    "details": [
+      {
+        "slug": "admin",
+        "module": "Admin User Management",
+        "action": "MODERATE",
+        "endpoints": [{ "method": "POST", "path": "/api/admin/users/ban" }],
+        "adminPages": ["Admin users"]
+      }
+    ]
+  },
+  "sqlQueries": []
+}

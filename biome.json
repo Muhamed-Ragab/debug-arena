@@ -14,8 +14,7 @@
       "!.next",
       "!dist",
       "!build",
-      "!drizzle",
-      "!messages"
+      "!drizzle"
     ]
   },
   "overrides": [
@@ -30,7 +29,6 @@
       }
     },
     {
-      "includes": ["src/components/preferences/LanguageSwitcher.tsx"],
       "linter": {
         "rules": {
           "suspicious": {

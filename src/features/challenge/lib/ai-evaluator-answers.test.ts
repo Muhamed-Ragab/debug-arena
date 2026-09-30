@@ -296,7 +296,7 @@ describe("AI Evaluator - Answer Quality & Grading Automation", () => {
       expect(onlineResult.alignmentPercent).toBe(0);
     });
 
-    it("safely handles malformed LLM JSON by falling back to vector scoring", async () => {
+    it("safely handles malformed LLM JSON by falling back to token-overlap scoring", async () => {
       const ai = await import("ai");
       vi.mocked(ai.generateText).mockRejectedValueOnce(
         new Error("Malformed JSON or Schema validation failed")

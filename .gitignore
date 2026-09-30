@@ -28,9 +28,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# i18n messages are committed (next-intl JSON)
-# src/locales removed — see messages/{en,ar}/*.json
-
 # vitest / testing
 /coverage
 

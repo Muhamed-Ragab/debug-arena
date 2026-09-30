@@ -1,21 +1,16 @@
 "use client";
-
-import { useExtracted } from "next-intl";
 import { DIFFICULTY_CONFIG, type Difficulty } from "@/lib/domain";
 
 export function DiffBadge({ difficulty }: { difficulty: Difficulty }) {
-  const t = useExtracted();
   const c = DIFFICULTY_CONFIG[difficulty];
   const label = (() => {
     switch (difficulty) {
       case "Easy":
-        return t("Easy");
+        return "Easy";
       case "Medium":
-        return t("Medium");
+        return "Medium";
       case "Hard":
-        return t("Hard");
-      case "Expert":
-        return t("Expert");
+        return "Hard";
       default:
         return difficulty;
     }

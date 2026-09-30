@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { gradeSubmission } from "./grading";
 
+const passingSandbox = {
+  executionTimeMs: 1,
+  passed: true,
+  passedTests: 1,
+  testResults: [{ durationMs: 1, name: "t1", passed: true }],
+  totalTests: 1,
+};
+
 describe("gradeSubmission", () => {
   it("awards full localization score when line is exact match", () => {
     const result = gradeSubmission({
@@ -51,5 +59,55 @@ describe("gradeSubmission", () => {
     expect(result.localizationCorrect).toBe(false);
     expect(result.scoreParts[0].score).toBe(0);
     expect(result.totalScore).toBe(0);
+  });
+
+  it("scores exact canonical terms high via token overlap", () => {
+    const result = gradeSubmission({
+      buggyLines: [8, 8],
+      canonicalPreventionNotes: "Use functional updates in timers.",
+      canonicalRootCause:
+        "setInterval captured stale closure count without functional updater",
+      hintsUsedCount: 0,
+      hintsUsedPenalty: 0,
+      localizationLines: [8],
+      rootCauseExplanation:
+        "setInterval captured stale closure count without functional updater",
+      sandboxResult: passingSandbox,
+    });
+
+    expect(result.rootCauseScore).toBe(25);
+  });
+
+  it("scores unrelated text low via token overlap", () => {
+    const result = gradeSubmission({
+      buggyLines: [8, 8],
+      canonicalPreventionNotes: "Use functional updates in timers.",
+      canonicalRootCause:
+        "setInterval captured stale closure count without functional updater",
+      hintsUsedCount: 0,
+      hintsUsedPenalty: 0,
+      localizationLines: [8],
+      rootCauseExplanation:
+        "The pizza delivery arrived late because traffic was heavy downtown",
+      sandboxResult: passingSandbox,
+    });
+
+    expect(result.rootCauseScore).toBeLessThanOrEqual(5);
+  });
+
+  it("scores empty input as zero", () => {
+    const result = gradeSubmission({
+      buggyLines: [8, 8],
+      canonicalPreventionNotes: "Use functional updates in timers.",
+      canonicalRootCause:
+        "setInterval captured stale closure count without functional updater",
+      hintsUsedCount: 0,
+      hintsUsedPenalty: 0,
+      localizationLines: [8],
+      rootCauseExplanation: "",
+      sandboxResult: passingSandbox,
+    });
+
+    expect(result.rootCauseScore).toBe(0);
   });
 });

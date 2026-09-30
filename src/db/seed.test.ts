@@ -1,16 +1,35 @@
 import { describe, expect, it, vi } from "vitest";
 import { SEED_CATEGORIES } from "@/features/category/constants";
+import { ADDITIONAL_SEED_CHALLENGES } from "@/features/challenge/data/challenges.additional.seed";
+import { SEED_CHALLENGES } from "@/features/challenge/data/challenges.seed";
+import { resolveAdminSeedPassword } from "./seed-utils";
 
 const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{6}$/;
 
 describe("seed categories idempotency", () => {
-  it("SEED_CATEGORIES has 6 entries", () => {
-    expect(SEED_CATEGORIES).toHaveLength(6);
+  it("does not use an insecure fallback password for the optional admin seed", () => {
+    expect(resolveAdminSeedPassword(undefined)).toBeNull();
+    expect(resolveAdminSeedPassword("Admin123456!")).toBeNull();
+    expect(resolveAdminSeedPassword("configured-password")).toBe(
+      "configured-password"
+    );
+  });
+
+  it("includes the original categories and common system design areas", () => {
+    expect(SEED_CATEGORIES.length).toBeGreaterThanOrEqual(10);
+    expect(SEED_CATEGORIES.map((category) => category.slug)).toEqual(
+      expect.arrayContaining([
+        "system-design",
+        "database-design",
+        "distributed-systems",
+        "testing-reliability",
+      ])
+    );
   });
 
   it("all SEED_CATEGORIES have unique slugs", () => {
     const slugs = SEED_CATEGORIES.map((c) => c.slug);
-    expect(new Set(slugs).size).toBe(6);
+    expect(new Set(slugs).size).toBe(SEED_CATEGORIES.length);
   });
 
   it("each SEED_CATEGORY has icon, color, sortOrder, isActive populated", () => {
@@ -19,16 +38,56 @@ describe("seed categories idempotency", () => {
       expect(cat.color).toMatch(HEX_COLOR_REGEX);
       expect(typeof cat.sortOrder).toBe("number");
       expect(cat.sortOrder).toBeGreaterThanOrEqual(0);
-      expect(cat.sortOrder).toBeLessThanOrEqual(5);
+      expect(cat.sortOrder).toBeLessThan(SEED_CATEGORIES.length);
       expect(cat.isActive).toBe(true);
       expect(cat.name).toBeTruthy();
       expect(cat.description).toBeTruthy();
     }
   });
 
-  it("sortOrder values are 0-5 in order", () => {
+  it("sortOrder values are contiguous and ordered", () => {
     const orders = SEED_CATEGORIES.map((c) => c.sortOrder);
-    expect(orders).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(orders).toEqual(SEED_CATEGORIES.map((_, index) => index));
+  });
+
+  it("adds at least 50 distinct researched challenges across categories", () => {
+    expect(SEED_CHALLENGES.length).toBeGreaterThanOrEqual(70);
+    expect(
+      new Set(SEED_CHALLENGES.map((challenge) => challenge.slug)).size
+    ).toBe(SEED_CHALLENGES.length);
+    expect(
+      SEED_CHALLENGES.every((challenge) =>
+        SEED_CATEGORIES.some(
+          (category) => category.slug === challenge.categorySlug
+        )
+      )
+    ).toBe(true);
+  });
+
+  it("points localization grading at the changed source lines", () => {
+    const bySlug = new Map(
+      SEED_CHALLENGES.map((challenge) => [challenge.slug, challenge])
+    );
+
+    expect(
+      bySlug.get("react-effect-stale-search")?.buggyArtifact.buggyLines
+    ).toEqual([3, 3]);
+    expect(
+      bySlug.get("react-subscription-cleanup")?.buggyArtifact.buggyLines
+    ).toEqual([2, 2]);
+    expect(
+      bySlug.get("backend-inventory-lost-update")?.buggyArtifact.buggyLines
+    ).toEqual([1, 2]);
+
+    for (const challenge of ADDITIONAL_SEED_CHALLENGES) {
+      const [start, end] = challenge.buggyArtifact.buggyLines;
+      const code = challenge.buggyArtifact.files.find(
+        (file) => file.name === challenge.buggyArtifact.entryFile
+      )?.code;
+      expect(start).toBeGreaterThan(0);
+      expect(end).toBeGreaterThanOrEqual(start);
+      expect(end).toBeLessThanOrEqual(code?.split("\n").length ?? 0);
+    }
   });
 
   it("re-export from challenge/constants still works", async () => {
@@ -36,7 +95,7 @@ describe("seed categories idempotency", () => {
     expect(mod.SEED_CATEGORIES).toEqual(SEED_CATEGORIES);
   });
 
-  it("idempotent upsert via in-memory map: second run keeps count 6 and updates columns", () => {
+  it("idempotent upsert via in-memory map keeps count and updates columns", () => {
     const store = new Map<string, (typeof SEED_CATEGORIES)[number]>();
 
     function upsert(cats: typeof SEED_CATEGORIES) {
@@ -46,7 +105,7 @@ describe("seed categories idempotency", () => {
     }
 
     upsert(SEED_CATEGORIES);
-    expect(store.size).toBe(6);
+    expect(store.size).toBe(SEED_CATEGORIES.length);
 
     const firstIcons = new Map(
       [...store.entries()].map(([k, v]) => [k, v.icon] as const)
@@ -56,7 +115,7 @@ describe("seed categories idempotency", () => {
     );
 
     upsert(SEED_CATEGORIES);
-    expect(store.size).toBe(6);
+    expect(store.size).toBe(SEED_CATEGORIES.length);
     for (const cat of SEED_CATEGORIES) {
       expect(store.get(cat.slug)?.icon).toBe(firstIcons.get(cat.slug));
       expect(store.get(cat.slug)?.color).toBe(firstColors.get(cat.slug));
@@ -140,7 +199,7 @@ describe("seed categories idempotency", () => {
     for (const c of all as { id: string; slug: string }[]) {
       map.set(c.slug, c.id);
     }
-    expect(map.size).toBe(6);
+    expect(map.size).toBe(SEED_CATEGORIES.length);
     for (const cat of SEED_CATEGORIES) {
       expect(map.has(cat.slug)).toBe(true);
     }

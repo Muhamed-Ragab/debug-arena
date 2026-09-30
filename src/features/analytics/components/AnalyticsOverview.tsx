@@ -1,6 +1,4 @@
 "use client";
-
-import { useExtracted } from "next-intl";
 import {
   Bar,
   BarChart,
@@ -23,7 +21,6 @@ interface Props {
 }
 
 export function AnalyticsOverview({ data }: Props) {
-  const t = useExtracted();
   const {
     totalUsers,
     totalChallenges,
@@ -40,41 +37,41 @@ export function AnalyticsOverview({ data }: Props) {
   const archived = statusMap.get("archived") ?? 0;
 
   const submissionsConfig = {
-    count: { color: "var(--chart-1)", label: t("Submissions") },
+    count: { color: "var(--chart-1)", label: "Submissions" },
   } satisfies ChartConfig;
 
   const avgScoreConfig = {
-    avgScore: { color: "var(--chart-1)", label: t("Avg Score") },
+    avgScore: { color: "var(--chart-1)", label: "Avg Score" },
   } satisfies ChartConfig;
 
   const statusConfig = {
-    count: { color: "var(--chart-1)", label: t("Challenges") },
+    count: { color: "var(--chart-1)", label: "Challenges" },
   } satisfies ChartConfig;
 
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-border bg-card p-5">
-          <p className="text-muted-foreground text-sm">{t("Total Users")}</p>
+          <p className="text-muted-foreground text-sm">{"Total Users"}</p>
           <p className="mt-2 font-semibold text-2xl text-heading">
             {totalUsers}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
           <p className="text-muted-foreground text-sm">
-            {t("Challenges by Status")}
+            {"Challenges by Status"}
           </p>
           <p className="mt-2 font-semibold text-2xl text-heading">
             {totalChallenges}
           </p>
           <p className="mt-1 text-muted-foreground text-xs">
-            {t("Published")}: {published} · {t("Drafts")}: {draft} ·{" "}
-            {t("Archived")}: {archived}
+            {"Published"}: {published} · {"Drafts"}: {draft} · {"Archived"}:{" "}
+            {archived}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
           <p className="text-muted-foreground text-sm">
-            {t("Overall Solve Rate")}
+            {"Overall Solve Rate"}
           </p>
           <p className="mt-2 font-semibold text-2xl text-heading">
             {solveRate.rate}%
@@ -85,10 +82,10 @@ export function AnalyticsOverview({ data }: Props) {
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
           <p className="text-muted-foreground text-sm">
-            {t("Top Categories by Attempts")}
+            {"Top Categories by Attempts"}
           </p>
           <p className="mt-2 font-semibold text-heading text-lg">
-            {topCategories[0]?.categoryName ?? t("No data available yet.")}
+            {topCategories[0]?.categoryName ?? "No data available yet."}
           </p>
           <p className="mt-1 text-muted-foreground text-xs">
             {topCategories[0] ? `${topCategories[0].attempts} attempts` : ""}
@@ -99,11 +96,11 @@ export function AnalyticsOverview({ data }: Props) {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-5">
           <h3 className="font-semibold text-heading text-sm">
-            {t("Submissions (Last 30 Days)")}
+            {"Submissions (Last 30 Days)"}
           </h3>
           {submissionsByDay.length === 0 ? (
             <p className="mt-4 text-muted-foreground text-sm">
-              {t("No data available yet.")}
+              {"No data available yet."}
             </p>
           ) : (
             <ChartContainer
@@ -139,11 +136,11 @@ export function AnalyticsOverview({ data }: Props) {
 
         <div className="rounded-xl border border-border bg-card p-5">
           <h3 className="font-semibold text-heading text-sm">
-            {t("Avg Score per Category")}
+            {"Avg Score per Category"}
           </h3>
           {avgScorePerCategory.length === 0 ? (
             <p className="mt-4 text-muted-foreground text-sm">
-              {t("No data available yet.")}
+              {"No data available yet."}
             </p>
           ) : (
             <ChartContainer
@@ -180,11 +177,11 @@ export function AnalyticsOverview({ data }: Props) {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-5">
           <h3 className="font-semibold text-heading text-sm">
-            {t("Top Categories by Attempts")}
+            {"Top Categories by Attempts"}
           </h3>
           {topCategories.length === 0 ? (
             <p className="mt-4 text-muted-foreground text-sm">
-              {t("No data available yet.")}
+              {"No data available yet."}
             </p>
           ) : (
             <ul className="mt-4 flex flex-col gap-2">
@@ -207,11 +204,11 @@ export function AnalyticsOverview({ data }: Props) {
 
         <div className="rounded-xl border border-border bg-card p-5">
           <h3 className="font-semibold text-heading text-sm">
-            {t("Challenges by Status")}
+            {"Challenges by Status"}
           </h3>
           {challengesByStatus.length === 0 ? (
             <p className="mt-4 text-muted-foreground text-sm">
-              {t("No data available yet.")}
+              {"No data available yet."}
             </p>
           ) : (
             <ChartContainer className="mt-4 h-48 w-full" config={statusConfig}>

@@ -1,7 +1,9 @@
 "use server";
-import { ActionError, authActionClient } from "@/lib/safe-action";
+import { ActionError, actionClient, authActionClient } from "@/lib/safe-action";
 import { challengeService } from "./service";
 import {
+  listChallengesOutputSchema,
+  listChallengesQuerySchema,
   submitChallengeOutputSchema,
   submitChallengeSchema,
 } from "./validation";
@@ -12,7 +14,7 @@ export const submitChallengeAction = authActionClient
   .action(async ({ parsedInput, ctx }) => {
     const { role } = ctx.user;
     if (role === "admin") {
-      throw new ActionError("error.forbiddenAdminSubmit");
+      throw new ActionError("Administrators cannot submit challenges.");
     }
     const result = await challengeService.submitChallenge({
       challengeId: parsedInput.challengeId,
@@ -25,4 +27,13 @@ export const submitChallengeAction = authActionClient
       userId: ctx.user.id,
     });
     return { ...result, success: true };
+  });
+
+export const listChallengesAction = actionClient
+  .inputSchema(listChallengesQuerySchema)
+  .outputSchema(listChallengesOutputSchema)
+  .action(async ({ parsedInput }) => {
+    const result =
+      await challengeService.getPublishedChallengesPaginated(parsedInput);
+    return { success: true, ...result };
   });

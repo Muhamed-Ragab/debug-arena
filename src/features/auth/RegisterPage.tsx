@@ -4,10 +4,8 @@ import { ArrowRight, AtSign, GitBranch, Lock, Mail, User } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useExtracted } from "next-intl";
 import { type FormEvent, useEffect, useState } from "react";
 import { Logo } from "@/components/layout/Logo";
-import { LanguageSwitcher } from "@/components/preferences/LanguageSwitcher";
 import { ThemeToggle } from "@/components/preferences/ThemeToggle";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +27,6 @@ function getSafeCallbackUrl(callbackUrl: string | null): string | null {
 }
 
 export function RegisterPage() {
-  const t = useExtracted();
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"));
@@ -62,10 +59,10 @@ export function RegisterPage() {
       if (signUpError) {
         if (signUpError.code === "PASSWORD_COMPROMISED") {
           setError(
-            t("This password appeared in a data breach. Please choose another.")
+            "This password appeared in a data breach. Please choose another."
           );
         } else {
-          setError(signUpError.message ?? t("Registration failed"));
+          setError(signUpError.message ?? "Registration failed");
         }
         return;
       }
@@ -82,7 +79,7 @@ export function RegisterPage() {
         router.push((callbackUrl ?? "/challenges") as Route);
       }
     } catch {
-      setError(t("An unexpected error occurred."));
+      setError("An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -93,7 +90,6 @@ export function RegisterPage() {
       <header className="flex h-16 items-center justify-between px-4 sm:px-8">
         <Logo />
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
           <ThemeToggle />
         </div>
       </header>
@@ -102,10 +98,10 @@ export function RegisterPage() {
         <Card className="w-full max-w-md p-2 shadow-2xl shadow-black/30">
           <CardHeader className="space-y-1.5 text-center">
             <h1 className="font-semibold text-2xl text-heading tracking-tight">
-              {t("Create your arena")}
+              {"Create your arena"}
             </h1>
             <p className="text-muted-foreground text-sm">
-              {t("Start diagnosing real-world bugs.")}
+              {"Start diagnosing real-world bugs."}
             </p>
           </CardHeader>
 
@@ -130,7 +126,7 @@ export function RegisterPage() {
                 GitHub
                 {lastMethod === "github" && (
                   <Badge className="absolute -inset-e-2 -top-2 text-[10px]">
-                    {t("Last used")}
+                    {"Last used"}
                   </Badge>
                 )}
               </Button>
@@ -153,7 +149,7 @@ export function RegisterPage() {
                 Google
                 {lastMethod === "google" && (
                   <Badge className="absolute -inset-e-2 -top-2 text-[10px]">
-                    {t("Last used")}
+                    {"Last used"}
                   </Badge>
                 )}
               </Button>
@@ -161,13 +157,13 @@ export function RegisterPage() {
 
             <div className="my-4 flex items-center gap-3 text-[11px] text-muted-foreground uppercase tracking-[0.14em]">
               <Separator className="flex-1" />
-              {t("or")}
+              {"or"}
               <Separator className="flex-1" />
             </div>
 
             <form className="space-y-4" noValidate onSubmit={handleSubmit}>
               <div className="space-y-1.5">
-                <Label htmlFor="name">{t("Display name")}</Label>
+                <Label htmlFor="name">{"Display name"}</Label>
                 <div className="relative">
                   <User
                     className="pointer-events-none absolute inset-s-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -178,14 +174,14 @@ export function RegisterPage() {
                     className="h-10 ps-10 pe-3"
                     id="name"
                     name="name"
-                    placeholder={t("Ada Lovelace")}
+                    placeholder={"Ada Lovelace"}
                     type="text"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="email">{t("Email")}</Label>
+                <Label htmlFor="email">{"Email"}</Label>
                 <div className="relative">
                   <AtSign
                     className="pointer-events-none absolute inset-s-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -196,14 +192,14 @@ export function RegisterPage() {
                     className="h-10 ps-10 pe-3"
                     id="email"
                     name="email"
-                    placeholder={t("you@company.com")}
+                    placeholder={"you@company.com"}
                     type="email"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="password">{t("Password")}</Label>
+                <Label htmlFor="password">{"Password"}</Label>
                 <div className="relative">
                   <Lock
                     className="pointer-events-none absolute inset-s-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -214,7 +210,7 @@ export function RegisterPage() {
                     className="h-10 ps-10 pe-3"
                     id="password"
                     name="password"
-                    placeholder={t("••••••••")}
+                    placeholder={"••••••••"}
                     type="password"
                   />
                 </div>
@@ -233,29 +229,29 @@ export function RegisterPage() {
                 type="submit"
                 variant="default"
               >
-                {loading ? t("Creating account...") : t("Create account")}
+                {loading ? "Creating account..." : "Create account"}
                 <ArrowRight size={16} />
                 {lastMethod === "email" && (
                   <Badge className="ms-2" variant="secondary">
-                    {t("Last used")}
+                    {"Last used"}
                   </Badge>
                 )}
               </Button>
             </form>
 
             <p className="mt-4 text-center text-muted-foreground text-xs leading-relaxed">
-              {t(
+              {
                 "By creating an account you agree to the terms. We'll never page you at 2am."
-              )}
+              }
             </p>
 
             <p className="mt-4 text-center text-muted-foreground text-sm">
-              {t("Already have an account?")}{" "}
+              {"Already have an account?"}{" "}
               <Link
                 className="font-medium text-primary hover:underline"
                 href="/login"
               >
-                {t("Log in")}
+                {"Log in"}
               </Link>
             </p>
           </CardContent>

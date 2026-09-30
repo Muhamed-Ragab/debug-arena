@@ -1,7 +1,6 @@
 "use client";
 
 import { AlertTriangle, Check, KeyRound, Link2 } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -36,7 +35,6 @@ interface LinkedAccountsProps {
 export function LinkedAccounts({
   accounts: initialAccounts,
 }: LinkedAccountsProps) {
-  const t = useExtracted();
   const [accounts, setAccounts] = useState<LinkedAccount[]>(initialAccounts);
   const [blocked, setBlocked] = useState<ProviderId | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -47,8 +45,8 @@ export function LinkedAccounts({
 
   const handleLink = async (provider: ProviderId) => {
     if (!ENABLED_PROVIDERS.has(provider)) {
-      setErrorMessage(t("Provider not available"));
-      toast.error(t("Provider not available"));
+      setErrorMessage("Provider not available");
+      toast.error("Provider not available");
       return;
     }
     setIsLinking(provider);
@@ -59,12 +57,12 @@ export function LinkedAccounts({
         provider: "google",
       });
       if (result?.error) {
-        const msg = result.error.message ?? t("Something went wrong");
+        const msg = result.error.message ?? "Something went wrong";
         setErrorMessage(msg);
         toast.error(msg);
       }
     } catch {
-      const msg = t("Something went wrong");
+      const msg = "Something went wrong";
       setErrorMessage(msg);
       toast.error(msg);
     } finally {
@@ -74,8 +72,8 @@ export function LinkedAccounts({
 
   const handleUnlink = async (account: LinkedAccount) => {
     if (!ENABLED_PROVIDERS.has(account.provider)) {
-      setErrorMessage(t("Provider not available"));
-      toast.error(t("Provider not available"));
+      setErrorMessage("Provider not available");
+      toast.error("Provider not available");
       return;
     }
     if (account.connected && connectedCount <= 1) {
@@ -88,15 +86,15 @@ export function LinkedAccounts({
 
     try {
       if (!account.accountId) {
-        setErrorMessage(t("Something went wrong"));
-        toast.error(t("Something went wrong"));
+        setErrorMessage("Something went wrong");
+        toast.error("Something went wrong");
         return;
       }
       const result = await authClient.unlinkAccount({
         accountId: account.accountId,
       });
       if (result?.error) {
-        const msg = result.error.message ?? t("Something went wrong");
+        const msg = result.error.message ?? "Something went wrong";
         setErrorMessage(msg);
         toast.error(msg);
       } else {
@@ -107,10 +105,10 @@ export function LinkedAccounts({
               : a
           )
         );
-        toast.success(t("Provider unlinked"));
+        toast.success("Provider unlinked");
       }
     } catch {
-      const msg = t("Something went wrong");
+      const msg = "Something went wrong";
       setErrorMessage(msg);
       toast.error(msg);
     } finally {
@@ -133,11 +131,11 @@ export function LinkedAccounts({
   return (
     <Card className="p-1">
       <CardHeader>
-        <CardTitle className="text-base">{t("Connected accounts")}</CardTitle>
+        <CardTitle className="text-base">{"Connected accounts"}</CardTitle>
         <CardDescription>
-          {t(
+          {
             "Link providers to sign in faster. One stays primary for your avatar and name."
-          )}
+          }
         </CardDescription>
       </CardHeader>
 
@@ -169,11 +167,11 @@ export function LinkedAccounts({
                   title={
                     isEnabled
                       ? undefined
-                      : t("Coming soon — only Google is available")
+                      : "Coming soon — only Google is available"
                   }
                   variant="destructive"
                 >
-                  {loadingUnlink ? t("Unlinking...") : t("Unlink")}
+                  {loadingUnlink ? "Unlinking..." : "Unlink"}
                 </Button>
               );
             } else if (isEnabled) {
@@ -185,7 +183,7 @@ export function LinkedAccounts({
                   variant="default"
                 >
                   <Link2 size={13} />{" "}
-                  {loadingLink ? t("Connecting...") : t("Connect")}
+                  {loadingLink ? "Connecting..." : "Connect"}
                 </Button>
               );
             } else {
@@ -194,10 +192,10 @@ export function LinkedAccounts({
                   aria-disabled="true"
                   disabled
                   size="sm"
-                  title={t("Coming soon — only Google is available")}
+                  title={"Coming soon — only Google is available"}
                   variant="secondary"
                 >
-                  <Link2 size={13} /> {t("Connect")}
+                  <Link2 size={13} /> {"Connect"}
                 </Button>
               );
             }
@@ -223,14 +221,14 @@ export function LinkedAccounts({
                           className="gap-1 font-medium text-[11px]"
                           variant="default"
                         >
-                          <Check size={11} /> {t("Connected")}
+                          <Check size={11} /> {"Connected"}
                         </Badge>
                       )}
                     </div>
                     <p className="mt-0.5 text-[12px] text-muted-foreground">
                       {account.connected
-                        ? (account.email ?? t("Connected"))
-                        : t("Not connected")}
+                        ? (account.email ?? "Connected")
+                        : "Not connected"}
                     </p>
                   </div>
 
@@ -243,12 +241,7 @@ export function LinkedAccounts({
                   <Alert className="mt-3" variant="destructive">
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>
-                      {t(
-                        "Can't unlink {label} — it's your only sign-in method. Add another provider first, then retry.",
-                        {
-                          label: account.label,
-                        }
-                      )}
+                      {`Can't unlink ${account.label} — it's your only sign-in method. Add another provider first, then retry.`}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -260,9 +253,9 @@ export function LinkedAccounts({
         <div className="mt-5 flex items-start gap-2 rounded-md border border-border bg-inset px-3 py-2.5 text-[12px] text-muted-foreground">
           <KeyRound className="mt-0.5 shrink-0 text-primary" size={14} />
           <span>
-            {t(
+            {
               "Unlinking a provider only removes the connection — it never deletes your Debug Arena account or your challenge history."
-            )}
+            }
           </span>
         </div>
       </CardContent>

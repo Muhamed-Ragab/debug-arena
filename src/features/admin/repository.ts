@@ -276,36 +276,12 @@ export function createAdminRepository(
     }
   }
 
-  async function upsertEmbedding(
-    challengeId: string,
-    content: string,
-    embedding: (typeof schema.challengeEmbeddings.$inferInsert)["embedding"]
-  ): Promise<void> {
-    try {
-      await dbClient
-        .delete(schema.challengeEmbeddings)
-        .where(eq(schema.challengeEmbeddings.challengeId, challengeId));
-
-      await dbClient.insert(schema.challengeEmbeddings).values({
-        challengeId,
-        content,
-        embedding,
-      });
-    } catch (err) {
-      handleDbError(err, "upsertEmbedding");
-    }
-  }
-
   async function deleteChallengeCascade(challengeId: string): Promise<void> {
     try {
       await dbClient.transaction(async (tx) => {
         await tx
           .delete(schema.hints)
           .where(eq(schema.hints.challengeId, challengeId));
-
-        await tx
-          .delete(schema.challengeEmbeddings)
-          .where(eq(schema.challengeEmbeddings.challengeId, challengeId));
 
         await tx
           .delete(schema.submissions)
@@ -405,10 +381,7 @@ export function createAdminRepository(
     insertHints,
     updateChallenge,
     updateUserBanStatus,
-    upsertEmbedding,
   };
 }
 
 export const adminRepository = createAdminRepository();
-
-export type { ChallengeRow as ChallengeEmbeddingRow } from "./types";

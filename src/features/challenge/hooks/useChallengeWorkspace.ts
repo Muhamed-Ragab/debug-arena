@@ -90,7 +90,7 @@ function getFirstValidationMessage(fe: FieldErrors): string {
   if (fe._errors && fe._errors.length > 0) {
     return fe._errors[0];
   }
-  return "challenge.workspace.validationFailed";
+  return "Please review the highlighted fields and try again.";
 }
 
 export function useChallengeWorkspace(
@@ -170,15 +170,17 @@ export function useChallengeWorkspace(
     const next: FieldErrors = {};
     let hasError = false;
     if (selectedLines.length === 0) {
-      next.localizationLines = ["challenge.workspace.selectBugLine"];
+      next.localizationLines = ["Select at least one line containing the bug."];
       hasError = true;
     }
     const trimmed = explanation.trim();
     if (!trimmed) {
-      next.rootCauseExplanation = ["challenge.workspace.explainRequired"];
+      next.rootCauseExplanation = ["Explain the root cause before submitting."];
       hasError = true;
     } else if (trimmed.length < 5) {
-      next.rootCauseExplanation = ["validation.rootCauseMin"];
+      next.rootCauseExplanation = [
+        "The root cause explanation must be at least 5 characters.",
+      ];
       hasError = true;
     }
     return hasError ? next : null;
@@ -191,7 +193,7 @@ export function useChallengeWorkspace(
     if (fe.rootCauseExplanation && fe.rootCauseExplanation.length > 0) {
       return fe.rootCauseExplanation[0];
     }
-    return "challenge.workspace.fixValidationErrors";
+    return "Please correct the highlighted fields before submitting.";
   };
 
   const handleMockSubmit = () => {
@@ -248,7 +250,7 @@ export function useChallengeWorkspace(
     }
     const role = (session?.user as { role?: string } | undefined)?.role;
     if (role === "admin") {
-      setError("error.forbiddenAdminSubmit");
+      setError("Administrators cannot submit challenges.");
       return;
     }
     const clientErrors = buildClientFieldErrors();
@@ -275,10 +277,10 @@ export function useChallengeWorkspace(
       });
       const handled = handleServerResponse(response);
       if (!handled) {
-        setError("challenge.workspace.failedSubmit");
+        setError("The challenge could not be submitted. Please try again.");
       }
     } catch {
-      setError("error.somethingWrong");
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

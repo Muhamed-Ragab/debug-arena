@@ -15,6 +15,10 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+vi.mock("@/lib/auth/client", () => ({
+  useSession: () => ({ data: null, isPending: false }),
+}));
+
 describe("ChallengeScreen Component", () => {
   const mockChallenge: Challenge = {
     category: "React Rendering",

@@ -31,6 +31,9 @@ export type PublishedChallenge = ChallengeRow & {
 
 export interface ProfileRepository {
   deleteUser: (userId: string) => Promise<void>;
+  findAllSubmissionsByUserId: (
+    userId: string
+  ) => Promise<UserWithRelations["submissions"]>;
   findByIdForSettings: (userId: string) => Promise<UserForSettings | null>;
   findByIdWithRelations: (userId: string) => Promise<{
     user: UserWithRelations | null;
@@ -38,7 +41,7 @@ export interface ProfileRepository {
   }>;
   findCategoryStats: (
     userId: string,
-    category: string
+    categoryId: string
   ) => Promise<CategoryStatRow | null>;
   updateUser: (
     userId: string,
@@ -62,7 +65,6 @@ export interface RadarPoint {
 
 export interface StrengthPoint {
   Easy: number;
-  Expert: number;
   Hard: number;
   Medium: number;
   name: string;

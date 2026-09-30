@@ -2,7 +2,6 @@
 
 import type { Route } from "next";
 import Link from "next/link";
-import { useExtracted } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
 import { SignOutButton } from "@/features/auth/components/SignOutButton";
 import { useSession } from "@/lib/auth/client";
@@ -19,13 +18,12 @@ interface TopBarProps {
 }
 
 export function TopBar({ crumbs, right }: TopBarProps) {
-  const t = useExtracted();
   const { data: session } = useSession();
 
   const user = session?.user;
 
-  const userName = user?.displayName || user?.name || t("Developer");
-  const userJobTitle = user?.jobTitle || t("Developer");
+  const userName = user?.displayName || user?.name || "Developer";
+  const userJobTitle = user?.jobTitle || "Developer";
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-border border-b bg-surface px-6">
@@ -76,12 +74,12 @@ export function TopBar({ crumbs, right }: TopBarProps) {
         </Link>
         <div className="h-4 w-px bg-border" />
         <SignOutButton
-          aria-label={t("Log out")}
+          aria-label={"Log out"}
           className="h-8 w-8 p-0"
           size="icon"
-          title={t("Log out")}
+          title={"Log out"}
         >
-          <span className="sr-only">{t("Log out")}</span>
+          <span className="sr-only">{"Log out"}</span>
         </SignOutButton>
       </div>
     </header>

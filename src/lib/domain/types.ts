@@ -7,20 +7,15 @@ export type Screen =
   | "analytics"
   | "admin";
 
-export type Category =
-  | "React Rendering"
-  | "Backend Concurrency"
-  | "Race Conditions"
-  | "Off-by-One"
-  | "Memory Leaks"
-  | "Security Flaws"
-  | "Logic Inversions"
-  | "State Mutations";
+export type Category = string;
 
-export type Difficulty = "Easy" | "Medium" | "Hard" | "Expert";
+export type Difficulty = "Easy" | "Medium" | "Hard";
 
 export interface Challenge {
   category: Category;
+  categoryColor?: string | null;
+  categoryIcon?: string | null;
+  categorySlug?: string;
   description?: string;
   difficulty: Difficulty;
   filePath?: string;

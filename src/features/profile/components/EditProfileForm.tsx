@@ -14,7 +14,6 @@ import {
   User,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useExtracted } from "next-intl";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -28,8 +27,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { CategoryDTO } from "@/features/category/types";
 import { authClient } from "@/lib/auth/client";
-import { CATEGORY_CONFIG, CATEGORY_ORDER } from "@/lib/domain/categories";
+import { getCategoryAppearance } from "@/lib/domain/categories";
 import type { Category } from "@/lib/domain/types";
 import { flattenValidationErrors } from "@/lib/safe-action/validation";
 import { cn } from "@/lib/utils";
@@ -49,7 +49,6 @@ function HandleStatus({
   available: boolean;
   error: string | null;
 }) {
-  const t = useExtracted();
   if (error) {
     return (
       <span className="flex items-center gap-1 text-[12px] text-destructive">
@@ -60,14 +59,12 @@ function HandleStatus({
   if (available) {
     return (
       <span className="flex items-center gap-1 text-[12px] text-emerald-400">
-        <CheckCircle2 size={12} /> {t("Handle looks good")}
+        <CheckCircle2 size={12} /> {"Handle looks good"}
       </span>
     );
   }
   return (
-    <span className="text-[12px] text-muted-foreground/70">
-      {t("No change.")}
-    </span>
+    <span className="text-[12px] text-muted-foreground/70">{"No change."}</span>
   );
 }
 
@@ -84,18 +81,17 @@ function AvatarPickerSection({
   setAvatarColor: (c: string) => void;
   setAvatarUrl: (u: string) => void;
 }) {
-  const t = useExtracted();
   return (
     <div className="mt-6">
       <p className="mb-2 flex items-center gap-1.5 font-medium text-[12px] text-muted-foreground">
-        <Camera size={13} /> {t("Preferred avatar color")}
+        <Camera size={13} /> {"Preferred avatar color"}
       </p>
       <div className="flex flex-wrap gap-2.5">
         {AVATAR_PRESETS.map((preset) => {
           const selected = preset.color === avatarColor;
           return (
             <Button
-              aria-label={t("Select {id} avatar", { id: preset.id })}
+              aria-label={`Select ${preset.id} avatar`}
               aria-pressed={selected}
               className={cn(
                 "flex h-9 w-9 items-center justify-center rounded-full font-semibold text-[13px] text-white transition-all",
@@ -121,7 +117,7 @@ function AvatarPickerSection({
           className="mb-1.5 block font-medium text-[11px] text-muted-foreground"
           htmlFor="avatarUrl"
         >
-          {t("Or custom avatar image URL")}
+          {"Or custom avatar image URL"}
         </Label>
         <div className="relative">
           <ImageIcon
@@ -132,7 +128,7 @@ function AvatarPickerSection({
             className="h-8 ps-9 pe-3 text-[12px]"
             id="avatarUrl"
             onChange={(e) => setAvatarUrl(e.target.value)}
-            placeholder={t("https://...")}
+            placeholder={"https://..."}
             value={avatarUrl}
           />
         </div>
@@ -147,55 +143,32 @@ function AvatarPickerSection({
 }
 
 function CategoryInterestsSection({
+  categories,
   interests,
   toggleInterest,
 }: {
+  categories: CategoryDTO[];
   interests: Category[];
   toggleInterest: (c: Category) => void;
 }) {
-  const t = useExtracted();
-
-  const getCategoryLabel = (category: string): string => {
-    switch (category) {
-      case "Backend Concurrency":
-        return t("Backend Concurrency");
-      case "Logic Inversions":
-        return t("Logic Inversions");
-      case "Memory Leaks":
-        return t("Memory Leaks");
-      case "Off-by-One":
-        return t("Off-by-One");
-      case "Race Conditions":
-        return t("Race Conditions");
-      case "React Rendering":
-        return t("React Rendering");
-      case "Security Flaws":
-        return t("Security Flaws");
-      case "State Mutations":
-        return t("State Mutations");
-      default:
-        return category;
-    }
-  };
-
   return (
     <div className="mt-6">
       <p className="mb-1 font-medium text-[12px] text-muted-foreground">
-        {t("Category interests")}
+        {"Category interests"}
       </p>
       <p className="mb-2.5 text-[12px] text-muted-foreground/70">
-        {t("Preferred challenge classes surfaced first in your browser.")}
+        {"Preferred challenge classes surfaced first in your browser."}
       </p>
       <div className="flex flex-wrap gap-2">
-        {CATEGORY_ORDER.map((cat) => {
-          const cfg = CATEGORY_CONFIG[cat];
-          const selected = interests.includes(cat);
+        {categories.map((cat) => {
+          const cfg = getCategoryAppearance(cat);
+          const selected = interests.includes(cat.name);
           return (
             <Button
               aria-pressed={selected}
               className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 font-medium text-[12px] transition-colors"
-              key={cat}
-              onClick={() => toggleInterest(cat)}
+              key={cat.id}
+              onClick={() => toggleInterest(cat.name)}
               size="sm"
               style={
                 selected
@@ -216,7 +189,7 @@ function CategoryInterestsSection({
                 className="h-1.5 w-1.5 rounded-full"
                 style={{ backgroundColor: cfg.color }}
               />
-              {getCategoryLabel(cat)}
+              {cat.name}
               {Boolean(selected) && <Check className="ms-auto" size={12} />}
             </Button>
           );
@@ -233,7 +206,6 @@ function PrivacySection({
   isPublic: boolean;
   setIsPublic: (p: boolean) => void;
 }) {
-  const t = useExtracted();
   return (
     <div className="mt-6 border-border border-t pt-4">
       <div className="flex items-center justify-between">
@@ -244,14 +216,12 @@ function PrivacySection({
             ) : (
               <Lock className="text-amber-400" size={14} />
             )}
-            {isPublic ? t("Public Profile") : t("Private Profile")}
+            {isPublic ? "Public Profile" : "Private Profile"}
           </p>
           <p className="mt-0.5 text-[12px] text-muted-foreground">
             {isPublic
-              ? t(
-                  "Your stats, solved challenges, and radar charts are visible on the leaderboard."
-                )
-              : t("Your profile is hidden from the public leaderboard.")}
+              ? "Your stats, solved challenges, and radar charts are visible on the leaderboard."
+              : "Your profile is hidden from the public leaderboard."}
           </p>
         </div>
         <Button
@@ -259,7 +229,7 @@ function PrivacySection({
           size="sm"
           variant={isPublic ? "default" : "outline"}
         >
-          {isPublic ? t("Enabled") : t("Private")}
+          {isPublic ? "Enabled" : "Private"}
         </Button>
       </div>
     </div>
@@ -267,6 +237,7 @@ function PrivacySection({
 }
 
 interface EditProfileFormProps {
+  categories: CategoryDTO[];
   initialProfile?: {
     avatarColor?: string;
     avatarUrl?: string;
@@ -279,8 +250,10 @@ interface EditProfileFormProps {
   };
 }
 
-export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
-  const t = useExtracted();
+export function EditProfileForm({
+  categories,
+  initialProfile,
+}: EditProfileFormProps) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState(
     initialProfile?.displayName || ""
@@ -295,8 +268,8 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
   );
   const [avatarUrl, setAvatarUrl] = useState(initialProfile?.avatarUrl || "");
   const [interests, setInterests] = useState<Category[]>(
-    (initialProfile?.interests ?? []).filter((v): v is Category =>
-      CATEGORY_ORDER.includes(v as Category)
+    (initialProfile?.interests ?? []).filter((value): value is Category =>
+      categories.some((category) => category.name === value)
     )
   );
   const [isPublic, setIsPublic] = useState(initialProfile?.isPublic ?? true);
@@ -314,13 +287,13 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
     }
     const v = displayName.trim();
     if (v.length === 0) {
-      return t("Display name is required.");
+      return "Display name is required.";
     }
     if (v.length > MAX_NAME) {
-      return t("Display name must be 50 characters or fewer.");
+      return "Display name must be 50 characters or fewer.";
     }
     return null;
-  }, [displayName, fieldErrors.displayName, t]);
+  }, [displayName, fieldErrors.displayName]);
 
   const handleError = useMemo(() => {
     if (fieldErrors.username) {
@@ -328,26 +301,26 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
     }
     const v = handle.trim();
     if (v.length === 0) {
-      return t("Handle is required.");
+      return "Handle is required.";
     }
     if (v.length < 3) {
-      return t("Handle must be at least 3 characters.");
+      return "Handle must be at least 3 characters.";
     }
     if (!HANDLE_RE.test(v)) {
-      return t("Handle can only contain letters, numbers, and underscores.");
+      return "Handle can only contain letters, numbers, and underscores.";
     }
     return null;
-  }, [handle, fieldErrors.username, t]);
+  }, [handle, fieldErrors.username]);
 
   const bioError = useMemo(() => {
     if (fieldErrors.bio) {
       return fieldErrors.bio;
     }
     if (bio.length > MAX_BIO) {
-      return t("Bio must be 250 characters or fewer.");
+      return "Bio must be 250 characters or fewer.";
     }
     return null;
-  }, [bio, fieldErrors.bio, t]);
+  }, [bio, fieldErrors.bio]);
 
   const avatarUrlError = useMemo(() => {
     if (fieldErrors.avatarUrl) {
@@ -398,7 +371,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
     router.refresh();
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
-    toast.success(t("Profile updated"));
+    toast.success("Profile updated");
   };
 
   const getFirstValidationMessage = (
@@ -409,7 +382,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
     flat.bio ??
     flat.avatarUrl ??
     flat._errors ??
-    t("Validation failed");
+    "Validation failed";
 
   const handleValidationErrors = (
     validationErrors: Parameters<typeof flattenValidationErrors>[0]
@@ -418,7 +391,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
     setFieldErrors(flat);
     const first = getFirstValidationMessage(flat);
     setServerError(first);
-    toast.error(t("Validation failed"));
+    toast.error("Validation failed");
   };
 
   const handleServerError = (message: string) => {
@@ -441,7 +414,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
       handleServerError(res.serverError);
       return;
     }
-    handleServerError(t("Something went wrong"));
+    handleServerError("Something went wrong");
   };
 
   const onSave = async () => {
@@ -455,7 +428,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
       const res = await updateProfileAction(buildPayload());
       await processResult(res);
     } catch {
-      handleServerError(t("Something went wrong"));
+      handleServerError("Something went wrong");
     } finally {
       setIsSaving(false);
     }
@@ -464,11 +437,11 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
   return (
     <Card className="p-1">
       <CardHeader>
-        <CardTitle className="text-base">{t("Profile details")}</CardTitle>
+        <CardTitle className="text-base">{"Profile details"}</CardTitle>
         <CardDescription>
-          {t(
+          {
             "Customize your public persona, job title, avatar color, and preferences."
-          )}
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -479,7 +452,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
               className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
               htmlFor="displayName"
             >
-              {t("Display name")}
+              {"Display name"}
             </Label>
             <div className="relative">
               <User
@@ -499,7 +472,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
                     });
                   }
                 }}
-                placeholder={t("e.g. Alex Morgan")}
+                placeholder={"e.g. Alex Morgan"}
                 value={displayName}
               />
             </div>
@@ -510,7 +483,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
                 </span>
               ) : (
                 <span className="text-[12px] text-muted-foreground/70">
-                  {t("Public-facing name.")}
+                  {"Public-facing name."}
                 </span>
               )}
               <span className="text-[11px] text-muted-foreground/60 tabular-nums">
@@ -525,7 +498,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
               className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
               htmlFor="handle"
             >
-              {t("Username / handle")}
+              {"Username / handle"}
             </Label>
             <div className="relative">
               <AtSign
@@ -544,7 +517,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
                     });
                   }
                 }}
-                placeholder={t("username")}
+                placeholder={"username"}
                 value={handle}
               />
             </div>
@@ -563,7 +536,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
             className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
             htmlFor="jobTitle"
           >
-            {t("Job title / Role")}
+            {"Job title / Role"}
           </Label>
           <div className="relative">
             <Briefcase
@@ -575,9 +548,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
               id="jobTitle"
               maxLength={MAX_JOB}
               onChange={(e) => setJobTitle(e.target.value)}
-              placeholder={t(
-                "e.g. Senior Frontend Engineer, Distributed Systems"
-              )}
+              placeholder={"e.g. Senior Frontend Engineer, Distributed Systems"}
               value={jobTitle}
             />
           </div>
@@ -589,7 +560,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
             className="mb-1.5 block font-medium text-[12px] text-muted-foreground"
             htmlFor="bio"
           >
-            {t("Bio / tagline")}
+            {"Bio / tagline"}
           </Label>
           <div className="relative">
             <FileText
@@ -609,9 +580,9 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
                   });
                 }
               }}
-              placeholder={t(
+              placeholder={
                 "Tell us a bit about your engineering interests or background..."
-              )}
+              }
               rows={3}
               value={bio}
             />
@@ -623,7 +594,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
               </span>
             ) : (
               <span className="text-[12px] text-muted-foreground/70">
-                {t("Shown on your public profile.")}
+                {"Shown on your public profile."}
               </span>
             )}
             <span className="text-[11px] text-muted-foreground/60 tabular-nums">
@@ -649,6 +620,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
         />
 
         <CategoryInterestsSection
+          categories={categories}
           interests={interests}
           toggleInterest={toggleInterest}
         />
@@ -661,17 +633,17 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
             {saved ? <Check size={14} /> : null}
             {(() => {
               if (isSaving) {
-                return t("Saving...");
+                return "Saving...";
               }
               if (saved) {
-                return t("Saved");
+                return "Saved";
               }
-              return t("Save changes");
+              return "Save changes";
             })()}
           </Button>
           {Boolean(saved) && (
             <span className="flex items-center gap-1 text-[12px] text-emerald-400">
-              <CheckCircle2 size={13} /> {t("Profile updated successfully.")}
+              <CheckCircle2 size={13} /> {"Profile updated successfully."}
             </span>
           )}
           {Boolean(serverError) && (
@@ -681,7 +653,7 @@ export function EditProfileForm({ initialProfile }: EditProfileFormProps) {
           )}
           {Boolean(hasErrors && !serverError) && (
             <span className="text-[12px] text-muted-foreground/70">
-              {t("Fix the highlighted fields to save.")}
+              {"Fix the highlighted fields to save."}
             </span>
           )}
         </div>

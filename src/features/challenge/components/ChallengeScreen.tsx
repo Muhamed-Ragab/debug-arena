@@ -1,12 +1,11 @@
 "use client";
 
 import { GripVertical } from "lucide-react";
-import { useExtracted } from "next-intl";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import type { HintItem } from "@/features/challenge/types";
-import { CATEGORY_CONFIG } from "@/lib/domain/categories";
+import { getCategoryAppearance } from "@/lib/domain/categories";
 import type { Challenge } from "@/lib/domain/types";
 import { cn } from "@/lib/utils";
 import { useChallengeWorkspace } from "../hooks/useChallengeWorkspace";
@@ -45,9 +44,11 @@ export function ChallengeScreen({
   scenarioParagraphs,
   isReadOnly = false,
 }: Props) {
-  const t = useExtracted();
-  const cfg =
-    CATEGORY_CONFIG[challenge.category] ?? CATEGORY_CONFIG["React Rendering"];
+  const cfg = getCategoryAppearance({
+    color: challenge.categoryColor,
+    icon: challenge.categoryIcon,
+    name: challenge.category,
+  });
   const ws = useChallengeWorkspace(challenge.id, onSubmit);
 
   const [leftWidth, setLeftWidth] = useState(DEFAULT_LEFT_WIDTH);
@@ -110,7 +111,7 @@ export function ChallengeScreen({
     >
       <TopBar
         crumbs={[
-          { label: t("Challenges"), to: "/challenges" },
+          { label: "Challenges", to: "/challenges" },
           { label: challenge.title },
         ]}
       />
@@ -132,7 +133,7 @@ export function ChallengeScreen({
 
         {/* Left Resize Splitter Handle */}
         <div
-          aria-label={t("Resize left sidebar")}
+          aria-label={"Resize left sidebar"}
           aria-valuemax={MAX_LEFT_WIDTH}
           aria-valuemin={MIN_LEFT_WIDTH}
           aria-valuenow={leftWidth}
@@ -141,7 +142,7 @@ export function ChallengeScreen({
           onMouseDown={handleLeftMouseDown}
           role="slider"
           tabIndex={0}
-          title={t("Drag to resize sidebar (Double click to reset)")}
+          title={"Drag to resize sidebar (Double click to reset)"}
         >
           <div className="z-10 flex h-6 w-3 items-center justify-center rounded-full bg-card/80 text-muted-foreground opacity-0 shadow-xs transition-opacity group-hover:opacity-100">
             <GripVertical size={10} />
@@ -163,7 +164,7 @@ export function ChallengeScreen({
 
         {/* Right Resize Splitter Handle */}
         <div
-          aria-label={t("Resize right sidebar")}
+          aria-label={"Resize right sidebar"}
           aria-valuemax={MAX_RIGHT_WIDTH}
           aria-valuemin={MIN_RIGHT_WIDTH}
           aria-valuenow={rightWidth}
@@ -172,7 +173,7 @@ export function ChallengeScreen({
           onMouseDown={handleRightMouseDown}
           role="slider"
           tabIndex={0}
-          title={t("Drag to resize tabs panel (Double click to reset)")}
+          title={"Drag to resize tabs panel (Double click to reset)"}
         >
           <div className="z-10 flex h-6 w-3 items-center justify-center rounded-full bg-card/80 text-muted-foreground opacity-0 shadow-xs transition-opacity group-hover:opacity-100">
             <GripVertical size={10} />
@@ -224,9 +225,9 @@ export function ChallengeScreen({
           />
           {isReadOnly ? (
             <p className="px-4 pb-3 text-center text-muted-foreground text-xs">
-              {t(
+              {
                 "Admins can browse challenges in read-only mode. Submissions are disabled for admin accounts."
-              )}
+              }
             </p>
           ) : null}
         </div>

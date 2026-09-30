@@ -1,6 +1,4 @@
 "use client";
-
-import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -23,7 +21,6 @@ interface Props {
 }
 
 export function UserManagementClient({ initialUsers }: Props) {
-  const t = useExtracted();
   const [users, setUsers] = useState<UserRow[]>(initialUsers);
   const [query, setQuery] = useState("");
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -56,10 +53,10 @@ export function UserManagementClient({ initialUsers }: Props) {
     }
     if (result?.validationErrors) {
       setUsers(previous);
-      toast.error(t("Validation failed"));
+      toast.error("Validation failed");
       return;
     }
-    toast.success(nextBanned ? t("Banned") : t("Active"));
+    toast.success(nextBanned ? "Banned" : "Active");
   }
 
   return (
@@ -67,24 +64,24 @@ export function UserManagementClient({ initialUsers }: Props) {
       <input
         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
         onChange={(e) => setQuery(e.target.value)}
-        placeholder={t("Search by name or email...")}
+        placeholder={"Search by name or email..."}
         value={query}
       />
       {filtered.length === 0 ? (
         <p className="py-8 text-center text-muted-foreground text-sm">
-          {t("No users found.")}
+          {"No users found."}
         </p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-border border-b text-left text-muted-foreground">
-                <th className="px-3 py-2 font-medium">{t("User")}</th>
-                <th className="px-3 py-2 font-medium">{t("Email")}</th>
-                <th className="px-3 py-2 font-medium">{t("Rating")}</th>
-                <th className="px-3 py-2 font-medium">{t("Streak")}</th>
-                <th className="px-3 py-2 font-medium">{t("Status")}</th>
-                <th className="px-3 py-2 font-medium">{t("Action")}</th>
+                <th className="px-3 py-2 font-medium">{"User"}</th>
+                <th className="px-3 py-2 font-medium">{"Email"}</th>
+                <th className="px-3 py-2 font-medium">{"Rating"}</th>
+                <th className="px-3 py-2 font-medium">{"Streak"}</th>
+                <th className="px-3 py-2 font-medium">{"Status"}</th>
+                <th className="px-3 py-2 font-medium">{"Action"}</th>
               </tr>
             </thead>
             <tbody>
@@ -93,9 +90,9 @@ export function UserManagementClient({ initialUsers }: Props) {
                 if (pendingId === u.id) {
                   banLabel = "...";
                 } else if (u.banned) {
-                  banLabel = t("Unban");
+                  banLabel = "Unban";
                 } else {
-                  banLabel = t("Ban");
+                  banLabel = "Ban";
                 }
                 return (
                   <tr
@@ -116,7 +113,7 @@ export function UserManagementClient({ initialUsers }: Props) {
                           u.banned ? "text-destructive" : "text-emerald-600"
                         }
                       >
-                        {u.banned ? t("Banned") : t("Active")}
+                        {u.banned ? "Banned" : "Active"}
                       </span>
                     </td>
                     <td className="px-3 py-2">

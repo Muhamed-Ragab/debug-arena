@@ -1,65 +1,95 @@
+import {
+  calcPoints,
+  countSolvedChallenges,
+  filterLeaderboardSubmissions,
+  isSolved,
+} from "@/lib/domain/scoring";
 import type { Category } from "@/lib/domain/types";
 import {
   getCachedLeaderboard,
   getLeaderboardCacheKey,
   setCachedLeaderboard,
 } from "./cache";
-import { SCORE_WEIGHT_RATING, SCORE_WEIGHT_SOLVED } from "./constants";
 import { leaderboardRepository } from "./repository";
 import type {
   GetLeaderboardOptions,
   LeaderboardEntry,
   LeaderboardRepository,
+  LeaderboardSubmission,
   UserWithSubmissionsAndStats,
 } from "./types";
 
-export function isSolved(submission: {
-  fixCorrect: boolean | null;
-  totalScore: number | null;
-}): boolean {
-  return Boolean(submission.fixCorrect || (submission.totalScore ?? 0) >= 60);
-}
-
-export function calcPoints(currentRating: number, solvedCount: number): number {
-  return (
-    currentRating * SCORE_WEIGHT_RATING + solvedCount * SCORE_WEIGHT_SOLVED
-  );
-}
+export { calcPoints, isSolved } from "@/lib/domain/scoring";
 
 export function getStrongestCategory(
   categoryStats: Array<{ avgScore: number; category?: { name: string } | null }>
 ): Category {
   if (categoryStats.length === 0) {
-    return "State Mutations";
+    return "";
   }
   const sorted = [...categoryStats].sort((a, b) => b.avgScore - a.avgScore);
-  return (sorted[0]?.category?.name as Category) || "State Mutations";
+  return sorted[0]?.category?.name || "";
+}
+
+function getRankedSubmissions(
+  submissions: readonly LeaderboardSubmission[],
+  options: Pick<GetLeaderboardOptions, "categorySlug" | "period">,
+  now: Date
+): LeaderboardSubmission[] {
+  return filterLeaderboardSubmissions(submissions, {
+    categorySlug: options.categorySlug,
+    now,
+    period: options.period,
+  });
+}
+
+function averageScore(submissions: readonly LeaderboardSubmission[]): number {
+  const bestScores = new Map<string, number>();
+  for (const submission of submissions) {
+    const score = submission.totalScore ?? 0;
+    const bestScore = bestScores.get(submission.challengeId) ?? 0;
+    if (score > bestScore) {
+      bestScores.set(submission.challengeId, score);
+    }
+  }
+  if (bestScores.size === 0) {
+    return 0;
+  }
+  return Math.round(
+    [...bestScores.values()].reduce((sum, score) => sum + score, 0) /
+      bestScores.size
+  );
+}
+
+function compareLeaderboardEntries(
+  left: Pick<LeaderboardEntry, "avgScore" | "score" | "solved" | "userId">,
+  right: Pick<LeaderboardEntry, "avgScore" | "score" | "solved" | "userId">
+): number {
+  return (
+    right.score - left.score ||
+    right.solved - left.solved ||
+    right.avgScore - left.avgScore ||
+    (left.userId ?? "").localeCompare(right.userId ?? "")
+  );
 }
 
 export function buildUserLeaderboardEntry(
   user: UserWithSubmissionsAndStats,
-  rank: number
+  rank: number,
+  options: Pick<GetLeaderboardOptions, "categorySlug" | "period"> = {},
+  now = new Date()
 ): LeaderboardEntry {
-  const solvedCount = user.submissions.filter(isSolved).length;
-  const totalSubmissions = user.submissions.length;
-  const avgScore =
-    totalSubmissions > 0
-      ? Math.round(
-          user.submissions.reduce((sum, s) => sum + (s.totalScore ?? 0), 0) /
-            totalSubmissions
-        )
-      : Math.min(100, Math.round(user.currentRating / 100));
-
-  const totalScore = calcPoints(user.currentRating, solvedCount);
-
+  const submissions = getRankedSubmissions(user.submissions, options, now);
   return {
-    avgScore,
+    avgScore: averageScore(submissions),
     name: user.displayName || user.name || "Anonymous",
     rank,
-    score: totalScore,
-    solved: solvedCount,
+    score: calcPoints(submissions),
+    solved: countSolvedChallenges(submissions),
     streak: user.streakCount,
-    strongest: getStrongestCategory(user.categoryStats),
+    strongest: options.categorySlug
+      ? submissions[0]?.challenge?.category?.name || ""
+      : getStrongestCategory(user.categoryStats),
     userId: user.id,
   };
 }
@@ -67,33 +97,51 @@ export function buildUserLeaderboardEntry(
 export function createLeaderboardService(
   repo: LeaderboardRepository = leaderboardRepository
 ) {
-  async function calculateUserRank(userId: string): Promise<string> {
-    const allUsers = await repo.findAllUsersWithSubmissions();
-    const scores = allUsers.map((u) => {
-      const solvedCount = u.submissions.filter(isSolved).length;
-      const totalPoints = calcPoints(u.currentRating, solvedCount);
-      return { id: u.id, score: totalPoints };
-    });
-    scores.sort((a, b) => b.score - a.score);
-    const idx = scores.findIndex((s) => s.id === userId);
+  async function calculateUserRank(
+    userId: string,
+    options: Pick<GetLeaderboardOptions, "categorySlug" | "period"> = {},
+    now = new Date()
+  ): Promise<string> {
+    const users = await repo.findAllUsersWithSubmissions();
+    const entries = users
+      .map((user) => {
+        const submissions = getRankedSubmissions(
+          user.submissions,
+          options,
+          now
+        );
+        return {
+          avgScore: averageScore(submissions),
+          score: calcPoints(submissions),
+          solved: countSolvedChallenges(submissions),
+          userId: user.id,
+        };
+      })
+      .filter((entry) => entry.score > 0 || entry.solved > 0)
+      .sort(compareLeaderboardEntries);
+    const idx = entries.findIndex((entry) => entry.userId === userId);
     return idx >= 0 ? `#${idx + 1}` : "#--";
   }
 
-  // TODO(rank): push limit/order to SQL — currently fetches all users then sorts/slices in JS
   async function fetchDbLeaderboard(
-    _period: "weekly" | "all_time",
-    limit: number
+    options: Pick<GetLeaderboardOptions, "categorySlug" | "period">,
+    limit: number,
+    now: Date
   ): Promise<LeaderboardEntry[]> {
-    const allUsers = await repo.findAllWithCategoryStats();
-    const entriesWithScores = allUsers.map((u) => {
-      const solvedCount = u.submissions.filter(isSolved).length;
-      const totalScore = calcPoints(u.currentRating, solvedCount);
-      return { totalScore, user: u };
-    });
-    entriesWithScores.sort((a, b) => b.totalScore - a.totalScore);
-    return entriesWithScores
+    const users = await repo.findAllWithCategoryStats();
+    return users
+      .map((user) =>
+        buildUserLeaderboardEntry(
+          user as UserWithSubmissionsAndStats,
+          0,
+          options,
+          now
+        )
+      )
+      .filter((entry) => entry.score > 0 || entry.solved > 0)
+      .sort(compareLeaderboardEntries)
       .slice(0, limit)
-      .map(({ user }, idx) => buildUserLeaderboardEntry(user, idx + 1));
+      .map((entry, idx) => ({ ...entry, rank: idx + 1 }));
   }
 
   async function getTopLeaderboard(
@@ -105,47 +153,46 @@ export function createLeaderboardService(
       currentUserId = null,
       limit = 100,
     } = options;
-
-    const cacheKey = getLeaderboardCacheKey(period, categorySlug);
+    const rankingOptions = { categorySlug, period };
+    const now = new Date();
+    const cacheKey = getLeaderboardCacheKey(period, categorySlug, limit);
     const cached = await getCachedLeaderboard(cacheKey);
 
-    let rawEntries: LeaderboardEntry[];
-
-    if (cached && cached.length > 0) {
-      rawEntries = cached;
-    } else {
-      rawEntries = await fetchDbLeaderboard(period, limit);
-      if (rawEntries.length > 0) {
-        await setCachedLeaderboard(cacheKey, rawEntries);
-      }
+    let entries = cached;
+    if (!entries) {
+      entries = await fetchDbLeaderboard(rankingOptions, limit, now);
+      await setCachedLeaderboard(cacheKey, entries);
     }
 
-    const entriesWithUserFlag = rawEntries.map((e) => ({
-      ...e,
-      isUser: Boolean(currentUserId && e.userId === currentUserId),
+    const entriesWithUserFlag = entries.map((entry) => ({
+      ...entry,
+      isUser: Boolean(currentUserId && entry.userId === currentUserId),
     }));
 
-    if (currentUserId && !entriesWithUserFlag.some((e) => e.isUser)) {
+    if (currentUserId && !entriesWithUserFlag.some((entry) => entry.isUser)) {
       const currentUser = await repo.findByIdWithRelations(currentUserId);
-      if (!currentUser) {
+      if (currentUser?.role !== "user" || currentUser.banned) {
         return entriesWithUserFlag;
       }
-      if (
-        (currentUser as unknown as { role?: string }).role !== "user" ||
-        (currentUser as unknown as { banned?: boolean }).banned === true
-      ) {
-        return entriesWithUserFlag;
-      }
-      const userRank = await calculateUserRank(currentUserId);
-      const parsedRank =
-        Number.parseInt(userRank.replace("#", ""), 10) || rawEntries.length + 1;
-      const userEntry = buildUserLeaderboardEntry(
-        currentUser as unknown as UserWithSubmissionsAndStats,
-        parsedRank
+      const currentUserEntry = buildUserLeaderboardEntry(
+        currentUser,
+        0,
+        rankingOptions,
+        now
       );
+      if (currentUserEntry.score === 0 && currentUserEntry.solved === 0) {
+        return entriesWithUserFlag;
+      }
+      const userRank = await calculateUserRank(
+        currentUserId,
+        rankingOptions,
+        now
+      );
+      const rank = Number.parseInt(userRank.slice(1), 10) || entries.length + 1;
       entriesWithUserFlag.push({
-        ...userEntry,
+        ...currentUserEntry,
         isUser: true,
+        rank,
       });
     }
 

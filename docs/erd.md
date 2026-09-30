@@ -14,7 +14,7 @@
 | bio | text nullable | short user bio |
 | avatar_url | text nullable | profile avatar URL |
 | role | enum(user, admin) | |
-| current_rating | int | ELO-style skill rating, updated per submission |
+| current_rating | int | Separate rating metric updated per submission; not used for profile points or leaderboard ranking |
 | streak_count | int | Current daily active streak |
 | last_activity_date | date | To compute streak continuity |
 | created_at | timestamptz | |
@@ -89,16 +89,6 @@
 | body_html | text | HTML email body |
 | body_text | text | plain-text email body |
 
-### challenge_embeddings
-| Field | Type | Notes |
-|---|---|---|
-| challenge_id | uuid FK -> challenges.id | |
-| model | text | embedding model name |
-| content_hash | text | hash of source text |
-| search_text | text | text indexed for RAG search |
-| embedding | vector(1536) | pgvector embedding for RAG retrieval |
-| PK | (challenge_id, model) | |
-
 ### categories
 | Field | Type | Notes |
 |---|---|---|
@@ -119,7 +109,6 @@
 | buggy_artifact | jsonb | code files, or log dump, or video URL |
 | reference_fix | jsonb | canonical corrected code/diff |
 | root_cause_summary | text | canonical explanation |
-| root_cause_embedding | vector(1536) | pgvector column for semantic grading |
 | prevention_notes | text | canonical "how to avoid this class of bug" |
 | source | enum(manual, ai_generated, postmortem_import) | |
 | status | enum(draft, published, archived) | |
@@ -143,7 +132,6 @@
 | localization_answer | text | which file/function/component the user identified |
 | localization_correct | boolean | |
 | root_cause_explanation | text | free-text user explanation |
-| root_cause_embedding | vector(1536) | pgvector, computed on submit |
 | root_cause_score | int | 0–100, from grading agent |
 | proposed_fix | jsonb | code/diff the user submitted |
 | fix_correct | boolean | from automated test run |
@@ -151,6 +139,11 @@
 | prevention_score | int | optional |
 | hints_used | int | count, affects max score |
 | total_score | int | weighted composite |
+
+Profile and leaderboard points are derived, not stored as a column: each
+challenge's best submission contributes `challenge points × total_score / 100`.
+Challenge points come from `buggy_artifact.points`, with easy/medium/hard
+defaults of 100/200/300. Solved counts deduplicate by challenge.
 | time_spent_seconds | int | |
 | created_at | timestamptz | |
 
@@ -234,12 +227,10 @@
 - `users` 1—N `user_achievements`
 - `achievements` 1—N `user_achievements`
 - `bug_injection_jobs` 1—1 `challenges`
-- `submissions.root_cause_embedding` vs `challenges.root_cause_embedding` via pgvector for semantic-similarity pass.
 - `users` 1—N `accounts` (better-auth)
 - `users` 1—N `sessions` (better-auth)
 - `users` 1—N `verifications` (better-auth)
 - `users` 1—N `profile_links`
-- `challenges` 1—N `challenge_embeddings` (RAG search via pgvector)
 - `login_attempts` keyed by `email`/`ip_address` for rate limiting (no FK to users, supports pre-account attempts).
 - *RLS policies remain keyed on `request.jwt.claim.sub`; the value is populated per-request from the better-auth session via a `SET LOCAL` bridge (see implementation_guide.md §6).*
 

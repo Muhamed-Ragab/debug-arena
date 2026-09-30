@@ -1,5 +1,13 @@
 # Implementation Guide & Feature Breakdown
 
+> **STACK NOTE:** The current app is a single Next.js 16 application (App Router
+> + Server Actions via `next-safe-action`), not NestJS; the frontend is Next.js,
+> not Vite; the interface is English-only; the database is plain Postgres 16
+> with no vector extension. Sections below that still say NestJS/Vite describe
+> the original plan, not the shipped code. The app is free to use — no payment
+> flow exists. User-configured (BYOK) AI providers with usage quotas are
+> roadmap work (see `plan.md`), not implemented.
+
 This document provides a senior-level technical breakdown of how each feature in Debug Arena will be implemented. It details the specific functions, order of execution, dependencies, and architectural feasibility before any code is written.
 
 ## 1. Rate Limiting, DDoS Prevention, and Retries
@@ -132,9 +140,8 @@ Triggered via event `eventEmitter.emit('submission.created', { userId })`
 5. **Controller Response:**
    - Responds immediately with `{ success: true, data: { status: "Grading in progress", fixCorrect: true } }`.
 6. **Background Worker (`GradingProcessor`):**
-   - Computes pgvector embedding for the user's explanation.
-   - Queries Postgres for cosine similarity against `challenges.root_cause_embedding`.
-   - Passes the text and similarity metadata to Vercel AI SDK (Anthropic model).
+   - Calls the Groq LLM judge (Vercel AI SDK) to score reasoning quality.
+   - When no API key is configured, grades offline with the deterministic token-overlap fallback (`overlapScore` in `src/features/challenge/lib/text-similarity.ts`).
    - Updates `submissions` table with final score.
    - Emits `grading.completed` event (triggering SSE and Emails).
 
@@ -209,36 +216,41 @@ This keeps every existing RLS policy (users, submissions, sessions, accounts, ve
 
 ---
 
-## 7. pgvector RAG
-**Feasibility:** 100% (Postgres `pgvector` extension, already provisioned in `docker-compose.yml`)
+## 7. Deterministic fallback grading (token overlap)
+**Feasibility:** 100% (pure TypeScript, no extension or model needed)
 
-The grading pipeline uses retrieval over stored embeddings as a cheap first-pass signal before the LLM judge runs. The `challenges` table carries `root_cause_embedding vector(1536)` and `submissions` carries `root_cause_embedding vector(1536)`. We populate the challenge side at authoring time and query it with cosine distance during grading.
+When no Groq API key is configured, the grading pipeline falls back to a
+deterministic, zero-cost token-overlap signal before/without the LLM judge.
+`src/features/challenge/lib/text-similarity.ts` tokenizes both texts
+(lowercase, camelCase/snake_case splitting, stopword removal) and computes
+`overlapScore = |user ∩ canonical| / |canonical|`.
 
-### Populating `challenge_embeddings`
-The term `challenge_embeddings` refers to the `root_cause_embedding` column on `challenges`, populated whenever a challenge is created or updated:
+### Thresholds
+The fallback maps the overlap ratio onto the 0–25 root-cause scale:
 
-1. **Manual authoring:** An admin saves a challenge with a `root_cause_summary`. `ChallengesService` embeds that summary through the Vercel AI SDK embedding model (1536-dim, matching the column) and writes it back in the same transaction.
-2. **AI-generated challenges:** The bug-injection agent produces `root_cause_summary` as part of its output. Before the challenge is published, `ChallengesService.embedRootCause(challengeId)` runs so the vector is never null at grading time.
-3. **Postmortem import:** The postmortem-import agent reverse-engineers a summary from a GitHub issue; the same embed step applies.
-4. **Index:** We create an IVFFlat index on `root_cause_embedding` with a cosine-distance operator class (`vector_cosine_ops`) so nearest-neighbor lookups stay fast as the challenge count grows.
+1. **≥ 0.70** → 25 ("Accurately diagnosed failure mechanism and state lifecycle").
+2. **≥ 0.45** → 18 ("Partially identified the failure mechanism…").
+3. **≥ 0.20** → 10–12 ("Identified surface symptoms…").
+4. **Below** → 5 ("Explanation does not match the canonical failure mechanism").
+5. **Empty input** → 0.
 
-### Querying with Cosine Distance
-pgvector exposes cosine distance through the `<=>` operator, where `0` means identical and `1` means orthogonal. The grading worker uses it like this:
+### Querying with token overlap
+The same `overlapScore` grades the proposed solution explanation against the
+canonical root cause (fix score) and the combined user text against the
+canonical prevention notes (prevention score):
 
 ```typescript
-const similar = await db.execute(sql`
-  SELECT id, title, 1 - (root_cause_embedding <=> ${userEmbedding}) AS distance
-  FROM challenges
-  WHERE id != ${challengeId}
-  ORDER BY root_cause_embedding <=> ${userEmbedding}
-  LIMIT 5
-`);
+const similarity = overlapScore(userExplanation, canonicalRootCause);
+const solSim = overlapScore(solutionExplanation, canonicalRootCause);
+const prevSim = overlapScore(combinedUserText, canonicalPreventionNotes);
 ```
 
-- The user's `root_cause_embedding` is computed at submission time (see section 5, step 6) from their free-text explanation.
-- We compare the user's vector against the current challenge's canonical vector to get a similarity score, and against the top neighbors to detect near-duplicate reasoning patterns.
-- The resulting cosine distance is normalized into a 0 to 100 sub-score that feeds the composite grade, giving us a deterministic, low-cost signal before the LLM judge scores reasoning quality.
-- Because the embedding lookup is a plain SQL query, it costs a fraction of an LLM call and acts as the cost-control gate described in `architecture.md §4`.
+- The user's explanation is never persisted as a vector; no `root_cause_embedding`
+  column and no `challenge_embeddings` table exist.
+- Because the fallback is a pure function, it costs nothing and acts as the
+  cost-control gate described in `architecture.md §4`.
+- The Groq LLM judge remains the primary grader whenever an API key is
+  configured; the token-overlap path only runs offline or on LLM failure.
 
 ---
 
@@ -265,4 +277,4 @@ Rather than hardcoding email bodies in the `EmailService`, we store templates in
 2. **`EmailService.render(template, vars)`:** Substitutes `{{variable}}` tokens in `subject`, `html_body`, and `text_body`. Missing variables throw before send, so a broken template fails loud instead of shipping a half-rendered email.
 3. **Dispatch:** The notification listeners from section 3 call `EmailService.send({ to, slug, vars })`. For example, the `grading.completed` event passes `{ username, score, challengeTitle }`, which fill the `grading_completed` template.
 4. **Fallback:** If a slug has no active template (e.g. a new event type before its template is authored), `EmailService` logs a warning and skips send rather than crashing the notification pipeline.
-5. **Localization hook:** Because templates live in the DB, we can later add a `locale` column and pick the row by user preference without touching `EmailService` code.
+5. **Language scope:** Email templates and the current interface use English; localization is not part of the application.

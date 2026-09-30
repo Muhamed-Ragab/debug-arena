@@ -8,17 +8,19 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useExtracted } from "next-intl";
 import { CategoryTag } from "@/components/shared/CategoryTag";
 import { DiffBadge } from "@/components/shared/DiffBadge";
 import { formatSolves } from "@/features/challenge/lib/format";
-import { CATEGORY_CONFIG } from "@/lib/domain/categories";
+import { getCategoryAppearance } from "@/lib/domain/categories";
 import type { Challenge } from "@/lib/domain/types";
 
 export function ChallengeCard({ challenge }: { challenge: Challenge }) {
-  const t = useExtracted();
-  const accent =
-    CATEGORY_CONFIG[challenge.category]?.dim ?? "rgba(99,102,241,0.15)";
+  const appearance = getCategoryAppearance({
+    color: challenge.categoryColor,
+    icon: challenge.categoryIcon,
+    name: challenge.category,
+  });
+  const accent = appearance.dim;
 
   return (
     <div
@@ -27,7 +29,11 @@ export function ChallengeCard({ challenge }: { challenge: Challenge }) {
     >
       <div className="flex items-center justify-between">
         <DiffBadge difficulty={challenge.difficulty} />
-        <CategoryTag category={challenge.category} />
+        <CategoryTag
+          category={challenge.category}
+          color={challenge.categoryColor}
+          icon={challenge.categoryIcon}
+        />
       </div>
 
       <h3 className="mt-3 font-semibold text-[15px] text-heading leading-snug">
@@ -42,13 +48,11 @@ export function ChallengeCard({ challenge }: { challenge: Challenge }) {
       <div className="mt-4 flex items-center gap-4 text-muted-foreground text-xs">
         <span className="flex items-center gap-1.5">
           <Users size={13} />
-          {t("{count} solves", {
-            count: formatSolves(challenge.solves ?? 0),
-          })}
+          {`${formatSolves(challenge.solves ?? 0)} solves`}
         </span>
         <span className="flex items-center gap-1.5">
           <Clock size={13} />
-          {challenge.time ?? t("~30m")}
+          {challenge.time ?? "~30m"}
         </span>
       </div>
 
@@ -56,18 +60,18 @@ export function ChallengeCard({ challenge }: { challenge: Challenge }) {
         {challenge.solved ? (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 font-medium text-emerald-400 text-xs">
             <CheckCircle2 size={13} />
-            {t("Solved")}
+            {"Solved"}
           </span>
         ) : (
           <span className="text-muted-foreground text-xs">
-            {t("Not attempted")}
+            {"Not attempted"}
           </span>
         )}
         <Link
           className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 font-medium text-primary-foreground text-xs transition-opacity hover:opacity-90"
           href={`/challenges/${challenge.id}`}
         >
-          {challenge.solved ? t("Review") : t("Start Debugging")}
+          {challenge.solved ? "Review" : "Start Debugging"}
           <ArrowRight size={13} />
         </Link>
       </div>

@@ -2,7 +2,6 @@
 
 import { Select as SelectPrimitive } from "@base-ui/react/select";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import { useExtracted } from "next-intl";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
@@ -226,8 +225,7 @@ export function SimpleSelect({
   disabled = false,
   className,
 }: SimpleSelectProps) {
-  const t = useExtracted();
-  const effectivePlaceholder = placeholder ?? t("Select...");
+  const effectivePlaceholder = placeholder ?? "Select...";
   const selectedOption = options.find((opt) => opt.value === value);
 
   return (

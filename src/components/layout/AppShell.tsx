@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useExtracted } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "./Sidebar";
@@ -11,7 +10,6 @@ interface AppShellProps {
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const t = useExtracted();
   const pathname = usePathname();
   const [navOpen, setNavOpen] = useState(false);
 
@@ -35,7 +33,7 @@ export function AppShell({ children }: AppShellProps) {
 
       {Boolean(navOpen) && (
         <Button
-          aria-label={t("Close navigation")}
+          aria-label={"Close navigation"}
           className="fixed inset-0 z-40 h-auto w-auto rounded-none bg-black/60 p-0 backdrop-blur-sm lg:hidden"
           onClick={() => setNavOpen(false)}
           type="button"

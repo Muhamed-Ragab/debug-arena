@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronDown, ChevronRight, Clock } from "lucide-react";
-import { useExtracted } from "next-intl";
 import { CategoryTag } from "@/components/shared/CategoryTag";
 import { DiffBadge } from "@/components/shared/DiffBadge";
 import { FormattedMarkdown } from "@/components/shared/FormattedMarkdown";
@@ -28,7 +27,6 @@ export function ChallengeScenario({
   scenarioParagraphs,
   className,
 }: Props) {
-  const t = useExtracted();
   const scenarioContent = scenarioParagraphs.join("\n\n");
   const fileNode = challenge.filePath ?? challenge.title;
 
@@ -41,7 +39,11 @@ export function ChallengeScenario({
     >
       <div className="border-border border-b px-5 pt-5 pb-4">
         <div className="mb-2 flex flex-wrap items-center gap-2">
-          <CategoryTag category={challenge.category} />
+          <CategoryTag
+            category={challenge.category}
+            color={challenge.categoryColor}
+            icon={challenge.categoryIcon}
+          />
           <DiffBadge difficulty={challenge.difficulty} />
         </div>
         <h2 className="mt-2.5 font-semibold text-[13px] text-heading leading-snug">
@@ -49,10 +51,10 @@ export function ChallengeScenario({
         </h2>
         <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
           <span className="flex items-center gap-1">
-            <Clock size={10} /> {challenge.timeLimit ?? t("30 min")}
+            <Clock size={10} /> {challenge.timeLimit ?? "30 min"}
           </span>
           <span className="font-mono">
-            {t("{points} pts max", { points: String(challenge.points ?? 200) })}
+            {`${String(challenge.points ?? 200)} pts max`}
           </span>
         </div>
       </div>
@@ -69,7 +71,7 @@ export function ChallengeScenario({
             variant="ghost"
           >
             {treeOpen ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
-            {t("Relevant files")}
+            {"Relevant files"}
           </Button>
           {Boolean(treeOpen) && <FileTree cfg={cfg} fileName={fileNode} />}
         </div>

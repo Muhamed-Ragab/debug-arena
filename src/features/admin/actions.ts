@@ -101,7 +101,7 @@ export const toggleUserBanAction = adminActionClient
   .outputSchema(toggleUserBanOutputSchema)
   .action(async ({ parsedInput, ctx }) => {
     if (parsedInput.userId === ctx.user.id) {
-      throw new ActionError("error.cannotBanSelf");
+      throw new ActionError("You cannot ban your own account.");
     }
     const requestHeaders = await headers();
     if (parsedInput.banned) {

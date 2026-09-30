@@ -2,19 +2,23 @@ import "dotenv/config";
 import { eq, sql } from "drizzle-orm";
 import { SEED_CATEGORIES } from "@/features/category/constants";
 import { SEED_CHALLENGES } from "@/features/challenge/data/challenges.seed";
-import { generateDeterministicEmbedding } from "@/features/challenge/lib/embedding";
 import { auth } from "@/lib/auth";
 import { env } from "@/lib/env/env";
 import { db } from "./client";
 import * as schema from "./schema";
+import { resolveAdminSeedPassword } from "./seed-utils";
 
 async function seedAdmin() {
-  const adminEmail =
-    env.ADMIN_EMAIL ?? process.env.ADMIN_EMAIL ?? "admin@debugarena.dev";
-  const adminPassword =
-    env.ADMIN_PASSWORD ?? process.env.ADMIN_PASSWORD ?? "Admin123456!";
-  const adminName =
-    env.ADMIN_NAME ?? process.env.ADMIN_NAME ?? "Debug Arena Admin";
+  const adminEmail = env.ADMIN_EMAIL ?? "admin@debugarena.dev";
+  const adminPassword = resolveAdminSeedPassword(env.ADMIN_PASSWORD);
+  const adminName = env.ADMIN_NAME ?? "Debug Arena Admin";
+
+  if (!adminPassword) {
+    console.warn(
+      "Skipping optional admin seed; configure ADMIN_PASSWORD to create the admin account."
+    );
+    return;
+  }
 
   console.log(`\n👤 Seeding admin account (${adminEmail})...`);
 
@@ -102,28 +106,29 @@ async function main() {
       continue;
     }
 
-    const embedding = generateDeterministicEmbedding(ch.rootCauseSummary);
-
     // biome-ignore lint/performance/noAwaitInLoops: sequential challenge lookup
     const existing = await db.query.challenges.findFirst({
       where: eq(schema.challenges.title, ch.title),
     });
 
     let challengeId: string;
+    const buggyArtifact = {
+      ...ch.buggyArtifact,
+      ...(ch.hiddenTests ? { hiddenTests: ch.hiddenTests } : {}),
+    };
 
     if (existing) {
       challengeId = existing.id;
       await db
         .update(schema.challenges)
         .set({
-          buggyArtifact: ch.buggyArtifact,
+          buggyArtifact,
           categoryId,
           difficulty: ch.difficulty,
           format: ch.format,
           preventionNotes: ch.preventionNotes,
           prompt: ch.prompt,
           referenceFix: ch.referenceFix,
-          rootCauseEmbedding: embedding,
           rootCauseSummary: ch.rootCauseSummary,
           source: ch.source,
           status: ch.status,
@@ -134,14 +139,13 @@ async function main() {
       const [inserted] = await db
         .insert(schema.challenges)
         .values({
-          buggyArtifact: ch.buggyArtifact,
+          buggyArtifact,
           categoryId,
           difficulty: ch.difficulty,
           format: ch.format,
           preventionNotes: ch.preventionNotes,
           prompt: ch.prompt,
           referenceFix: ch.referenceFix,
-          rootCauseEmbedding: embedding,
           rootCauseSummary: ch.rootCauseSummary,
           source: ch.source,
           status: ch.status,
