@@ -31,7 +31,7 @@ export function HintsPanel({ hintsOpen, toggleHint, hints }: Props) {
         const cost = hint.penaltyPoints;
         return (
           <Card
-            className="overflow-hidden"
+            className="overflow-hidden p-0"
             key={`${hint.order}-${hint.socraticPrompt.slice(0, 20)}`}
           >
             <Button
