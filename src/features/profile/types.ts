@@ -32,7 +32,8 @@ export type PublishedChallenge = ChallengeRow & {
 export interface ProfileRepository {
   deleteUser: (userId: string) => Promise<void>;
   findAllSubmissionsByUserId: (
-    userId: string
+    userId: string,
+    limit?: number
   ) => Promise<UserWithRelations["submissions"]>;
   findByIdForSettings: (userId: string) => Promise<UserForSettings | null>;
   findByIdWithRelations: (userId: string) => Promise<{
@@ -164,4 +165,28 @@ export interface UserSettingsData {
     jobTitle?: string;
   };
   sessions: SessionData[];
+}
+
+export type ExportFormat = "json" | "csv";
+
+export interface SubmissionExportDto {
+  aiFeedback: string | null;
+  challengeCategory: string;
+  challengeDifficulty: string;
+  challengeTitle: string;
+  fixCorrect: boolean | null;
+  hintsUsed: number;
+  id: string;
+  localizationCorrect: boolean | null;
+  preventionAnswer: string | null;
+  rootCauseExplanation: string | null;
+  submittedAt: string;
+  timeSpentSeconds: number | null;
+  totalScore: number | null;
+}
+
+export interface ExportSubmissionsResult {
+  content: string;
+  filename: string;
+  mimeType: string;
 }

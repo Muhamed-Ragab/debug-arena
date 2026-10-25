@@ -7,14 +7,23 @@ import {
   isSolved,
   type ScoringSubmission,
 } from "@/lib/domain/scoring";
-import { DEFAULT_CATEGORIES } from "./constants";
+import {
+  CSV_FORMULA_TRIGGER_REGEX,
+  DEFAULT_CATEGORIES,
+  DEFAULT_SUBMISSION_EXPORT_LIMIT,
+  EXPORT_SUBMISSION_CSV_HEADERS,
+  NUMERIC_STRING_REGEX,
+} from "./constants";
 import { profileRepository } from "./repository";
 import type {
   CategoryStat,
+  ExportFormat,
+  ExportSubmissionsResult,
   ProfileRepository,
   RadarPoint,
   RecentSubmission,
   StrengthPoint,
+  SubmissionExportDto,
   UserProfileData,
   UserSettingsData,
   UserWithRelations,
@@ -145,6 +154,94 @@ export function buildStrengthData(
       name: catName,
     };
   });
+}
+
+export function sanitizeCsvFormula(value: string | null | undefined): string {
+  if (!value) {
+    return "";
+  }
+  const trimmed = value.trim();
+  if (NUMERIC_STRING_REGEX.test(trimmed)) {
+    return value;
+  }
+  if (CSV_FORMULA_TRIGGER_REGEX.test(trimmed)) {
+    return `'${value}`;
+  }
+  return value;
+}
+
+export function escapeCsvField(value: unknown): string {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  if (typeof value === "boolean") {
+    return value ? "true" : "false";
+  }
+  if (typeof value === "number") {
+    return String(value);
+  }
+  const sanitized = sanitizeCsvFormula(String(value));
+  if (
+    sanitized.includes('"') ||
+    sanitized.includes(",") ||
+    sanitized.includes("\n") ||
+    sanitized.includes("\r") ||
+    sanitized.startsWith("'")
+  ) {
+    return `"${sanitized.replaceAll('"', '""')}"`;
+  }
+  return sanitized;
+}
+
+export function projectSubmissionToExportDto(
+  submission: UserWithRelations["submissions"][number]
+): SubmissionExportDto {
+  return {
+    aiFeedback: submission.aiFeedback ?? null,
+    challengeCategory: submission.challenge?.category?.name ?? "General",
+    challengeDifficulty: submission.challenge?.difficulty ?? "medium",
+    challengeTitle: submission.challenge?.title || "Challenge",
+    fixCorrect: submission.fixCorrect ?? null,
+    hintsUsed: submission.hintsUsed ?? 0,
+    id: submission.id,
+    localizationCorrect: submission.localizationCorrect ?? null,
+    preventionAnswer: submission.preventionAnswer ?? null,
+    rootCauseExplanation: submission.rootCauseExplanation ?? null,
+    submittedAt: submission.createdAt
+      ? new Date(submission.createdAt).toISOString()
+      : new Date().toISOString(),
+    timeSpentSeconds: submission.timeSpentSeconds ?? null,
+    totalScore: submission.totalScore ?? null,
+  };
+}
+
+export function formatSubmissionsCsv(dtos: SubmissionExportDto[]): string {
+  const headerLine = EXPORT_SUBMISSION_CSV_HEADERS.join(",");
+  if (dtos.length === 0) {
+    return headerLine;
+  }
+  const rows = dtos.map((dto) =>
+    [
+      escapeCsvField(dto.id),
+      escapeCsvField(dto.challengeTitle),
+      escapeCsvField(dto.challengeCategory),
+      escapeCsvField(dto.challengeDifficulty),
+      escapeCsvField(dto.totalScore),
+      escapeCsvField(dto.fixCorrect),
+      escapeCsvField(dto.localizationCorrect),
+      escapeCsvField(dto.hintsUsed),
+      escapeCsvField(dto.timeSpentSeconds),
+      escapeCsvField(dto.rootCauseExplanation),
+      escapeCsvField(dto.preventionAnswer),
+      escapeCsvField(dto.aiFeedback),
+      escapeCsvField(dto.submittedAt),
+    ].join(",")
+  );
+  return [headerLine, ...rows].join("\r\n");
+}
+
+export function formatSubmissionsJson(dtos: SubmissionExportDto[]): string {
+  return JSON.stringify(dtos, null, 2);
 }
 
 function computeAvgScore(
@@ -416,11 +513,36 @@ export function createProfileService(
     };
   }
 
+  async function exportUserSubmissions(
+    userId: string,
+    format: ExportFormat,
+    limit = DEFAULT_SUBMISSION_EXPORT_LIMIT
+  ): Promise<ExportSubmissionsResult> {
+    const rawSubmissions = await repo.findAllSubmissionsByUserId(userId, limit);
+    const dtos = rawSubmissions.map(projectSubmissionToExportDto);
+
+    const timestamp = new Date().toISOString().slice(0, 10);
+    if (format === "csv") {
+      return {
+        content: formatSubmissionsCsv(dtos),
+        filename: `submissions-${timestamp}.csv`,
+        mimeType: "text/csv;charset=utf-8;",
+      };
+    }
+
+    return {
+      content: formatSubmissionsJson(dtos),
+      filename: `submissions-${timestamp}.json`,
+      mimeType: "application/json;charset=utf-8;",
+    };
+  }
+
   return {
     buildCategoryStats,
     buildRadarData,
     buildStrengthData,
     calcPoints,
+    exportUserSubmissions,
     getUserProfileData,
     getUserSettingsData,
     isSolved,

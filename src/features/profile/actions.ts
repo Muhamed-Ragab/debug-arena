@@ -4,11 +4,14 @@ import { revalidatePath } from "next/cache";
 import { getRedis } from "@/lib/redis";
 import { ActionError, authActionClient } from "@/lib/safe-action";
 import { profileRepository } from "./repository";
+import { profileService } from "./service";
 import {
   deleteAccountOutputSchema,
   deleteAccountSchema,
   editProfileOutputSchema,
   editProfileSchema,
+  exportSubmissionsInputSchema,
+  exportSubmissionsOutputSchema,
   revokeAllOtherSessionsOutputSchema,
   revokeAllOtherSessionsSchema,
   revokeSessionOutputSchema,
@@ -138,4 +141,21 @@ export const deleteAccountAction = authActionClient
       console.warn("revalidate outside request");
     }
     return { success: true };
+  });
+
+export const exportSubmissionsAction = authActionClient
+  .inputSchema(exportSubmissionsInputSchema)
+  .outputSchema(exportSubmissionsOutputSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const userId = ctx.user.id;
+    const result = await profileService.exportUserSubmissions(
+      userId,
+      parsedInput.format
+    );
+    return {
+      content: result.content,
+      filename: result.filename,
+      mimeType: result.mimeType,
+      success: true,
+    };
   });

@@ -29,6 +29,10 @@ export const revokeAllOtherSessionsSchema = z.object({}).passthrough();
 
 export const deleteAccountSchema = z.object({}).passthrough();
 
+export const exportSubmissionsInputSchema = z.object({
+  format: z.enum(["json", "csv"]),
+});
+
 export const editProfileOutputSchema = z
   .object({ success: z.boolean() })
   .passthrough();
@@ -46,5 +50,9 @@ export const revokeAllOtherSessionsOutputSchema = z
   .passthrough();
 
 export const deleteAccountOutputSchema = z
+  .object({ success: z.boolean() })
+  .passthrough();
+
+export const exportSubmissionsOutputSchema = z
   .object({ success: z.boolean() })
   .passthrough();

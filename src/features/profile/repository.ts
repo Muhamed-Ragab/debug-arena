@@ -133,10 +133,12 @@ export function createProfileRepository(
   }
 
   async function findAllSubmissionsByUserId(
-    userId: string
+    userId: string,
+    limit?: number
   ): Promise<UserWithRelations["submissions"]> {
     try {
       const subs = await dbClient.query.submissions.findMany({
+        ...(limit ? { limit } : {}),
         orderBy: [desc(schema.submissions.createdAt)],
         where: eq(schema.submissions.userId, userId),
         with: {

@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { CategoryTag } from "@/components/shared/CategoryTag";
 import type { CategoryDTO } from "@/features/category/types";
+import { useExportSubmissions } from "../hooks/useExportSubmissions";
 import type { RecentSubmission } from "../types";
+import { ExportSubmissionsButton } from "./ExportSubmissionsButton";
 
 function getScoreColor(pct: number): string {
   if (pct >= 80) {
@@ -22,11 +24,20 @@ export function RecentSubmissions({
   categories: CategoryDTO[];
   items: (RecentSubmission & { id?: string; submittedAt?: string })[];
 }) {
+  const { handleExport, isExporting } = useExportSubmissions();
+
   return (
     <div>
-      <p className="mb-3 font-mono text-[11px] text-muted-foreground uppercase tracking-widest">
-        {"Recent submissions"}
-      </p>
+      <div className="mb-3 flex items-center justify-between">
+        <p className="font-mono text-[11px] text-muted-foreground uppercase tracking-widest">
+          {"Recent submissions"}
+        </p>
+        <ExportSubmissionsButton
+          disabled={items.length === 0}
+          isExporting={isExporting}
+          onExport={handleExport}
+        />
+      </div>
 
       {items.length === 0 ? (
         <div className="rounded-lg border border-border bg-card/40 p-8 text-center">

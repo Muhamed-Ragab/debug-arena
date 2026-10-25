@@ -14,3 +14,30 @@ export const AVATAR_PRESETS: AvatarPreset[] = [
   { color: "#f43f5e", id: "rose" },
   { color: "#10b981", id: "emerald" },
 ];
+
+export const EXPORT_SUBMISSION_CSV_HEADERS = [
+  "ID",
+  "Challenge Title",
+  "Category",
+  "Difficulty",
+  "Total Score",
+  "Fix Correct",
+  "Localization Correct",
+  "Hints Used",
+  "Time Spent (s)",
+  "Root Cause Explanation",
+  "Prevention Answer",
+  "AI Feedback",
+  "Submitted At",
+] as const;
+
+export const CSV_FORMULA_TRIGGER_REGEX = /^[=+\-@\t\r|%]/;
+export const NUMERIC_STRING_REGEX = /^-?\d+(\.\d+)?$/;
+export const DEFAULT_SUBMISSION_EXPORT_LIMIT = 1000;
+
+export const EXPORT_MESSAGES = {
+  ERROR: "Failed to export submissions. Please try again.",
+  GENERATE_ERROR: "Failed to generate export file. Please try again.",
+  PREPARING: (format: string) => `Preparing ${format.toUpperCase()} export...`,
+  SUCCESS: (filename: string) => `Successfully downloaded ${filename}`,
+} as const;
