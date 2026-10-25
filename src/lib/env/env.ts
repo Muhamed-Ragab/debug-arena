@@ -33,6 +33,8 @@ export const env = createEnv({
       .enum(["development", "test", "production"])
       .default("development"),
     REDIS_URL: z.string().default("redis://localhost:6379"),
+    VERCEL_PROJECT_PRODUCTION_URL: z.string().optional(),
+    VERCEL_URL: z.string().optional(),
   },
 });
 

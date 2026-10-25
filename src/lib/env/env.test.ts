@@ -8,4 +8,9 @@ describe("env configuration", () => {
     expect(env.BETTER_AUTH_SECRET).toBeDefined();
     expect(env.NODE_ENV).toBeDefined();
   });
+
+  it("supports VERCEL_PROJECT_PRODUCTION_URL and VERCEL_URL as server environment variables", () => {
+    expect("VERCEL_PROJECT_PRODUCTION_URL" in env).toBe(true);
+    expect("VERCEL_URL" in env).toBe(true);
+  });
 });
