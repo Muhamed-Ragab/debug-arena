@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import Script from "next/script";
 import { ThemeProvider } from "next-themes";
 import { getBaseUrl, SITE_CONFIG } from "@/lib/seo/config";
 import { OrganizationJsonLd, WebSiteJsonLd } from "@/lib/seo/json-ld";
@@ -54,6 +55,19 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background text-foreground antialiased">
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-JWHPCBPHYL"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-JWHPCBPHYL');
+          `}
+        </Script>
         <OrganizationJsonLd />
         <WebSiteJsonLd />
         <ThemeProvider
