@@ -14,6 +14,10 @@ export const env = createEnv({
     ADMIN_EMAIL: z.string().email().optional(),
     ADMIN_NAME: z.string().min(2).optional(),
     ADMIN_PASSWORD: z.string().min(8).optional(),
+    AI_ENCRYPTION_SECRET: z
+      .string()
+      .min(32)
+      .default("dev-ai-encryption-secret-32-chars-min!"),
     BETTER_AUTH_SECRET: z
       .string()
       .min(1)
