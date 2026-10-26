@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { encryptApiKey } from "@/lib/crypto/encryption";
 import { DEFAULT_CATEGORIES } from "./constants";
 
 vi.mock("@/lib/ai/rate-limit", () => ({
@@ -201,6 +202,34 @@ describe("profile/service", () => {
       expect(config.apiKeys[0]?.provider).toBe("anthropic");
       expect(config.settings.activeProvider).toBe("anthropic");
       expect(config.dailyQuota.isByok).toBe(true);
+    });
+
+    it("getActiveAiCredentials resolves decrypted BYOK key and active model", async () => {
+      const svc = createProfileService(mockRepo);
+      mockRepo.findAiSettingsByUserId.mockResolvedValueOnce({
+        activeModel: "gpt-4o",
+        activeProvider: "openai",
+        customModel: null,
+        id: "set-1",
+        updatedAt: new Date(),
+        userId: "user-1",
+      });
+      mockRepo.findApiKeyByProvider.mockResolvedValueOnce({
+        createdAt: new Date(),
+        encryptedApiKey: encryptApiKey("sk-real-secret"),
+        id: "k-1",
+        keyPreview: "sk-pro...cdef",
+        provider: "openai",
+        updatedAt: new Date(),
+        userId: "user-1",
+      });
+
+      const creds = await svc.getActiveAiCredentials("user-1");
+
+      expect(creds.isByok).toBe(true);
+      expect(creds.provider).toBe("openai");
+      expect(creds.modelName).toBe("gpt-4o");
+      expect(creds.apiKey).toBe("sk-real-secret");
     });
   });
 

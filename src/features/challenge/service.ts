@@ -2,10 +2,9 @@ import { revalidatePath } from "next/cache";
 import { invalidateLeaderboardCache } from "@/features/leaderboard/cache";
 import { leaderboardService } from "@/features/leaderboard/service";
 import { profileRepository } from "@/features/profile/repository";
-import { AI_PRIMARY_MODEL } from "@/lib/ai/constants";
+import { profileService } from "@/features/profile/service";
 import { checkAIRateLimit } from "@/lib/ai/rate-limit";
 import type { AIProviderType } from "@/lib/ai/types";
-import { decryptApiKey } from "@/lib/crypto/encryption";
 import { isSolved } from "@/lib/domain/scoring";
 import { ActionError, NotFoundError } from "@/lib/safe-action";
 import { DIFFICULTY_LABEL, STATUS_LABEL } from "./constants";
@@ -48,34 +47,7 @@ export async function resolveSubmissionAiConfig(userId: string): Promise<{
   modelName: string;
   provider: AIProviderType;
 }> {
-  const aiSettings = await profileRepository.findAiSettingsByUserId(userId);
-  let isByok = false;
-  let provider: AIProviderType = "platform";
-  let modelName: string = AI_PRIMARY_MODEL;
-  let apiKey: string | undefined;
-
-  if (aiSettings && aiSettings.activeProvider !== "platform") {
-    const keyRow = await profileRepository.findApiKeyByProvider(
-      userId,
-      aiSettings.activeProvider
-    );
-    if (keyRow) {
-      try {
-        apiKey = decryptApiKey(keyRow.encryptedApiKey);
-        provider = aiSettings.activeProvider as AIProviderType;
-        modelName =
-          aiSettings.customModel || aiSettings.activeModel || AI_PRIMARY_MODEL;
-        isByok = true;
-      } catch (err) {
-        console.warn(
-          "[submitChallenge] Failed to decrypt user key, falling back to platform default:",
-          err
-        );
-      }
-    }
-  }
-
-  return { apiKey, isByok, modelName, provider };
+  return await profileService.getActiveAiCredentials(userId);
 }
 
 function resolveSubmissionArtifact(

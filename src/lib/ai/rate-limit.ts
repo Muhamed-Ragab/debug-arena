@@ -83,10 +83,12 @@ export async function checkAIRateLimit(
       };
     }
 
-    // 3. Increment daily usage counter
-    const dailyCount = await redis.incr(dailyKey);
-    if (dailyCount === 1) {
-      await redis.expire(dailyKey, 86_400);
+    // 3. Increment daily usage counter for platform requests
+    if (!isByok) {
+      const dailyCount = await redis.incr(dailyKey);
+      if (dailyCount === 1) {
+        await redis.expire(dailyKey, 86_400);
+      }
     }
 
     const remaining = Math.max(0, limit - rpmCount);

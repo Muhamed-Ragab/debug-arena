@@ -3,6 +3,13 @@ import { describe, expect, it, vi } from "vitest";
 import HomePage from "./page";
 import { Providers } from "./providers";
 
+vi.mock("@/lib/auth/client", () => ({
+  authClient: {
+    useSession: () => ({ data: null, isPending: false }),
+  },
+  useSession: () => ({ data: null, isPending: false }),
+}));
+
 vi.mock("@/features/category/service", () => ({
   categoryService: {
     getActiveCategories: vi.fn().mockResolvedValue([]),

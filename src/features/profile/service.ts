@@ -1,6 +1,13 @@
 import { leaderboardService } from "@/features/leaderboard/service";
+import { AI_PRIMARY_MODEL } from "@/lib/ai/constants";
 import { getDailyAIQuota } from "@/lib/ai/rate-limit";
-import { encryptApiKey, maskApiKey } from "@/lib/crypto/encryption";
+import { testProviderConnection } from "@/lib/ai/test-connection";
+import type { AIProviderType } from "@/lib/ai/types";
+import {
+  decryptApiKey,
+  encryptApiKey,
+  maskApiKey,
+} from "@/lib/crypto/encryption";
 import {
   calcPoints,
   countSolvedChallenges,
@@ -645,6 +652,67 @@ export function createProfileService(
     };
   }
 
+  async function getActiveAiCredentials(userId: string): Promise<{
+    apiKey: string | undefined;
+    isByok: boolean;
+    modelName: string;
+    provider: AIProviderType;
+  }> {
+    const aiSettings = await repo.findAiSettingsByUserId(userId);
+    let isByok = false;
+    let provider: AIProviderType = "platform";
+    let modelName: string = AI_PRIMARY_MODEL;
+    let apiKey: string | undefined;
+
+    if (aiSettings && aiSettings.activeProvider !== "platform") {
+      const keyRow = await repo.findApiKeyByProvider(
+        userId,
+        aiSettings.activeProvider
+      );
+      if (keyRow) {
+        try {
+          apiKey = decryptApiKey(keyRow.encryptedApiKey);
+          provider = aiSettings.activeProvider as AIProviderType;
+          modelName =
+            aiSettings.customModel ||
+            aiSettings.activeModel ||
+            AI_PRIMARY_MODEL;
+          isByok = true;
+        } catch (err) {
+          console.warn(
+            "[profileService.getActiveAiCredentials] Failed to decrypt user key:",
+            err
+          );
+        }
+      }
+    }
+
+    return { apiKey, isByok, modelName, provider };
+  }
+
+  async function testConnection(
+    userId: string,
+    provider: AIProviderType,
+    apiKey?: string,
+    modelId?: string
+  ): Promise<{ error?: string; latencyMs: number; success: boolean }> {
+    let effectiveKey = apiKey?.trim();
+
+    if (!effectiveKey && provider !== "platform") {
+      const existingKeyRow = await repo.findApiKeyByProvider(userId, provider);
+      if (!existingKeyRow) {
+        return {
+          error: `No saved API key found for ${provider}`,
+          latencyMs: 0,
+          success: false,
+        };
+      }
+      effectiveKey = decryptApiKey(existingKeyRow.encryptedApiKey);
+    }
+
+    return await testProviderConnection(provider, effectiveKey || "", modelId);
+  }
+
   return {
     buildCategoryStats,
     buildRadarData,
@@ -652,11 +720,13 @@ export function createProfileService(
     calcPoints,
     deleteApiKey,
     exportUserSubmissions,
+    getActiveAiCredentials,
     getAiConfig,
     getUserProfileData,
     getUserSettingsData,
     isSolved,
     saveApiKey,
+    testConnection,
     updateAiSettings,
   };
 }

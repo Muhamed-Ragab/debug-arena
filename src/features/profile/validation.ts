@@ -64,6 +64,7 @@ export const saveApiKeyInputSchema = z.object({
 
 export const saveApiKeyOutputSchema = z
   .object({
+    id: z.string().optional(),
     keyPreview: z.string().optional(),
     provider: z.string().optional(),
     success: z.boolean(),

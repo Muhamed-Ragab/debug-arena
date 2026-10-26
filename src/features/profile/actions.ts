@@ -1,8 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { testProviderConnection } from "@/lib/ai/test-connection";
-import { decryptApiKey } from "@/lib/crypto/encryption";
 import { getRedis } from "@/lib/redis";
 import { ActionError, authActionClient } from "@/lib/safe-action";
 import { profileRepository } from "./repository";
@@ -183,6 +181,7 @@ export const saveApiKeyAction = authActionClient
       console.warn("revalidate outside request");
     }
     return {
+      id: result.id,
       keyPreview: result.keyPreview,
       provider: result.provider,
       success: true,
@@ -231,29 +230,15 @@ export const testConnectionAction = authActionClient
   .outputSchema(testConnectionOutputSchema)
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.user.id;
-    const { provider, modelId } = parsedInput;
-    let effectiveKey = parsedInput.apiKey?.trim();
+    const { provider, modelId, apiKey } = parsedInput;
 
-    if (!effectiveKey && provider !== "platform") {
-      const existingKeyRow = await profileRepository.findApiKeyByProvider(
-        userId,
-        provider
-      );
-      if (!existingKeyRow) {
-        return {
-          error: `No saved API key found for ${provider}`,
-          latencyMs: 0,
-          success: false,
-        };
-      }
-      effectiveKey = decryptApiKey(existingKeyRow.encryptedApiKey);
-    }
-
-    const result = await testProviderConnection(
+    const result = await profileService.testConnection(
+      userId,
       provider,
-      effectiveKey || "",
+      apiKey,
       modelId
     );
+
     return {
       error: result.error,
       latencyMs: result.latencyMs,

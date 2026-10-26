@@ -117,12 +117,3 @@ export const userAiSettings = pgTable(
     }),
   ]
 );
-
-export type ProfileLinkSelect = typeof profileLinks.$inferSelect;
-export type ProfileLinkInsert = typeof profileLinks.$inferInsert;
-
-export type UserApiKeySelect = typeof userApiKeys.$inferSelect;
-export type UserApiKeyInsert = typeof userApiKeys.$inferInsert;
-
-export type UserAiSettingsSelect = typeof userAiSettings.$inferSelect;
-export type UserAiSettingsInsert = typeof userAiSettings.$inferInsert;

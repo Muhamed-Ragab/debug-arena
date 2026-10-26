@@ -61,7 +61,6 @@ describe("AI Rate Limiter & Usage Quotas", () => {
     it("allows up to 30 RPM and does not enforce 15 daily limit", async () => {
       mockRedis.incr.mockResolvedValueOnce(10); // 10th request this minute
       mockRedis.ttl.mockResolvedValueOnce(50);
-      mockRedis.incr.mockResolvedValueOnce(25); // 25th daily request
 
       const result = await checkAIRateLimit("user-byok", true);
 

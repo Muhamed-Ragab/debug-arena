@@ -18,23 +18,21 @@ interface Props {
   selectedLines?: number[];
 }
 
+const MODEL_FAMILY_LABELS: readonly [string, string][] = [
+  ["claude", "Claude"],
+  ["gpt-4o", "GPT-4o"],
+  ["gemini", "Gemini"],
+  ["llama", "Llama"],
+];
+
 function getModelBadgeLabel(model?: string, provider?: string): string {
-  if (provider && provider !== "platform") {
-    if (model?.includes("claude")) {
-      return "Claude";
-    }
-    if (model?.includes("gpt-4o")) {
-      return "GPT-4o";
-    }
-    if (model?.includes("gemini")) {
-      return "Gemini";
-    }
-    if (model?.includes("llama")) {
-      return "Llama";
-    }
-    return model || "BYOK";
+  if (!provider || provider === "platform") {
+    return "Platform AI";
   }
-  return "Platform AI";
+  const match = MODEL_FAMILY_LABELS.find(([needle]) =>
+    model?.toLowerCase().includes(needle)
+  );
+  return match ? match[1] : model || "BYOK";
 }
 
 export function SubmitBar({
