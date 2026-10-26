@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { AIEvaluationResult } from "@/features/challenge/types";
 import { getAIModel } from "@/lib/ai/client";
 import { AI_FAST_MODEL, AI_PRIMARY_MODEL } from "@/lib/ai/constants";
+import type { AIProviderType } from "@/lib/ai/types";
 import { env } from "@/lib/env/env";
 import { overlapScore } from "./text-similarity";
 
@@ -173,8 +174,28 @@ const aiEvaluationSchema = z.object({
   rootCauseScore: z.number().min(0).max(25),
 });
 
-export const getEvaluatorStrategy = (apiKey?: string): EvaluatorStrategy => {
-  const effectiveKey = apiKey || env.GROQ_API_KEY;
+export interface EvaluatorStrategyOptions {
+  apiKey?: string;
+  model?: string;
+  provider?: AIProviderType;
+}
+
+export const getEvaluatorStrategy = (
+  options?: EvaluatorStrategyOptions | string
+): EvaluatorStrategy => {
+  const opts: EvaluatorStrategyOptions =
+    typeof options === "string" ? { apiKey: options } : (options ?? {});
+  const provider = opts.provider ?? "platform";
+  const modelName = opts.model ?? AI_PRIMARY_MODEL;
+
+  let effectiveKey = opts.apiKey;
+  if (
+    (provider === "platform" || provider === "groq") &&
+    effectiveKey === undefined
+  ) {
+    effectiveKey = env.GROQ_API_KEY;
+  }
+
   if (!effectiveKey) {
     return (params) =>
       Promise.resolve(
@@ -187,8 +208,11 @@ export const getEvaluatorStrategy = (apiKey?: string): EvaluatorStrategy => {
       );
   }
 
-  // ponytail: resolve model facade dynamically per strategy invocation
-  const model = getAIModel(AI_PRIMARY_MODEL, effectiveKey);
+  // resolve model facade dynamically per strategy invocation
+  const model = getAIModel(modelName, {
+    apiKey: effectiveKey,
+    provider,
+  });
 
   return async (params) => {
     const {
@@ -265,11 +289,11 @@ ${solutionExplanation || userExplanation}
         ...output,
         confidence: "high",
         isAiGraded: true,
-        modelUsed: AI_PRIMARY_MODEL,
+        modelUsed: modelName,
       };
     } catch (err: unknown) {
       console.warn(
-        "[Groq AI] Request failed or timed out. Using fallback evaluation:",
+        `[${provider} AI] Request failed or timed out. Using fallback evaluation:`,
         err instanceof Error ? err.message : err
       );
       return fallbackEvaluation(
@@ -337,13 +361,12 @@ ${codeSnippet}`;
   };
 };
 
-// Deprecated exact-match legacy exports to not break callers that haven't updated yet,
-// they just wrap the strategies with the default env keys.
+// Evaluates user explanation with dynamic multi-model AI provider or fallback.
 export function evaluateExplanationWithGroq(
   params: EvaluateExplanationParams,
-  apiKey?: string
+  options?: EvaluatorStrategyOptions | string
 ): Promise<AIEvaluationResult> {
-  const strategy = getEvaluatorStrategy(apiKey);
+  const strategy = getEvaluatorStrategy(options);
   return strategy(params);
 }
 

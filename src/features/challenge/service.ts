@@ -2,10 +2,17 @@ import { revalidatePath } from "next/cache";
 import { invalidateLeaderboardCache } from "@/features/leaderboard/cache";
 import { leaderboardService } from "@/features/leaderboard/service";
 import { profileRepository } from "@/features/profile/repository";
+import { AI_PRIMARY_MODEL } from "@/lib/ai/constants";
+import { checkAIRateLimit } from "@/lib/ai/rate-limit";
+import type { AIProviderType } from "@/lib/ai/types";
+import { decryptApiKey } from "@/lib/crypto/encryption";
 import { isSolved } from "@/lib/domain/scoring";
-import { NotFoundError } from "@/lib/safe-action";
+import { ActionError, NotFoundError } from "@/lib/safe-action";
 import { DIFFICULTY_LABEL, STATUS_LABEL } from "./constants";
-import { evaluateExplanationWithGroq } from "./lib/ai-evaluator";
+import {
+  evaluateExplanationWithGroq,
+  getEvaluatorStrategy,
+} from "./lib/ai-evaluator";
 import { gradeSubmission } from "./lib/grading";
 import type { HiddenTestSpec } from "./lib/sandbox";
 import { runSandboxTests } from "./lib/sandbox";
@@ -33,6 +40,88 @@ export function formatLocalizationAnswer(lines: number[]): string {
     return `Line ${lines[0]}`;
   }
   return `Lines ${lines.join(", ")}`;
+}
+
+export async function resolveSubmissionAiConfig(userId: string): Promise<{
+  apiKey: string | undefined;
+  isByok: boolean;
+  modelName: string;
+  provider: AIProviderType;
+}> {
+  const aiSettings = await profileRepository.findAiSettingsByUserId(userId);
+  let isByok = false;
+  let provider: AIProviderType = "platform";
+  let modelName: string = AI_PRIMARY_MODEL;
+  let apiKey: string | undefined;
+
+  if (aiSettings && aiSettings.activeProvider !== "platform") {
+    const keyRow = await profileRepository.findApiKeyByProvider(
+      userId,
+      aiSettings.activeProvider
+    );
+    if (keyRow) {
+      try {
+        apiKey = decryptApiKey(keyRow.encryptedApiKey);
+        provider = aiSettings.activeProvider as AIProviderType;
+        modelName =
+          aiSettings.customModel || aiSettings.activeModel || AI_PRIMARY_MODEL;
+        isByok = true;
+      } catch (err) {
+        console.warn(
+          "[submitChallenge] Failed to decrypt user key, falling back to platform default:",
+          err
+        );
+      }
+    }
+  }
+
+  return { apiKey, isByok, modelName, provider };
+}
+
+function resolveSubmissionArtifact(
+  buggyArtifact: {
+    buggyLines?: [number, number];
+    files?: Array<{ code: string; name: string }>;
+    hiddenTests?: HiddenTestSpec[];
+  },
+  proposedFixCode?: string
+) {
+  const hiddenTests: HiddenTestSpec[] = buggyArtifact.hiddenTests ?? [];
+  const buggyLines: [number, number] = buggyArtifact.buggyLines ?? [1, 1];
+  const codeToTest =
+    proposedFixCode && proposedFixCode.trim().length > 0
+      ? proposedFixCode
+      : (buggyArtifact.files?.[0]?.code ?? "");
+  return { buggyLines, codeToTest, hiddenTests };
+}
+
+function buildEvaluationDetails(
+  aiEvaluation: {
+    alignmentPercent: number;
+    confidence?: string;
+    modelUsed?: string;
+  },
+  grading: {
+    enhancementSuggestions: string[];
+    isAiGraded: boolean;
+    isCorrect: boolean;
+    keyConceptsIdentified: string[];
+    missedMechanisms: string[];
+    needsEnhancement: boolean;
+  },
+  fallbackModel: string
+) {
+  return {
+    alignmentPercent: aiEvaluation.alignmentPercent,
+    confidence: aiEvaluation.confidence ?? "high",
+    enhancementSuggestions: grading.enhancementSuggestions,
+    isAiGraded: grading.isAiGraded,
+    isCorrect: grading.isCorrect,
+    keyConceptsIdentified: grading.keyConceptsIdentified,
+    missedMechanisms: grading.missedMechanisms,
+    modelUsed: aiEvaluation.modelUsed || fallbackModel,
+    needsEnhancement: grading.needsEnhancement,
+  };
 }
 
 export function createChallengeService(
@@ -273,17 +362,26 @@ export function createChallengeService(
     if (!challenge) {
       throw new NotFoundError("Challenge not found.");
     }
-    const buggyArtifact = challenge.buggyArtifact as {
-      buggyLines?: [number, number];
-      files?: Array<{ code: string; name: string }>;
-      hiddenTests?: HiddenTestSpec[];
-    };
-    const hiddenTests: HiddenTestSpec[] = buggyArtifact.hiddenTests ?? [];
-    const buggyLines: [number, number] = buggyArtifact.buggyLines ?? [1, 1];
-    const codeToTest =
-      input.proposedFixCode && input.proposedFixCode.trim().length > 0
-        ? input.proposedFixCode
-        : (buggyArtifact.files?.[0]?.code ?? "");
+
+    const { apiKey, isByok, modelName, provider } =
+      await resolveSubmissionAiConfig(input.userId);
+
+    const rateLimit = await checkAIRateLimit(input.userId, isByok);
+    if (!rateLimit.allowed) {
+      throw new ActionError(
+        rateLimit.errorReason ??
+          "Rate limit exceeded. Please wait before submitting again."
+      );
+    }
+
+    const { buggyLines, codeToTest, hiddenTests } = resolveSubmissionArtifact(
+      challenge.buggyArtifact as {
+        buggyLines?: [number, number];
+        files?: Array<{ code: string; name: string }>;
+        hiddenTests?: HiddenTestSpec[];
+      },
+      input.proposedFixCode
+    );
     const sandboxResult = await deps.runSandbox(codeToTest, hiddenTests);
     const hintsList = await deps.challengeRepo.findHintsByChallengeId(
       input.challengeId
@@ -291,7 +389,13 @@ export function createChallengeService(
     const totalHintPenalty = hintsList
       .slice(0, input.hintsRevealedCount)
       .reduce((sum, h) => sum + h.penaltyPoints, 0);
-    const aiEvaluation = await deps.evaluate({
+
+    const evaluateFn =
+      deps.evaluate === evaluateExplanationWithGroq
+        ? getEvaluatorStrategy({ apiKey, model: modelName, provider })
+        : deps.evaluate;
+
+    const aiEvaluation = await evaluateFn({
       buggyCodeSnippet: codeToTest,
       canonicalPreventionNotes: challenge.preventionNotes ?? "",
       canonicalRootCause: challenge.rootCauseSummary ?? "",
@@ -318,17 +422,11 @@ export function createChallengeService(
     const localizationAnswer = formatLocalizationAnswer(
       input.localizationLines
     );
-    const evaluationDetails = {
-      alignmentPercent: aiEvaluation.alignmentPercent,
-      confidence: aiEvaluation.confidence ?? "high",
-      enhancementSuggestions: grading.enhancementSuggestions,
-      isAiGraded: grading.isAiGraded,
-      isCorrect: grading.isCorrect,
-      keyConceptsIdentified: grading.keyConceptsIdentified,
-      missedMechanisms: grading.missedMechanisms,
-      modelUsed: aiEvaluation.modelUsed,
-      needsEnhancement: grading.needsEnhancement,
-    };
+    const evaluationDetails = buildEvaluationDetails(
+      aiEvaluation,
+      grading,
+      modelName
+    );
     const submission = (await deps.challengeRepo.insertSubmission({
       aiFeedback: grading.aiFeedback,
       challengeId: input.challengeId,
