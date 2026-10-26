@@ -1,18 +1,19 @@
 "use client";
 
-import { Link2, MonitorSmartphone, ShieldAlert, User } from "lucide-react";
+import { Cpu, Link2, MonitorSmartphone, ShieldAlert, User } from "lucide-react";
 import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import type { CategoryDTO } from "@/features/category/types";
 import { cn } from "@/lib/utils";
+import { AiSettingsTab } from "./components/AiSettingsTab";
 import { DangerZone } from "./components/DangerZone";
 import { EditProfileForm } from "./components/EditProfileForm";
 import { LinkedAccounts } from "./components/LinkedAccounts";
 import { SessionManager } from "./components/SessionManager";
-import type { LinkedAccount, SessionData } from "./types";
+import type { LinkedAccount, SessionData, UserAiConfigData } from "./types";
 
-type SectionId = "profile" | "sessions" | "accounts" | "danger";
+type SectionId = "profile" | "ai" | "sessions" | "accounts" | "danger";
 
 const SECTIONS: {
   id: SectionId;
@@ -20,6 +21,7 @@ const SECTIONS: {
   danger?: boolean;
 }[] = [
   { icon: User, id: "profile" },
+  { icon: Cpu, id: "ai" },
   { icon: MonitorSmartphone, id: "sessions" },
   { icon: Link2, id: "accounts" },
   { danger: true, icon: ShieldAlert, id: "danger" },
@@ -38,6 +40,7 @@ function getNavClasses(isActive: boolean, danger?: boolean): string {
 interface ProfileSettingsPageProps {
   categories: CategoryDTO[];
   initialAccounts?: LinkedAccount[];
+  initialAiConfig?: UserAiConfigData;
   initialProfile?: {
     avatarColor?: string;
     avatarUrl?: string;
@@ -56,6 +59,7 @@ export function ProfileSettingsPage({
   initialProfile,
   initialAccounts,
   initialSessions,
+  initialAiConfig,
 }: ProfileSettingsPageProps) {
   const [active, setActive] = useState<SectionId>("profile");
 
@@ -63,6 +67,8 @@ export function ProfileSettingsPage({
     switch (id) {
       case "accounts":
         return "Connected Accounts";
+      case "ai":
+        return "AI & API Keys";
       case "danger":
         return "Danger Zone";
       case "profile":
@@ -124,6 +130,9 @@ export function ProfileSettingsPage({
                 categories={categories}
                 initialProfile={initialProfile}
               />
+            )}
+            {active === "ai" && (
+              <AiSettingsTab initialAiConfig={initialAiConfig} />
             )}
             {active === "sessions" && (
               <SessionManager sessions={initialSessions ?? []} />

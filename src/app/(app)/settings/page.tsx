@@ -12,15 +12,17 @@ export default async function Page() {
     redirect("/login");
   }
 
-  const [settingsData, categories] = await Promise.all([
+  const [settingsData, categories, aiConfig] = await Promise.all([
     profileService.getUserSettingsData(session.user.id),
     categoryService.getActiveCategories(),
+    profileService.getAiConfig(session.user.id),
   ]);
 
   return (
     <ProfileSettingsPage
       categories={categories}
       initialAccounts={settingsData?.accounts}
+      initialAiConfig={aiConfig}
       initialProfile={settingsData?.profile}
       initialSessions={settingsData?.sessions}
     />
