@@ -71,6 +71,21 @@ describe("ChallengeScreen Component", () => {
     expect(screen.getByText(LINE_MARK_REGEX)).toBeInTheDocument();
   });
 
+  it("renders active model badge in SubmitBar when model is specified", () => {
+    renderWithProviders(
+      <ChallengeScreen
+        activeModel="claude-3-5-sonnet-20241022"
+        activeProvider="anthropic"
+        challenge={mockChallenge}
+        codeLines={mockCodeLines}
+        fileName="Counter.tsx"
+        hints={mockHints}
+      />
+    );
+
+    expect(screen.getByText("Claude")).toBeInTheDocument();
+  });
+
   it("switches to hints tab and reveals a hint", async () => {
     const user = userEvent.setup();
     renderWithProviders(

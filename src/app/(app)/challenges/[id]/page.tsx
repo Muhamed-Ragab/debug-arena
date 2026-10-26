@@ -3,6 +3,7 @@ import { AdminReadOnlyBanner } from "@/features/challenge/components/AdminReadOn
 import { ChallengeScreen } from "@/features/challenge/components/ChallengeScreen";
 import { challengeService } from "@/features/challenge/service";
 import type { DiffLine } from "@/features/challenge/types";
+import { profileRepository } from "@/features/profile/repository";
 import { getServerSession } from "@/lib/auth/session";
 import type { Category, Challenge, Difficulty } from "@/lib/domain/types";
 
@@ -66,6 +67,9 @@ export default async function Page({
     : undefined;
 
   const isAdmin = sessionRole === "admin";
+  const aiSettings = session?.user?.id
+    ? await profileRepository.findAiSettingsByUserId(session.user.id)
+    : null;
 
   return (
     <div className="flex h-full w-full flex-col">
@@ -76,6 +80,8 @@ export default async function Page({
       ) : null}
       <div className="min-h-0 flex-1">
         <ChallengeScreen
+          activeModel={aiSettings?.customModel || aiSettings?.activeModel}
+          activeProvider={aiSettings?.activeProvider}
           challenge={challenge}
           codeLines={codeLines}
           diffLines={referenceFix.diff}

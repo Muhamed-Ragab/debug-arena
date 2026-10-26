@@ -1,10 +1,12 @@
 "use client";
 
-import { Send } from "lucide-react";
+import { Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface Props {
+  activeModel?: string;
+  activeProvider?: string;
   disabled?: boolean;
   fieldErrors?: {
     localizationLines?: string[];
@@ -16,6 +18,25 @@ interface Props {
   selectedLines?: number[];
 }
 
+function getModelBadgeLabel(model?: string, provider?: string): string {
+  if (provider && provider !== "platform") {
+    if (model?.includes("claude")) {
+      return "Claude";
+    }
+    if (model?.includes("gpt-4o")) {
+      return "GPT-4o";
+    }
+    if (model?.includes("gemini")) {
+      return "Gemini";
+    }
+    if (model?.includes("llama")) {
+      return "Llama";
+    }
+    return model || "BYOK";
+  }
+  return "Platform AI";
+}
+
 export function SubmitBar({
   fieldErrors,
   fileName = "main.ts",
@@ -24,6 +45,8 @@ export function SubmitBar({
   selectedLine,
   selectedLines,
   disabled = false,
+  activeModel,
+  activeProvider,
 }: Props) {
   let activeLines: number[] = [];
   if (Array.isArray(selectedLines)) {
@@ -50,16 +73,25 @@ export function SubmitBar({
 
   return (
     <div className="border-border border-t bg-card/60 p-4">
-      <p
-        className={cn(
-          "mb-2 truncate font-mono text-[11px]",
-          localizationError
-            ? "font-medium text-destructive"
-            : "text-muted-foreground"
-        )}
-      >
-        {localizationError ? localizationError : getLineSummary()}
-      </p>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p
+          className={cn(
+            "truncate font-mono text-[11px]",
+            localizationError
+              ? "font-medium text-destructive"
+              : "text-muted-foreground"
+          )}
+        >
+          {localizationError ? localizationError : getLineSummary()}
+        </p>
+        <span
+          className="inline-flex shrink-0 items-center gap-1 rounded border border-border bg-surface px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+          title={`Active Evaluator: ${activeModel || "Platform Evaluator"}`}
+        >
+          <Sparkles className="h-3 w-3 text-primary" />
+          {getModelBadgeLabel(activeModel, activeProvider)}
+        </span>
+      </div>
       <Button
         className="flex w-full items-center justify-center gap-2 rounded py-2.5 font-medium text-[13px] transition-all"
         disabled={isDisabled}

@@ -16,6 +16,8 @@ import { CodeViewer } from "./CodeViewer";
 import { SubmitBar } from "./SubmitBar";
 
 interface Props {
+  activeModel?: string;
+  activeProvider?: string;
   challenge: Challenge;
   codeLines?: string[];
   diffLines?: DiffLine[];
@@ -43,6 +45,8 @@ export function ChallengeScreen({
   diffLines,
   scenarioParagraphs,
   isReadOnly = false,
+  activeModel,
+  activeProvider,
 }: Props) {
   const cfg = getCategoryAppearance({
     color: challenge.categoryColor,
@@ -215,6 +219,8 @@ export function ChallengeScreen({
             </div>
           ) : null}
           <SubmitBar
+            activeModel={activeModel}
+            activeProvider={activeProvider}
             disabled={isReadOnly}
             fieldErrors={ws.fieldErrors}
             fileName={fileName}
