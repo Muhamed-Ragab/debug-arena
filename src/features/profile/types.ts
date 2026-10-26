@@ -10,6 +10,8 @@ export type ProfileLinkRow = typeof schema.profileLinks.$inferSelect;
 export type SubmissionRow = typeof schema.submissions.$inferSelect;
 export type ChallengeRow = typeof schema.challenges.$inferSelect;
 export type LoginAttemptRow = typeof schema.loginAttempts.$inferSelect;
+export type UserApiKeyRow = typeof schema.userApiKeys.$inferSelect;
+export type UserAiSettingsRow = typeof schema.userAiSettings.$inferSelect;
 
 export type UserWithRelations = UserRow & {
   accounts: AccountRow[];
@@ -30,11 +32,18 @@ export type PublishedChallenge = ChallengeRow & {
 };
 
 export interface ProfileRepository {
+  deleteApiKey: (userId: string, provider: string) => Promise<void>;
   deleteUser: (userId: string) => Promise<void>;
+  findAiSettingsByUserId: (userId: string) => Promise<UserAiSettingsRow | null>;
   findAllSubmissionsByUserId: (
     userId: string,
     limit?: number
   ) => Promise<UserWithRelations["submissions"]>;
+  findApiKeyByProvider: (
+    userId: string,
+    provider: string
+  ) => Promise<UserApiKeyRow | null>;
+  findApiKeysByUserId: (userId: string) => Promise<UserApiKeyRow[]>;
   findByIdForSettings: (userId: string) => Promise<UserForSettings | null>;
   findByIdWithRelations: (userId: string) => Promise<{
     user: UserWithRelations | null;
@@ -48,6 +57,12 @@ export interface ProfileRepository {
     userId: string,
     data: Partial<typeof schema.users.$inferInsert>
   ) => Promise<UserRow | null>;
+  upsertAiSettings: (
+    data: typeof schema.userAiSettings.$inferInsert
+  ) => Promise<UserAiSettingsRow>;
+  upsertApiKey: (
+    data: typeof schema.userApiKeys.$inferInsert
+  ) => Promise<UserApiKeyRow>;
   upsertCategoryStats: (
     data: typeof schema.userCategoryStats.$inferInsert
   ) => Promise<CategoryStatRow | null>;
@@ -189,4 +204,30 @@ export interface ExportSubmissionsResult {
   content: string;
   filename: string;
   mimeType: string;
+}
+
+export interface UserApiKeyDto {
+  createdAt: string;
+  id: string;
+  keyPreview: string;
+  provider: string;
+  updatedAt: string;
+}
+
+export interface UserAiSettingsDto {
+  activeModel: string;
+  activeProvider: string;
+  customModel: string | null;
+  id?: string;
+  updatedAt?: string;
+}
+
+export interface UserAiConfigData {
+  apiKeys: UserApiKeyDto[];
+  dailyQuota: {
+    isByok: boolean;
+    total: number;
+    used: number;
+  };
+  settings: UserAiSettingsDto;
 }

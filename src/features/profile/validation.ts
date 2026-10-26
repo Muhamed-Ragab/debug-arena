@@ -56,3 +56,48 @@ export const deleteAccountOutputSchema = z
 export const exportSubmissionsOutputSchema = z
   .object({ success: z.boolean() })
   .passthrough();
+
+export const saveApiKeyInputSchema = z.object({
+  apiKey: z.string().min(1, "API key cannot be empty"),
+  provider: z.enum(["groq", "openai", "anthropic", "google"]),
+});
+
+export const saveApiKeyOutputSchema = z
+  .object({
+    keyPreview: z.string().optional(),
+    provider: z.string().optional(),
+    success: z.boolean(),
+  })
+  .passthrough();
+
+export const deleteApiKeyInputSchema = z.object({
+  provider: z.enum(["groq", "openai", "anthropic", "google"]),
+});
+
+export const deleteApiKeyOutputSchema = z
+  .object({ success: z.boolean() })
+  .passthrough();
+
+export const updateAiSettingsInputSchema = z.object({
+  activeModel: z.string().min(1, "Active model cannot be empty"),
+  activeProvider: z.enum(["platform", "groq", "openai", "anthropic", "google"]),
+  customModel: z.string().optional().nullable(),
+});
+
+export const updateAiSettingsOutputSchema = z
+  .object({ success: z.boolean() })
+  .passthrough();
+
+export const testConnectionInputSchema = z.object({
+  apiKey: z.string().optional(),
+  modelId: z.string().optional(),
+  provider: z.enum(["platform", "groq", "openai", "anthropic", "google"]),
+});
+
+export const testConnectionOutputSchema = z
+  .object({
+    error: z.string().optional(),
+    latencyMs: z.number(),
+    success: z.boolean(),
+  })
+  .passthrough();

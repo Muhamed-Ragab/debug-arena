@@ -8,6 +8,8 @@ import type {
   CategoryStatRow,
   ProfileRepository,
   PublishedChallenge,
+  UserAiSettingsRow,
+  UserApiKeyRow,
   UserForSettings,
   UserRow,
   UserWithRelations,
@@ -200,13 +202,129 @@ export function createProfileRepository(
     }
   }
 
+  async function findApiKeysByUserId(userId: string): Promise<UserApiKeyRow[]> {
+    try {
+      const keys = await dbClient.query.userApiKeys.findMany({
+        orderBy: [desc(schema.userApiKeys.updatedAt)],
+        where: eq(schema.userApiKeys.userId, userId),
+      });
+      return keys;
+    } catch (err) {
+      console.warn("[profileRepository.findApiKeysByUserId] DB error:", err);
+      throw toOfflineError(err, OFFLINE_MESSAGE);
+    }
+  }
+
+  async function findApiKeyByProvider(
+    userId: string,
+    provider: string
+  ): Promise<UserApiKeyRow | null> {
+    try {
+      const key = await dbClient.query.userApiKeys.findFirst({
+        where: and(
+          eq(schema.userApiKeys.userId, userId),
+          eq(schema.userApiKeys.provider, provider)
+        ),
+      });
+      return key ?? null;
+    } catch (err) {
+      console.warn("[profileRepository.findApiKeyByProvider] DB error:", err);
+      throw toOfflineError(err, OFFLINE_MESSAGE);
+    }
+  }
+
+  async function upsertApiKey(
+    data: typeof schema.userApiKeys.$inferInsert
+  ): Promise<UserApiKeyRow> {
+    try {
+      const [saved] = await dbClient
+        .insert(schema.userApiKeys)
+        .values(data)
+        .onConflictDoUpdate({
+          set: {
+            encryptedApiKey: data.encryptedApiKey,
+            keyPreview: data.keyPreview,
+            updatedAt: data.updatedAt ?? new Date(),
+          },
+          target: [schema.userApiKeys.userId, schema.userApiKeys.provider],
+        })
+        .returning();
+
+      return saved;
+    } catch (err) {
+      console.warn("[profileRepository.upsertApiKey] DB error:", err);
+      throw toOfflineError(err, OFFLINE_MESSAGE);
+    }
+  }
+
+  async function deleteApiKey(userId: string, provider: string): Promise<void> {
+    try {
+      await dbClient
+        .delete(schema.userApiKeys)
+        .where(
+          and(
+            eq(schema.userApiKeys.userId, userId),
+            eq(schema.userApiKeys.provider, provider)
+          )
+        );
+    } catch (err) {
+      console.warn("[profileRepository.deleteApiKey] DB error:", err);
+      throw toOfflineError(err, OFFLINE_MESSAGE);
+    }
+  }
+
+  async function findAiSettingsByUserId(
+    userId: string
+  ): Promise<UserAiSettingsRow | null> {
+    try {
+      const settings = await dbClient.query.userAiSettings.findFirst({
+        where: eq(schema.userAiSettings.userId, userId),
+      });
+      return settings ?? null;
+    } catch (err) {
+      console.warn("[profileRepository.findAiSettingsByUserId] DB error:", err);
+      throw toOfflineError(err, OFFLINE_MESSAGE);
+    }
+  }
+
+  async function upsertAiSettings(
+    data: typeof schema.userAiSettings.$inferInsert
+  ): Promise<UserAiSettingsRow> {
+    try {
+      const [saved] = await dbClient
+        .insert(schema.userAiSettings)
+        .values(data)
+        .onConflictDoUpdate({
+          set: {
+            activeModel: data.activeModel,
+            activeProvider: data.activeProvider,
+            customModel: data.customModel,
+            updatedAt: data.updatedAt ?? new Date(),
+          },
+          target: schema.userAiSettings.userId,
+        })
+        .returning();
+
+      return saved;
+    } catch (err) {
+      console.warn("[profileRepository.upsertAiSettings] DB error:", err);
+      throw toOfflineError(err, OFFLINE_MESSAGE);
+    }
+  }
+
   return {
+    deleteApiKey,
     deleteUser,
+    findAiSettingsByUserId,
     findAllSubmissionsByUserId,
+    findApiKeyByProvider,
+    findApiKeysByUserId,
     findByIdForSettings,
     findByIdWithRelations,
     findCategoryStats,
     updateUser,
+    upsertAiSettings,
+    upsertApiKey,
     upsertCategoryStats,
   };
 }

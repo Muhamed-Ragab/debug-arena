@@ -1,5 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_CATEGORIES } from "./constants";
+
+vi.mock("@/lib/ai/rate-limit", () => ({
+  getDailyAIQuota: vi.fn(async (_userId, isByok) => ({
+    isByok: Boolean(isByok),
+    total: isByok ? -1 : 15,
+    used: 0,
+  })),
+}));
+
 import {
   buildCategoryStats,
   buildRadarData,
@@ -73,6 +82,125 @@ describe("profile/service", () => {
     it("handles null or empty string safely", () => {
       expect(sanitizeCsvFormula("")).toBe("");
       expect(sanitizeCsvFormula(null as unknown as string)).toBe("");
+    });
+  });
+
+  describe("AI Settings & BYOK Keys in profileService", () => {
+    const mockRepo = {
+      deleteApiKey: vi.fn(),
+      deleteUser: vi.fn(),
+      findAiSettingsByUserId: vi.fn(),
+      findAllSubmissionsByUserId: vi.fn(),
+      findApiKeyByProvider: vi.fn(),
+      findApiKeysByUserId: vi.fn(),
+      findByIdForSettings: vi.fn(),
+      findByIdWithRelations: vi.fn(),
+      findCategoryStats: vi.fn(),
+      updateUser: vi.fn(),
+      upsertAiSettings: vi.fn(),
+      upsertApiKey: vi.fn(),
+      upsertCategoryStats: vi.fn(),
+    };
+
+    it("saveApiKey encrypts key, creates preview, and persists via repo", async () => {
+      const svc = createProfileService(mockRepo);
+      mockRepo.upsertApiKey.mockResolvedValueOnce({
+        createdAt: new Date(),
+        encryptedApiKey: "iv:cipher:tag",
+        id: "key-1",
+        keyPreview: "sk-ant...4a2b",
+        provider: "anthropic",
+        updatedAt: new Date(),
+        userId: "user-1",
+      });
+
+      const result = await svc.saveApiKey(
+        "user-1",
+        "anthropic",
+        "sk-ant-api03-1234567890abcdef4a2b"
+      );
+
+      expect(mockRepo.upsertApiKey).toHaveBeenCalledWith(
+        expect.objectContaining({
+          keyPreview: expect.stringContaining("...4a2b"),
+          provider: "anthropic",
+          userId: "user-1",
+        })
+      );
+      expect(result.provider).toBe("anthropic");
+    });
+
+    it("deleteApiKey removes key and resets active provider if matching", async () => {
+      const svc = createProfileService(mockRepo);
+      mockRepo.findAiSettingsByUserId.mockResolvedValueOnce({
+        activeModel: "claude-3-5-sonnet-20241022",
+        activeProvider: "anthropic",
+        customModel: null,
+        id: "settings-1",
+        updatedAt: new Date(),
+        userId: "user-1",
+      });
+
+      await svc.deleteApiKey("user-1", "anthropic");
+
+      expect(mockRepo.deleteApiKey).toHaveBeenCalledWith("user-1", "anthropic");
+      expect(mockRepo.upsertAiSettings).toHaveBeenCalledWith(
+        expect.objectContaining({
+          activeModel: "openai/gpt-oss-120b",
+          activeProvider: "platform",
+          userId: "user-1",
+        })
+      );
+    });
+
+    it("updateAiSettings rejects provider activation if no key is configured", async () => {
+      const svc = createProfileService(mockRepo);
+      mockRepo.findApiKeyByProvider.mockResolvedValueOnce(null);
+
+      let caughtError: unknown;
+      try {
+        await svc.updateAiSettings("user-1", {
+          activeModel: "gpt-4o",
+          activeProvider: "openai",
+        });
+      } catch (err) {
+        caughtError = err;
+      }
+
+      expect(caughtError).toBeInstanceOf(Error);
+      expect((caughtError as Error).message).toMatch(
+        /without configured API key/i
+      );
+    });
+
+    it("getAiConfig aggregates API keys, settings, and daily quota", async () => {
+      const svc = createProfileService(mockRepo);
+      mockRepo.findApiKeysByUserId.mockResolvedValueOnce([
+        {
+          createdAt: new Date("2026-10-26T10:00:00Z"),
+          encryptedApiKey: "enc",
+          id: "k-1",
+          keyPreview: "sk-ant...4a2b",
+          provider: "anthropic",
+          updatedAt: new Date("2026-10-26T10:00:00Z"),
+          userId: "user-1",
+        },
+      ]);
+      mockRepo.findAiSettingsByUserId.mockResolvedValueOnce({
+        activeModel: "claude-3-5-sonnet-20241022",
+        activeProvider: "anthropic",
+        customModel: null,
+        id: "set-1",
+        updatedAt: new Date("2026-10-26T10:00:00Z"),
+        userId: "user-1",
+      });
+
+      const config = await svc.getAiConfig("user-1");
+
+      expect(config.apiKeys).toHaveLength(1);
+      expect(config.apiKeys[0]?.provider).toBe("anthropic");
+      expect(config.settings.activeProvider).toBe("anthropic");
+      expect(config.dailyQuota.isByok).toBe(true);
     });
   });
 

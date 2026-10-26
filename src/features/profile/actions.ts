@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { testProviderConnection } from "@/lib/ai/test-connection";
+import { decryptApiKey } from "@/lib/crypto/encryption";
 import { getRedis } from "@/lib/redis";
 import { ActionError, authActionClient } from "@/lib/safe-action";
 import { profileRepository } from "./repository";
@@ -8,6 +10,8 @@ import { profileService } from "./service";
 import {
   deleteAccountOutputSchema,
   deleteAccountSchema,
+  deleteApiKeyInputSchema,
+  deleteApiKeyOutputSchema,
   editProfileOutputSchema,
   editProfileSchema,
   exportSubmissionsInputSchema,
@@ -16,8 +20,14 @@ import {
   revokeAllOtherSessionsSchema,
   revokeSessionOutputSchema,
   revokeSessionSchema,
+  saveApiKeyInputSchema,
+  saveApiKeyOutputSchema,
+  testConnectionInputSchema,
+  testConnectionOutputSchema,
   unlinkAccountOutputSchema,
   unlinkAccountSchema,
+  updateAiSettingsInputSchema,
+  updateAiSettingsOutputSchema,
 } from "./validation";
 
 export const updateProfileAction = authActionClient
@@ -157,5 +167,96 @@ export const exportSubmissionsAction = authActionClient
       filename: result.filename,
       mimeType: result.mimeType,
       success: true,
+    };
+  });
+
+export const saveApiKeyAction = authActionClient
+  .inputSchema(saveApiKeyInputSchema)
+  .outputSchema(saveApiKeyOutputSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const userId = ctx.user.id;
+    const { provider, apiKey } = parsedInput;
+    const result = await profileService.saveApiKey(userId, provider, apiKey);
+    try {
+      revalidatePath("/settings");
+    } catch {
+      console.warn("revalidate outside request");
+    }
+    return {
+      keyPreview: result.keyPreview,
+      provider: result.provider,
+      success: true,
+    };
+  });
+
+export const deleteApiKeyAction = authActionClient
+  .inputSchema(deleteApiKeyInputSchema)
+  .outputSchema(deleteApiKeyOutputSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const userId = ctx.user.id;
+    const { provider } = parsedInput;
+    await profileService.deleteApiKey(userId, provider);
+    try {
+      revalidatePath("/settings");
+    } catch {
+      console.warn("revalidate outside request");
+    }
+    return { success: true };
+  });
+
+export const updateAiSettingsAction = authActionClient
+  .inputSchema(updateAiSettingsInputSchema)
+  .outputSchema(updateAiSettingsOutputSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const userId = ctx.user.id;
+    try {
+      await profileService.updateAiSettings(userId, parsedInput);
+    } catch (err) {
+      throw new ActionError(
+        err instanceof Error ? err.message : "Failed to update AI settings",
+        { cause: err }
+      );
+    }
+    try {
+      revalidatePath("/settings");
+      revalidatePath("/challenges");
+    } catch {
+      console.warn("revalidate outside request");
+    }
+    return { success: true };
+  });
+
+export const testConnectionAction = authActionClient
+  .inputSchema(testConnectionInputSchema)
+  .outputSchema(testConnectionOutputSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const userId = ctx.user.id;
+    const { provider, modelId } = parsedInput;
+    let effectiveKey = parsedInput.apiKey?.trim();
+
+    if (!effectiveKey && provider !== "platform") {
+      const existingKeyRow = await profileRepository.findApiKeyByProvider(
+        userId,
+        provider
+      );
+      if (!existingKeyRow) {
+        return {
+          error: `No saved API key found for ${provider}`,
+          latencyMs: 0,
+          success: false,
+        };
+      }
+      effectiveKey = decryptApiKey(existingKeyRow.encryptedApiKey);
+    }
+
+    const result = await testProviderConnection(
+      provider,
+      effectiveKey || "",
+      modelId
+    );
+    return {
+      error: result.error,
+      latencyMs: result.latencyMs,
+      success: result.success,
     };
   });

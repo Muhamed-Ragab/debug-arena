@@ -44,7 +44,6 @@ export async function testProviderConnection(
 
     await generateText({
       abortSignal: AbortSignal.timeout(10_000),
-      maxTokens: 2,
       model,
       prompt: "ping",
     });

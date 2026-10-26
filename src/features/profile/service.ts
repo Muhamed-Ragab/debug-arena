@@ -1,4 +1,6 @@
 import { leaderboardService } from "@/features/leaderboard/service";
+import { getDailyAIQuota } from "@/lib/ai/rate-limit";
+import { encryptApiKey, maskApiKey } from "@/lib/crypto/encryption";
 import {
   calcPoints,
   countSolvedChallenges,
@@ -24,6 +26,7 @@ import type {
   RecentSubmission,
   StrengthPoint,
   SubmissionExportDto,
+  UserAiConfigData,
   UserProfileData,
   UserSettingsData,
   UserWithRelations,
@@ -537,15 +540,124 @@ export function createProfileService(
     };
   }
 
+  async function saveApiKey(
+    userId: string,
+    provider: string,
+    apiKey: string
+  ): Promise<{ id: string; keyPreview: string; provider: string }> {
+    const encryptedApiKey = encryptApiKey(apiKey);
+    const keyPreview = maskApiKey(apiKey);
+    const saved = await repo.upsertApiKey({
+      encryptedApiKey,
+      keyPreview,
+      provider,
+      updatedAt: new Date(),
+      userId,
+    });
+    return {
+      id: saved.id,
+      keyPreview: saved.keyPreview,
+      provider: saved.provider,
+    };
+  }
+
+  async function deleteApiKey(
+    userId: string,
+    provider: string
+  ): Promise<{ success: boolean }> {
+    await repo.deleteApiKey(userId, provider);
+    const settings = await repo.findAiSettingsByUserId(userId);
+    if (settings?.activeProvider === provider) {
+      await repo.upsertAiSettings({
+        activeModel: "openai/gpt-oss-120b",
+        activeProvider: "platform",
+        customModel: null,
+        updatedAt: new Date(),
+        userId,
+      });
+    }
+    return { success: true };
+  }
+
+  async function getAiConfig(userId: string): Promise<UserAiConfigData> {
+    const [keys, settings] = await Promise.all([
+      repo.findApiKeysByUserId(userId),
+      repo.findAiSettingsByUserId(userId),
+    ]);
+    const activeProvider = settings?.activeProvider ?? "platform";
+    const isByok = activeProvider !== "platform";
+    const dailyQuota = await getDailyAIQuota(userId, isByok);
+
+    return {
+      apiKeys: keys.map((k) => ({
+        createdAt: k.createdAt.toISOString(),
+        id: k.id,
+        keyPreview: k.keyPreview,
+        provider: k.provider,
+        updatedAt: k.updatedAt.toISOString(),
+      })),
+      dailyQuota,
+      settings: {
+        activeModel: settings?.activeModel ?? "openai/gpt-oss-120b",
+        activeProvider,
+        customModel: settings?.customModel ?? null,
+        id: settings?.id,
+        updatedAt: settings?.updatedAt
+          ? settings.updatedAt.toISOString()
+          : undefined,
+      },
+    };
+  }
+
+  async function updateAiSettings(
+    userId: string,
+    data: {
+      activeModel: string;
+      activeProvider: string;
+      customModel?: string | null;
+    }
+  ): Promise<{
+    activeModel: string;
+    activeProvider: string;
+    customModel: string | null;
+    success: boolean;
+  }> {
+    if (data.activeProvider !== "platform") {
+      const key = await repo.findApiKeyByProvider(userId, data.activeProvider);
+      if (!key) {
+        throw new Error(
+          `Cannot activate provider ${data.activeProvider} without configured API key`
+        );
+      }
+    }
+    const saved = await repo.upsertAiSettings({
+      activeModel: data.activeModel,
+      activeProvider: data.activeProvider,
+      customModel: data.customModel ?? null,
+      updatedAt: new Date(),
+      userId,
+    });
+    return {
+      activeModel: saved.activeModel,
+      activeProvider: saved.activeProvider,
+      customModel: saved.customModel,
+      success: true,
+    };
+  }
+
   return {
     buildCategoryStats,
     buildRadarData,
     buildStrengthData,
     calcPoints,
+    deleteApiKey,
     exportUserSubmissions,
+    getAiConfig,
     getUserProfileData,
     getUserSettingsData,
     isSolved,
+    saveApiKey,
+    updateAiSettings,
   };
 }
 
