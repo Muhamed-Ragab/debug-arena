@@ -147,8 +147,13 @@ export function useAiSettings({ initialAiConfig }: UseAiSettingsProps = {}) {
   ) => {
     setTestingProvider(provider);
     try {
+      const modelToTest =
+        provider === activeProvider
+          ? customModel.trim() || activeModel || undefined
+          : undefined;
       const res = await testConnectionAction({
         apiKey: apiKeyOverride?.trim(),
+        modelId: modelToTest,
         provider,
       });
       if (res?.data) {

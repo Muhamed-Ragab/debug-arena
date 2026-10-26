@@ -72,4 +72,58 @@ describe("Live Provider Connection Test", () => {
     // Ensures sensitive key is not exposed in error string
     expect(result.error).not.toContain("sk-secret-12345");
   });
+
+  it("handles Google sunset or unavailable model with fallback discovery", async () => {
+    vi.mocked(generateText)
+      .mockRejectedValueOnce(
+        new Error(
+          "This model models/gemini-2.0-flash is no longer available. Please update your code to use models/gemini-3.8-flash for the latest features and improvements."
+        )
+      )
+      .mockResolvedValueOnce({
+        text: "pong",
+      } as unknown as Awaited<ReturnType<typeof generateText>>);
+
+    const mockFetch = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      json: async () => ({
+        models: [
+          {
+            name: "models/gemini-3.5-flash",
+            supportedGenerationMethods: ["generateContent"],
+          },
+        ],
+      }),
+      ok: true,
+    } as unknown as Response);
+
+    const result = await testProviderConnection("google", "test-google-key");
+
+    expect(result.success).toBe(true);
+    expect(mockFetch).toHaveBeenCalled();
+    mockFetch.mockRestore();
+  });
+
+  it("recovers from Google text generation timeout when ListModels succeeds", async () => {
+    vi.mocked(generateText).mockRejectedValue(
+      new Error("The operation was aborted due to timeout")
+    );
+
+    const mockFetch = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      json: async () => ({
+        models: [
+          {
+            name: "models/gemini-3.8-flash",
+            supportedGenerationMethods: ["generateContent"],
+          },
+        ],
+      }),
+      ok: true,
+    } as unknown as Response);
+
+    const result = await testProviderConnection("google", "test-google-key");
+
+    expect(result.success).toBe(true);
+    expect(result.error).toBeUndefined();
+    mockFetch.mockRestore();
+  });
 });

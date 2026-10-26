@@ -78,7 +78,7 @@ describe("AI Client Factory & Facade", () => {
       apiKey: "google-test-key",
       provider: "google",
     });
-    const model = provider("gemini-1.5-pro-latest");
+    const model = provider("gemini-3.8-flash");
     expect((model as unknown as { provider: string }).provider).toBe("google");
     expect(
       (model as unknown as { config: { apiKey: string } }).config.apiKey

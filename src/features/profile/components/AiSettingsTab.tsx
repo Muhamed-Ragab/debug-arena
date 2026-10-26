@@ -53,7 +53,7 @@ const PROVIDER_INFO: Record<
     name: "Anthropic",
   },
   google: {
-    description: "Gemini 1.5 Pro & Gemini 1.5 Flash",
+    description: "Gemini 3.8 Flash & Gemini 3 Pro",
     docsUrl: "https://aistudio.google.com/app/apikey",
     keyPlaceholder: "AIzaSy...",
     name: "Google Gemini",
