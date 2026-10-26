@@ -6,11 +6,17 @@ import {
   leaderboardEntries,
   userCategoryStats,
 } from "@/features/leaderboard/schema";
-import { profileLinks } from "@/features/profile/schema";
+import {
+  profileLinks,
+  userAiSettings,
+  userApiKeys,
+} from "@/features/profile/schema";
 
 // --- Relations ---
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   accounts: many(accounts),
+  aiSettings: one(userAiSettings),
+  apiKeys: many(userApiKeys),
   categoryStats: many(userCategoryStats),
   leaderboardEntries: many(leaderboardEntries),
   loginAttempts: many(loginAttempts),
@@ -86,4 +92,12 @@ export const loginAttemptsRelations = relations(loginAttempts, ({ one }) => ({
 
 export const profileLinksRelations = relations(profileLinks, ({ one }) => ({
   user: one(users, { fields: [profileLinks.userId], references: [users.id] }),
+}));
+
+export const userApiKeysRelations = relations(userApiKeys, ({ one }) => ({
+  user: one(users, { fields: [userApiKeys.userId], references: [users.id] }),
+}));
+
+export const userAiSettingsRelations = relations(userAiSettings, ({ one }) => ({
+  user: one(users, { fields: [userAiSettings.userId], references: [users.id] }),
 }));
