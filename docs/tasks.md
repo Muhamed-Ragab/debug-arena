@@ -17,18 +17,34 @@ notes are kept in `docs/superpowers/` as historical records.
       fresh Postgres installs replay migrations without the vector extension
 - [x] Keep the app free with no checkout, subscriptions, or paid tiers
 
-## Next: user-configured AI
+## User-configured AI (BYOK) & Multi-Model Engine
 
-- [ ] Let users choose a provider supported by the Vercel AI SDK
-- [ ] Let users select a model offered by their chosen provider
-- [ ] Store provider keys encrypted at rest; decrypt and use them only in
-      server-side AI operations
-- [ ] Track and enforce per-user AI usage limits before provider calls
-- [ ] Explain remaining usage and limit behavior in user settings
+- [x] Let users choose a provider supported by the Vercel AI SDK (Anthropic, OpenAI, Groq, Google Gemini)
+- [x] Let users select a model offered by their chosen provider
+- [x] Store provider keys encrypted at rest (AES-256-GCM); decrypt and use them only in server-side AI operations
+- [x] Track and enforce per-user AI usage limits (5 RPM / 15 daily platform, 30 RPM unmetered BYOK) before provider calls
+- [x] Explain remaining usage and limit behavior in user settings with live connection testing and workspace model badges
+
+## Feature Roadmap
+
+### 1. Authentic SRE & Investigation Experience
+- [ ] **Interactive "Fix & Test" Sandbox**: Embed code editor (Monaco/CodeMirror) in Challenge "Fix" tab with real-time test execution against sandbox prior to submission
+- [ ] **"On-Call Incident Mode" (`log_only`)**: Dedicated terminal/telemetry triage UI displaying raw server logs, HTTP request timelines, and APM error/latency spikes for root-cause diagnosis without source code
+- [ ] **Multi-File Project Workspace**: File-tree navigation and tabbed file viewing for challenges spanning multiple source files
+
+### 2. AI & Personalized Mentorship
+- [ ] **Socratic AI "Rubber Duck" Mentor**: Interactive in-workspace debugging mentor providing guidance and counter-questions without spoiling solutions
+- [ ] **Targeted On-Call Shift**: Automated weak-spot practice queue surfacing challenges based on user category radar weak points
+
+### 3. Retention & Habit Formation
+- [ ] **"Incident of the Day" (Daily Challenge)**: Curated daily challenge with streak tracking, bonus rank points, and GitHub-style activity heatmap on user profile
+- [ ] **Community Postmortems & Solutions**: Post-solve discussion space where engineers who solved the challenge can share postmortem writeups, discuss architectural mitigations, and vote
+
+### 4. Competitive & Community Growth
+- [ ] **1v1 Speed Debug Duels**: Synchronous or async competitive debugging match mode with Elo rating system
+- [ ] **Community Challenge Submissions**: Pipeline for users to submit sanitized real-world production bugs with test suites, subject to admin review
 
 ## Later
 
 - [ ] Review sandbox isolation and resource limits for production deployment
 - [ ] Improve challenge authoring and review workflows
-- [ ] Add achievements, useful streaks, and social ranking options
-- [ ] Explore adaptive hints and weak-spot recommendations
