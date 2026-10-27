@@ -16,6 +16,8 @@ import {
   editProfileSchema,
   exportSubmissionsInputSchema,
   exportSubmissionsOutputSchema,
+  getActiveSessionsOutputSchema,
+  getActiveSessionsSchema,
   revokeAllOtherSessionsOutputSchema,
   revokeAllOtherSessionsSchema,
   revokeSessionOutputSchema,
@@ -229,6 +231,22 @@ export const revokeAllOtherSessionsAction = authActionClient
       console.warn("revalidate outside request");
     }
     return { success: true };
+  });
+
+export const getActiveSessionsAction = authActionClient
+  .inputSchema(getActiveSessionsSchema)
+  .outputSchema(getActiveSessionsOutputSchema)
+  .action(async ({ ctx }) => {
+    const userId = ctx.user.id;
+    const currentSessionId = ctx.session.id || ctx.session.token;
+    const data = await profileService.getUserSettingsData(
+      userId,
+      currentSessionId
+    );
+    return {
+      sessions: data?.sessions ?? [],
+      success: true,
+    };
   });
 
 export const deleteAccountAction = authActionClient

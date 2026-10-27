@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { SessionData } from "./types";
 
 export const editProfileSchema = z.object({
   avatarUrl: z.string().url().or(z.literal("")).optional().nullable(),
@@ -27,6 +28,8 @@ export const revokeSessionSchema = z.object({
 
 export const revokeAllOtherSessionsSchema = z.object({}).passthrough();
 
+export const getActiveSessionsSchema = z.object({}).passthrough();
+
 export const deleteAccountSchema = z.object({}).passthrough();
 
 export const exportSubmissionsInputSchema = z.object({
@@ -47,6 +50,13 @@ export const revokeSessionOutputSchema = z
 
 export const revokeAllOtherSessionsOutputSchema = z
   .object({ success: z.boolean() })
+  .passthrough();
+
+export const getActiveSessionsOutputSchema = z
+  .object({
+    sessions: z.array(z.custom<SessionData>()),
+    success: z.boolean(),
+  })
   .passthrough();
 
 export const deleteAccountOutputSchema = z

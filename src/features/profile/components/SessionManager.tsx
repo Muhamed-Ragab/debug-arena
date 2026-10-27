@@ -6,11 +6,13 @@ import {
   Laptop,
   LogOut,
   MapPin,
+  RefreshCw,
   ShieldAlert,
   Smartphone,
   Tablet,
 } from "lucide-react";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,7 +26,11 @@ import {
 import { SignOutButton } from "@/features/auth/components/SignOutButton";
 import { flattenValidationErrors } from "@/lib/safe-action/validation";
 import { cn } from "@/lib/utils";
-import { revokeAllOtherSessionsAction, revokeSessionAction } from "../actions";
+import {
+  getActiveSessionsAction,
+  revokeAllOtherSessionsAction,
+  revokeSessionAction,
+} from "../actions";
 import type { DeviceType, SessionData } from "../types";
 
 const DEVICE_ICON: Record<DeviceType, typeof Laptop> = {
@@ -34,14 +40,45 @@ const DEVICE_ICON: Record<DeviceType, typeof Laptop> = {
 };
 
 interface SessionManagerProps {
-  sessions: SessionData[];
+  sessions?: SessionData[];
 }
 
 export function SessionManager({
-  sessions: initialSessions,
+  sessions: initialSessions = [],
 }: SessionManagerProps) {
+  const router = useRouter();
   const [sessions, setSessions] = useState<SessionData[]>(initialSessions);
   const [isRevoking, setIsRevoking] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Sync state with incoming props when updated from server component revalidation
+  useEffect(() => {
+    if (initialSessions.length > 0) {
+      setSessions(initialSessions);
+    }
+  }, [initialSessions]);
+
+  // Reusable function to fetch live active sessions directly from backend
+  const refreshSessions = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await getActiveSessionsAction({});
+      if (res?.data?.sessions) {
+        setSessions(res.data.sessions);
+      }
+    } catch {
+      toast.error("Failed to refresh sessions from server");
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  // If initial sessions are empty on client mount, fetch live from backend
+  useEffect(() => {
+    if (initialSessions.length === 0) {
+      refreshSessions();
+    }
+  }, [initialSessions.length, refreshSessions]);
 
   const otherSessions = sessions.filter((s) => !s.current);
   const hasOthers = otherSessions.length > 0;
@@ -62,6 +99,7 @@ export function SessionManager({
       if (res?.data?.success) {
         setSessions((prev) => prev.filter((s) => s.id !== id));
         toast.success("Session revoked");
+        router.refresh();
       }
     } catch {
       toast.error("Something went wrong");
@@ -86,6 +124,7 @@ export function SessionManager({
       if (res?.data?.success) {
         setSessions((prev) => prev.filter((s) => s.current));
         toast.success("Other sessions revoked");
+        router.refresh();
       }
     } catch {
       toast.error("Something went wrong");
@@ -109,85 +148,111 @@ export function SessionManager({
               }
             </CardDescription>
           </div>
-          <Button
-            disabled={!hasOthers || isRevoking === "all"}
-            onClick={revokeAllOthers}
-            size="sm"
-            variant="outline"
-          >
-            <LogOut size={14} />
-            {isRevoking === "all" ? "Revoking..." : "Revoke all other sessions"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              aria-label="Refresh sessions"
+              disabled={isRefreshing}
+              onClick={() => {
+                refreshSessions();
+              }}
+              size="sm"
+              variant="ghost"
+            >
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")}
+              />
+              <span className="hidden sm:inline">{"Refresh"}</span>
+            </Button>
+            <Button
+              disabled={!hasOthers || isRevoking === "all"}
+              onClick={revokeAllOthers}
+              size="sm"
+              variant="outline"
+            >
+              <LogOut size={14} />
+              {isRevoking === "all"
+                ? "Revoking..."
+                : "Revoke all other sessions"}
+            </Button>
+          </div>
         </div>
       </CardHeader>
 
       <CardContent>
-        <ul className="divide-y divide-border">
-          {sessions.map((s) => {
-            const Icon = DEVICE_ICON[s.deviceType] || Laptop;
-            const loading = isRevoking === s.id;
+        {sessions.length === 0 ? (
+          <div className="py-8 text-center text-[13px] text-muted-foreground">
+            {isRefreshing
+              ? "Loading active sessions..."
+              : "No active sessions found."}
+          </div>
+        ) : (
+          <ul className="divide-y divide-border">
+            {sessions.map((s) => {
+              const Icon = DEVICE_ICON[s.deviceType] || Laptop;
+              const loading = isRevoking === s.id;
 
-            return (
-              <li
-                className={cn(
-                  "flex items-center gap-4 py-4",
-                  s.newLogin && "-mx-3 rounded-md bg-amber-500/5 px-3"
-                )}
-                key={s.id}
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border bg-inset text-muted-foreground">
-                  <Icon size={18} />
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium text-[13px] text-foreground">
-                      {s.device}
-                    </span>
-                    {Boolean(s.current) && (
-                      <Badge
-                        className="gap-1 font-medium text-[11px]"
-                        variant="success"
-                      >
-                        <Check size={11} /> {"This device"}
-                      </Badge>
-                    )}
-                    {Boolean(s.newLogin) && (
-                      <Badge
-                        className="gap-1 font-medium text-[11px]"
-                        variant="warning"
-                      >
-                        <AlertTriangle size={11} /> {"New login"}
-                      </Badge>
-                    )}
+              return (
+                <li
+                  className={cn(
+                    "flex items-center gap-4 py-4",
+                    s.newLogin && "-mx-3 rounded-md bg-amber-500/5 px-3"
+                  )}
+                  key={s.id}
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border bg-inset text-muted-foreground">
+                    <Icon size={18} />
                   </div>
-                  <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
-                    {s.browser} · {s.os}
-                  </p>
-                  <p className="mt-1 flex items-center gap-3 text-[12px] text-muted-foreground/70">
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin size={12} /> {s.location}
-                    </span>
-                    <span className="font-mono">{s.ip}</span>
-                    <span>·</span>
-                    <span>{s.lastActive}</span>
-                  </p>
-                </div>
 
-                {s.current ? null : (
-                  <Button
-                    disabled={loading}
-                    onClick={() => revoke(s.id)}
-                    size="sm"
-                    variant="destructive"
-                  >
-                    {loading ? "Revoking..." : "Revoke"}
-                  </Button>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-medium text-[13px] text-foreground">
+                        {s.device}
+                      </span>
+                      {Boolean(s.current) && (
+                        <Badge
+                          className="gap-1 font-medium text-[11px]"
+                          variant="success"
+                        >
+                          <Check size={11} /> {"This device"}
+                        </Badge>
+                      )}
+                      {Boolean(s.newLogin) && (
+                        <Badge
+                          className="gap-1 font-medium text-[11px]"
+                          variant="warning"
+                        >
+                          <AlertTriangle size={11} /> {"New login"}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
+                      {s.browser} · {s.os}
+                    </p>
+                    <p className="mt-1 flex items-center gap-3 text-[12px] text-muted-foreground/70">
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin size={12} /> {s.location}
+                      </span>
+                      <span className="font-mono">{s.ip}</span>
+                      <span>·</span>
+                      <span>{s.lastActive}</span>
+                    </p>
+                  </div>
+
+                  {s.current ? null : (
+                    <Button
+                      disabled={loading}
+                      onClick={() => revoke(s.id)}
+                      size="sm"
+                      variant="destructive"
+                    >
+                      {loading ? "Revoking..." : "Revoke"}
+                    </Button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
 
         <div className="mt-5 flex items-start gap-2 rounded-md border border-border bg-inset px-3 py-2.5 text-[12px] text-muted-foreground">
           <ShieldAlert className="mt-0.5 shrink-0 text-primary" size={14} />
