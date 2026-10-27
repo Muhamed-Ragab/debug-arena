@@ -9,6 +9,8 @@ export * from "./dialog";
 export * from "./dropdown-menu";
 export * from "./input";
 export * from "./label";
+export * from "./pagination";
+export * from "./password-input";
 export * from "./select";
 export * from "./separator";
 export * from "./skeleton";

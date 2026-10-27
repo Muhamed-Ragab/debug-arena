@@ -58,11 +58,15 @@ function mapDtoToChallenge(
   };
 }
 
-interface UsePaginatedChallengesOptions {
+export interface UsePaginatedChallengesOptions {
+  initialCategory?: string;
   initialChallenges: Challenge[];
+  initialDifficulty?: string;
   initialPage?: number;
   initialPageSize?: number;
+  initialSearch?: string;
   initialTotal?: number;
+  initialTotalPages?: number;
   userId?: string | null;
 }
 
@@ -127,24 +131,41 @@ function getCurrentSearchString(): string {
 
 export function usePaginatedChallenges(options: UsePaginatedChallengesOptions) {
   const {
+    initialCategory = "all",
     initialChallenges,
-    initialTotal = initialChallenges.length,
+    initialDifficulty = "all",
     initialPage = 1,
     initialPageSize = 6,
+    initialSearch = "",
+    initialTotal = initialChallenges.length,
+    initialTotalPages,
     userId = null,
   } = options;
 
-  const [search, setSearch] = useState(() => getUrlParams().search);
+  const [search, setSearch] = useState(() =>
+    typeof window === "undefined" ? initialSearch : getUrlParams().search
+  );
   const debouncedSearch = useDebounce(search, { wait: DEBOUNCE_WAIT });
-  const [category, setCategory] = useState(() => getUrlParams().category);
-  const [difficulty, setDifficulty] = useState(() => getUrlParams().difficulty);
-  const [page, setPage] = useState(() => getUrlParams().page);
-  const [pageSize, setPageSize] = useState(() => getUrlParams().pageSize);
+  const [category, setCategory] = useState(() =>
+    typeof window === "undefined" ? initialCategory : getUrlParams().category
+  );
+  const [difficulty, setDifficulty] = useState(() =>
+    typeof window === "undefined"
+      ? initialDifficulty
+      : getUrlParams().difficulty
+  );
+  const [page, setPage] = useState(() =>
+    typeof window === "undefined" ? initialPage : getUrlParams().page
+  );
+  const [pageSize, setPageSize] = useState(() =>
+    typeof window === "undefined" ? initialPageSize : getUrlParams().pageSize
+  );
 
   const [challenges, setChallenges] = useState<Challenge[]>(initialChallenges);
   const [total, setTotal] = useState(initialTotal);
   const [totalPages, setTotalPages] = useState(
-    initialTotal > 0 ? Math.ceil(initialTotal / initialPageSize) : 0
+    initialTotalPages ??
+      (initialTotal > 0 ? Math.ceil(initialTotal / initialPageSize) : 0)
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

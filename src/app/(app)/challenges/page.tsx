@@ -2,18 +2,35 @@ import { OfflineBanner } from "@/components/shared/offline-banner";
 import { ChallengeBrowser } from "@/features/browser/components/ChallengeBrowser";
 import { categoryService } from "@/features/category/service";
 import { challengeService } from "@/features/challenge/service";
+import { listChallengesQuerySchema } from "@/features/challenge/validation";
 import { getServerSession } from "@/lib/auth/session";
 import type { Category, Challenge, Difficulty } from "@/lib/domain/types";
 import { isOfflineCause, isOfflineError, OFFLINE_MESSAGE } from "@/lib/offline";
 
 export const dynamic = "force-dynamic";
 
-export default async function ChallengesPage() {
+interface ChallengesPageProps {
+  searchParams?: Promise<{
+    category?: string;
+    difficulty?: string;
+    page?: string;
+    pageSize?: string;
+    search?: string;
+  }>;
+}
+
+export default async function ChallengesPage(props: ChallengesPageProps) {
   const session = await getServerSession();
   const userId = session?.user?.id;
 
-  let dbChallenges: Awaited<
-    ReturnType<typeof challengeService.getPublishedChallenges>
+  const rawParams = props.searchParams ? await props.searchParams : {};
+  const queryResult = listChallengesQuerySchema.safeParse(rawParams);
+  const query = queryResult.success
+    ? queryResult.data
+    : { category: "all", difficulty: "all", page: 1, pageSize: 6, search: "" };
+
+  let paginatedData: Awaited<
+    ReturnType<typeof challengeService.getPublishedChallengesPaginated>
   >;
   let userStats: Awaited<
     ReturnType<typeof challengeService.getUserChallengeStats>
@@ -23,8 +40,8 @@ export default async function ChallengesPage() {
   >;
 
   try {
-    [dbChallenges, userStats, categories] = await Promise.all([
-      challengeService.getPublishedChallenges(),
+    [paginatedData, userStats, categories] = await Promise.all([
+      challengeService.getPublishedChallengesPaginated(query),
       challengeService.getUserChallengeStats(userId),
       categoryService.getActiveCategories(),
     ]);
@@ -41,17 +58,22 @@ export default async function ChallengesPage() {
         <ChallengeBrowser
           categories={[]}
           initialChallenges={[]}
+          initialPage={1}
+          initialPageSize={6}
+          initialTotal={0}
+          initialTotalPages={0}
           stats={[
             { label: "browser.stats.solved", value: "0 / 0" },
             { label: "browser.stats.currentStreak", value: "0 days" },
             { label: "browser.stats.rank", value: "#--" },
           ]}
+          userId={userId}
         />
       </div>
     );
   }
 
-  const formattedChallenges: Challenge[] = dbChallenges.map((c) => {
+  const formattedChallenges: Challenge[] = paginatedData.items.map((c) => {
     const artifact = c.buggyArtifact as {
       entryFile?: string;
       points?: number;
@@ -96,8 +118,16 @@ export default async function ChallengesPage() {
   return (
     <ChallengeBrowser
       categories={categories}
+      initialCategory={query.category}
       initialChallenges={formattedChallenges}
+      initialDifficulty={query.difficulty}
+      initialPage={paginatedData.page}
+      initialPageSize={paginatedData.pageSize}
+      initialSearch={query.search}
+      initialTotal={paginatedData.total}
+      initialTotalPages={paginatedData.totalPages}
       stats={statsProps}
+      userId={userId}
     />
   );
 }

@@ -1,34 +1,47 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useChallengeFilters } from "@/features/browser/hooks/useChallengeFilters";
+import { ResponsivePagination } from "@/components/ui/pagination";
+import { usePaginatedChallenges } from "@/features/browser/hooks/usePaginatedChallenges";
 import type { CategoryDTO } from "@/features/category/types";
 import type { Challenge, Difficulty } from "@/lib/domain/types";
+import { cn } from "@/lib/utils";
 import { ChallengeCard } from "./ChallengeCard";
 import { ChallengeFilters } from "./ChallengeFilters";
-
-const PAGE_SIZE = 6;
 
 export interface ChallengeBrowserStat {
   label: string;
   value: string;
 }
 
+export interface ChallengeBrowserProps {
+  categories: CategoryDTO[];
+  initialCategory?: string;
+  initialChallenges: Challenge[];
+  initialDifficulty?: string;
+  initialPage?: number;
+  initialPageSize?: number;
+  initialSearch?: string;
+  initialTotal?: number;
+  initialTotalPages?: number;
+  stats: ChallengeBrowserStat[];
+  userId?: string | null;
+}
+
 export function ChallengeBrowser({
   categories,
+  initialCategory,
   initialChallenges,
+  initialDifficulty,
+  initialPage = 1,
+  initialPageSize = 6,
+  initialSearch,
+  initialTotal,
+  initialTotalPages,
   stats,
-}: {
-  categories: CategoryDTO[];
-  initialChallenges: Challenge[];
-  stats: ChallengeBrowserStat[];
-}) {
-  const [page, setPage] = useState(1);
-
+  userId = null,
+}: ChallengeBrowserProps) {
   const getStatLabel = (key: string): string => {
     switch (key) {
       case "browser.stats.solved":
@@ -43,21 +56,30 @@ export function ChallengeBrowser({
   };
 
   const {
-    query,
-    setQuery,
-    catFilter,
-    setCatFilter,
-    diffFilter,
-    setDiffFilter,
-    filtered,
-  } = useChallengeFilters(initialChallenges);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const pageItems = filtered.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE
-  );
+    category,
+    challenges,
+    difficulty,
+    loading,
+    page,
+    pageSize,
+    search,
+    setCategory,
+    setDifficulty,
+    setPage,
+    setSearch,
+    total,
+    totalPages,
+  } = usePaginatedChallenges({
+    initialCategory,
+    initialChallenges,
+    initialDifficulty,
+    initialPage,
+    initialPageSize,
+    initialSearch,
+    initialTotal,
+    initialTotalPages,
+    userId,
+  });
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -89,63 +111,41 @@ export function ChallengeBrowser({
         <div className="mb-6">
           <ChallengeFilters
             categories={categories}
-            category={catFilter ?? "all"}
-            difficulty={(diffFilter ?? "all") as Difficulty | "all"}
-            onCategory={(c) => {
-              setCatFilter(c === "all" ? null : c);
-              setPage(1);
-            }}
-            onDifficulty={(d) => {
-              setDiffFilter(d === "all" ? null : d);
-              setPage(1);
-            }}
-            onSearch={setQuery}
-            search={query}
+            category={category}
+            difficulty={(difficulty ?? "all") as Difficulty | "all"}
+            onCategory={(c) => setCategory(c)}
+            onDifficulty={(d) => setDifficulty(d)}
+            onSearch={setSearch}
+            search={search}
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {pageItems.map((c) => (
+        <div
+          className={cn(
+            "grid grid-cols-1 gap-4 transition-opacity duration-200 md:grid-cols-2 xl:grid-cols-3",
+            loading && "pointer-events-none opacity-60"
+          )}
+        >
+          {challenges.map((c) => (
             <ChallengeCard challenge={c} key={c.id} />
           ))}
         </div>
 
-        {pageItems.length === 0 && (
+        {challenges.length === 0 && !loading && (
           <div className="flex h-40 items-center justify-center text-muted-foreground text-sm">
             {"No challenges match the current filters."}
           </div>
         )}
 
-        <div className="mt-8 flex items-center justify-center gap-1">
-          <Button
-            className="h-9 w-9 p-0"
-            disabled={safePage === 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            size="sm"
-            variant="outline"
-          >
-            <ChevronLeft size={16} />
-          </Button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <Button
-              className="h-9 min-w-9 px-3 text-sm"
-              key={p}
-              onClick={() => setPage(p)}
-              size="sm"
-              variant={p === safePage ? "default" : "outline"}
-            >
-              {p}
-            </Button>
-          ))}
-          <Button
-            className="h-9 w-9 p-0"
-            disabled={safePage === totalPages}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            size="sm"
-            variant="outline"
-          >
-            <ChevronRight size={16} />
-          </Button>
+        <div className="mt-8">
+          <ResponsivePagination
+            currentPage={page}
+            disabled={loading}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            totalItems={total}
+            totalPages={totalPages}
+          />
         </div>
       </div>
     </div>
