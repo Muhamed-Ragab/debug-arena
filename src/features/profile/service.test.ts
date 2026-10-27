@@ -381,7 +381,7 @@ describe("profile/service", () => {
         findAllSubmissionsByUserId: vi.fn().mockResolvedValue(mockRaw),
       };
 
-      const svc = createProfileService(mockRepo as never);
+      const svc = createProfileService(mockRepo as never, mockRepo as never);
       const result = await svc.exportUserSubmissions("user-1", "json");
 
       expect(mockRepo.findAllSubmissionsByUserId).toHaveBeenCalledWith(
@@ -420,13 +420,130 @@ describe("profile/service", () => {
         findAllSubmissionsByUserId: vi.fn().mockResolvedValue(mockRaw),
       };
 
-      const svc = createProfileService(mockRepo as never);
+      const svc = createProfileService(mockRepo as never, mockRepo as never);
       const result = await svc.exportUserSubmissions("user-1", "csv");
 
       expect(result.mimeType).toContain("text/csv");
       expect(result.filename).toMatch(/^submissions-\d{4}-\d{2}-\d{2}\.csv$/);
       expect(result.content).toContain("XSS Defense");
       expect(result.content.split("\r\n")).toHaveLength(2);
+    });
+  });
+
+  describe("getUserSettingsData active sessions resolution", () => {
+    const mockUserSettings = {
+      accounts: [
+        {
+          accountId: "octocat",
+          id: "acc-1",
+          password: null,
+          providerId: "github",
+          userId: "user-1",
+        },
+      ],
+      avatarUrl: "https://example.com/pic.png",
+      bio: "Full-stack engineer",
+      displayName: "Octo Cat",
+      email: "octo@example.com",
+      id: "user-1",
+      image: null,
+      interests: ["TypeScript"],
+      isPublic: true,
+      jobTitle: "Developer",
+      loginAttempts: [{ ipAddress: "192.168.1.50" }],
+      name: "Octo Cat",
+      preferredColor: "#10b981",
+      username: "octocat",
+    };
+
+    it("resolves and maps multiple active sessions with device parsing, IP masking, and current session identification", async () => {
+      const mockRepo = {
+        findByIdForSettings: vi.fn().mockResolvedValue(mockUserSettings),
+      };
+      const svc = createProfileService(mockRepo as never, mockRepo as never);
+
+      const sessionCurrent = {
+        createdAt: new Date(Date.now() - 1000 * 60 * 10),
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        id: "session-curr-123",
+        ipAddress: "127.0.0.1",
+        token: "token-curr-123",
+        updatedAt: new Date(Date.now() - 1000 * 60 * 2), // 2m ago -> "Active now"
+        userAgent:
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        userId: "user-1",
+      };
+
+      const sessionOtherRecent = {
+        createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30m ago (< 2h) -> newLogin: true
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        id: "session-other-456",
+        ipAddress: "192.168.1.100",
+        token: "token-other-456",
+        updatedAt: new Date(Date.now() - 1000 * 60 * 15), // 15m ago
+        userAgent:
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3.1 Mobile/15E148 Safari/604.1",
+        userId: "user-1",
+      };
+
+      const result = await svc.getUserSettingsData(
+        "user-1",
+        "session-curr-123",
+        {
+          getSessions: vi
+            .fn()
+            .mockResolvedValue([sessionCurrent, sessionOtherRecent]),
+        }
+      );
+
+      expect(result).not.toBeNull();
+      expect(result?.sessions).toHaveLength(2);
+
+      expect(result?.sessions[0]).toEqual({
+        browser: "Chrome",
+        current: true,
+        device: "MacBook / Mac",
+        deviceType: "desktop",
+        id: "session-curr-123",
+        ip: "127.0.0.1 (Localhost)",
+        lastActive: "Active now",
+        location: "Local Network",
+        newLogin: false,
+        os: "macOS",
+      });
+
+      expect(result?.sessions[1]).toEqual({
+        browser: "Safari",
+        current: false,
+        device: "iPhone",
+        deviceType: "mobile",
+        id: "session-other-456",
+        ip: "192.168.1.***",
+        lastActive: "15m ago",
+        location: "Local Network",
+        newLogin: true,
+        os: "iOS",
+      });
+    });
+
+    it("falls back gracefully to a fallback current session if session resolution yields empty", async () => {
+      const mockRepo = {
+        findByIdForSettings: vi.fn().mockResolvedValue(mockUserSettings),
+      };
+      const svc = createProfileService(mockRepo as never, mockRepo as never);
+
+      const result = await svc.getUserSettingsData(
+        "user-1",
+        "session-fallback-789",
+        {
+          getSessions: vi.fn().mockResolvedValue([]),
+        }
+      );
+
+      expect(result).not.toBeNull();
+      expect(result?.sessions).toHaveLength(1);
+      expect(result?.sessions[0]?.current).toBe(true);
+      expect(result?.sessions[0]?.id).toBe("session-fallback-789");
     });
   });
 });

@@ -128,6 +128,17 @@ export interface SessionData {
   os: string;
 }
 
+export interface ActiveSessionRecord {
+  createdAt?: Date | string | number | null;
+  expiresAt: Date | string | number;
+  id: string;
+  ipAddress?: string | null;
+  token?: string;
+  updatedAt?: Date | string | number | null;
+  userAgent?: string | null;
+  userId: string;
+}
+
 export interface LinkedAccount {
   accountId?: string;
   connected: boolean;

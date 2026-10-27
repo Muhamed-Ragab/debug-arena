@@ -13,7 +13,10 @@ export default async function Page() {
   }
 
   const [settingsData, categories, aiConfig] = await Promise.all([
-    profileService.getUserSettingsData(session.user.id),
+    profileService.getUserSettingsData(
+      session.user.id,
+      session.session.id || session.session.token
+    ),
     categoryService.getActiveCategories(),
     profileService.getAiConfig(session.user.id),
   ]);

@@ -3,6 +3,7 @@ import { AI_PRIMARY_MODEL } from "@/lib/ai/constants";
 import { getDailyAIQuota } from "@/lib/ai/rate-limit";
 import { testProviderConnection } from "@/lib/ai/test-connection";
 import type { AIProviderType } from "@/lib/ai/types";
+import { maskIpAddress, parseUserAgent } from "@/lib/auth/user-agent";
 import {
   decryptApiKey,
   encryptApiKey,
@@ -16,6 +17,7 @@ import {
   isSolved,
   type ScoringSubmission,
 } from "@/lib/domain/scoring";
+import { getRedis } from "@/lib/redis";
 import {
   CSV_FORMULA_TRIGGER_REGEX,
   DEFAULT_CATEGORIES,
@@ -25,12 +27,14 @@ import {
 } from "./constants";
 import { profileRepository } from "./repository";
 import type {
+  ActiveSessionRecord,
   CategoryStat,
   ExportFormat,
   ExportSubmissionsResult,
   ProfileRepository,
   RadarPoint,
   RecentSubmission,
+  SessionData,
   StrengthPoint,
   SubmissionExportDto,
   UserAiConfigData,
@@ -385,9 +389,177 @@ function buildProfileStatsValues(params: {
   ];
 }
 
+function formatRelativeTime(
+  dateInput: Date | string | number | null | undefined
+): string {
+  if (!dateInput) {
+    return "Active now";
+  }
+  const date = new Date(dateInput);
+  const diffMs = Date.now() - date.getTime();
+  if (Number.isNaN(diffMs) || diffMs <= 0 || diffMs < 5 * 60 * 1000) {
+    return "Active now";
+  }
+  const diffMinutes = Math.floor(diffMs / (60 * 1000));
+  if (diffMinutes < 60) {
+    return `${diffMinutes}m ago`;
+  }
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) {
+    return `${diffHours}h ago`;
+  }
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) {
+    return "Yesterday";
+  }
+  return `${diffDays}d ago`;
+}
+
+function resolveSessionLocation(ip: string | null | undefined): string {
+  if (!ip) {
+    return "Local Network";
+  }
+  const trimmed = ip.trim().toLowerCase();
+  if (
+    trimmed === "127.0.0.1" ||
+    trimmed === "::1" ||
+    trimmed === "localhost" ||
+    trimmed.startsWith("192.168.") ||
+    trimmed.startsWith("10.") ||
+    trimmed.startsWith("172.16.") ||
+    trimmed.startsWith("172.17.") ||
+    trimmed.startsWith("172.18.") ||
+    trimmed.startsWith("172.19.") ||
+    trimmed.startsWith("172.2") ||
+    trimmed.startsWith("172.30.") ||
+    trimmed.startsWith("172.31.") ||
+    trimmed.startsWith("::ffff:192.168.") ||
+    trimmed.startsWith("::ffff:10.") ||
+    trimmed.startsWith("::ffff:127.")
+  ) {
+    return "Local Network";
+  }
+  return "Remote Network";
+}
+
+function extractValidTokens(rawList: string, now: number): string[] {
+  let items: unknown;
+  try {
+    items = JSON.parse(rawList);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(items)) {
+    return [];
+  }
+
+  const tokens: string[] = [];
+  for (const item of items) {
+    if (typeof item === "string") {
+      tokens.push(item);
+    } else if (item && typeof item === "object") {
+      const { token, expiresAt } = item as {
+        expiresAt?: number;
+        token?: string;
+      };
+      if (token && (!expiresAt || expiresAt > now)) {
+        tokens.push(token);
+      }
+    }
+  }
+  return tokens;
+}
+
+function parseSessionRecord(
+  raw: string,
+  fallbackToken: string,
+  userId: string,
+  now: number
+): ActiveSessionRecord | null {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    const sess = (
+      parsed && typeof parsed === "object" && "session" in parsed
+        ? (parsed as { session: unknown }).session
+        : parsed
+    ) as Record<string, unknown> | null;
+
+    if (!sess || typeof sess !== "object") {
+      return null;
+    }
+
+    const expiresAtMs = sess.expiresAt
+      ? new Date(sess.expiresAt as string | number | Date).getTime()
+      : 0;
+    if (expiresAtMs && expiresAtMs <= now) {
+      return null;
+    }
+
+    const sessId = typeof sess.id === "string" ? sess.id : fallbackToken;
+    const sessToken =
+      typeof sess.token === "string" ? sess.token : fallbackToken;
+    const sessIp = typeof sess.ipAddress === "string" ? sess.ipAddress : null;
+    const sessUa = typeof sess.userAgent === "string" ? sess.userAgent : null;
+    const sessUserId = typeof sess.userId === "string" ? sess.userId : userId;
+
+    return {
+      createdAt: sess.createdAt as Date | string | number | null | undefined,
+      expiresAt: sess.expiresAt as Date | string | number,
+      id: sessId,
+      ipAddress: sessIp,
+      token: sessToken,
+      updatedAt: sess.updatedAt as Date | string | number | null | undefined,
+      userAgent: sessUa,
+      userId: sessUserId,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function fetchRedisActiveSessions(
+  userId: string
+): Promise<ActiveSessionRecord[]> {
+  try {
+    const redis = getRedis();
+    const rawList = await redis.get(`active-sessions-${userId}`);
+    if (!rawList) {
+      return [];
+    }
+
+    const now = Date.now();
+    const tokens = extractValidTokens(rawList, now);
+    if (tokens.length === 0) {
+      return [];
+    }
+
+    const rawSessions = await redis.mget(...tokens);
+    const results: ActiveSessionRecord[] = [];
+
+    for (let i = 0; i < tokens.length; i += 1) {
+      const raw = rawSessions[i];
+      if (!raw) {
+        continue;
+      }
+      const record = parseSessionRecord(raw, tokens[i] as string, userId, now);
+      if (record) {
+        results.push(record);
+      }
+    }
+
+    return results;
+  } catch (err) {
+    console.warn(
+      "[ProfileService] Notice while retrieving active sessions from Redis:",
+      err
+    );
+    return [];
+  }
+}
+
 export function createProfileService(
   repo: ProfileRepository = profileRepository,
-  profileRepo: ProfileRepository = profileRepository
+  profileRepo: ProfileRepository = repo
 ) {
   async function getUserProfileData(
     userId: string
@@ -465,7 +637,11 @@ export function createProfileService(
   }
 
   async function getUserSettingsData(
-    userId: string
+    userId: string,
+    currentSessionId?: string,
+    deps?: {
+      getSessions?: (userId: string) => Promise<ActiveSessionRecord[]>;
+    }
   ): Promise<UserSettingsData | null> {
     const user = await profileRepo.findByIdForSettings(userId);
     if (!user) {
@@ -494,19 +670,77 @@ export function createProfileService(
         provider: p.provider,
       };
     });
-    const sessions = [
-      {
-        browser: "Chrome",
-        current: true,
-        device: "Current Session",
-        deviceType: "desktop" as const,
-        id: "current_session",
-        ip: user.loginAttempts[0]?.ipAddress || "127.0.0.1",
-        lastActive: "Active now",
-        location: "Local Network",
-        os: "Desktop OS",
-      },
-    ];
+
+    let activeSessions: ActiveSessionRecord[] = [];
+    try {
+      if (deps?.getSessions) {
+        activeSessions = await deps.getSessions(userId);
+      } else {
+        activeSessions = await fetchRedisActiveSessions(userId);
+      }
+    } catch (err) {
+      console.warn("[ProfileService] Failed to resolve active sessions:", err);
+      activeSessions = [];
+    }
+
+    let sessions: SessionData[];
+    if (activeSessions.length > 0) {
+      const twoHoursMs = 2 * 60 * 60 * 1000;
+      const now = Date.now();
+      sessions = activeSessions.map((s) => {
+        const parsedUa = parseUserAgent(s.userAgent);
+        const isCurrent = Boolean(
+          currentSessionId &&
+            (s.id === currentSessionId || s.token === currentSessionId)
+        );
+        const createdAtTime = s.createdAt ? new Date(s.createdAt).getTime() : 0;
+        const isRecent = createdAtTime > 0 && now - createdAtTime < twoHoursMs;
+        const newLogin = Boolean(!isCurrent && isRecent);
+        const ip = maskIpAddress(
+          s.ipAddress || user.loginAttempts[0]?.ipAddress || "127.0.0.1"
+        );
+        const lastActive = formatRelativeTime(s.updatedAt ?? s.createdAt);
+        const location = resolveSessionLocation(s.ipAddress);
+
+        return {
+          browser: parsedUa.browser,
+          current: isCurrent,
+          device: parsedUa.device,
+          deviceType: parsedUa.deviceType,
+          id: s.id || s.token || "session",
+          ip,
+          lastActive,
+          location,
+          newLogin,
+          os: parsedUa.os,
+        };
+      });
+
+      sessions.sort((a, b) => {
+        if (a.current && !b.current) {
+          return -1;
+        }
+        if (!a.current && b.current) {
+          return 1;
+        }
+        return 0;
+      });
+    } else {
+      sessions = [
+        {
+          browser: "Chrome",
+          current: true,
+          device: "Current Session",
+          deviceType: "desktop" as const,
+          id: currentSessionId || "current_session",
+          ip: maskIpAddress(user.loginAttempts[0]?.ipAddress || "127.0.0.1"),
+          lastActive: "Active now",
+          location: "Local Network",
+          os: "Desktop OS",
+        },
+      ];
+    }
+
     return {
       accounts,
       profile: {

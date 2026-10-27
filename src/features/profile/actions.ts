@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 import { getRedis } from "@/lib/redis";
 import { ActionError, authActionClient } from "@/lib/safe-action";
 import { profileRepository } from "./repository";
@@ -95,18 +97,104 @@ export const unlinkAccountAction = authActionClient
     return { success: true };
   });
 
+async function evictSessionInRedis(
+  userId: string,
+  sessionId: string
+): Promise<void> {
+  try {
+    const redis = getRedis();
+    await redis.del(sessionId);
+    await redis.del(`session:${sessionId}`);
+    await redis.del(`session_token:${sessionId}`);
+
+    const rawList = await redis.get(`active-sessions-${userId}`);
+    if (!rawList) {
+      return;
+    }
+    const list = JSON.parse(rawList);
+    if (!Array.isArray(list)) {
+      return;
+    }
+
+    const filtered = list.filter((item: unknown) => {
+      if (typeof item === "string") {
+        return item !== sessionId;
+      }
+      if (item && typeof item === "object") {
+        const record = item as { id?: string; token?: string };
+        return record.token !== sessionId && record.id !== sessionId;
+      }
+      return true;
+    });
+
+    if (filtered.length > 0) {
+      await redis.set(`active-sessions-${userId}`, JSON.stringify(filtered));
+    } else {
+      await redis.del(`active-sessions-${userId}`);
+    }
+  } catch (err) {
+    console.warn("[RevokeSession] Redis eviction notice:", err);
+  }
+}
+
+async function cleanupOtherSessionsInRedis(
+  userId: string,
+  currentSessionToken: string
+): Promise<void> {
+  try {
+    const redis = getRedis();
+    const rawList = await redis.get(`active-sessions-${userId}`);
+    if (!rawList) {
+      return;
+    }
+    const list = JSON.parse(rawList);
+    if (!Array.isArray(list)) {
+      return;
+    }
+
+    const tokensToDelete: string[] = [];
+    const remaining: unknown[] = [];
+    for (const item of list) {
+      const token =
+        typeof item === "string" ? item : (item as { token?: string }).token;
+      if (token && token !== currentSessionToken) {
+        tokensToDelete.push(token);
+      } else {
+        remaining.push(item);
+      }
+    }
+
+    if (tokensToDelete.length > 0) {
+      await redis.del(...tokensToDelete);
+    }
+    if (remaining.length > 0) {
+      await redis.set(`active-sessions-${userId}`, JSON.stringify(remaining));
+    } else {
+      await redis.del(`active-sessions-${userId}`);
+    }
+  } catch (err) {
+    console.warn("[RevokeAllOtherSessions] Redis cleanup notice:", err);
+  }
+}
+
 export const revokeSessionAction = authActionClient
   .inputSchema(revokeSessionSchema)
   .outputSchema(revokeSessionOutputSchema)
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     const { sessionId } = parsedInput;
+    const userId = ctx.user.id;
     try {
-      const redis = getRedis();
-      await redis.del(`session:${sessionId}`);
-      await redis.del(`session_token:${sessionId}`);
+      const reqHeaders = await headers();
+      await auth.api.revokeSession({
+        body: { token: sessionId },
+        headers: reqHeaders,
+      });
     } catch (err) {
-      console.warn("[RevokeSession] Redis deletion notice:", err);
+      console.warn("[RevokeSession] Better-Auth revokeSession notice:", err);
     }
+
+    await evictSessionInRedis(userId, sessionId);
+
     try {
       revalidatePath("/settings");
     } catch {
@@ -120,15 +208,21 @@ export const revokeAllOtherSessionsAction = authActionClient
   .outputSchema(revokeAllOtherSessionsOutputSchema)
   .action(async ({ ctx }) => {
     const userId = ctx.user.id;
+    const currentSessionToken = ctx.session.token;
     try {
-      const redis = getRedis();
-      const userSessionKeys = await redis.keys(`*${userId}*`);
-      if (userSessionKeys.length > 0) {
-        await redis.del(...userSessionKeys);
-      }
+      const reqHeaders = await headers();
+      await auth.api.revokeOtherSessions({
+        headers: reqHeaders,
+      });
     } catch (err) {
-      console.warn("[RevokeAllOtherSessions] Redis cleanup notice:", err);
+      console.warn(
+        "[RevokeAllOtherSessions] Better-Auth revokeOtherSessions notice:",
+        err
+      );
     }
+
+    await cleanupOtherSessionsInRedis(userId, currentSessionToken);
+
     try {
       revalidatePath("/settings");
     } catch {
