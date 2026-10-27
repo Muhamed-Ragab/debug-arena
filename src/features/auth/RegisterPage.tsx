@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, AtSign, GitBranch, Lock, Mail, User } from "lucide-react";
+import { ArrowRight, AtSign, GitBranch, Mail, User } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Separator } from "@/components/ui/separator";
 import { authClient } from "@/lib/auth/client";
 
@@ -200,20 +201,11 @@ export function RegisterPage() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="password">{"Password"}</Label>
-                <div className="relative">
-                  <Lock
-                    className="pointer-events-none absolute inset-s-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    size={15}
-                  />
-                  <Input
-                    autoComplete="new-password"
-                    className="h-10 ps-10 pe-3"
-                    id="password"
-                    name="password"
-                    placeholder={"••••••••"}
-                    type="password"
-                  />
-                </div>
+                <PasswordInput
+                  autoComplete="new-password"
+                  id="password"
+                  name="password"
+                />
               </div>
 
               {Boolean(error) && (
