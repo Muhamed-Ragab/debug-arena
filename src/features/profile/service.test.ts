@@ -545,5 +545,36 @@ describe("profile/service", () => {
       expect(result?.sessions[0]?.current).toBe(true);
       expect(result?.sessions[0]?.id).toBe("session-fallback-789");
     });
+
+    it("uses currentSession object details for fallback session when activeSessions is empty", async () => {
+      const mockRepo = {
+        findByIdForSettings: vi.fn().mockResolvedValue(mockUserSettings),
+      };
+      const svc = createProfileService(mockRepo as never, mockRepo as never);
+
+      const activeSessionObj = {
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        id: "sess-obj-1",
+        ipAddress: "203.0.113.195",
+        token: "tok-obj-1",
+        updatedAt: new Date(),
+        userAgent:
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        userId: "user-1",
+      };
+
+      const result = await svc.getUserSettingsData("user-1", activeSessionObj, {
+        getSessions: vi.fn().mockResolvedValue([]),
+      });
+
+      expect(result?.sessions).toHaveLength(1);
+      const session = result?.sessions[0];
+      expect(session?.current).toBe(true);
+      expect(session?.device).toBe("MacBook / Mac");
+      expect(session?.browser).toBe("Chrome");
+      expect(session?.os).toBe("macOS");
+      expect(session?.ip).toBe("203.0.113.***");
+    });
   });
 });

@@ -7,6 +7,7 @@ import { getRedis } from "@/lib/redis";
 import { ActionError, authActionClient } from "@/lib/safe-action";
 import { profileRepository } from "./repository";
 import { profileService } from "./service";
+import type { ActiveSessionRecord } from "./types";
 import {
   deleteAccountOutputSchema,
   deleteAccountSchema,
@@ -99,43 +100,96 @@ export const unlinkAccountAction = authActionClient
     return { success: true };
   });
 
+async function evictFromKey(
+  redis: ReturnType<typeof getRedis>,
+  key: string,
+  sessionId: string
+): Promise<void> {
+  const rawList = await redis.get(key);
+  if (!rawList) {
+    return;
+  }
+  const list = JSON.parse(rawList);
+  if (!Array.isArray(list)) {
+    return;
+  }
+
+  const filtered = list.filter((item: unknown) => {
+    if (typeof item === "string") {
+      return item !== sessionId;
+    }
+    if (item && typeof item === "object") {
+      const record = item as { id?: string; token?: string };
+      return record.token !== sessionId && record.id !== sessionId;
+    }
+    return true;
+  });
+
+  if (filtered.length > 0) {
+    await redis.set(key, JSON.stringify(filtered));
+  } else {
+    await redis.del(key);
+  }
+}
+
 async function evictSessionInRedis(
   userId: string,
   sessionId: string
 ): Promise<void> {
   try {
     const redis = getRedis();
-    await redis.del(sessionId);
-    await redis.del(`session:${sessionId}`);
-    await redis.del(`session_token:${sessionId}`);
+    await Promise.all([
+      redis.del(`better-auth:${sessionId}`),
+      redis.del(sessionId),
+      redis.del(`session:${sessionId}`),
+      redis.del(`session_token:${sessionId}`),
+    ]);
 
-    const rawList = await redis.get(`active-sessions-${userId}`);
-    if (!rawList) {
-      return;
-    }
-    const list = JSON.parse(rawList);
-    if (!Array.isArray(list)) {
-      return;
-    }
+    const keys = [
+      `better-auth:active-sessions-${userId}`,
+      `active-sessions-${userId}`,
+    ];
 
-    const filtered = list.filter((item: unknown) => {
-      if (typeof item === "string") {
-        return item !== sessionId;
-      }
-      if (item && typeof item === "object") {
-        const record = item as { id?: string; token?: string };
-        return record.token !== sessionId && record.id !== sessionId;
-      }
-      return true;
-    });
-
-    if (filtered.length > 0) {
-      await redis.set(`active-sessions-${userId}`, JSON.stringify(filtered));
-    } else {
-      await redis.del(`active-sessions-${userId}`);
-    }
+    await Promise.all(keys.map((k) => evictFromKey(redis, k, sessionId)));
   } catch (err) {
     console.warn("[RevokeSession] Redis eviction notice:", err);
+  }
+}
+
+async function cleanupFromKey(
+  redis: ReturnType<typeof getRedis>,
+  key: string,
+  currentSessionToken: string
+): Promise<void> {
+  const rawList = await redis.get(key);
+  if (!rawList) {
+    return;
+  }
+  const list = JSON.parse(rawList);
+  if (!Array.isArray(list)) {
+    return;
+  }
+
+  const tokensToDelete: string[] = [];
+  const remaining: unknown[] = [];
+  for (const item of list) {
+    const token =
+      typeof item === "string" ? item : (item as { token?: string }).token;
+    if (token && token !== currentSessionToken) {
+      tokensToDelete.push(`better-auth:${token}`);
+      tokensToDelete.push(token);
+    } else {
+      remaining.push(item);
+    }
+  }
+
+  if (tokensToDelete.length > 0) {
+    await redis.del(...tokensToDelete);
+  }
+  if (remaining.length > 0) {
+    await redis.set(key, JSON.stringify(remaining));
+  } else {
+    await redis.del(key);
   }
 }
 
@@ -145,35 +199,14 @@ async function cleanupOtherSessionsInRedis(
 ): Promise<void> {
   try {
     const redis = getRedis();
-    const rawList = await redis.get(`active-sessions-${userId}`);
-    if (!rawList) {
-      return;
-    }
-    const list = JSON.parse(rawList);
-    if (!Array.isArray(list)) {
-      return;
-    }
+    const keys = [
+      `better-auth:active-sessions-${userId}`,
+      `active-sessions-${userId}`,
+    ];
 
-    const tokensToDelete: string[] = [];
-    const remaining: unknown[] = [];
-    for (const item of list) {
-      const token =
-        typeof item === "string" ? item : (item as { token?: string }).token;
-      if (token && token !== currentSessionToken) {
-        tokensToDelete.push(token);
-      } else {
-        remaining.push(item);
-      }
-    }
-
-    if (tokensToDelete.length > 0) {
-      await redis.del(...tokensToDelete);
-    }
-    if (remaining.length > 0) {
-      await redis.set(`active-sessions-${userId}`, JSON.stringify(remaining));
-    } else {
-      await redis.del(`active-sessions-${userId}`);
-    }
+    await Promise.all(
+      keys.map((k) => cleanupFromKey(redis, k, currentSessionToken))
+    );
   } catch (err) {
     console.warn("[RevokeAllOtherSessions] Redis cleanup notice:", err);
   }
@@ -238,10 +271,26 @@ export const getActiveSessionsAction = authActionClient
   .outputSchema(getActiveSessionsOutputSchema)
   .action(async ({ ctx }) => {
     const userId = ctx.user.id;
-    const currentSessionId = ctx.session.id || ctx.session.token;
+    let betterAuthSessions: ActiveSessionRecord[] = [];
+    try {
+      const reqHeaders = await headers();
+      const list = await auth.api.listSessions({ headers: reqHeaders });
+      if (Array.isArray(list)) {
+        betterAuthSessions = list as unknown as ActiveSessionRecord[];
+      }
+    } catch (err) {
+      console.warn(
+        "[getActiveSessionsAction] auth.api.listSessions notice:",
+        err
+      );
+    }
+
     const data = await profileService.getUserSettingsData(
       userId,
-      currentSessionId
+      ctx.session,
+      betterAuthSessions.length > 0
+        ? { getSessions: async () => betterAuthSessions }
+        : undefined
     );
     return {
       sessions: data?.sessions ?? [],

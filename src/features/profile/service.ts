@@ -27,10 +27,12 @@ import {
 } from "./constants";
 import { profileRepository } from "./repository";
 import type {
+  AccountRow,
   ActiveSessionRecord,
   CategoryStat,
   ExportFormat,
   ExportSubmissionsResult,
+  LinkedAccount,
   ProfileRepository,
   RadarPoint,
   RecentSubmission,
@@ -522,7 +524,10 @@ async function fetchRedisActiveSessions(
 ): Promise<ActiveSessionRecord[]> {
   try {
     const redis = getRedis();
-    const rawList = await redis.get(`active-sessions-${userId}`);
+    let rawList = await redis.get(`better-auth:active-sessions-${userId}`);
+    if (!rawList) {
+      rawList = await redis.get(`active-sessions-${userId}`);
+    }
     if (!rawList) {
       return [];
     }
@@ -533,7 +538,11 @@ async function fetchRedisActiveSessions(
       return [];
     }
 
-    const rawSessions = await redis.mget(...tokens);
+    const prefixedKeys = tokens.map((t) => `better-auth:${t}`);
+    let rawSessions = await redis.mget(...prefixedKeys);
+    if (rawSessions.every((r) => r === null)) {
+      rawSessions = await redis.mget(...tokens);
+    }
     const results: ActiveSessionRecord[] = [];
 
     for (let i = 0; i < tokens.length; i += 1) {
@@ -555,6 +564,158 @@ async function fetchRedisActiveSessions(
     );
     return [];
   }
+}
+
+function buildAccountsList(
+  userAccounts: AccountRow[],
+  userEmail: string
+): LinkedAccount[] {
+  const supportedProviders = [
+    { label: "GitHub", provider: "github" as const },
+    { label: "Google", provider: "google" as const },
+    { label: "GitLab", provider: "gitlab" as const },
+    { label: "Discord", provider: "discord" as const },
+  ];
+  const userAccountsMap = new Map(userAccounts.map((a) => [a.providerId, a]));
+  return supportedProviders.map((p) => {
+    const acc = userAccountsMap.get(p.provider);
+    return {
+      accountId: acc?.id,
+      connected: Boolean(acc),
+      email: acc?.accountId || (acc ? userEmail : undefined),
+      isCurrentSignIn: Boolean(acc),
+      isPrimary:
+        p.provider === "github" || (Boolean(acc) && userAccounts.length === 1),
+      label: p.label,
+      provider: p.provider,
+    };
+  });
+}
+
+function mapActiveSessions(
+  activeSessions: ActiveSessionRecord[],
+  currentSessionId: string | undefined,
+  defaultIp: string
+): SessionData[] {
+  const twoHoursMs = 2 * 60 * 60 * 1000;
+  const now = Date.now();
+  const sessions = activeSessions.map((s) => {
+    const parsedUa = parseUserAgent(s.userAgent);
+    const isCurrent = Boolean(
+      currentSessionId &&
+        (s.id === currentSessionId || s.token === currentSessionId)
+    );
+    const createdAtTime = s.createdAt ? new Date(s.createdAt).getTime() : 0;
+    const isRecent = createdAtTime > 0 && now - createdAtTime < twoHoursMs;
+    const newLogin = Boolean(!isCurrent && isRecent);
+    const ip = maskIpAddress(s.ipAddress || defaultIp);
+    const lastActive = formatRelativeTime(s.updatedAt ?? s.createdAt);
+    const location = resolveSessionLocation(s.ipAddress);
+
+    return {
+      browser: parsedUa.browser,
+      current: isCurrent,
+      device: parsedUa.device,
+      deviceType: parsedUa.deviceType,
+      id: s.id || s.token || "session",
+      ip,
+      lastActive,
+      location,
+      newLogin,
+      os: parsedUa.os,
+    };
+  });
+
+  sessions.sort((a, b) => {
+    if (a.current && !b.current) {
+      return -1;
+    }
+    if (!a.current && b.current) {
+      return 1;
+    }
+    return 0;
+  });
+
+  return sessions;
+}
+
+function buildFallbackSession(
+  currentSessionId: string | undefined,
+  currentUa: string | null,
+  currentIp: string | null,
+  defaultIp: string
+): SessionData[] {
+  const fallbackParsedUa = parseUserAgent(currentUa);
+  const fallbackIp = maskIpAddress(currentIp || defaultIp);
+  const fallbackLocation = resolveSessionLocation(currentIp);
+
+  return [
+    {
+      browser: fallbackParsedUa.browser,
+      current: true,
+      device:
+        fallbackParsedUa.device === "Unknown Device"
+          ? "Current Session"
+          : fallbackParsedUa.device,
+      deviceType: fallbackParsedUa.deviceType,
+      id: currentSessionId || "current_session",
+      ip: fallbackIp,
+      lastActive: "Active now",
+      location: fallbackLocation,
+      os: fallbackParsedUa.os,
+    },
+  ];
+}
+
+async function resolveSessions(
+  userId: string,
+  currentSessionOrId: string | ActiveSessionRecord | null | undefined,
+  defaultIp: string,
+  deps?: { getSessions?: (userId: string) => Promise<ActiveSessionRecord[]> }
+): Promise<SessionData[]> {
+  const currentSessionId =
+    typeof currentSessionOrId === "string"
+      ? currentSessionOrId
+      : currentSessionOrId?.id || currentSessionOrId?.token;
+
+  const currentObj =
+    typeof currentSessionOrId === "object" && currentSessionOrId !== null
+      ? currentSessionOrId
+      : null;
+
+  let activeSessions: ActiveSessionRecord[] = [];
+  try {
+    if (deps?.getSessions) {
+      activeSessions = await deps.getSessions(userId);
+    } else {
+      activeSessions = await fetchRedisActiveSessions(userId);
+    }
+  } catch (err) {
+    console.warn("[ProfileService] Failed to resolve active sessions:", err);
+    activeSessions = [];
+  }
+
+  if (currentObj) {
+    const hasCurrent = activeSessions.some(
+      (s) =>
+        (currentSessionId && s.id === currentSessionId) ||
+        (currentObj.token && s.token === currentObj.token)
+    );
+    if (!hasCurrent) {
+      activeSessions.push(currentObj);
+    }
+  }
+
+  if (activeSessions.length > 0) {
+    return mapActiveSessions(activeSessions, currentSessionId, defaultIp);
+  }
+
+  return buildFallbackSession(
+    currentSessionId,
+    currentObj?.userAgent ?? null,
+    currentObj?.ipAddress ?? null,
+    defaultIp
+  );
 }
 
 export function createProfileService(
@@ -638,7 +799,7 @@ export function createProfileService(
 
   async function getUserSettingsData(
     userId: string,
-    currentSessionId?: string,
+    currentSessionOrId?: string | ActiveSessionRecord | null,
     deps?: {
       getSessions?: (userId: string) => Promise<ActiveSessionRecord[]>;
     }
@@ -647,99 +808,15 @@ export function createProfileService(
     if (!user) {
       return null;
     }
-    const supportedProviders = [
-      { label: "GitHub", provider: "github" as const },
-      { label: "Google", provider: "google" as const },
-      { label: "GitLab", provider: "gitlab" as const },
-      { label: "Discord", provider: "discord" as const },
-    ];
-    const userAccountsMap = new Map(
-      user.accounts.map((a) => [a.providerId, a])
+
+    const accounts = buildAccountsList(user.accounts, user.email);
+    const defaultIp = user.loginAttempts[0]?.ipAddress || "127.0.0.1";
+    const sessions = await resolveSessions(
+      userId,
+      currentSessionOrId,
+      defaultIp,
+      deps
     );
-    const accounts = supportedProviders.map((p) => {
-      const acc = userAccountsMap.get(p.provider);
-      return {
-        accountId: acc?.id,
-        connected: Boolean(acc),
-        email: acc?.accountId || (acc ? user.email : undefined),
-        isCurrentSignIn: Boolean(acc),
-        isPrimary:
-          p.provider === "github" ||
-          (Boolean(acc) && user.accounts.length === 1),
-        label: p.label,
-        provider: p.provider,
-      };
-    });
-
-    let activeSessions: ActiveSessionRecord[] = [];
-    try {
-      if (deps?.getSessions) {
-        activeSessions = await deps.getSessions(userId);
-      } else {
-        activeSessions = await fetchRedisActiveSessions(userId);
-      }
-    } catch (err) {
-      console.warn("[ProfileService] Failed to resolve active sessions:", err);
-      activeSessions = [];
-    }
-
-    let sessions: SessionData[];
-    if (activeSessions.length > 0) {
-      const twoHoursMs = 2 * 60 * 60 * 1000;
-      const now = Date.now();
-      sessions = activeSessions.map((s) => {
-        const parsedUa = parseUserAgent(s.userAgent);
-        const isCurrent = Boolean(
-          currentSessionId &&
-            (s.id === currentSessionId || s.token === currentSessionId)
-        );
-        const createdAtTime = s.createdAt ? new Date(s.createdAt).getTime() : 0;
-        const isRecent = createdAtTime > 0 && now - createdAtTime < twoHoursMs;
-        const newLogin = Boolean(!isCurrent && isRecent);
-        const ip = maskIpAddress(
-          s.ipAddress || user.loginAttempts[0]?.ipAddress || "127.0.0.1"
-        );
-        const lastActive = formatRelativeTime(s.updatedAt ?? s.createdAt);
-        const location = resolveSessionLocation(s.ipAddress);
-
-        return {
-          browser: parsedUa.browser,
-          current: isCurrent,
-          device: parsedUa.device,
-          deviceType: parsedUa.deviceType,
-          id: s.id || s.token || "session",
-          ip,
-          lastActive,
-          location,
-          newLogin,
-          os: parsedUa.os,
-        };
-      });
-
-      sessions.sort((a, b) => {
-        if (a.current && !b.current) {
-          return -1;
-        }
-        if (!a.current && b.current) {
-          return 1;
-        }
-        return 0;
-      });
-    } else {
-      sessions = [
-        {
-          browser: "Chrome",
-          current: true,
-          device: "Current Session",
-          deviceType: "desktop" as const,
-          id: currentSessionId || "current_session",
-          ip: maskIpAddress(user.loginAttempts[0]?.ipAddress || "127.0.0.1"),
-          lastActive: "Active now",
-          location: "Local Network",
-          os: "Desktop OS",
-        },
-      ];
-    }
 
     return {
       accounts,
